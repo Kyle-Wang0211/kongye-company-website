@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>PocketWorld Shared Viewer</title>
+  <link rel="icon" href="data:,">
+  <style>
+    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:#000; }
+    canvas { display:block; width:100%; height:100%; touch-action:none; }
+    #status { position:fixed; left:16px; right:16px; top:max(16px,env(safe-area-inset-top));
+      color:#fff; font:14px system-ui,sans-serif; pointer-events:none; text-align:center; }
+    #status:empty { display:none; }
+  </style>
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+  <canvas id="viewer" aria-label="3D作品"></canvas>
+  <div id="status" role="status" aria-live="polite">正在初始化…</div>
+  <script type="module">
+    import { create } from './viewer.mjs';
+    import { installHostBridge } from './host_bridge.mjs';
+    import { verifyLocalBundle } from './bundle_identity.mjs';
+    const canvas = document.querySelector('#viewer');
+    const status = document.querySelector('#status');
+    let resizeObserver;
+    function stateChanged(state) {
+      status.textContent = state.error || (state.status === 'loading' ? '正在加载…' :
+        state.format === 'skp' ? 'SKP 转换预览：复杂结构可能存在差异' : '');
+      window.dispatchEvent(new CustomEvent('pw-viewer-state', { detail: state }));
+    }
+    window.pwSharedViewerReady = verifyLocalBundle().then(bundleIdentity =>
+      create(canvas, { onStateChange: stateChanged, bundleIdentity,
+        onSurfaceEvent: (type, detail) => window.dispatchEvent(new CustomEvent(type, {detail})) })).then(async controller => {
+      window.pwSharedViewerController = controller;
+      const resize = () => {
+        if (!controller.getState().disposed) controller.resize();
+      };
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(resize);
+        resizeObserver.observe(canvas);
+      } else window.addEventListener('resize', resize);
+      const visibility = () => {
+        if (controller.getState().disposed) return;
+        document.hidden ? controller.pause() : controller.resume();
+      };
+      document.addEventListener('visibilitychange', visibility);
+      window.addEventListener('pageshow', event => {
+        if (event.persisted && !controller.getState().disposed) controller.resume();
+      });
+      window.addEventListener('pagehide', event => {
+        if (event.persisted) {
+          if (!controller.getState().disposed) controller.pause();
+          return;
+        }
+        resizeObserver?.disconnect();
+        window.removeEventListener('resize', resize);
+        document.removeEventListener('visibilitychange', visibility);
+        controller.dispose();
+      });
+      const query = new URLSearchParams(location.search);
+      if (query.has('model')) await controller.load({ url: query.get('model'), format: query.get('format') || 'glb' });
+      return controller;
+    });
+    window.pwSharedViewerReady.catch(error => {
+      status.textContent = error instanceof Error ? error.message : String(error);
+      window.dispatchEvent(new CustomEvent('pw-viewer-error', { detail: status.textContent }));
+    });
+    installHostBridge(window);
+  </script>
+</body>
+</html>
