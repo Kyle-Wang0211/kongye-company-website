@@ -1,10 +1,10 @@
 {
-  "candidate_source_manifest_sha256": "aa292844ec7ca18ea9f6829d01269e9699ffa2b200275bc4b85d13a12b903c5a",
-  "compiled_main_sha256": "5295ee523b13bb5835f9de5c8d7ae27a0d98799d3599dca7678ebb39baabcad6",
+  "candidate_source_manifest_sha256": "31114d3a1b32060377b43efc3568564fdf29bd61ed9afc0525ff66f7f2f9cbe8",
+  "compiled_main_sha256": "aa687e22b467b67f979cbc3ad9351020db6171003b8d1b7d8d7717802c37f636",
   "actual_build_input_kind": "latest successful dart2js and asset dependency records; absolute paths excluded",
   "pinned_sdk": "Flutter 3.47.1 revision 6655482ec06e547f90abf8ae7590466f4415978d; engine 5d531788691ec3404cac0cee66ead4007b177363; Dart 3.13.1",
   "pubspec_lock_sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
-  "file_count": 204,
+  "file_count": 208,
   "external_dependency_classes": [
     "locked-public-package",
     "pinned-sdk-or-tool"
@@ -17,7 +17,7 @@
       "change": "Optional browser harness resolves the supplied Playwright package by name rather than an author workstation path. Not executed as part of this release."
     }
   ],
-  "current_release": "production-viewer-parity-20261102-v5",
+  "current_release": "aligned-grid-staged-loading-20261102-v6",
   "production_camera_reference_revision": "198a41cdeecfca0ba38a3027e120700ddca334c6",
   "packaging_note": "Viewer web entry and host bridge receive cache-versioned imports; runtime assets are copied unchanged from archived shared viewer source after Dart compilation. Renderer and framing algorithms unchanged.",
   "file_count_scope": "files in public community_app archive, including documentation and tests"

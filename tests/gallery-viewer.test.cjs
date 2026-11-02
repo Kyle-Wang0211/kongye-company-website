@@ -23,7 +23,9 @@ test('public community leads the page without marketing hero or eager renderers'
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  assert(!html.includes('class="hero wrap"'));
  assert(!html.includes('id="showcase"'));
- assert.equal((html.match(/<iframe/g)||[]).length,1);
+ assert.equal((html.match(/<iframe/g)||[]).length,0);
+ assert(!html.includes('<dialog'));
+ assert(fs.readFileSync(path.join(root,'community-feed.js'),'utf8').includes('location.assign(url.href)'));
  assert(!/<iframe[^>]+src="community\//.test(html));
  assert(html.includes('community-feed.js'));
 });

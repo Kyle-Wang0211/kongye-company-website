@@ -14,6 +14,8 @@ import '../shared/product_model_view.dart';
 import 'first_pair_policy.dart';
 import 'masonry_policy.dart';
 import 'generated_account_avatar.dart';
+import 'community_loading.dart';
+import 'published_cover.dart';
 
 class WorkCard extends StatefulWidget {
   const WorkCard({
@@ -39,8 +41,11 @@ class WorkCard extends StatefulWidget {
     this.onPreparationDisposed,
     this.viewerHostBuilderForTesting,
     this.preparedStillBytes,
+    this.coverImageForTesting,
   });
 
+  @visibleForTesting
+  final ImageProvider? coverImageForTesting;
   final FeedWork work;
   final CommunityService service;
   final VoidCallback onTap;
@@ -115,9 +120,15 @@ class _WorkCardState extends State<WorkCard> {
         .round()
         .clamp(64, 1024);
     final url = path == null || path.trim().isEmpty
-        ? null
+        ? (_work.format == 'glb'
+              ? publishedModelCover(_work.modelStoragePath)
+              : null)
         : widget.service.thumbnailUrlFor(path);
-    final key = url == null ? null : '$url\u0000$cacheWidth';
+    final key = widget.coverImageForTesting != null
+        ? 'test-${identityHashCode(widget.coverImageForTesting)}'
+        : url == null
+        ? 'missing'
+        : '$url\u0000$cacheWidth';
     if (key == _thumbnailKey) return;
     _detachThumbnail();
     _thumbnailKey = key;
@@ -126,17 +137,22 @@ class _WorkCardState extends State<WorkCard> {
     _thumbnailAspectRatio = null;
     _reportedReady = false;
     _lastPreparedMetrics = null;
-    _thumbnailProvider = url == null
-        ? null
-        : ResizeImage.resizeIfNeeded(cacheWidth, null, NetworkImage(url));
-    if (_thumbnailProvider == null) return;
+    _thumbnailProvider =
+        widget.coverImageForTesting ??
+        (url == null
+            ? null
+            : ResizeImage.resizeIfNeeded(cacheWidth, null, NetworkImage(url)));
+    if (_thumbnailProvider == null) {
+      _coverFailed = true;
+      return;
+    }
     final epoch = _thumbnailEpoch;
     final provider = _thumbnailProvider!;
     void fail(Object error) {
       if (!mounted || epoch != _thumbnailEpoch || _thumbReady || _coverFailed) {
         return;
       }
-      _coverFailed = true;
+      setState(() => _coverFailed = true);
       _coverDeadline?.cancel();
       unawaited(provider.evict());
       widget.onPreparationFailed?.call(error);
@@ -292,7 +308,7 @@ class _WorkCardState extends State<WorkCard> {
         if (mounted) widget.onVisibilityChanged?.call(info.visibleFraction);
       },
       child: Visibility(
-        visible: ready && widget.revealed,
+        visible: widget.revealed && !widget.prepareWhileHidden,
         maintainSize: true,
         maintainAnimation: true,
         maintainState: true,
@@ -313,21 +329,36 @@ class _WorkCardState extends State<WorkCard> {
                     aspectRatio: ratio ?? kCommunityLoadingCoverAspectRatio,
                     child: ColoredBox(
                       color: Colors.black,
-                      child: _thumbnailProvider == null
-                          ? const SizedBox.expand()
+                      child: _coverFailed
+                          ? Center(
+                              key: ValueKey('work-cover-error-${_work.id}'),
+                              child: const Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.white54,
+                                semanticLabel: 'Cover unavailable',
+                              ),
+                            )
+                          : !ready
+                          ? CommunityShimmer(
+                              key: ValueKey('work-cover-loading-${_work.id}'),
+                            )
                           : Image(
                               image: _thumbnailProvider!,
                               fit: BoxFit.contain,
                               alignment: Alignment.center,
-                              gaplessPlayback: true,
-                              errorBuilder: (_, _, _) =>
-                                  const SizedBox.shrink(),
+                              errorBuilder: (_, _, _) => const Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.white54,
+                              ),
                             ),
                     ),
                   ),
                   KeyedSubtree(
                     key: ValueKey('work-info-${_work.id}'),
-                    child: _cardInformation(),
+                    child: SizedBox(
+                      height: communityInformationHeight(context),
+                      child: _cardInformation(),
+                    ),
                   ),
                 ],
               ),
@@ -345,54 +376,73 @@ class _WorkCardState extends State<WorkCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            _work.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.3,
-              fontWeight: FontWeight.w600,
-              color: AetherColors.textPrimary,
+          SizedBox(
+            height: MediaQuery.textScalerOf(context).scale(13) * 2.6,
+            child: Text(
+              _work.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: AetherColors.textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              GestureDetector(
-                key: ValueKey('work-avatar-${_work.id}'),
-                onTap: widget.onAuthorTap == null
-                    ? null
-                    : () => widget.onAuthorTap!(_work),
-                child: GeneratedAccountAvatar(userId: _work.userId, radius: 8),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    text: _work.authorDisplayName,
-                    recognizer: _authorTapRecognizer,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    height: 1.2,
-                    color: AetherColors.textSecondary,
+          SizedBox(
+            height: communityAuthorRowHeight(context),
+            child: Row(
+              children: [
+                GestureDetector(
+                  key: ValueKey('work-avatar-${_work.id}'),
+                  onTap: widget.onAuthorTap == null
+                      ? null
+                      : () => widget.onAuthorTap!(_work),
+                  child: GeneratedAccountAvatar(
+                    userId: _work.userId,
+                    radius: 8,
                   ),
                 ),
-              ),
-              const SizedBox(width: 2),
-              ValueListenableBuilder<Set<String>>(
-                valueListenable: widget.service.pendingLikeWorkIds,
-                builder: (_, pending, _) => _LikeButton(
-                  liked: _work.likedByMe,
-                  count: _work.likesCount,
-                  busy: _likeInFlight || pending.contains(_work.id),
-                  onTap: _toggleLike,
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      text: _work.authorDisplayName,
+                      recognizer: _authorTapRecognizer,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: kCommunityMetadataTextStyle.copyWith(
+                      color: AetherColors.textSecondary,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 2),
+                ValueListenableBuilder<Set<String>>(
+                  valueListenable: widget.service.pendingLikeWorkIds,
+                  builder: (_, pending, _) => _LikeButton(
+                    liked: _work.likedByMe,
+                    count: _work.likesCount,
+                    busy: _likeInFlight || pending.contains(_work.id),
+                    onTap: _toggleLike,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _work.publishedAt == null
+                ? ''
+                : '${_work.publishedAt!.year}-${_work.publishedAt!.month.toString().padLeft(2, '0')}-${_work.publishedAt!.day.toString().padLeft(2, '0')}',
+            maxLines: 1,
+            style: const TextStyle(
+              fontSize: 10,
+              height: 1.2,
+              color: AetherColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -422,13 +472,13 @@ class _LikeButton extends StatelessWidget {
       onTap: busy ? null : onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        padding: kCommunityLikePadding,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               liked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-              size: 16,
+              size: kCommunityLikeIconSize,
               // Keep the existing design-system like colors.
               color: liked ? AetherColors.danger : AetherColors.textPrimary,
             ),
@@ -441,11 +491,10 @@ class _LikeButton extends StatelessWidget {
               const SizedBox(width: 3),
               Text(
                 formatCount(count),
-                style: const TextStyle(
-                  fontSize: 11,
+                style: kCommunityMetadataTextStyle.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AetherColors.textPrimary,
-                  fontFeatures: [FontFeature.tabularFigures()],
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],

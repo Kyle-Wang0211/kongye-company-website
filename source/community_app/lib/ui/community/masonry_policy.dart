@@ -3,21 +3,13 @@ import '../../community/feed_models.dart';
 // Community-only values; other screens keep their existing design tokens.
 const double kCommunitySideInset = 2;
 const double kCommunityCardRadius = 4;
-// Reserved layout for the loading animation only; never a work's actual ratio.
+// Every cover occupies one fixed media frame, independent of decoded pixels.
 const double kCommunityLoadingCoverAspectRatio = 3 / 4;
 
-/// Published cover pixels define the media frame. The existing masonry widget
-/// lays out each natural height; no fixed aspect buckets or forced crop.
-double? masonryCoverAspectRatio(double? contentAspectRatio) {
-  if (contentAspectRatio == null ||
-      !contentAspectRatio.isFinite ||
-      contentAspectRatio <= 0) {
-    return null;
-  }
-  return contentAspectRatio;
-}
+double masonryCoverAspectRatio(double? contentAspectRatio) =>
+    kCommunityLoadingCoverAspectRatio;
 
-/// Structural eligibility only; actual media still has to load before reveal.
+/// Reports source availability only; missing covers still render metadata.
 bool hasCommunityPreviewSource(FeedWork work) =>
     work.thumbnailStoragePath?.trim().isNotEmpty == true;
 

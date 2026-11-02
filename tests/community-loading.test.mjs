@@ -7,7 +7,10 @@ import {legacyWorkIds,workCovers} from '../docs/community-work-links.mjs';
 
 class Element {
   children=[]; dataset={}; listeners=new Map(); attributes={}; style={}; textContent='';
-  append(...nodes){this.children.push(...nodes);}
+  classList={add:(name)=>{this.className=((this.className||'')+' '+name).trim();},remove:(name)=>{this.className=(this.className||'').split(' ').filter(x=>x!==name).join(' ');},contains:(name)=>(this.className||'').split(' ').includes(name)};
+  append(...nodes){for(const node of nodes){node.parent=this;this.children.push(node);}}
+  remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this);}
+  decode=async()=>{};
   insertBefore(node,before){const i=this.children.indexOf(before);if(i<0)this.append(node);else this.children.splice(i,0,node);}
   replaceChildren(...nodes){this.children=[...nodes];}
   setAttribute(k,v){this.attributes[k]=v;}
@@ -22,24 +25,27 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
 const defer=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const response=value=>({ok:true,json:async()=>value});
 const work={id:'12345678-1234-4234-8234-123456789abc',user_id:'12345678-1234-4234-8234-123456789abd',title:'真实社区作品',format:'glb',file_size_bytes:100,model_storage_path:'owner/model.glb',published_at:'2026-11-02T04:00:00Z'};
-function boot(search=''){
+function boot(search='',{intersection=false}={}){
  const grid=new Element(),status=new Element(),more=new Element(),dialog=new Element();dialog.parts={iframe:new Element(),h2:new Element(),button:new Element()};
  const elements={'#community-grid':grid,'#feed-status':status,'#feed-more':more,'#work-dialog':dialog,'#share-work':new Element(),'#share-status':new Element(),'#work-meta':new Element()};
- const pending=[];
+ const pending=[],timers=new Map(),observers=[],navigations=[],events=new Map();let clock=0;
+ class Observer{constructor(callback){this.callback=callback;observers.push(this);}observe(target){this.target=target;}disconnect(){this.target=null;}}
  const fetch=(url,options)=>{const gate=defer();pending.push({url:String(url),options,...gate});return gate.promise;};
  const source=readFileSync(new URL('../docs/community-feed.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
- vm.runInNewContext(source,{...data,legacyWorkIds,workCovers,document:{querySelector:s=>elements[s],createElement:()=>new Element()},fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search},navigator:{},window:{addEventListener(){}}});
- return {grid,status,more,pending,dialog,elements};
+ vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,legacyWorkIds,workCovers,document:{querySelector:s=>elements[s],createElement:()=>new Element()},fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f)=>{const id=++clock;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{addEventListener:(name,callback)=>events.set(name,callback)}});
+ return {grid,status,more,pending,dialog,elements,timers,navigations,events,intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
 }
 async function configure(page){page.pending.shift().resolve(response({origin:'https://api.kongye.space',anonKey:'public'}));await settle();}
 async function completeFeed(page,rows=[work]){page.pending.shift().resolve(response(rows));await settle();if(rows.length){page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();}}
 
-test('refresh waits for real feed and authors without flashing local-only cards',async()=>{
- const page=boot();assert.equal(page.grid.children.length,0,'no local-only version while config loads');
- await configure(page);assert.equal(page.grid.children.length,0,'no local-only version while feed loads');
- page.pending.shift().resolve(response([work]));await settle();assert.equal(page.grid.children.length,0,'wait for real authors');
+const realCards=page=>page.grid.children.filter(e=>e.className==='community-card');
+test('refresh reserves inert shimmer shells before real metadata without flashing local-only works',async()=>{
+ const page=boot();assert.equal(realCards(page).length,0);assert.equal(page.grid.children.length,12);
+ assert(page.grid.children.every(e=>e.attributes['aria-hidden']==='true'));
+ await configure(page);assert.equal(realCards(page).length,0);
+ page.pending.shift().resolve(response([work]));await settle();assert.equal(realCards(page).length,0);
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
- assert.equal(page.grid.children.length,1);assert(!page.grid.children.some(x=>x.dataset.example));
+ assert.equal(page.grid.children.length,1);assert.equal(realCards(page).length,1);assert(!page.grid.children.some(x=>x.dataset.example));
 });
 
 test('failed feed offers retry without substituting three local works; retry stays deduplicated',async()=>{
@@ -54,18 +60,55 @@ test('config request has a bounded timeout so a stalled config can fail visibly'
  const page=boot();assert(page.pending[0].options?.signal instanceof AbortSignal);
 });
 
-test('decoded cover pixels set the natural card aspect without cropping or aspect buckets',async()=>{
+test('metadata appears before independent cover decode and frame geometry never switches to natural aspect',async()=>{
  const page=boot();await configure(page);
- await completeFeed(page,[{...work,thumbnail_storage_path:'owner/cover.png'}]);
- const picture=page.grid.children[0].children[0].children[0];
- const image=picture.children[0];
- for(const [width,height] of [[1920,1080],[600,797],[500,768]]){
-  image.naturalWidth=width;image.naturalHeight=height;
-  image.listeners.get('load')?.();
-  assert.equal(Number(picture.style.aspectRatio),width/height);
+ await completeFeed(page,[{...work,description:'Only in details',thumbnail_storage_path:'owner/cover.png'}]);
+ const card=realCards(page)[0],picture=card.children[0].children[0],image=picture.children[0];
+ assert.equal(card.children[0].children[1].textContent,work.title);
+ assert.equal(card.children[1].children[1].textContent,'窗后城');
+ assert.equal(picture.dataset.mediaState,'loading');
+ const decode=defer();image.decode=()=>decode.promise;image.naturalWidth=1920;image.naturalHeight=1080;
+ image.listeners.get('load')();await settle();assert.equal(picture.dataset.mediaState,'loading');
+ decode.resolve();await settle();assert.equal(picture.dataset.mediaState,'ready');
+ assert.equal(picture.style.aspectRatio,undefined);assert(image.classList.contains('is-ready'));
+ assert(!JSON.stringify(card,(key,value)=>key==='parent'?undefined:value).includes('Only in details'));
+});
+
+test('cover error and deadline stop shimmer while retaining usable metadata',async()=>{
+ for(const mode of ['error','deadline']){
+  const page=boot();await configure(page);await completeFeed(page,[{...work,thumbnail_storage_path:'owner/cover.png'}]);
+  const card=realCards(page)[0],picture=card.children[0].children[0],image=picture.children[0];
+  if(mode==='error')image.listeners.get('error')();else [...page.timers.values()][0]();
+  assert.equal(picture.dataset.mediaState,'error');assert(!picture.classList.contains('is-loading'));
+  assert.equal(card.children[0].children[1].textContent,work.title);
  }
 });
 
+test('pagination keeps existing cards while bounded shimmer shells await the next page',async()=>{
+ const page=boot();await configure(page);await completeFeed(page,[work]);
+ const existing=page.grid.children[0];const retry=page.more.listeners.get('click')();
+ assert.equal(page.grid.children[0],existing);assert.equal(page.grid.children.length,13);
+ page.pending.shift().reject(Error('offline'));await retry;
+ assert.deepEqual(page.grid.children,[existing]);assert.equal(page.more.textContent,'重新加载');
+});
+
+test('scroll pagination is single-flight and a failed page waits for explicit retry',async()=>{
+ const page=boot('',{intersection:true});await configure(page);
+ await completeFeed(page,Array.from({length:12},(_,i)=>({...work,id:work.id.slice(0,-3)+String(i).padStart(3,'0')})));
+ page.intersect(page.more);page.intersect(page.more);assert.equal(page.pending.length,1);
+ page.pending.shift().reject(Error('offline'));await settle();
+ page.intersect(page.more);assert.equal(page.pending.length,0,'no automatic failure loop');
+ const retry=page.more.listeners.get('click')();assert.equal(page.pending.length,1);
+ page.pending.shift().resolve(response([]));await retry;assert.equal(page.more.hidden,true);
+});
+
+test('browser Back restores automatic pagination after cached page navigation',async()=>{
+ const page=boot('',{intersection:true});await configure(page);
+ await completeFeed(page,Array.from({length:12},(_,i)=>({...work,id:work.id.slice(0,-3)+String(i).padStart(3,'0')})));
+ page.events.get('pagehide')();page.intersect(page.more);assert.equal(page.pending.length,0);
+ page.events.get('pageshow')?.();page.intersect(page.more);assert.equal(page.pending.length,1);
+ page.pending.shift().resolve(response([]));await settle();
+});
 
 test('legacy links and new shares resolve to the same real work identity',async()=>{
  const slug=Object.keys(legacyWorkIds)[0];assert(slug);
@@ -73,10 +116,8 @@ test('legacy links and new shares resolve to the same real work identity',async(
  const lookup=page.pending.shift();assert.equal(new URL(lookup.url).searchParams.get('id'),'eq.'+legacyWorkIds[slug]);
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
- assert.equal(page.dialog.open,true);assert.equal(new URL(page.dialog.parts.iframe.src).pathname,'/community/');assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('release'),'production-viewer-parity-20261102-v5');
- await page.elements['#share-work'].listeners.get('click')();
- const shared=new URL(page.elements['#share-status'].textContent);assert.equal(shared.searchParams.get('work'),legacyWorkIds[slug]);assert(!shared.searchParams.has('example'));
+ assert.equal(page.dialog.open,undefined);assert.equal(new URL(page.navigations.at(-1)).pathname,'/community/');assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),legacyWorkIds[slug]);
+ assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'aligned-grid-staged-loading-20261102-v6');
 });
 
 for(const failure of ['config','lookup'])test('direct work link recovers after '+failure+' failure',async()=>{
@@ -90,5 +131,5 @@ for(const failure of ['config','lookup'])test('direct work link recovers after '
  const lookup=page.pending.shift();assert.equal(new URL(lookup.url).searchParams.get('id'),'eq.'+work.id);
  lookup.resolve(response([work]));await settle();
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'林远'}]));await retry;
- assert.equal(page.dialog.open,true);
+ assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),work.id);
 });
