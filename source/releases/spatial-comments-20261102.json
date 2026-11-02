@@ -7,6 +7,18 @@
   "root_javascript_tests": 22,
   "build_seconds": 23.46,
   "build_max_rss_bytes": 1131511808,
-  "browser_verification": "pending_final_production_readback",
-  "phone_updated": false
+  "browser_verification": {
+    "origin": "https://kongye.space",
+    "viewer_entry_release": "spatial-comments-20261102-v3",
+    "anonymous_comments_count": 3,
+    "author_reply_visible": true,
+    "anonymous_composer_disabled": true,
+    "separate_pin_1_and_pin_2_keyboard_selections_display_corresponding_text": true,
+    "card_within_shared_viewer_iframe": true,
+    "full_comment_list_remains_separate": true,
+    "comment_saved_camera_restore": true,
+    "raw_touch_gesture_live_validation": "not asserted; in-app browser Input.dispatchTouchEvent unsupported; projection/zoom regression tests passed"
+  },
+  "phone_updated": false,
+  "public_work_verified": "c1225d92-3375-4026-8fff-94db0b9400b3"
 }

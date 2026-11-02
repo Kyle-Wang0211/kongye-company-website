@@ -10,7 +10,7 @@
   {
     "path": "source/community_app/SOURCE_IDENTITY.json",
     "bytes": 791,
-    "sha256": "dd1f6c7506e732c3db25165a2e89370f68237d76a7aa85763f228dbb6d402e96",
+    "sha256": "ea9315842910017304561935bad21d4804380561490ef20f0228d292c2fc238e",
     "reasons": [
       "generated-public-package-documentation"
     ]

@@ -4,8 +4,8 @@
   "actual_build_input_kind": "latest successful dart2js and asset dependency records; absolute paths excluded",
   "pinned_sdk": "Flutter 3.47.1 revision 6655482ec06e547f90abf8ae7590466f4415978d; engine 5d531788691ec3404cac0cee66ead4007b177363; Dart 3.13.1",
   "pubspec_lock_sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
-  "file_count": 198,
-  "bytes": 92947141,
+  "file_count": 200,
+  "bytes": 92957631,
   "external_dependency_classes": [
     "locked-public-package",
     "pinned-sdk-or-tool"
