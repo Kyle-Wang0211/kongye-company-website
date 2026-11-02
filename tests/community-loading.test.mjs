@@ -6,7 +6,7 @@ import * as data from '../docs/community-data.mjs';
 import {legacyWorkIds,workCovers} from '../docs/community-work-links.mjs';
 
 class Element {
-  children=[]; dataset={}; listeners=new Map(); attributes={}; textContent='';
+  children=[]; dataset={}; listeners=new Map(); attributes={}; style={}; textContent='';
   append(...nodes){this.children.push(...nodes);}
   insertBefore(node,before){const i=this.children.indexOf(before);if(i<0)this.append(node);else this.children.splice(i,0,node);}
   replaceChildren(...nodes){this.children=[...nodes];}
@@ -54,6 +54,18 @@ test('config request has a bounded timeout so a stalled config can fail visibly'
  const page=boot();assert(page.pending[0].options?.signal instanceof AbortSignal);
 });
 
+test('decoded cover pixels set the natural card aspect without cropping or aspect buckets',async()=>{
+ const page=boot();await configure(page);
+ await completeFeed(page,[{...work,thumbnail_storage_path:'owner/cover.png'}]);
+ const picture=page.grid.children[0].children[0].children[0];
+ const image=picture.children[0];
+ for(const [width,height] of [[1920,1080],[600,797],[500,768]]){
+  image.naturalWidth=width;image.naturalHeight=height;
+  image.listeners.get('load')?.();
+  assert.equal(Number(picture.style.aspectRatio),width/height);
+ }
+});
+
 
 test('legacy links and new shares resolve to the same real work identity',async()=>{
  const slug=Object.keys(legacyWorkIds)[0];assert(slug);
@@ -62,7 +74,7 @@ test('legacy links and new shares resolve to the same real work identity',async(
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
  assert.equal(page.dialog.open,true);assert.equal(new URL(page.dialog.parts.iframe.src).pathname,'/community/');assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('release'),'phone-login-singleflight-20261102-v4');
+ assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('release'),'production-viewer-parity-20261102-v5');
  await page.elements['#share-work'].listeners.get('click')();
  const shared=new URL(page.elements['#share-status'].textContent);assert.equal(shared.searchParams.get('work'),legacyWorkIds[slug]);assert(!shared.searchParams.has('example'));
 });

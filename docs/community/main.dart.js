@@ -128321,7 +128321,7 @@ n.d=s
 n.a.toString
 r=v.G
 q=r.document
-p=A.cN(q.baseURI,0,m).ap("assets/packages/pw_shared_viewer/web/index.html?v=spatial-comments-20261102-v3")
+p=A.cN(q.baseURI,0,m).ap("assets/packages/pw_shared_viewer/web/index.html?v=production-viewer-parity-20261102-v5")
 q=r.window.location.origin
 n.f!==$&&A.aK()
 n.f=q

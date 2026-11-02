@@ -1,0 +1,215 @@
+{
+  "release": "production-viewer-parity-20261102-v5",
+  "base_website_revision": "228f1bea28bebac6906572fd5e595c6bc7122b03",
+  "production_camera_reference_revision": "198a41cdeecfca0ba38a3027e120700ddca334c6",
+  "source_manifest_sha256": "aa292844ec7ca18ea9f6829d01269e9699ffa2b200275bc4b85d13a12b903c5a",
+  "main_js_sha256": "5295ee523b13bb5835f9de5c8d7ae27a0d98799d3599dca7678ebb39baabcad6",
+  "shared_viewer_bundle_sha256": "6045a1b87a87ddc9fad1a1dd2b2f10d5e31ec1752f4c2fc1350ac72242b9c1aa",
+  "tests": {
+    "dart": 104,
+    "javascript": 78,
+    "red_regressions_observed": 3
+  },
+  "build": {
+    "seconds": 23.3,
+    "max_rss_bytes": 1209401344,
+    "swaps": 0
+  },
+  "cover_captures": [
+    {
+      "slug": "cma-dragon-jar-1986-85",
+      "width": 600,
+      "height": 800,
+      "state": {
+        "engine": "three",
+        "engineVersion": "0.186.1",
+        "engineRevision": "186",
+        "bundleIdentity": "464aeda4827522c862d5d291def47b277b296de2a96fed7eb5531bce08e8a7b3",
+        "importInfo": null,
+        "idealAspect": 0.7872342970215879,
+        "status": "ready",
+        "error": null,
+        "url": "/assets/models/cma-dragon-jar-1986-85.glb",
+        "format": "glb",
+        "width": 600,
+        "height": 800,
+        "pixelRatio": 1,
+        "paused": true,
+        "disposed": false,
+        "userHasInteracted": false,
+        "surfaceCommentMode": false,
+        "background": 0,
+        "pointSize": 0.005,
+        "maxFps": 15,
+        "interactionEnabled": true,
+        "autoRotate": false,
+        "autoRotateUntilTouched": false,
+        "meshCount": 1,
+        "pointCount": 0,
+        "triangleCount": 20412,
+        "materialCount": 1,
+        "textureCount": 3,
+        "loadedTextureCount": 3,
+        "normalMapCount": 1,
+        "camera": {
+          "position": {
+            "x": 0.37053210184559293,
+            "y": 0.47135873783767257,
+            "z": 0.37682410225853413
+          },
+          "target": {
+            "x": -0.001815497875213623,
+            "y": 0.22312700469046834,
+            "z": 0.004476502537727495
+          },
+          "near": 2.1217245707530192e-05,
+          "far": 212.1724570753019
+        }
+      },
+      "pixels": 150394,
+      "bounds": {
+        "minX": 95,
+        "minY": 128,
+        "maxX": 507,
+        "maxY": 649
+      },
+      "image_sha256": "e6f6a2b31d139723426cdf58b65fa7cfd3c3a7af0f44701fb73198b793e2a66f",
+      "source_sha256": "f80acfbf8e1c88a096187a59c41dcb98e9a78c263044d5d8bc7a0187ab0e4ccc"
+    },
+    {
+      "slug": "cma-nataraja-1930-331",
+      "width": 600,
+      "height": 800,
+      "state": {
+        "engine": "three",
+        "engineVersion": "0.186.1",
+        "engineRevision": "186",
+        "bundleIdentity": "464aeda4827522c862d5d291def47b277b296de2a96fed7eb5531bce08e8a7b3",
+        "importInfo": null,
+        "idealAspect": 0.8945573152743659,
+        "status": "ready",
+        "error": null,
+        "url": "/assets/models/cma-nataraja-1930-331.glb",
+        "format": "glb",
+        "width": 600,
+        "height": 800,
+        "pixelRatio": 1,
+        "paused": true,
+        "disposed": false,
+        "userHasInteracted": false,
+        "surfaceCommentMode": false,
+        "background": 0,
+        "pointSize": 0.005,
+        "maxFps": 15,
+        "interactionEnabled": true,
+        "autoRotate": false,
+        "autoRotateUntilTouched": false,
+        "meshCount": 1,
+        "pointCount": 0,
+        "triangleCount": 98795,
+        "materialCount": 1,
+        "textureCount": 3,
+        "loadedTextureCount": 3,
+        "normalMapCount": 1,
+        "camera": {
+          "position": {
+            "x": 1.0559049488368006,
+            "y": 0.651098027057368,
+            "z": 2.5976430851852728
+          },
+          "target": {
+            "x": 0.013392108466088406,
+            "y": -0.04391053318977312,
+            "z": 1.5551302448145603
+          },
+          "near": 5.940484403279635e-05,
+          "far": 594.0484403279635
+        }
+      },
+      "pixels": 58553,
+      "bounds": {
+        "minX": 184,
+        "minY": 132,
+        "maxX": 527,
+        "maxY": 632
+      },
+      "image_sha256": "265e9d8b8bcc3a1ef531d9080e5f1320f5058ad06cbf76640c0615710781d707",
+      "source_sha256": "3e4fce6fe2014ec83de31dd47930f7946b458ae615bf4b9526a2d65a0a944d2a"
+    },
+    {
+      "slug": "cma-vase-1963-514",
+      "width": 600,
+      "height": 800,
+      "state": {
+        "engine": "three",
+        "engineVersion": "0.186.1",
+        "engineRevision": "186",
+        "bundleIdentity": "464aeda4827522c862d5d291def47b277b296de2a96fed7eb5531bce08e8a7b3",
+        "importInfo": null,
+        "idealAspect": 0.478720165761296,
+        "status": "ready",
+        "error": null,
+        "url": "/assets/models/cma-vase-1963-514.glb",
+        "format": "glb",
+        "width": 600,
+        "height": 800,
+        "pixelRatio": 1,
+        "paused": false,
+        "disposed": false,
+        "userHasInteracted": false,
+        "surfaceCommentMode": false,
+        "background": 0,
+        "pointSize": 0.005,
+        "maxFps": 15,
+        "interactionEnabled": true,
+        "autoRotate": false,
+        "autoRotateUntilTouched": false,
+        "meshCount": 1,
+        "pointCount": 0,
+        "triangleCount": 9522,
+        "materialCount": 1,
+        "textureCount": 3,
+        "loadedTextureCount": 3,
+        "normalMapCount": 1,
+        "camera": {
+          "position": {
+            "x": 0.1324998236331665,
+            "y": 0.13234816523471876,
+            "z": 0.1362020526464137
+          },
+          "target": {
+            "x": -0.0016611732595748652,
+            "y": 0.04290750063955784,
+            "z": 0.002041055753672307
+          },
+          "near": 7.644810487766995e-06,
+          "far": 76.44810487766993
+        }
+      },
+      "pixels": 70464,
+      "bounds": {
+        "minX": 188,
+        "minY": 123,
+        "maxX": 410,
+        "maxY": 641
+      },
+      "image_sha256": "38e83db0f1234378754bb41b7ef1148e3fc9f72d998a8e0cbf922b3d87dd6802",
+      "source_sha256": "76db4d238fba298028a8be1157601e1c39159b1ebd4d73917ec3e66a549088b2"
+    }
+  ],
+  "browser_layout": {
+    "desktop_covers_checked": 12,
+    "mobile_width": 390,
+    "mobile_covers_checked": 12,
+    "all_contained": true,
+    "black_backing": true,
+    "decoded_image_aspect": true
+  },
+  "phone_updated": false,
+  "backend_records_modified": false,
+  "scope_limit": "The three museum captures are exact-model-bound homepage fallback covers; no cloud thumbnail/moderation/publication fields were changed.",
+  "source_manifest_kind": "frozen isolated complete web-build source manifest",
+  "archive_copy_manifest_sha256": "09b3c145b541abc9bd3224f09224d73bd870db5afb3359f043ff0c6fb8eb93a7",
+  "render_viewer_sha256": "d3b7be7d696961d1a2e838d5d69210d8b0003d36facd87a507a650463a8a3eff",
+  "capture_bundle_difference": "Captures used bundle464aeda4827522c862d5d291def47b277b296de2a96fed7eb5531bce08e8a7b3; final bundle6045a1b87a87ddc9fad1a1dd2b2f10d5e31ec1752f4c2fc1350ac72242b9c1aa differs only in entrypoint host_bridge cache-version import. Camera/viewer source unchanged."
+}

@@ -312,9 +312,15 @@ class SharedViewerController extends ChangeNotifier {
     });
   }
 
-  Future<Object?> capture({String type = 'image/png', double? quality}) =>
-      _request(
-          'capture', {'type': type, if (quality != null) 'quality': quality});
+  Future<Object?> capture(
+          {String type = 'image/png',
+          double? quality,
+          bool canonicalCamera = false}) =>
+      _request('capture', {
+        'type': type,
+        if (quality != null) 'quality': quality,
+        if (canonicalCamera) 'canonicalCamera': true
+      });
   Future<void> pause() async {
     await _request('pause');
   }

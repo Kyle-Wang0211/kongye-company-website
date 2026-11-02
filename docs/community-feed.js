@@ -1,5 +1,5 @@
 import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl} from './community-data.mjs';
-import {legacyWorkIds,workCovers} from './community-work-links.mjs';
+import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=production-viewer-parity-20261102-v5';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
 const dialog=document.querySelector('#work-dialog'),frame=dialog.querySelector('iframe'),title=dialog.querySelector('h2');
 let config,cursor,busy=false,selectedId,shareResolved=false;const seen=new Set(),authors=new Map();
@@ -16,7 +16,7 @@ function openWork(work){
  const meta=document.querySelector('#work-meta');meta.replaceChildren();
  const info=document.createElement('p');info.textContent=authorName(work)+(publishedLabel(work.published_at)?' · '+publishedLabel(work.published_at):'');meta.append(info);
  if(work.description){const description=document.createElement('p');description.textContent=work.description;meta.append(description);}
- const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','phone-login-singleflight-20261102-v4');
+ const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','production-viewer-parity-20261102-v5');
  dialog.querySelectorAll('.work-actions a').forEach(link=>link.href=url.href);
  dialog.showModal();frame.src=url.href;
  }catch(e){status.textContent=e.message;}
@@ -30,12 +30,12 @@ function cardFor(work){
  const card=document.createElement('article');card.className='community-card';
  const open=document.createElement('button');open.type='button';open.className='community-open';open.setAttribute('aria-label','查看 '+(work.title||'未命名作品'));
  const picture=document.createElement('div');picture.className='community-picture';
- if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){try{const img=document.createElement('img');img.src=work.thumbnail_storage_path?assetUrl(config.origin,'thumbnails',work.thumbnail_storage_path):new URL(workCovers[work.model_storage_path],location.href).href;img.alt=work.title||'三维作品';img.loading='lazy';img.decoding='async';img.addEventListener('error',()=>{img.remove();picture.textContent='3D';},{once:true});picture.append(img);}catch{picture.textContent='3D';}}else picture.textContent='3D';
+ if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){try{const img=document.createElement('img');img.src=work.thumbnail_storage_path?assetUrl(config.origin,'thumbnails',work.thumbnail_storage_path):new URL(workCovers[work.model_storage_path],location.href).href;img.alt=work.title||'三维作品';img.addEventListener('load',()=>{if(img.naturalWidth>0&&img.naturalHeight>0)picture.style.aspectRatio=String(img.naturalWidth/img.naturalHeight);});img.loading='lazy';img.decoding='async';img.addEventListener('error',()=>{img.remove();picture.textContent='3D';},{once:true});picture.append(img);}catch{picture.textContent='3D';}}else picture.textContent='3D';
  const label=document.createElement('span');label.className='community-card-title';label.textContent=work.title||'未命名作品';open.append(picture,label);open.addEventListener('click',()=>openWork(work));
  const row=document.createElement('div');row.className='community-author-row';
  const avatar=document.createElement('span');avatar.className='community-avatar';avatar.setAttribute('aria-hidden','true');
  const author=document.createElement('span');author.className='community-author';author.textContent=authorName(work);
- const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=phone-login-singleflight-20261102-v4';like.setAttribute('aria-label','登录后点赞');
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=production-viewer-parity-20261102-v5';like.setAttribute('aria-label','登录后点赞');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);

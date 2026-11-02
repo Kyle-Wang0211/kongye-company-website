@@ -1,4 +1,4 @@
-import { createSurfaceComments } from './surface_comments.mjs?v=spatial-comments-20261102-v3';
+import { createSurfaceComments } from './surface_comments.mjs?v=production-viewer-parity-20261102-v5';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
 // Host/lifecycle adapter only. Rendering, loaders, materials and controls are upstream Three.js.
@@ -91,7 +91,8 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 1000);
   camera.position.set(0, 0, 3);
   const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
+  // Gesture callbacks apply their entire delta synchronously. No inertial tail.
+  controls.enableDamping = false;
   controls.screenSpacePanning = true;
   const ambient = new THREE.AmbientLight(0xffffff, 2);
   const key = new THREE.DirectionalLight(0xffffff, 3);
@@ -121,12 +122,16 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     if (typeof time === 'number' && lastAnimationTime !== null && time - lastAnimationTime < 1000 / maxFps) return;
     const delta = typeof time === 'number' && lastAnimationTime !== null ? Math.max(0, (time - lastAnimationTime) / 1000) : 0;
     if (typeof time === 'number') lastAnimationTime = time;
-    controls.update(delta); renderer.render(scene, camera); surfaceComments.update();
+    // With direct controls, pointer handlers already applied the full input.
+    // Idle frames must not integrate residual movement or alter camera values.
+    if (controls.autoRotate || controls.enableDamping) controls.update(delta);
+    renderer.render(scene, camera); surfaceComments.update();
   };
   let background = 0x000000, pointSize = options.pointSize ?? 0.005, autoRotateUntilTouched = false;
   const stopOnTouch = () => {
     userHasInteracted = true;
-    if (autoRotateUntilTouched) { controls.autoRotate = false; autoRotateUntilTouched = false; notify(); }
+    if (autoRotateUntilTouched) { controls.autoRotate = false; autoRotateUntilTouched = false; }
+    notify();
   };
   controls.addEventListener?.('start', stopOnTouch);
   const coordinates = vector => ({ x: vector.x, y: vector.y, z: vector.z });
@@ -134,7 +139,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     engine: 'three', engineVersion: ENGINE_VERSION, engineRevision: THREE.REVISION,
     bundleIdentity: options.bundleIdentity ?? null,
     importInfo, idealAspect: framing?.idealAspect ?? null,
-    status, error, url, format, width, height, pixelRatio, paused, disposed,
+    status, error, url, format, width, height, pixelRatio, paused, disposed, userHasInteracted,
     surfaceCommentMode: surfaceComments.enabled,
     background, pointSize, maxFps, interactionEnabled: controls.enabled !== false,
     autoRotate: controls.autoRotate === true, autoRotateUntilTouched,
@@ -146,19 +151,27 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     catch (failure) { console.warn('Viewer state observer failed', failure); }
   };
 
+  // Shared by the initial interactive fit and the cover camera. Never derive a
+  // second orientation, pivot or zoom in a thumbnail painter.
+  function applyInitialCamera(targetCamera, nextFraming) {
+    const { center, radius, idealCameraDistance } = nextFraming;
+    targetCamera.up.set(0, 1, 0);
+    targetCamera.zoom = 1;
+    targetCamera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, targetCamera.aspect);
+    targetCamera.position.copy(center).add(
+      new THREE.Vector3(1.8, 1.2, 1.8).normalize().multiplyScalar(idealCameraDistance * 1.05));
+    targetCamera.near = Math.max(radius / 10000, 0.000001);
+    targetCamera.far = Math.max(radius * 1000, targetCamera.near * 1000);
+    targetCamera.lookAt(center);
+    targetCamera.updateProjectionMatrix();
+    targetCamera.updateMatrixWorld();
+  }
+
   function fit(nextFraming) {
     if (!nextFraming) return;
     const { center, radius, idealCameraDistance } = nextFraming;
     controls.target.copy(center);
-    // Use Google's adjustedFoV with its documented spherical framing default.
-    // This retains containment at the host's existing orbit and at automatic
-    // rotations, including flat geometry, with the existing 5% distance margin.
-    camera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, camera.aspect);
-    camera.position.copy(center).add(
-      new THREE.Vector3(1.8, 1.2, 1.8).normalize().multiplyScalar(idealCameraDistance * 1.05));
-    camera.near = Math.max(radius / 10000, 0.000001);
-    camera.far = Math.max(radius * 1000, camera.near * 1000);
-    camera.updateProjectionMatrix();
+    applyInitialCamera(camera, nextFraming);
     controls.minDistance = camera.near * 2;
     controls.maxDistance = camera.far / 2;
     controls.update();
@@ -291,9 +304,25 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     }
     camera.updateProjectionMatrix(); render(); notify();
   }
-  function capture(type = 'image/png', quality) {
-    assertActive(); render();
-    return renderer.domElement.toDataURL(type, quality);
+  function capture(type = 'image/png', quality, canonicalCamera = false) {
+    assertActive();
+    if (!canonicalCamera) {
+      render();
+      return renderer.domElement.toDataURL(type, quality);
+    }
+    if (!current || !framing) throw new Error('Cover requires a loaded source');
+    // Use this canvas/aspect, containing the full model on both axes. The card
+    // presents the saved canvas with contain rather than cutting its edges.
+    const coverCamera = camera.clone();
+    applyInitialCamera(coverCamera, framing);
+    try {
+      renderer.render(scene, coverCamera);
+      return renderer.domElement.toDataURL(type, quality);
+    } finally {
+      // No controls.update/reset: a cover must not alter user orbit, damping,
+      // zoom, autorotation, saved camera or interaction state.
+      renderer.render(scene, camera);
+    }
   }
   function pause() { assertActive(); lastAnimationTime = null; paused = true; renderer.setAnimationLoop(null); notify(); }
   function resume() { assertActive(); lastAnimationTime = null; paused = false; renderer.setAnimationLoop(render); notify(); }

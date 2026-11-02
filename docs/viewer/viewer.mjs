@@ -1,4 +1,4 @@
-import { createSurfaceComments } from './surface_comments.mjs';
+import { createSurfaceComments } from './surface_comments.mjs?v=production-viewer-parity-20261102-v5';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
 // Host/lifecycle adapter only. Rendering, loaders, materials and controls are upstream Three.js.
@@ -113,6 +113,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   const surfaceComments = createSurfaceComments({THREE, canvas, camera, controls,
     getModel: () => current, getFormat: () => format,
     getOverviewDistance: () => framing?.idealCameraDistance * 1.05,
+    onMarkerInteraction: () => { stopOnTouch(); controls.autoRotate = false; notify(); },
     emit: (type, detail) => options.onSurfaceEvent?.(type, detail)});
   const assertActive = () => { if (disposed) throw new Error('Viewer is disposed'); };
   let lastAnimationTime = null, maxFps = 60;

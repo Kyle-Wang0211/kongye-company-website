@@ -1,16 +1,16 @@
 [
   {
     "path": "source/community_app/README.md",
-    "bytes": 5933,
-    "sha256": "77c717c094e03c82eee5505b709aed47c4a1430edeef4fec3f26790624db18b4",
+    "bytes": 7174,
+    "sha256": "6c0d3b5505216462825aab15c97b4a186864002f043cfe3d7a069e2002a9dda9",
     "reasons": [
       "generated-public-package-documentation"
     ]
   },
   {
     "path": "source/community_app/SOURCE_IDENTITY.json",
-    "bytes": 1194,
-    "sha256": "a28fcf57979718360645e26dac96dc95b8b79b7c763a1df385f0c547803737fa",
+    "bytes": 1645,
+    "sha256": "25e1b9efd8d4980f45b9d4cab7f1d3235fec46cb9378007a15d4d1dcaeedead0",
     "reasons": [
       "generated-public-package-documentation"
     ]
@@ -1083,8 +1083,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/controller.dart",
-    "bytes": 11619,
-    "sha256": "28631d3db8b302dfbcc6283f8afb7338336d1f65bdc0de25e8ebb01a8c1d532e",
+    "bytes": 11747,
+    "sha256": "1e8eab3f219d1ca76b1c0ee8b4257dcfb558015e717fdd0a664a051e0297fbc9",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -1168,8 +1168,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_web.dart",
-    "bytes": 6553,
-    "sha256": "7ff20e5158623cebe88031c7008672a0d9514f18577f31e0b846f106b7ee7c1b",
+    "bytes": 6561,
+    "sha256": "d20d6c57adaaf8eb10072c33dd9d97abeabc90645c706cdee5665159a9047499",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -1289,8 +1289,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/tests/spatial_cache_release.test.mjs",
-    "bytes": 555,
-    "sha256": "37d23eeb0da91552f503b849929ca57587064ea1e00999d67d8fa6efe59d7670",
+    "bytes": 641,
+    "sha256": "3c0fab61aec03d04c72c62c12f37e36073c749f1e6155448c00931e8fe9c1839",
     "reasons": [
       "spatial-comment-release-source"
     ]
@@ -1306,7 +1306,7 @@
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json",
     "bytes": 3196,
-    "sha256": "3301febd8156d5af7bb3ae7fb0bf1b676400fa0f0dc9446c47fe9d51524da5ed",
+    "sha256": "fccf78c5561d62073cf9a2a52ab221d2ac446ea7e50ee75fdf6025b395d1fa9c",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1379,8 +1379,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/host_bridge.mjs",
-    "bytes": 3701,
-    "sha256": "3d4149dd86acfc7764cd2764d03383ca595edaf44bc9bf94b73ec497ea1e88be",
+    "bytes": 3801,
+    "sha256": "a07c1a4c0980f0eb10afe320f0038427fa54f6c7a99b5378fb47545464a67157",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1399,8 +1399,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/index.html",
-    "bytes": 3553,
-    "sha256": "f1a9bc9e385c8d37fc5c95e563e0cac23ebd7428a53b23a5fb47b0780506d16c",
+    "bytes": 3600,
+    "sha256": "17a2a6f291688b9afe365a9f8ae35b3aea84c4acabf5c25f9a90d60b2a2a195a",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1581,8 +1581,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/viewer.mjs",
-    "bytes": 16774,
-    "sha256": "b9e00a8e7f0d5ae617e4128d377d445ad5dc7ba74c668edcb52154b52332f5ed",
+    "bytes": 18059,
+    "sha256": "d3b7be7d696961d1a2e838d5d69210d8b0003d36facd87a507a650463a8a3eff",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1729,5 +1729,21 @@
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/initial_cover_camera.test.mjs",
+    "reasons": [
+      "production-viewer-camera-regression"
+    ],
+    "sha256": "a1fd2c2a0c8d0149b709cd9c0862fa395fbed98f3a4651d56464172ed73b3b51",
+    "bytes": 5660
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/direct_gesture_camera.test.mjs",
+    "reasons": [
+      "production-viewer-camera-regression"
+    ],
+    "sha256": "defcaa45b5ac6b4d5932578aedf4aad03a986afdbabce70a146fc3a014530424",
+    "bytes": 5779
   }
 ]

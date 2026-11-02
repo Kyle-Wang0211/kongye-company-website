@@ -20,7 +20,9 @@ export function createHostBridge({ ready, send }) {
         case 'load': result = await viewer.load(args); break;
         case 'configure': result = viewer.configure(args); break;
         case 'resize': result = viewer.resize(args.width, args.height, args.pixelRatio); break;
-        case 'capture': result = viewer.capture(args.type, args.quality); break;
+        case 'capture': result = args.canonicalCamera === true
+          ? viewer.capture(args.type, args.quality, true)
+          : viewer.capture(args.type, args.quality); break;
         default: result = viewer[packet.method]();
       }
       response = { protocol: PROTOCOL, id, ok: true, result: result ?? null };
