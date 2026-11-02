@@ -1,0 +1,26 @@
+[
+  {
+    "file": "privacy.html",
+    "source_sha256": "feb8b1e3a5a815d887b4ac41907260efe7ebcd168ab0eb286d0ac74cc0987e36",
+    "output_sha256": "039323d32f9ba4f65e2a511041463ef2269381d051f4478502cee0067fd724c9",
+    "sections": 10,
+    "paragraphs": 77,
+    "transformation": "existing App content; product name 方寸间→窗后城, formal publication metadata"
+  },
+  {
+    "file": "terms.html",
+    "source_sha256": "307d817f930a089a414ca46b197621fc9af992ffcc1863b0a1fe88fc5201cea3",
+    "output_sha256": "f2eb4a7e8a17ea2d86aefc96bf61b47aaddf8eb67a08d9d9ed785c7e5ea0d9ba",
+    "sections": 14,
+    "paragraphs": 71,
+    "transformation": "existing App content; product name 方寸间→窗后城, formal publication metadata"
+  },
+  {
+    "file": "community-rules.html",
+    "source_sha256": "7e87bf641b25314551bc0e9ea819c54ef4b85974a712de9d8372fd2f50507cb3",
+    "output_sha256": "1dcf4039b7595fb762da7648eaeeb4ac42091a439111fcf2b871fc609eb4164e",
+    "sections": 5,
+    "paragraphs": 23,
+    "transformation": "existing App content; product name 方寸间→窗后城, formal publication metadata"
+  }
+]

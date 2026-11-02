@@ -7,9 +7,8 @@
   <meta name="theme-color" content="#050505">
   <title>窗后城 — 让空间，留在身边。</title>
   <link rel="canonical" href="https://kongye.space/">
-  <link rel="stylesheet" href="styles.css?v=20261102-community">
-  <script src="community-feed.js?v=20261102b" type="module"></script>
-  <script src="gallery.js" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261102-community-cards">
+  <script src="community-feed.js?v=20261102c" type="module"></script>
 </head>
 <body>
   <a class="skip" href="#main">跳至正文</a>
@@ -24,42 +23,9 @@
       <p id="feed-status" role="status" aria-live="polite">正在读取社区作品…</p>
       <div id="community-grid" class="community-grid"></div><button id="feed-more" type="button">加载更多</button>
     </section>
-    <dialog id="work-dialog" aria-labelledby="work-title"><div class="viewer-toolbar"><h2 id="work-title">三维作品</h2><button type="button" aria-label="关闭作品">关闭 ×</button></div><iframe title="社区三维作品" allow="fullscreen" allowfullscreen></iframe><div class="work-actions"><button id="share-work" type="button">分享链接</button><a href="community/">登录后点赞</a><a href="community/">登录后评论</a><span id="share-status" role="status"></span></div><p>拖动旋转 · 滚动或双指缩放</p></dialog>
+    <dialog id="work-dialog" aria-labelledby="work-title"><div class="viewer-toolbar"><h2 id="work-title">三维作品</h2><button type="button" aria-label="关闭作品">关闭 ×</button></div><iframe title="社区三维作品" allow="fullscreen" allowfullscreen></iframe><div id="work-meta"></div><div class="work-actions"><button id="share-work" type="button">分享链接</button><a href="community/">登录后点赞</a><a href="community/">登录后评论</a><span id="share-status" role="status"></span></div><p>拖动旋转 · 滚动或双指缩放</p></dialog>
 
-    <section id="showcase" class="section wrap" aria-labelledby="showcase-title">
-      <div class="section-label"><span>3D VIEWER</span><span>示例作品</span></div>
-      <div class="section-heading"><h2 id="showcase-title">体验三维浏览</h2></div>
-      <p class="showcase-intro">使用与 App 共用的三维浏览器，查看以下开放授权示例。</p>
-      <div class="scan-grid">
-        <article class="scan-work">
-          <details class="scan-card">
-            <summary><img src="assets/models/cma-vase-1963-514.jpg" alt="彩瓷花瓶三维模型预览" width="720" height="720" loading="lazy"><span>旋转查看 3D <b aria-hidden="true">↗</b></span></summary>
-            <div class="scan-view"><iframe data-src="viewer/index.html?model=../assets/models/cma-vase-1963-514.glb&amp;format=glb" title="彩瓷花瓶交互三维视图" allow="fullscreen" allowfullscreen></iframe><p>拖动旋转，滚动缩放 · 窗后城三维浏览</p></div>
-          </details>
-          <div class="scan-heading"><h3>彩瓷花瓶</h3></div><p class="scan-description">清代乾隆时期瓷器，彩色珐琅装饰与器物曲面。</p>
-          <div class="scan-links"><a href="assets/models/cma-vase-1963-514.glb" download>下载 GLB · 1.9 MB ↓</a></div>
-        </article>
-        <article class="scan-work">
-          <details class="scan-card">
-            <summary><img src="assets/models/cma-dragon-jar-1986-85.jpg" alt="青花龙纹罐三维模型预览" width="720" height="720" loading="lazy"><span>旋转查看 3D <b aria-hidden="true">↗</b></span></summary>
-            <div class="scan-view"><iframe data-src="viewer/index.html?model=../assets/models/cma-dragon-jar-1986-85.glb&amp;format=glb" title="青花龙纹罐交互三维视图" allow="fullscreen" allowfullscreen></iframe><p>拖动旋转，滚动缩放 · 窗后城三维浏览</p></div>
-          </details>
-          <div class="scan-heading"><h3>青花龙纹罐</h3></div><p class="scan-description">十八世纪朝鲜王朝瓷器，蓝色龙纹环绕白色釉面。</p>
-          <div class="scan-links"><a href="assets/models/cma-dragon-jar-1986-85.glb" download>下载 GLB · 1.7 MB ↓</a></div>
-        </article>
-        <article class="scan-work">
-          <details class="scan-card">
-            <summary><img src="assets/models/cma-nataraja-1930-331.jpg" alt="青铜舞王湿婆像三维模型预览" width="720" height="720" loading="lazy"><span>旋转查看 3D <b aria-hidden="true">↗</b></span></summary>
-            <div class="scan-view"><iframe data-src="viewer/index.html?model=../assets/models/cma-nataraja-1930-331.glb&amp;format=glb" title="青铜舞王像交互三维视图" allow="fullscreen" allowfullscreen></iframe><p>拖动旋转，滚动缩放 · 窗后城三维浏览</p></div>
-          </details>
-          <div class="scan-heading"><h3>青铜舞王像</h3></div><p class="scan-description">十一世纪南印度青铜雕塑，火焰环与多臂造型细节。</p>
-          <div class="scan-links"><a href="assets/models/cma-nataraja-1930-331.glb" download>下载 GLB · 6.8 MB ↓</a></div>
-        </article>
-      </div>
-      <p class="showcase-footnote">开放授权示例素材，用于展示三维作品浏览体验。</p>
-    </section>
-
-    <section id="contact" class="compact-support wrap"><h2 id="support">支持与联系</h2><p>产品咨询、使用反馈：<a href="mailto:kaidong@kongye.space">kaidong@kongye.space</a></p><nav id="legal-docs"><a href="terms.html">用户协议</a><a href="privacy.html">隐私政策</a><a href="community-rules.html">平台公约</a></nav><small>协议为开发版本草稿，尚未正式生效。</small></section>
+    <section id="contact" class="compact-support wrap"><h2 id="support">支持与联系</h2><p>产品咨询、使用反馈：<a href="mailto:kaidong@kongye.space">kaidong@kongye.space</a></p><nav id="legal-docs"><a href="terms.html">用户协议</a><a href="privacy.html">隐私政策</a><a href="community-rules.html">平台公约</a></nav><small>协议 V1.1 · 2026年11月2日发布 · <a href="publication-notice.html">三维作品发布与审核说明</a></small></section>
     <section id="about" class="section wrap" aria-labelledby="about-title">
       <div class="section-label"><span>ABOUT KONGYE</span><span>公司介绍</span></div>
       <div class="about-layout"><h2 id="about-title">空间有形，<br>探索无界。</h2><div><p class="company-name">北京空也科技有限公司</p><p class="english" lang="en">Beijing Kongye Technology Co., Ltd</p><p>空也科技是一家位于中国北京的科技公司，当前以「窗后城」iOS 应用研发为主要产品工作，关注移动设备、空间记录与三维内容之间的连接。</p><p>我们希望让数字空间的记录与体验逐渐融入日常，从熟悉的场景出发，寻找更自然的内容表达方式。本网站是公司的官方信息与联系渠道。</p><dl class="company-facts"><div><dt>所在地</dt><dd>中国 · 北京</dd></div><div><dt>产品</dt><dd>窗后城 · iOS 应用研发</dd></div><div><dt>官方网站</dt><dd>kongye.space</dd></div></dl></div></div>
