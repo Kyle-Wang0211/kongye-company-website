@@ -1,0 +1,18 @@
+Surface-comment adapter: MIT Sculpt contributors, 2026.
+Upstream revision: 2e0e11d76650748ffd577b45943cd063cf097cb4
+Source: apps/web/src/components/ModelAnnotationCanvas.tsx
+Original MIT license reproduced in SURFACE_COMMENTS_LICENSE.
+
+Adaptation, not byte-identical upstream reproduction: retain Sculpt's explicit
+pin mode, four-CSS-pixel click/drag tolerance, hit point/face normal, stored
+camera position/controls target and numbered selectable HTML pin semantics.
+Use the existing pinned Three.Raycaster and viewer scene/OrbitControls rather
+than React Three Fiber/Drei or a second renderer. No vendor code is changed.
+Unlike Sculpt's normalized world-space position, positions/normals here use
+the current GLB scene root's local space; camera position/target retain the
+existing viewer scene space. Root/world conversion uses Three matrices and
+normal matrices, including non-uniform transforms. Focus restores that camera
+snapshot immediately; it does not copy Sculpt's camera interpolation.
+Only static GLB surface annotation is supported. PLY/SKP picking and tracking
+anchors across asset replacement, animation, skinning or morphs are not claimed.
+The application binds asset revision and prefilters private/public marker access.

@@ -1,0 +1,1629 @@
+[
+  {
+    "path": "source/community_app/README.md",
+    "bytes": 3901,
+    "sha256": "bbc1aaf8a4d63f04fcea484b17c928d781d55180b43e1b7c8f50e98bdac92e6e",
+    "reasons": [
+      "generated-public-package-documentation"
+    ]
+  },
+  {
+    "path": "source/community_app/SOURCE_IDENTITY.json",
+    "bytes": 689,
+    "sha256": "4714810f0cbd28900b54b991508d5dffd60963d18d493a2fda8fc45b073add6f",
+    "reasons": [
+      "generated-public-package-documentation"
+    ]
+  },
+  {
+    "path": "source/community_app/analysis_options.yaml",
+    "bytes": 1546,
+    "sha256": "403d2c563287e55f12ff36526c0eeebec0510f7bf1a7b18a44bb6fef89cf7661",
+    "reasons": [
+      "build-configuration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/ibl/default_env_ibl.ktx",
+    "bytes": 2095464,
+    "sha256": "0245800fa846c2a3c15cb1d2aa6ded86fcf8355e568907dcd50e073c589f85d6",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/Avocado.glb",
+    "bytes": 8328156,
+    "sha256": "85ae91e60ed519f53a7e2096508837fedd446dcc450f8e05678b7a204679bd12",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/BoomBox.glb",
+    "bytes": 10945640,
+    "sha256": "84c32a396684d0b329bbe60428f5cb89c5f447356ccf359b0374856653eca331",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/DamagedHelmet.glb",
+    "bytes": 3773916,
+    "sha256": "a1e3b04de97b11de564ce6e53b95f02954a297f0008183ac63a4f5974f6b32d8",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/Duck.glb",
+    "bytes": 120484,
+    "sha256": "65bf938f54d6073e619e76e007820bbf980cdc3dc0daec0d94830ffc4ae54ab5",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/Lantern.glb",
+    "bytes": 9872848,
+    "sha256": "2d7ea69e1f4b7f5b9f00854978b20f41b9effa392272c50f4c98b5a8db3152b2",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/WaterBottle.glb",
+    "bytes": 8961340,
+    "sha256": "074341e0c9b991244ea88fed77221754dfa33b53ee13523fa5f3c10a28a30160",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/edgesam/README.md",
+    "bytes": 2147,
+    "sha256": "23ff18cd4e5960b48bccf29ae204dc9939e8c088078c939fc851f839ff388511",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/edgesam/mobile_sam_image_encoder.onnx",
+    "bytes": 28157093,
+    "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/assets/models/edgesam/sam_mask_decoder_single.onnx",
+    "bytes": 16501323,
+    "sha256": "93915fc7c993ab9d59ab8c9ccd3bce37f7509c81ab4150a74abd4d2abbd8570d",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/JXL/licenses/brotli-LICENSE",
+    "bytes": 1084,
+    "sha256": "3d180008e36922a4e8daec11c34c7af264fed5962d07924aea928c38e8663c94",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/JXL/licenses/highway-LICENSE",
+    "bytes": 11356,
+    "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/JXL/licenses/highway-LICENSE-BSD3",
+    "bytes": 1515,
+    "sha256": "d25e82e26acd42ca3ccc9993622631163425b869b9e16284226d534cff6470f2",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/JXL/licenses/libjxl-LICENSE",
+    "bytes": 1508,
+    "sha256": "8405932022a556380c2d8c272eff154a923feb197233f348ce5f7334fb0a5ede",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/JXL/licenses/skcms-LICENSE",
+    "bytes": 1635,
+    "sha256": "e59bb5c5c6ba426a9ac4ba9fe667ad14c5166b12aa25be8af1d122b14fbe2e36",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/abseil-LICENSE",
+    "bytes": 11361,
+    "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/ceres-LICENSE",
+    "bytes": 14355,
+    "sha256": "765fd9eac4cb827fa5de4304d1f81f4f2c5c332a3f1d6f0f3f7a69a33156729b",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/cgltf-LICENSE",
+    "bytes": 1200,
+    "sha256": "b7180ec5f85785c09399fe516a77209f9db031602ad2cb4b3cfef99191848c27",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/colmap-LICENSE",
+    "bytes": 1727,
+    "sha256": "62e79e3af0c6803bcd99098fe51d131398184f54eb17ccc12e5e2a66130540cb",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/dawn-LICENSE",
+    "bytes": 1561,
+    "sha256": "e2908f7576fb12be5bdb8480cddb0be62badb498cadb821d043aeaf01b0b0899",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/eigen-COPYING.MPL2",
+    "bytes": 16726,
+    "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/glog-COPYING",
+    "bytes": 1479,
+    "sha256": "136d48dea7a681413691f3db3098f6cf5ffaa3119d96d97bb83b8cff3ce38c4a",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/libjpeg-turbo-LICENSE",
+    "bytes": 5620,
+    "sha256": "2189dc45a8fe96204069f8124caa53a148dfdc193f50f584c6ca7849a6072872",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/meshoptimizer-LICENSE",
+    "bytes": 1079,
+    "sha256": "d1bc307ff896c7fc65e3ff4823cc478194f7a5bc6436f99534ebede4d9e2017a",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/poselib-LICENSE",
+    "bytes": 1694,
+    "sha256": "16478850e8c62589803663d43e53333e6e1e3318cd4a4d2b8a3fd66e584309f8",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/stb-LICENSE",
+    "bytes": 2454,
+    "sha256": "e66576ac80990033030d9a8f8ade24f7482fc08c9c86eb2ce5bcd2ab6f4ecd64",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/NativeCore/licenses/vlfeat-LICENSE",
+    "bytes": 1365,
+    "sha256": "33b9f7703327199088d74f884b19997a0084180f984724720095a7cb412c4d89",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/ios/Vendor/Zpaq/Zpaq-LICENSE.txt",
+    "bytes": 2741,
+    "sha256": "927b5feda84f7a7f2063998b124829182967f54b954db2c3569e8bd07958bf07",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/l10n.yaml",
+    "bytes": 142,
+    "sha256": "84c9497064453fe2db3b2b8733c2aabb9d1cc6ff2e243b9277bd0a07e732190f",
+    "reasons": [
+      "actual-web-build-dependency",
+      "build-configuration"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/aether_prefs.dart",
+    "bytes": 1861,
+    "sha256": "13a0d1d8b3e2c07c594a8766276869ef1c244a8d897028d288cd86df2181e5c4",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/aether_view/format_detect.dart",
+    "bytes": 6529,
+    "sha256": "3c4fe83a53cd9dc8b4af7aafb709b65314af15ec2cfede9881556b697c7a9879",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/aether_view/platform_check_web.dart",
+    "bytes": 339,
+    "sha256": "d4ba14a86eea3b5fd64a47872379fab3a37d8a6c2a05060a0af100b71ae4c4f4",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/aether_view/scene_bridge.dart",
+    "bytes": 12701,
+    "sha256": "07591ec075ddf1e92131ee751a5ecdc68f79493caaabd504b05393b379aad7f1",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/analytics/pw_analytics.dart",
+    "bytes": 9673,
+    "sha256": "c07438471b521ad540a98da2b4bd9c06b681acd869734000bf044fa2602ba411",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/auth_error.dart",
+    "bytes": 2712,
+    "sha256": "7292aac1b21b82ef60bd2400dea58f75ffaea8f1e0389833a43e4639fee7aed1",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/auth_models.dart",
+    "bytes": 4825,
+    "sha256": "9c2e9697402bcd9a3db2a5ecf45b1a844d5a6b8f850f832f20b17182859d0b79",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/auth_scope.dart",
+    "bytes": 1036,
+    "sha256": "9ab35d3092757e4fb15f61926b9a695fef2abab66db49970ed46d473a1adbebf",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/auth_service.dart",
+    "bytes": 4053,
+    "sha256": "993d880aee7160981264d85543ebf501ed3671fe29f5ab5df2ee434d6d22efb4",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/cold_start_session_gate.dart",
+    "bytes": 2413,
+    "sha256": "3dc7d530f8cfc6b81ac69f4d834d3c8762c9b73ccd1dd173da5f9b23e7c352f4",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/connection_backoff.dart",
+    "bytes": 2360,
+    "sha256": "d8f704066623961b946f08d1ff2b591cd9b3dd3da9b194df5ced52e22ffd9376",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/current_user.dart",
+    "bytes": 21877,
+    "sha256": "fb98b216e00b2f8aec368f086d47de93d4ccfc34b2c241620d97b7510593d7e3",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/data_api_readiness_gate.dart",
+    "bytes": 2118,
+    "sha256": "c2eddbf7c71f231b78c99049479f5f9f4a8120ed2e1e4ea6909d202e5b267051",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/password_sign_in.dart",
+    "bytes": 1378,
+    "sha256": "15021d8ecad28ccda886c5e249846bc6e2d5103944cf0c525a53715057e69dfe",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/supabase_auth_service.dart",
+    "bytes": 23310,
+    "sha256": "bc675087525edb56aa60effea0d4d6f5e1c2a0c94cd3f36dbc5b32dd9cfdb720",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/unavailable_auth_service.dart",
+    "bytes": 2345,
+    "sha256": "b102f885545b62cd11fb566299d78c152a23536f321c1df55f5500bcbf1f886e",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/capture/pw_telemetry.dart",
+    "bytes": 84,
+    "sha256": "00f7d081862dc824ced95cfeb60328edf2f6544b06850ab247fa3629031364ad",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/capture/pw_telemetry_web.dart",
+    "bytes": 943,
+    "sha256": "243d9accd2a6875c3cfaf5b6e99b6e73f49fb8690a2ce670791b6d65999f177e",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/comments/comment_models.dart",
+    "bytes": 14319,
+    "sha256": "a43e21c04ac8d2df200b75ceb752af7728e7dd4bb082b7ebe95da50084298ed8",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/comments/comment_moderation_models.dart",
+    "bytes": 6131,
+    "sha256": "79245db8ad78399c0e0ba818c60b83ba861d8af0ffd28fb83f0b50cebb13b893",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/comments/comment_moderation_repository.dart",
+    "bytes": 509,
+    "sha256": "401133306b3c2775eebb55837ce86754bad4fde9d5ef9009c8f9774db9b35e2f",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/comments/comment_repository.dart",
+    "bytes": 18421,
+    "sha256": "1b3c3348d1a2b19a0b814254507ea84e01442bca1e4fafc70dad6b4591bbd4f0",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/comments/comment_time.dart",
+    "bytes": 998,
+    "sha256": "74eee6efaaa98923701318f9eaa86a5b07cd1e38c76356a803aed9cb50d31544",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/community_cover_processor.dart",
+    "bytes": 2543,
+    "sha256": "4bd64a1a7a50fdeaa9a89ed964877180f30b53217551ff17501c5bdf856f1a4b",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/community_service.dart",
+    "bytes": 27225,
+    "sha256": "2c6d59bcf722ea73dd8a7ffbb9a63b1bfd3133eb4c331eb71470e4c1c43ab8cc",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/feed_models.dart",
+    "bytes": 5291,
+    "sha256": "58d00f1043d6f6ac89d8c9ec8b9ded37fd614a87a7f13b1d55ed5610ff248858",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/generated_avatar.dart",
+    "bytes": 1759,
+    "sha256": "c4dfacb7ca55143282715aad017d56bdc97edf4821acbccace1eee24b9fd7fc4",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/generated_avatar_repository.dart",
+    "bytes": 6377,
+    "sha256": "61f32b5cb4729b04f2101124284815332750d761933007d610ee97786a129a49",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/glb_cache.dart",
+    "bytes": 12346,
+    "sha256": "da5a8d556ff4c1dde4279663d7003bd4c72a9e2415770f68c9747346981b334a",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/public_work_repository.dart",
+    "bytes": 2426,
+    "sha256": "c1e051d71f0c41986eba6ac472216b29ff5bddcc551d8633a5fd0da6541044cd",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/report_evidence_processor.dart",
+    "bytes": 2887,
+    "sha256": "2e173854310180caeddd404236867410948fa6f7274da61d41abc91e48676821",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/shared_viewer_model_path.dart",
+    "bytes": 116,
+    "sha256": "28d0079e322b0274199c2ad0a7dee741bc33e46a0f955992adff70d34720927e",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/shared_viewer_model_path_web.dart",
+    "bytes": 207,
+    "sha256": "caf63112ab77452c982ecb940d97366166b43ad28a46ae4ec5baac52a4bfc7f1",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/social_profile_models.dart",
+    "bytes": 11767,
+    "sha256": "ae24f08819b94da56ed7a79e5c32b685b6fb4c6eb6fa11a5aee52418cd1912af",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/social_profile_repository.dart",
+    "bytes": 7075,
+    "sha256": "1e7840ea64d949f6768573bd330f254808989eb517e020a4253c6570fd57d27b",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/community/thumb_baker.dart",
+    "bytes": 5945,
+    "sha256": "3906d46dd6510c4abae0a1c57ddb3a0e9b95bffd9bca68599b3c5e64ce48f724",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/config/backend_deployment.dart",
+    "bytes": 4771,
+    "sha256": "a2d530ddf6d0a73b6119f57fa981a200ad9e25caa5ee7d962400b1862fc43c13",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/config/endpoint_config.dart",
+    "bytes": 9407,
+    "sha256": "08bc45ccf9f7033937b6e301adbf8b9290a5109c1b5ec10abfae00a688c29d25",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/i18n/locale_notifier.dart",
+    "bytes": 3694,
+    "sha256": "af846b3625cbf0d14e07031ee01bdbb4cb82ef1ca3f4fe590e6dbfd101407b2f",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/l10n/app_en.arb",
+    "bytes": 21243,
+    "sha256": "cb594c697b03abd2651bdab54395ee6ee0e376d9c23f6b747e93fd7bfd9a899d",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/l10n/app_localizations.dart",
+    "bytes": 61629,
+    "sha256": "c2958eb13fcf179858e7b046cf83553613ac87c3a89e03f1db6cb3acef707017",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/l10n/app_localizations_en.dart",
+    "bytes": 26729,
+    "sha256": "d2f427ce210acfd0682bea57b68ebd279a2eb658b86842321e9223845e25170d",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/l10n/app_localizations_zh.dart",
+    "bytes": 25766,
+    "sha256": "7aea54f36a472cdf4c43606fd1a04200e650d227e7ac6849c5d10040eacf5944",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/l10n/app_zh.arb",
+    "bytes": 18250,
+    "sha256": "28381cc412be7e7375a0d7b18cd65eb9cfa3020226c6cb2ee82ed6990b026740",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/main_community_web.dart",
+    "bytes": 9261,
+    "sha256": "c62f5bc178c837e4622714c91df5c0af455b352e621e01d1936668f7439a945f",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/official_util/device_log.dart",
+    "bytes": 2346,
+    "sha256": "241f4e96d66fb784c02fbfef9123bcb6d9ad591fa4244b44845b18179624f886",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/storage/signed_upload_broker.dart",
+    "bytes": 3212,
+    "sha256": "1cf8c126f28b15973f66d77068569a15a4254eb36d24cf8ec9ae49f37a794243",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/auth_minimal_widgets.dart",
+    "bytes": 13568,
+    "sha256": "6704cefe44e88cf0210194d8664b2eefa67b1a1784025a9ffecfd8de714e94ee",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/auth_root_view.dart",
+    "bytes": 11239,
+    "sha256": "78ab44eeb621a6e5f5a86af9c8b93f1a6ab1bac9e0cb65667f20bad07febde79",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/auth_shared_widgets.dart",
+    "bytes": 9925,
+    "sha256": "8fc29e7e41020c9778bfce1e3110d813981944c472eaaa988721a310591cf04e",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/email_sign_in_view.dart",
+    "bytes": 7827,
+    "sha256": "7a48c10b6bf3b54198160aac9949044bb1274c11a6f35b5d756de78e6efb2e7a",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/otp_verification_view.dart",
+    "bytes": 9278,
+    "sha256": "207c93ec9c34c5823f3643b10e430b69d117777696132dac64ac102538cad39a",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/phone_sign_in_view.dart",
+    "bytes": 7354,
+    "sha256": "0b52f77d2a5c1e716d3634201d13f9a19718e33bee5e8210d4e38717947f96b5",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/auth/reset_password_view.dart",
+    "bytes": 8973,
+    "sha256": "a4bad16e6910ad74b52409b9c929d3ac95c5c0eea5b7c3d1e202e471d12b00ef",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/aether_cpp_card_demo.dart",
+    "bytes": 3577,
+    "sha256": "80820658b85d95234c7d6a901b323dda09026d996026f2b8c19a3a82b17c9530",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/card_live_governor.dart",
+    "bytes": 15023,
+    "sha256": "b6504c0f5ecfac6dca441852e3f11630d161d4a8ca2a73a5c9c1a7c4953813aa",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/comment_moderation_routes.dart",
+    "bytes": 4363,
+    "sha256": "3b1936c8a708f82599a654f268d6d39083161f0e64d65c17321cbf8b0a1eb35b",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/comments/comment_report_sheet.dart",
+    "bytes": 6297,
+    "sha256": "4d7511cb2d551e46bd32942bc078e24fa5817884be90500d2b0db0d7db9c08e1",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/comments/community_comments_panel.dart",
+    "bytes": 54765,
+    "sha256": "cd1e7b0df2bc01adce643117795f6e675e77a4bd8ccc0c518fb54ddf7e847279",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/first_pair_policy.dart",
+    "bytes": 2501,
+    "sha256": "caa0cfd66a6571f9fe72320beaf42fc5bfd13144f08ea33c517e0a0069bd2f0c",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/generated_account_avatar.dart",
+    "bytes": 4390,
+    "sha256": "0d05a66fa7697398e034f3fbef835ae29fefc97f8da477a44f1eb808c8821d02",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/masonry_layout.dart",
+    "bytes": 1800,
+    "sha256": "fc6337abc89759a18b1a22401cee1d3cac5fb1b87a3b508c4a4e2c784d8b9918",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/masonry_policy.dart",
+    "bytes": 1154,
+    "sha256": "aae436dcceecf24300c982b03e6ee8ecff960eea969ecd899189b92f89745eef",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/notifications/community_comment_case_page.dart",
+    "bytes": 12887,
+    "sha256": "22137f0e60dc2ada2a229b5a483520eec1a712083fa93fc0ae048f16dbc3c0c3",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/notifications/community_comment_inbox_button.dart",
+    "bytes": 4296,
+    "sha256": "910e6a27e424a66beb7e698d124846f53dc020a5334dfa8bdf5f73ab8251f877",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/notifications/community_comment_inbox_page.dart",
+    "bytes": 10834,
+    "sha256": "c8fc8259023bf8e62cee2d387e515b89407405ff7ca92b422f3f298cc207f32c",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/notifications/moderation_ui_support.dart",
+    "bytes": 3009,
+    "sha256": "8a6d6071422f9cc22f4a63fd947e368cff20a9816457d8eed1b0226e646e71ec",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/public_work_entry.dart",
+    "bytes": 3543,
+    "sha256": "2f0d0653f9bd533a824d8aceabcfef5c4ae1103c6f1c4c42b58327a24262de6a",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/user_report_page.dart",
+    "bytes": 12158,
+    "sha256": "50dc762d7ff16749d91a83b9c9ff54c9200964fb13c15b846063ead5df7f8644",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/viewer_impl.dart",
+    "bytes": 19550,
+    "sha256": "a9eba2183656b0ad5d5f83e0eb6c4d55362c1fa073cd373c8be5d17292af3870",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/work_card.dart",
+    "bytes": 15584,
+    "sha256": "db0a595177226f96d818d104728962afe768706c6227c31d4be76e5b22ac3ffc",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/work_detail_page.dart",
+    "bytes": 47673,
+    "sha256": "521043a6e3daa7c83434cd24efa252502767d01b75ec97e9a3c45e88d7fa2056",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/design_system.dart",
+    "bytes": 17971,
+    "sha256": "5a128db9e570bf235782d939ad74ed74f8bc692207f313d03128a3a952aa7db3",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/legal_doc_links_row.dart",
+    "bytes": 1950,
+    "sha256": "d4b15af89d8b1c65e44cf15910cb65e33dfe114654860f20bf94f05d98a48328",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/legal_doc_model.dart",
+    "bytes": 1185,
+    "sha256": "7804d4b5583efc83de2d152171bfba17fe73590a06ef18286985dabaa1bea27a",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/legal_doc_page.dart",
+    "bytes": 5054,
+    "sha256": "c528c27780ddd399c1917e090947af127db1f978c312aaed0ac6a674401d18a3",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/platform_rules_content.dart",
+    "bytes": 8621,
+    "sha256": "e81f80b3f32081937bab2636f90326ada1fd08e0069a5c915f3f6e8d8e9159a1",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/platform_rules_page.dart",
+    "bytes": 4579,
+    "sha256": "44ea3a12ec699f1895cffda7ccbc99ad1d533fe6402d7eb2f677a5d902583636",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/privacy_policy_content.dart",
+    "bytes": 21213,
+    "sha256": "4c0ba2d460068b8b71a0d415fa43ef42a46767b3b62fe822192f8df6f85ffa7e",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/legal/user_agreement_content.dart",
+    "bytes": 27804,
+    "sha256": "84cb4330f761d35683caa9a14f3164f14617675ad6f124ca022383926e5cf53b",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/official_capture/auto_rotating_cloud_view.dart",
+    "bytes": 2149,
+    "sha256": "51290fda2815ef28fe28184eb3ebcd140e868af929b8d4f3317ecc9ddd7529e9",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/official_capture/community_sparse_cloud_data.dart",
+    "bytes": 1944,
+    "sha256": "9f8beb6789fe939014d580f338b5501b83eb651d1c9db685bf4610d3236a9b1f",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/browser_model_transport.dart",
+    "bytes": 1911,
+    "sha256": "6d40e215098eaa579b0b98a6345978c7f4575e8560e6d353659a721006ddae0a",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/community_viewer_session.dart",
+    "bytes": 8131,
+    "sha256": "d4e0d78d948701640d02fb7a544e6695a9368a99adef1dc025b1ae38a8759b55",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/local_work_viewer_session.dart",
+    "bytes": 110,
+    "sha256": "c25ed36cfa63fa01e9170e5cc767b1f65b6d4139d9124dcfae2f838923ca6a03",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/local_work_viewer_session_web.dart",
+    "bytes": 2208,
+    "sha256": "4a48f739c824cc6f94209acd3e28afdb5ef6251599fb13672d8761426916f96e",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/model_content_identity.dart",
+    "bytes": 112,
+    "sha256": "56194d4e953cfd47afe6bb41cfdf9bea46718b2809a85db1f966ea3dc8ca88ae",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/model_content_identity_web.dart",
+    "bytes": 133,
+    "sha256": "f0ac391a70e6aad1d9429899dbccaf65897551fccb278a8b0ff68a9880e3ae6f",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/product_model_view.dart",
+    "bytes": 34379,
+    "sha256": "a4394d3d55fa5e110ab2ab0544e323d971358b4017a6d6787f48acd571528ac6",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/shared/product_point_view.dart",
+    "bytes": 14377,
+    "sha256": "f31ac7a7abd7b4c03a4f5b8c7f88b1bf531634cb2c6b75ca10e9266ee8c8d327",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/startup_splash_gate.dart",
+    "bytes": 1323,
+    "sha256": "d027d5b56ecb9339eac1254c38bffd00783f292e6a494370f7ae6473337d2f76",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/vault_page.dart",
+    "bytes": 47818,
+    "sha256": "d245e31e8ea977815623bbf35fb76d4dd0d096d658b87bed7cdde95a7f0cf614",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/util/device_log.dart",
+    "bytes": 2319,
+    "sha256": "95186b41536d3846dfcd65e714421e53ff0c884822318ba7cce6745cd46b1eed",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/util/image_sanitize.dart",
+    "bytes": 2294,
+    "sha256": "17e81f44028f9fb73244f95fb3254fe1171157964ce0c74fe1c448fea3fa2910",
+    "reasons": [
+      "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/aether_capture_services/pubspec.yaml",
+    "bytes": 375,
+    "sha256": "0e19cfdd9ba495b33e63a96743db2e39df0ae9fa408682fc21b5a9f25705e2fc",
+    "reasons": [
+      "local-path-dependency-manifest"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/official_capture_services/pubspec.yaml",
+    "bytes": 377,
+    "sha256": "2ab2854eaa55d5921cc9dc224f8ee9520a41c991ab09bd9b57e05c12bc66a3ae",
+    "reasons": [
+      "local-path-dependency-manifest"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_hevc/pubspec.yaml",
+    "bytes": 404,
+    "sha256": "20a4c5a7910c30da1bd56e7d745c66be491f5aebc18ec7fe4d58fa8d9ec975eb",
+    "reasons": [
+      "local-path-dependency-manifest"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/README.md",
+    "bytes": 8343,
+    "sha256": "ba6a1528197ff72feacd1328bab7f5e9d2be5d8574af043e3ac105dfbe54976a",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/pw_shared_viewer.dart",
+    "bytes": 212,
+    "sha256": "43b6f30e6f6952474bb8eaf95e6b6ec40c76bee49566fe11dc4246f230c505c8",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/controller.dart",
+    "bytes": 11619,
+    "sha256": "28631d3db8b302dfbcc6283f8afb7338336d1f65bdc0de25e8ebb01a8c1d532e",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/local_server.dart",
+    "bytes": 6542,
+    "sha256": "4715d1bc29ccf281fb8c662d328e97343b00d8343cbe420119528bf126892736",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/native_bootstrap.dart",
+    "bytes": 5302,
+    "sha256": "42e2a7bcb2689774b750e341e5e2228befa4f00ca6efbea5b4a0c2f85ae6dba7",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/native_retained_session.dart",
+    "bytes": 11982,
+    "sha256": "2f5bf20a0299c5a61f499f472c4641dd4ed52f4cae94ea05ee34146a6fd90046",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/point_cloud_transport.dart",
+    "bytes": 1227,
+    "sha256": "9d686e53226c8265bb8e48a1b2bb39c998ca85766952309aa2005ccbcfea86a7",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/retained_session_unsupported.dart",
+    "bytes": 777,
+    "sha256": "7257b71909d32157e63e87e6796b3635502b7267496455102d40393585a4ac6c",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/surface_comments.dart",
+    "bytes": 5052,
+    "sha256": "621430dc79bd991ec94b3053712cbdb4c4406577c0eb0b17107370155b4a94d6",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer.dart",
+    "bytes": 131,
+    "sha256": "7de8e1e1c3434efb9123499fffe5abb3ff710e2227ba20cb697fb4eec0b767e8",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_native.dart",
+    "bytes": 6734,
+    "sha256": "61ae4ddf1e236a121f5c8f52ccf84ee92289837ebb869cd668cb8d9dd7635b51",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_unsupported.dart",
+    "bytes": 811,
+    "sha256": "501f0bd1b5147b82d7a8369928a0f427622ec0f4e43b7910b4d12758b6813713",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_web.dart",
+    "bytes": 6522,
+    "sha256": "9fe38a1e9707291abfd0219457f2007fceaca67dda5290f094bf0e6e360a2efb",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/pubspec.yaml",
+    "bytes": 1100,
+    "sha256": "9bba49e7736801c2c3fcaa2edc39052ea818aea5814db4c489ba32172cb3def8",
+    "reasons": [
+      "local-path-dependency-manifest"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/fixtures/skp/LICENSE",
+    "bytes": 1075,
+    "sha256": "7c70ac0b7916390744a5f6361c59008cada08149a54348530b767953e050dbc6",
+    "reasons": [
+      "existing-third-party-license-or-notice"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/fixtures/skp/NOTICE.md",
+    "bytes": 653,
+    "sha256": "a3a83dc9c76218cc0aa813c0ac98d223fda0140d95bdc0e2f1764a9b1605a510",
+    "reasons": [
+      "existing-third-party-license-or-notice"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json",
+    "bytes": 3196,
+    "sha256": "eaa1354a2d3e4d70332b4895f30df5f2d7f2ebbead1c8b17cfb7e0f4ee5dc4f6",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/MODEL_FRAMING_LICENSE",
+    "bytes": 11358,
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "reasons": [
+      "actual-web-build-dependency",
+      "existing-third-party-license-or-notice",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/MODEL_FRAMING_NOTICE",
+    "bytes": 958,
+    "sha256": "da599a090c4c21ef0295cdfc6af402468a91e780f3211d68ad1ddc7ba24307b5",
+    "reasons": [
+      "actual-web-build-dependency",
+      "existing-third-party-license-or-notice",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/MODEL_FRAMING_UPSTREAM.json",
+    "bytes": 6447,
+    "sha256": "40c675a6699a44d7fcd5fe7f0bf936fe1e7d1dfb1f488d8c8b582444b25cc135",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/SURFACE_COMMENTS_LICENSE",
+    "bytes": 1076,
+    "sha256": "1a4db66ba930fc7c09ea430225111b500e23537fdb52404a2d994468192226dc",
+    "reasons": [
+      "actual-web-build-dependency",
+      "existing-third-party-license-or-notice",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/SURFACE_COMMENTS_NOTICE",
+    "bytes": 1239,
+    "sha256": "ad55c17e5938e182fb7cc8c1b40c1cbf084cd47bbb6a8aa5cfb076b5ce354fc5",
+    "reasons": [
+      "actual-web-build-dependency",
+      "existing-third-party-license-or-notice",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/bundle_identity.mjs",
+    "bytes": 2165,
+    "sha256": "ddbe24cc4e7884d82a427ec6f1e263acdc07f0c1f99e7afba4828eabede216c9",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/host_bridge.mjs",
+    "bytes": 3701,
+    "sha256": "3d4149dd86acfc7764cd2764d03383ca595edaf44bc9bf94b73ec497ea1e88be",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/image_loader_lifecycle.mjs",
+    "bytes": 644,
+    "sha256": "97a6149a09667d515e496304ed03b1b8137530828fc1602bc74f9fe89de7fcff",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/index.html",
+    "bytes": 3522,
+    "sha256": "58fdd73bb859f4129256bc759cf4190e42fbfb99604fd3b49ccf366e6ecd13fb",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/model_framing.mjs",
+    "bytes": 3368,
+    "sha256": "22bc2551b22d52cd0fef089ec5c644028c5ef4866e0da000357a8f04a855b41f",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/skp_import.mjs",
+    "bytes": 1990,
+    "sha256": "fe32bcdc1880b14aef2bb2a7ce6e8040888bcef12fca585d1a3a233db90ece05",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/skp_import_worker.mjs",
+    "bytes": 1020,
+    "sha256": "b1192094c5a366351415c6637fccc8ab1e861f6f98d2e4d0323aede20ef72286",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/skp_policy.mjs",
+    "bytes": 1396,
+    "sha256": "654cd68309f8b12c920cc6b207b72ea9bcbe2fc5d7b2b286bf5e6ae5c3c458f3",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/surface_comments.mjs",
+    "bytes": 13058,
+    "sha256": "6c4adecf01cb9501e872adfe8f185d41562b4283166b4c0f78e4f2ebf5421cb6",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/openskp/BUNDLE_IDENTITY.json",
+    "bytes": 4135,
+    "sha256": "73d5258f1eadcdb2d4120e06bf680b94894b0623756ae262102de7eeb97ac8dc",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/openskp/THIRD_PARTY_NOTICES.txt",
+    "bytes": 15458,
+    "sha256": "4539f45ce7c48667a359ee836d23b937f0a11ec41a06d2468af9a69279fa96f5",
+    "reasons": [
+      "actual-web-build-dependency",
+      "existing-third-party-license-or-notice",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/openskp/openskp-browser.mjs",
+    "bytes": 86226,
+    "sha256": "46ebaee2b99da7534e702a72f4a51df00889b96ba532a6c576794ef9e702f2cc",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/LICENSE",
+    "bytes": 1081,
+    "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
+    "reasons": [
+      "actual-web-build-dependency",
+      "existing-third-party-license-or-notice",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/build/three.core.js",
+    "bytes": 1458113,
+    "sha256": "9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/build/three.module.js",
+    "bytes": 662772,
+    "sha256": "9052042d676cb0fdc1ddfefe193053f34b7ac0513a616fdac4535d49987812ea",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/examples/jsm/controls/OrbitControls.js",
+    "bytes": 40755,
+    "sha256": "3d79d07ecb686b4e5d93232eedab255331c1beef711e13164eaa1f68655a5f2b",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/examples/jsm/loaders/GLTFLoader.js",
+    "bytes": 117570,
+    "sha256": "131c0f78c01d19368ae495caa65b3adaa10487810a36a05bb5901b769a35ac16",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/examples/jsm/loaders/PLYLoader.js",
+    "bytes": 21869,
+    "sha256": "67b8c1015209b89081a92fdd69dc9df4a61284c3e9f8bb5380e441e4c64e5111",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/examples/jsm/utils/BufferGeometryUtils.js",
+    "bytes": 37712,
+    "sha256": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/examples/jsm/utils/SkeletonUtils.js",
+    "bytes": 11535,
+    "sha256": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/vendor/three/package.json",
+    "bytes": 3672,
+    "sha256": "f9c474a27c920b9435353a6235968f4453436bee0444fac7e5fd289c8fa463de",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/web/viewer.mjs",
+    "bytes": 16653,
+    "sha256": "16ed097ab79c2abe4e8fb84778c312d90800a8a559db2e922df352e544d0d1f9",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/pubspec.lock",
+    "bytes": 40499,
+    "sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
+    "reasons": [
+      "build-configuration"
+    ]
+  },
+  {
+    "path": "source/community_app/pubspec.yaml",
+    "bytes": 14959,
+    "sha256": "ae8b141b5fc01ceb0a2b18a3294f6ffb98ec4469463b9b5d13441e3c4ba4de87",
+    "reasons": [
+      "actual-web-build-dependency",
+      "build-configuration"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_comment_time_test.dart",
+    "bytes": 2102,
+    "sha256": "f88b51edeee2d05801115b7e28835885ec24e6809523e4f041dac8efe226f711",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_comments_domain_test.dart",
+    "bytes": 6771,
+    "sha256": "c81daa3defc6f3e33bdd8e496282b10177fa273132f800f3f468db9a5252a508",
+    "reasons": [
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/cloud_library/licenses/cross_file-0.3.5+4-LICENSE.txt",
+    "bytes": 1497,
+    "sha256": "420f7739f169097f0aad1242045169cd643c8f1d94e62866fad265ae4c369b7d",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/cloud_library/licenses/hive_ce-2.19.3-LICENSE.txt",
+    "bytes": 13104,
+    "sha256": "a56011480ee8475bdfff349c4b8ea5735129241305a31b12a498b6927ae2b3bb",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/cloud_library/licenses/isolate_channel-0.6.0-LICENSE.txt",
+    "bytes": 1456,
+    "sha256": "9322d3fbda6078ab299a9ffcd3940427cb9fbc064e6d14c251d00e8eecb304eb",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/cloud_library/licenses/json_annotation-4.9.0-LICENSE.txt",
+    "bytes": 1524,
+    "sha256": "143839f62c9b7f88143ea9f688361c27050888acde7696b34e04414bd254fafc",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/cloud_library/licenses/tusc-4.0.0-LICENSE.txt",
+    "bytes": 1082,
+    "sha256": "524cdafaab286bd4829570b57946fdfe67f6ace48db3b925f0138a0cc0fd827c",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/generated_avatar/licenses/Jdenticon-MIT.txt",
+    "bytes": 1088,
+    "sha256": "56f14f731959cf24c3a9d1dfa005ebb8df5de7cc08b37c60253508554ffd53ad",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/generated_avatar/licenses/canvas-renderer-MIT.txt",
+    "bytes": 1109,
+    "sha256": "7d2baf4e7257c621b4151500a056bd0576d8fd4a428ba415f071b286d7faf22c",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/lepton_jpeg/licenses/Lepton-LICENSE.txt",
+    "bytes": 11358,
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/lepton_jpeg/licenses/Lepton-NOTICE.txt",
+    "bytes": 1528,
+    "sha256": "50d7f80a7af7807747f9571a334ad52e1b00f901e025cec4194bc8e557171c1d",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/lepton_jpeg/licenses/Rust-Crate-THIRD-PARTY-NOTICES.txt",
+    "bytes": 7711,
+    "sha256": "b9d7d2bf53a5ff0e9a0c570c7c4f94297107cd345c62bf3f946be378493b8c4c",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/vendor/lepton_jpeg/licenses/Rust-Standard-Library-COPYRIGHT.html",
+    "bytes": 425661,
+    "sha256": "90567e2718bf7fd65a71a3a43c5596488e80e5f51ed02bfea6fec54458b5f3d1",
+    "reasons": [
+      "actual-web-build-dependency",
+      "unchanged-pubspec-asset-declaration"
+    ]
+  },
+  {
+    "path": "source/community_app/web/index.html",
+    "bytes": 1366,
+    "sha256": "7158dbc8c05689cd5a3e38d751338920d6c7311cecdfeb345d7d7e0e1fc09566",
+    "reasons": [
+      "actual-web-build-dependency",
+      "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  }
+]

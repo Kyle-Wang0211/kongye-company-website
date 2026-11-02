@@ -1,0 +1,13 @@
+{
+  "candidate_source_manifest_sha256": "c4a2e48c6ff622837db1edc887448d67f8afd634ca27982a07270fcbf602ccae",
+  "compiled_main_sha256": "d9924f28c9bf422766f560abb84f5f7a6044192c67ee54424da18a353a1e6142",
+  "actual_build_input_kind": "latest successful dart2js and asset dependency records; absolute paths excluded",
+  "pinned_sdk": "Flutter 3.47.1 revision 6655482ec06e547f90abf8ae7590466f4415978d; engine 5d531788691ec3404cac0cee66ead4007b177363; Dart 3.13.1",
+  "pubspec_lock_sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
+  "file_count": 187,
+  "bytes": 92887661,
+  "external_dependency_classes": [
+    "locked-public-package",
+    "pinned-sdk-or-tool"
+  ]
+}
