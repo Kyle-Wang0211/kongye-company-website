@@ -47,6 +47,23 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
   final _code = TextEditingController();
 
   PhoneVerificationChallenge? _challenge;
+  bool _operationPending = false;
+
+  bool get _blocked =>
+      _operationPending ||
+      widget.currentUser.isPerformingAuthAction ||
+      widget.currentUser.isSignedIn;
+
+  bool _beginOperation() {
+    if (_blocked) return false;
+    // Capture the intent synchronously, before a provider await or a rebuild.
+    setState(() => _operationPending = true);
+    return true;
+  }
+
+  void _finishOperation() {
+    if (mounted) setState(() => _operationPending = false);
+  }
 
   @override
   void dispose() {
@@ -69,41 +86,51 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
       _nationalNumber.text.replaceAll(RegExp(r'[^0-9]'), '').length >= 6;
 
   Future<void> _startVerification() async {
-    final result = await widget.currentUser.startPhoneVerification(_e164);
-    if (!mounted) return;
-    setState(() => _challenge = result);
+    if (!_beginOperation()) return;
+    try {
+      final result = await widget.currentUser.startPhoneVerification(_e164);
+      if (!mounted) return;
+      setState(() => _challenge = result);
+    } finally {
+      _finishOperation();
+    }
   }
 
   Future<void> _submitCode() async {
     final ch = _challenge;
-    if (ch == null) return;
-    switch (widget.intent) {
-      case PhoneIntent.signIn:
-        await widget.currentUser.signIn(
-          SignInRequest.phone(
-            phoneNumber: ch.phoneNumber,
-            verificationID: ch.verificationID,
-            code: _code.text,
-          ),
-        );
-      case PhoneIntent.signUp:
-        await widget.currentUser.signUp(
-          SignUpRequest.phone(
-            phoneNumber: ch.phoneNumber,
-            verificationID: ch.verificationID,
-            code: _code.text,
-            displayName: _displayName.text.trim().isEmpty
-                ? null
-                : _displayName.text.trim(),
-          ),
-        );
+    if (ch == null || !_beginOperation()) return;
+    try {
+      switch (widget.intent) {
+        case PhoneIntent.signIn:
+          await widget.currentUser.signIn(
+            SignInRequest.phone(
+              phoneNumber: ch.phoneNumber,
+              verificationID: ch.verificationID,
+              code: _code.text,
+            ),
+          );
+        case PhoneIntent.signUp:
+          await widget.currentUser.signUp(
+            SignUpRequest.phone(
+              phoneNumber: ch.phoneNumber,
+              verificationID: ch.verificationID,
+              code: _code.text,
+              displayName: _displayName.text.trim().isEmpty
+                  ? null
+                  : _displayName.text.trim(),
+            ),
+          );
+      }
+    } finally {
+      _finishOperation();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
-    final working = widget.currentUser.isPerformingAuthAction;
+    final working =
+        _operationPending || widget.currentUser.isPerformingAuthAction;
     if (_challenge != null) {
       return _codeEntryStep(l, working);
     }
@@ -131,9 +158,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
                 title: l.authPhoneNumberHint,
                 controller: _nationalNumber,
                 keyboard: AuthFieldKeyboard.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (_) => setState(() {}),
               ),
             ),
@@ -150,7 +175,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
         AuthPrimaryButton(
           title: l.authPhoneSendCode,
           isWorking: working,
-          isEnabled: _canStart,
+          isEnabled: _canStart && !widget.currentUser.isSignedIn,
           onTap: _startVerification,
         ),
         const SizedBox(height: AetherSpacing.md),
@@ -197,19 +222,24 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
         ),
         const SizedBox(height: AetherSpacing.lg),
         AuthPrimaryButton(
-          title: widget.intent == PhoneIntent.signIn ? l.authPhoneSubmitSignIn : l.authPhoneSubmitSignUp,
+          title: widget.intent == PhoneIntent.signIn
+              ? l.authPhoneSubmitSignIn
+              : l.authPhoneSubmitSignUp,
           isWorking: working,
-          isEnabled: _code.text.length >= 6,
+          isEnabled: _code.text.length >= 6 && !widget.currentUser.isSignedIn,
           onTap: _submitCode,
         ),
         const SizedBox(height: AetherSpacing.md),
         GestureDetector(
           onTap: working
               ? null
-              : () => setState(() {
+              : () {
+                  if (_blocked) return;
+                  setState(() {
                     _challenge = null;
                     _code.clear();
-                  }),
+                  });
+                },
           child: Text(
             l.authPhoneChangeNumber,
             style: const TextStyle(

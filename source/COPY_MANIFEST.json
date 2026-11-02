@@ -1,8 +1,8 @@
 [
   {
     "path": "source/community_app/README.md",
-    "bytes": 5129,
-    "sha256": "19290bbc3c98a8114154c8a9c62ea88ff400259320cbbfc83ad52bde513625b5",
+    "bytes": 5839,
+    "sha256": "63895c111b26201988d6be25112df9611f490b228381520d672224ed2eb771aa",
     "reasons": [
       "generated-public-package-documentation"
     ]
@@ -10,7 +10,7 @@
   {
     "path": "source/community_app/SOURCE_IDENTITY.json",
     "bytes": 1194,
-    "sha256": "0e20507296dd55af87c0f6a1b2b6900b8c7aead7f51b77a0718ad0ba3f2ec019",
+    "sha256": "a28fcf57979718360645e26dac96dc95b8b79b7c763a1df385f0c547803737fa",
     "reasons": [
       "generated-public-package-documentation"
     ]
@@ -706,8 +706,8 @@
   },
   {
     "path": "source/community_app/lib/ui/auth/phone_sign_in_view.dart",
-    "bytes": 7354,
-    "sha256": "0b52f77d2a5c1e716d3634201d13f9a19718e33bee5e8210d4e38717947f96b5",
+    "bytes": 8212,
+    "sha256": "30fdf2727f9164ecadd7b914791f2b55a0dba4ab31a05acef1eb12ba7a1a2bd3",
     "reasons": [
       "actual-web-build-dependency"
     ]

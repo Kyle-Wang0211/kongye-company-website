@@ -49,3 +49,9 @@ Sculpt-based surface pins open the corresponding approved comment inside the sha
 The shared viewer JavaScript tests are included under `packages/pw_shared_viewer/tests/` (22 focused checks were run for this candidate). Application widget regressions are preserved in `../patches/spatial-comment-regressions-20261102.patch`; they require the complete original VM test source tree. This web archive does not claim to supply that unrelated native capture source.
 
 The optional `browser_floating_comments_frontend.cjs` harness expects a separately supplied Playwright package. Its machine-specific module path was normalized for this archive; this optional browser harness was not executed for the release and is not part of the 22 focused checks. Shipped viewer sources are unaffected.
+
+## Phone login singleflight update — 2026-11-02
+
+The archived phone form now blocks duplicate sends and code submissions while a request is pending. The shared viewer, provider requests and 300-second OTP policy are unchanged. Root ran 104 Dart tests and one web build; the focused widget reproduction used the real CurrentUser queue with a controlled provider. Real-account login after this UI release remains pending.
+
+The complete change and eight widget regressions are preserved in `../patches/phone-login-singleflight-regressions-20261102.patch`. Like the existing spatial regression patch, its VM widget tests require the complete original product source closure, not only this web-oriented archive.

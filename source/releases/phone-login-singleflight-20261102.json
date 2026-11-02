@@ -1,0 +1,12 @@
+{
+  "source_manifest_sha256": "ec706d7babe0e852ccdb83989569e13e148a09444acc9b37348a23e825fb91e8",
+  "main_js_sha256": "af71cb3f188df8b6a806f5dcbccae058309b00bdf121eac11f79c1923025b80c",
+  "shared_viewer_bundle_sha256": "3bb8afdfadcff8a7287a635d7f7c66b7fb449c8df8334794e1c3f2d8ebc7efb0",
+  "dart_tests_passed": 104,
+  "focused_widget_tests_passed": 9,
+  "build_peak_rss_bytes": 1228472320,
+  "independent_source_review": "accept",
+  "real_account_login_after_ui_release": "pending",
+  "phone_updated": false,
+  "provider_and_otp_policy_changed": false
+}

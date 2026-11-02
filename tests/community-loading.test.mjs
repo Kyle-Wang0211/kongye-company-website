@@ -62,7 +62,7 @@ test('legacy links and new shares resolve to the same real work identity',async(
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
  assert.equal(page.dialog.open,true);assert.equal(new URL(page.dialog.parts.iframe.src).pathname,'/community/');assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('release'),'spatial-comments-20261102-v3');
+ assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('release'),'phone-login-singleflight-20261102-v4');
  await page.elements['#share-work'].listeners.get('click')();
  const shared=new URL(page.elements['#share-status'].textContent);assert.equal(shared.searchParams.get('work'),legacyWorkIds[slug]);assert(!shared.searchParams.has('example'));
 });
