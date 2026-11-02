@@ -9,3 +9,7 @@
 | 青铜舞王像 | [1930.331 Nataraja, Shiva as the Lord of Dance](https://sketchfab.com/3d-models/1930331-nataraja-shiva-as-the-lord-of-dance-6862a3c673d4434a8dc39ced2a5b5720) | [馆藏信息](https://www.clevelandart.org/art/1930.331) |
 
 模型以未修改的 GLB 格式保存。实机界面截图与 App 图标由公司提供。
+
+## 共享三维浏览器运行资源
+
+官网 viewer/ 随包保留 Three.js / OpenSKP / Sculpt 的 MIT 许可、Google 模型取景适配的 Apache-2.0 许可及对应 NOTICE。完整资源身份以 viewer/BUNDLE_MANIFEST.json 为准。内部产品包装的公开交付不构成将整个产品源码开源授权。
