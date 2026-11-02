@@ -1,13 +1,14 @@
 {
-  "candidate_source_manifest_sha256": "c4a2e48c6ff622837db1edc887448d67f8afd634ca27982a07270fcbf602ccae",
-  "compiled_main_sha256": "d9924f28c9bf422766f560abb84f5f7a6044192c67ee54424da18a353a1e6142",
+  "candidate_source_manifest_sha256": "d1ed4e02055d197404a98fa413b0deed7c92480809b73e52f1c52848a3ba20cd",
+  "compiled_main_sha256": "b3bf8a42950f50dcdf8f5621deaa4b26a29e28745e983644cec85140a75c0910",
   "actual_build_input_kind": "latest successful dart2js and asset dependency records; absolute paths excluded",
   "pinned_sdk": "Flutter 3.47.1 revision 6655482ec06e547f90abf8ae7590466f4415978d; engine 5d531788691ec3404cac0cee66ead4007b177363; Dart 3.13.1",
   "pubspec_lock_sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
-  "file_count": 187,
-  "bytes": 92887661,
+  "file_count": 198,
+  "bytes": 92947141,
   "external_dependency_classes": [
     "locked-public-package",
     "pinned-sdk-or-tool"
-  ]
+  ],
+  "shared_viewer_bundle_sha256": "3bb8afdfadcff8a7287a635d7f7c66b7fb449c8df8334794e1c3f2d8ebc7efb0"
 }

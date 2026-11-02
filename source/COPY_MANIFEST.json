@@ -1,16 +1,16 @@
 [
   {
     "path": "source/community_app/README.md",
-    "bytes": 3901,
-    "sha256": "bbc1aaf8a4d63f04fcea484b17c928d781d55180b43e1b7c8f50e98bdac92e6e",
+    "bytes": 4795,
+    "sha256": "4c9a51ac6af18a2006fde18080a7e28b2cb96e1add3790d255e794cf4a3e9b00",
     "reasons": [
       "generated-public-package-documentation"
     ]
   },
   {
     "path": "source/community_app/SOURCE_IDENTITY.json",
-    "bytes": 689,
-    "sha256": "4714810f0cbd28900b54b991508d5dffd60963d18d493a2fda8fc45b073add6f",
+    "bytes": 791,
+    "sha256": "dd1f6c7506e732c3db25165a2e89370f68237d76a7aa85763f228dbb6d402e96",
     "reasons": [
       "generated-public-package-documentation"
     ]
@@ -754,8 +754,8 @@
   },
   {
     "path": "source/community_app/lib/ui/community/comments/community_comments_panel.dart",
-    "bytes": 54765,
-    "sha256": "cd1e7b0df2bc01adce643117795f6e675e77a4bd8ccc0c518fb54ddf7e847279",
+    "bytes": 59408,
+    "sha256": "41dd40e770cab3d71b0e7f490282975baed6d390a53d87e3b33f26b35ce746ed",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -858,8 +858,8 @@
   },
   {
     "path": "source/community_app/lib/ui/community/work_detail_page.dart",
-    "bytes": 47673,
-    "sha256": "521043a6e3daa7c83434cd24efa252502767d01b75ec97e9a3c45e88d7fa2056",
+    "bytes": 47851,
+    "sha256": "599e9a9dc0d52b60bb73740cbe917f3422e8ab9f7a0d7be59a787f92f24811f2",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -1168,8 +1168,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_web.dart",
-    "bytes": 6522,
-    "sha256": "9fe38a1e9707291abfd0219457f2007fceaca67dda5290f094bf0e6e360a2efb",
+    "bytes": 6553,
+    "sha256": "7ff20e5158623cebe88031c7008672a0d9514f18577f31e0b846f106b7ee7c1b",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -1181,6 +1181,38 @@
     "sha256": "9bba49e7736801c2c3fcaa2edc39052ea818aea5814db4c489ba32172cb3def8",
     "reasons": [
       "local-path-dependency-manifest"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/browser_floating_comments_frontend.cjs",
+    "bytes": 11177,
+    "sha256": "3ae4ddf2e81ce650fbfa88725ca85e6c48b8f5574ff8225e152d20d998feb79d",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/browser_flutter_skp.cjs",
+    "bytes": 1170,
+    "sha256": "ae541ab9121cd1ea13e2316bb058e4499617d269aa325173048f7046e2b80b53",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/browser_formats.cjs",
+    "bytes": 1964,
+    "sha256": "53b6ec4e62db2dc833404e4db5bb70cce015e968b2cce76367c489a6994c6104",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/bundle_identity.test.mjs",
+    "bytes": 1524,
+    "sha256": "81ddded0ae075e5ac5741a7afb4d7288f58b52a30af07c291080a3b9ac433546",
+    "reasons": [
+      "spatial-comment-release-source"
     ]
   },
   {
@@ -1200,9 +1232,81 @@
     ]
   },
   {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/fixtures/skp/legacy_v3_textured.skp",
+    "bytes": 4121,
+    "sha256": "f68a36f4578ffb8533eae9a29c1b3dc2f6b5683bacc3e53c52fc5406b1375688",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/host_bridge.test.mjs",
+    "bytes": 4600,
+    "sha256": "677a716248015740f4fd45165771848a1d107a16cb69593faf73b6362b29b8de",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/image_loader_lifecycle.test.mjs",
+    "bytes": 1204,
+    "sha256": "e607c0a8876f27691e3b8b04b662c9b636e7f564634f559086afd25be56bf142",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/model_framing.test.mjs",
+    "bytes": 4356,
+    "sha256": "cae41e8eca15497888d14e27ac6734cc80ab83290c58b4a8afa2b5746ac18eb3",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/model_framing_reference.mjs",
+    "bytes": 3420,
+    "sha256": "95aaf95e98b1eadec03109dc46b709baa393d427f7d8f25b4c685d2a541db151",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/runtime.test.mjs",
+    "bytes": 15296,
+    "sha256": "c32cf596b137f80dcdd866f24b3dadd2e8dc5efd5c075db156015206e8a6d1a5",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/skp_import.test.mjs",
+    "bytes": 1402,
+    "sha256": "c34784ba68e0bb1661ab7ac0ea37e749fd707d5b5fbf1d8a53013b01e7362342",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/spatial_cache_release.test.mjs",
+    "bytes": 555,
+    "sha256": "37d23eeb0da91552f503b849929ca57587064ea1e00999d67d8fa6efe59d7670",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/surface_comments.test.mjs",
+    "bytes": 12719,
+    "sha256": "ef45e1397f1d622446801ead0b0f6560045b6aba490d60d3863cfc8196913a3a",
+    "reasons": [
+      "spatial-comment-release-source"
+    ]
+  },
+  {
     "path": "source/community_app/packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json",
     "bytes": 3196,
-    "sha256": "eaa1354a2d3e4d70332b4895f30df5f2d7f2ebbead1c8b17cfb7e0f4ee5dc4f6",
+    "sha256": "3301febd8156d5af7bb3ae7fb0bf1b676400fa0f0dc9446c47fe9d51524da5ed",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1295,8 +1399,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/index.html",
-    "bytes": 3522,
-    "sha256": "58fdd73bb859f4129256bc759cf4190e42fbfb99604fd3b49ccf366e6ecd13fb",
+    "bytes": 3553,
+    "sha256": "f1a9bc9e385c8d37fc5c95e563e0cac23ebd7428a53b23a5fb47b0780506d16c",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1345,8 +1449,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/surface_comments.mjs",
-    "bytes": 13058,
-    "sha256": "6c4adecf01cb9501e872adfe8f185d41562b4283166b4c0f78e4f2ebf5421cb6",
+    "bytes": 14516,
+    "sha256": "7371471bdaea59e4d354509d2c52d4aef32f4149b2e8a94d90f22dbfed5747f9",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1477,8 +1581,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/viewer.mjs",
-    "bytes": 16653,
-    "sha256": "16ed097ab79c2abe4e8fb84778c312d90800a8a559db2e922df352e544d0d1f9",
+    "bytes": 16774,
+    "sha256": "b9e00a8e7f0d5ae617e4128d377d445ad5dc7ba74c668edcb52154b52332f5ed",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",

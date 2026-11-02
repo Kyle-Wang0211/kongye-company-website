@@ -1,0 +1,12 @@
+{
+  "source_manifest_sha256": "d1ed4e02055d197404a98fa413b0deed7c92480809b73e52f1c52848a3ba20cd",
+  "compiled_main_sha256": "b3bf8a42950f50dcdf8f5621deaa4b26a29e28745e983644cec85140a75c0910",
+  "shared_viewer_bundle_sha256": "3bb8afdfadcff8a7287a635d7f7c66b7fb449c8df8334794e1c3f2d8ebc7efb0",
+  "sculpt_revision": "2e0e11d76650748ffd577b45943cd063cf097cb4",
+  "root_dart_tests": 96,
+  "root_javascript_tests": 22,
+  "build_seconds": 23.46,
+  "build_max_rss_bytes": 1131511808,
+  "browser_verification": "pending_final_production_readback",
+  "phone_updated": false
+}

@@ -19,9 +19,9 @@ export function validateAnchor(input) {
   return anchor;
 }
 
-export function createSurfaceComments({THREE, canvas, camera, controls, getModel, getFormat, getOverviewDistance, emit}) {
+export function createSurfaceComments({THREE, canvas, camera, controls, getModel, getFormat, getOverviewDistance, onMarkerInteraction, emit}) {
   const raycaster = new THREE.Raycaster();
-  let enabled = false, markers = [], down = null, disposed = false;
+  let enabled = false, markers = [], down = null, disposed = false, markerSignature = null;
   const pointers = new Set();
   const document = canvas.ownerDocument;
   let layoutSignature = 'null';
@@ -60,6 +60,11 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       })) throw new Error('Invalid surface comment content');
       return {id:value.id,number:value.number,selected:value.selected === true,anchor:validateAnchor(value.anchor),previewText,previewImages};
     });
+    const signature = JSON.stringify(validated);
+    // Polling/host echoes must not remove the native pointerdown target before
+    // pointerup/click. Content and identity changes still rebuild atomically.
+    if (signature === markerSignature) { update(); return; }
+    markerSignature = signature;
     overlay?.replaceChildren(); markers = validated;
     for (const marker of markers) {
       if (!overlay) continue;
@@ -69,8 +74,9 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       button.setAttribute('aria-pressed', String(marker.selected));
       Object.assign(button.style, {position:'absolute',width:'26px',height:'26px',borderRadius:'50%',
         border:'2px solid white',background:marker.selected ? '#ff7354' : '#222',color:'white',
-        font:'600 12px system-ui',padding:'0',pointerEvents:'auto',transform:'translate(-50%,-50%)',boxShadow:'0 1px 5px #0008'});
-      button.addEventListener('pointerdown', event => event.stopPropagation());
+        font:'600 12px system-ui',padding:'0',pointerEvents:'auto',zIndex:marker.selected?'2':'1',transform:'translate(-50%,-50%)',boxShadow:'0 1px 5px #0008'});
+      const stopRotation = () => { controls.autoRotate = false; onMarkerInteraction?.(); };
+      button.addEventListener('pointerdown', event => { event.stopPropagation(); stopRotation(); });
       // The pin is above the canvas. Preserve OrbitControls' wheel handling
       // there, while leaving scrolling inside a comment card to the browser.
       button.addEventListener('wheel', event => {
@@ -86,7 +92,21 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
           altKey:event.altKey, metaKey:event.metaKey,
         }));
       }, {passive:false});
-      button.addEventListener('click', event => { event.stopPropagation(); emitEvent('pw-viewer-surface-marker-selected', {id:marker.id}); });
+      button.addEventListener('click', event => {
+        event.stopPropagation();
+        if (marker.occluded || marker.content?.contains?.(event.target)) return;
+        stopRotation();
+        // Native click/keyboard activation must show feedback locally, without
+        // waiting for an asynchronous Flutter bridge echo.
+        for (const other of markers) {
+          other.selected = other.id === marker.id;
+          other.button.setAttribute('aria-pressed', String(other.selected));
+          other.button.style.background = other.selected ? '#ff7354' : '#222';
+          other.button.style.zIndex = other.selected ? '2' : '1';
+        }
+        update();
+        emitEvent('pw-viewer-surface-marker-selected', {id:marker.id});
+      });
       if(marker.previewText || marker.previewImages.length) {
         const content=document.createElement('span');marker.content=content;
         content.setAttribute('data-comment-content',marker.id);
@@ -156,6 +176,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     root.updateWorldMatrix(true,true);camera.updateMatrixWorld();
     const rect = canvas.getBoundingClientRect();
     const layouts = [];
+    const hasSelection = markers.some(marker => marker.selected);
     for (const marker of markers) {
       const world = root.localToWorld(new THREE.Vector3(...marker.anchor.position));
       const projected = world.clone().project(camera);
@@ -168,7 +189,10 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       raycaster.set(camera.position,direction.normalize());
       const hit=intersections(root)[0];
       const occluded=hit && hit.distance < distance - Math.max(1e-6,distance*1e-5);
+      marker.occluded = Boolean(occluded);
       marker.button.style.opacity = occluded ? '0.25' : '1';
+      marker.button.disabled = Boolean(occluded);
+      marker.button.style.pointerEvents = occluded ? 'none' : 'auto';
       const overview=getOverviewDistance?.();
       const zoom=Number.isFinite(overview) && overview>0 ? overview/camera.position.distanceTo(controls.target) : 1;
       const near=!occluded && zoom >= (marker.expanded ? 1.2 : 1.35);
@@ -180,8 +204,9 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       });
       if(marker.content) {
         // UI reveal relative to the upstream overview framing, independent of model units.
-        marker.content.style.display=near?'block':'none';
-        if(near) for(const {img,src} of marker.images) if(img.src!==src) img.src=src;
+        const contentVisible = !occluded && (marker.selected || (!hasSelection && near));
+        marker.content.style.display=contentVisible?'block':'none';
+        if(contentVisible) for(const {img,src} of marker.images) if(img.src!==src) img.src=src;
         const x=rect.left+(projected.x+1)*rect.width/2;
         const cardWidth=Math.min(260,Math.max(120,rect.width-32));
         const preferred=projected.x>0 ? x-cardWidth-24 : x+24;
@@ -210,7 +235,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     camera.position.copy(position);controls.target.copy(target);controls.update();controls.enableDamping=damping;
     update();
   }
-  function clear() { enabled=false;down=null;pointers.clear();markers=[];overlay?.replaceChildren();publishLayout(null); }
+  function clear() { enabled=false;down=null;pointers.clear();markers=[];markerSignature=null;overlay?.replaceChildren();publishLayout(null); }
   function dispose() { disposed=true;clear();for(const [name,handler] of Object.entries(handlers))canvas.removeEventListener?.(name,handler);overlay?.remove(); }
   return {setMode,setMarkers,focus,update,clear,dispose,get enabled(){return enabled;}};
 }

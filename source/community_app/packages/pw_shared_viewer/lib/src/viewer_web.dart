@@ -49,7 +49,7 @@ class _SharedViewerState extends State<SharedViewer>
     _viewType = 'pw-shared-viewer-${_nextView++}';
     final entry = widget.webEntryUri ??
         Uri.parse(web.document.baseURI)
-            .resolve('assets/packages/pw_shared_viewer/web/index.html');
+            .resolve('assets/packages/pw_shared_viewer/web/index.html?v=spatial-comments-20261102-v3');
     _origin = web.window.location.origin;
     if (entry.origin != _origin) {
       _error = ArgumentError(

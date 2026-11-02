@@ -110,12 +110,9 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   SharedSurfaceMarkerLayout? _commentLayout;
   String? _dismissedLayoutId;
   String? _selectedCommentId;
-  bool get _floatingCommentsVisible =>
-      !_selectingCommentPoint &&
-      (_commentsOpen ||
-          (_commentsEnabled &&
-              _commentLayout?.expanded == true &&
-              _dismissedLayoutId != _commentLayout?.id));
+  // Spatial cards render in the shared viewer. The full Flutter list is
+  // presented only through its explicit all-comments entry.
+  bool get _floatingCommentsVisible => !_selectingCommentPoint && _commentsOpen;
 
   void _onCommentLayout(SharedSurfaceMarkerLayout? layout) {
     if (!mounted || !_commentsEnabled || _surfaceAssetSha256 == null) return;
@@ -201,8 +198,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         )
         .firstOrNull;
     if (!mounted || _surfaceAssetSha256 == null || comment == null) return;
-    _showComments();
-    _focusComment(comment);
+    setState(() => _selectedCommentId = comment.id);
+    unawaited(_syncCommentMarkers());
   }
 
   void _closeComments() {
@@ -318,6 +315,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             anchor: _sharedAnchor(comment.anchor!),
             number: markers.length + 1,
             selected: comment.id == _selectedCommentId,
+            previewText: comment.body,
+            previewImages: comment.attachments
+                .map((image) => image.url)
+                .toList(),
           ),
         );
       } on ArgumentError {

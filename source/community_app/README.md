@@ -4,8 +4,8 @@ This directory contains the Flutter source inputs for the website's community en
 
 ## Source identity
 
-- Frozen source input manifest: `c4a2e48c6ff622837db1edc887448d67f8afd634ca27982a07270fcbf602ccae`.
-- Corresponding reviewed web `main.dart.js`: `d9924f28c9bf422766f560abb84f5f7a6044192c67ee54424da18a353a1e6142`.
+- Frozen source input manifest: `d1ed4e02055d197404a98fa413b0deed7c92480809b73e52f1c52848a3ba20cd`.
+- Corresponding reviewed web `main.dart.js`: `b3bf8a42950f50dcdf8f5621deaa4b26a29e28745e983644cec85140a75c0910`.
 - Entrypoint: `lib/main_community_web.dart`.
 - Verified SDK: Flutter **3.47.1**, framework revision `6655482ec06e547f90abf8ae7590466f4415978d`, engine revision `5d531788691ec3404cac0cee66ead4007b177363`, Dart **3.13.1**.
 
@@ -34,10 +34,16 @@ The live site additionally versions the generated bootstrap and JavaScript URLs 
 
 ## Validation and scope
 
-The original frozen candidate passed **87 tests**, including comment read/write gates, identity changes, model hash binding, byte/blob lifecycle, work deep links, login return navigation, author reply labels and relative time boundaries. Targeted analysis of ten source files reported no issues.
+The original frozen candidate passed **96 tests**, including comment read/write gates, identity changes, model hash binding, byte/blob lifecycle, work deep links, login return navigation, author reply labels and relative time boundaries. Targeted analysis of ten source files reported no issues.
 
-Those results belong to the complete original candidate. This archive is the website build input set, not the complete iOS or VM test source tree. The two included pure comment-domain/time test files are retained as focused source-level checks; the full 87-test suite is not claimed to be included or rerun from this archive.
+Those results belong to the complete original candidate. This archive is the website build input set, not the complete iOS or VM test source tree. The two included pure comment-domain/time test files are retained as focused source-level checks; the full 96-test suite is not claimed to be included or rerun from this archive.
 
 ## Assets and third-party notices
 
 The unchanged application `pubspec.yaml` declares model assets even where a website screen does not use them directly. They are retained because they are inputs to the existing build recipe. Removing them requires an explicit recipe change. Existing asset provenance documentation and third-party license/notice files are retained in their original locations, including the shared viewer's pinned renderer and surface-comment adaptation notices. No new third-party licensing conclusions are asserted here.
+
+## Spatial comment release
+
+Sculpt-based surface pins open the corresponding approved comment inside the shared viewer; the explicit all-comments entry retains the full list and authenticated replies. The upstream reference remains revision `2e0e11d76650748ffd577b45943cd063cf097cb4`; content cards and zoom reveal are product adaptations. Public readers cannot submit comments. Thirty-second paged refresh commits a validated, model-bound snapshot atomically instead of temporarily clearing the selected marker.
+
+The shared viewer JavaScript tests are included under `packages/pw_shared_viewer/tests/` (22 focused checks were run for this candidate). Application widget regressions are preserved in `../patches/spatial-comment-regressions-20261102.patch`; they require the complete original VM test source tree. This web archive does not claim to supply that unrelated native capture source.

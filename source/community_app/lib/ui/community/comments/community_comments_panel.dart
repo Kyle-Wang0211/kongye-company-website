@@ -291,9 +291,12 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   void _notifyVisible() {
     _reportRevision.value++;
     final generation = _generation;
+    final token = _loadToken;
     final rows = List<CommunityComment>.unmodifiable(_comments);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_current(generation)) widget.onVisibleCommentsChanged?.call(rows);
+      if (_current(generation) && token == _loadToken) {
+        widget.onVisibleCommentsChanged?.call(rows);
+      }
     });
   }
 
@@ -301,6 +304,14 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     final generation = _generation;
     final token = ++_loadToken;
     _inflightLoadToken = token;
+    if (_paged && refresh) {
+      try {
+        await _refreshPagedSnapshot(generation, token);
+      } finally {
+        if (_inflightLoadToken == token) _inflightLoadToken = null;
+      }
+      return;
+    }
     if (_paged) {
       setState(() {
         _loading = false;
@@ -382,6 +393,120 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       });
     } finally {
       if (_inflightLoadToken == token) _inflightLoadToken = null;
+    }
+  }
+
+  /// Polling stages both first pages without publishing a transient empty feed.
+  /// A validated snapshot replaces the old rows once; errors revoke remote
+  /// content immediately, and late/stale responses cannot refill it.
+  Future<void> _refreshPagedSnapshot(int generation, int token) async {
+    setState(() {
+      _loadError = null;
+      _sectionErrors.clear();
+      for (final section in CommunityCommentSection.values) {
+        _sectionBusy[section] = ++_sectionRequest;
+      }
+    });
+    try {
+      final pages = await Future.wait([
+        for (final section in CommunityCommentSection.values)
+          (widget.repository as CommunityCommentFeedRepository)
+              .fetchSection(widget.workId, section: section)
+              .timeout(const Duration(seconds: 30))
+              .then((page) {
+                if (widget.requireAssetBinding &&
+                    (widget.expectedAssetSha256 == null ||
+                        !RegExp(
+                          r'^[a-f0-9]{64}$',
+                        ).hasMatch(widget.expectedAssetSha256!) ||
+                        page.assetSha256 != widget.expectedAssetSha256)) {
+                  throw const CommunityCommentException('asset_changed');
+                }
+                return MapEntry(section, page);
+              }),
+      ], eagerError: true);
+      if (!_current(generation) || token != _loadToken) return;
+      if (pages.any(
+        (entry) => entry.value.assetRevision != pages.first.value.assetRevision,
+      )) {
+        throw const CommunityCommentException('asset_changed');
+      }
+      final rows = <String, CommunityComment>{};
+      setState(() {
+        _resetSections();
+        for (final entry in pages) {
+          final page = entry.value;
+          final ids = <String>[];
+          for (final comment in page.comments) {
+            if (comment.workId == widget.workId &&
+                comment.visibleTo(widget.currentUserId)) {
+              if (!ids.contains(comment.id)) ids.add(comment.id);
+              rows[comment.id] = comment;
+            }
+          }
+          _sectionIds[entry.key] = ids;
+          _sectionCursors[entry.key] = page.nextCursor;
+          for (final parent in page.contextComments) {
+            if (parent.workId == widget.workId &&
+                parent.visibleTo(widget.currentUserId)) {
+              _parentComments[parent.id] = parent;
+            }
+          }
+        }
+        _comments = rows.values.toList();
+        _page = pages
+            .map((entry) => entry.value)
+            .firstWhere(
+              (page) => !page.canComment,
+              orElse: () => pages.last.value,
+            );
+        _publicCount = _page!.publicCount;
+        _loading = false;
+        if (_reply != null &&
+            !rows.values.any((c) => c.id == _reply!.id && c.published)) {
+          _reply = null;
+        }
+        final preview = rows[_previewCommentId];
+        if (_previewAttachment != null &&
+            (preview == null ||
+                !preview.attachments.any(
+                  (image) =>
+                      image.id == _previewAttachment!.id &&
+                      image.url == _previewAttachment!.url,
+                ))) {
+          _previewAttachment = null;
+          _previewCommentId = null;
+        }
+      });
+      _notifyVisible();
+    } catch (error) {
+      if (!_current(generation) || token != _loadToken) return;
+      if (_clearInvalidIdentity(error)) return;
+      if (error is CommunityCommentException && error.code == 'asset_changed') {
+        _clearPrivateState(
+          widget.expectedAssetSha256 == null
+              ? '模型身份校验中，请稍后重试'
+              : '模型版本已更新，请重新打开评论',
+        );
+        return;
+      }
+      // Keep the user's unsent local draft, but never display stale server
+      // content or allow a write after an unavailable/denied refresh.
+      setState(() {
+        _loadToken++;
+        _comments = [];
+        _resetSections();
+        _page = null;
+        _publicCount = 0;
+        _reply = null;
+        _previewAttachment = null;
+        _previewCommentId = null;
+        _loading = false;
+        _loadError = error is CommunityCommentException
+            ? error.message
+            : '评论暂时无法加载';
+      });
+      _notifyVisible();
     }
   }
 
@@ -767,7 +892,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                                       _sending ||
                                       _busyComments.isNotEmpty
                                   ? null
-                                  : _load,
+                                  : () => _load(refresh: true),
                               icon: const Icon(Icons.refresh_rounded, size: 20),
                             ),
                             IconButton(
