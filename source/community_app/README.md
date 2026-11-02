@@ -52,6 +52,6 @@ The optional `browser_floating_comments_frontend.cjs` harness expects a separate
 
 ## Phone login singleflight update — 2026-11-02
 
-The archived phone form now blocks duplicate sends and code submissions while a request is pending. The shared viewer, provider requests and 300-second OTP policy are unchanged. Root ran 104 Dart tests and one web build; the focused widget reproduction used the real CurrentUser queue with a controlled provider. Real-account login after this UI release remains pending.
+The archived phone form now blocks duplicate sends and code submissions while a request is pending. The shared viewer, provider requests and 300-second OTP policy are unchanged. Root ran 104 Dart tests and one web build; the focused widget reproduction used the real CurrentUser queue with a controlled provider. At build time real-account login was pending; the later live acceptance is recorded in `../releases/phone-login-singleflight-acceptance-20261102.json`.
 
 The complete change and eight widget regressions are preserved in `../patches/phone-login-singleflight-regressions-20261102.patch`. Like the existing spatial regression patch, its VM widget tests require the complete original product source closure, not only this web-oriented archive.
