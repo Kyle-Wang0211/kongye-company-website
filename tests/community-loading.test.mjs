@@ -43,7 +43,8 @@ test('refresh reserves inert shimmer shells before real metadata without flashin
  const page=boot();assert.equal(realCards(page).length,0);assert.equal(page.grid.children.length,12);
  assert(page.grid.children.every(e=>e.attributes['aria-hidden']==='true'));
  await configure(page);assert.equal(realCards(page).length,0);
- page.pending.shift().resolve(response([work]));await settle();assert.equal(realCards(page).length,0);
+ page.pending.shift().resolve(response([work]));await settle();assert.equal(realCards(page).length,1);
+ assert.equal(realCards(page)[0].children[1].children[1].attributes['aria-busy'],'true');
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
  assert.equal(page.grid.children.length,1);assert.equal(realCards(page).length,1);assert(!page.grid.children.some(x=>x.dataset.example));
 });
@@ -115,9 +116,9 @@ test('legacy links and new shares resolve to the same real work identity',async(
  const page=boot('?example='+slug);await configure(page);await completeFeed(page,[]);
  const lookup=page.pending.shift();assert.equal(new URL(lookup.url).searchParams.get('id'),'eq.'+legacyWorkIds[slug]);
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
- page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
+ assert.equal(page.pending.length,0);
  assert.equal(page.dialog.open,undefined);assert.equal(new URL(page.navigations.at(-1)).pathname,'/community/');assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'aligned-grid-staged-loading-20261102-v6');
+ assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'shared-bilingual-comments-20261103-v8');
 });
 
 for(const failure of ['config','lookup'])test('direct work link recovers after '+failure+' failure',async()=>{
@@ -130,6 +131,60 @@ for(const failure of ['config','lookup'])test('direct work link recovers after '
  await completeFeed(page,[]);
  const lookup=page.pending.shift();assert.equal(new URL(lookup.url).searchParams.get('id'),'eq.'+work.id);
  lookup.resolve(response([work]));await settle();
- page.pending.shift().resolve(response([{id:work.user_id,display_name:'林远'}]));await retry;
+ await retry;assert.equal(page.pending.length,0);
  assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),work.id);
+});
+
+
+test('slow author lookup leaves real cards and cover requests usable before hydrating the same nodes',async()=>{
+ const page=boot();await configure(page);
+ page.pending.shift().resolve(response([{...work,thumbnail_storage_path:'owner/cover.png',likes_count:8}]));await settle();
+ const card=realCards(page)[0],author=card.children[1].children[1],picture=card.children[0].children[0],image=picture.children[0];
+ assert.equal(card.children[0].children[1].textContent,work.title);
+ assert.match(image.src,/owner\/cover.png$/);assert.equal(picture.dataset.mediaState,'loading');
+ assert.equal(card.children[1].children[2].children[1].textContent,'8');
+ assert.equal(author.textContent,'');assert.equal(author.attributes['aria-busy'],'true');assert(author.classList.contains('is-loading'));
+ assert.equal(page.grid.attributes['aria-busy'],'false');assert.equal(page.more.disabled,false);
+ const request=page.pending.shift();assert.match(request.url,/community_author_profiles/);
+ request.resolve(response([{id:work.user_id,display_name:'真实作者'}]));await settle();
+ assert.equal(realCards(page)[0],card);assert.equal(card.children[1].children[1],author);assert.equal(author.textContent,'真实作者');assert.equal(author.attributes['aria-busy'],'false');assert(!author.classList.contains('is-loading'));
+});
+
+test('failed author lookup retains works and exposes a local retry without failing the feed',async()=>{
+ const page=boot();await configure(page);page.pending.shift().resolve(response([work]));await settle();
+ const card=realCards(page)[0],author=card.children[1].children[1];
+ page.pending.shift().reject(Error('authors offline'));await settle();
+ assert.equal(realCards(page)[0],card);assert.equal(page.grid.attributes['aria-busy'],'false');assert.equal(page.more.textContent,data.t('siteLoadMore'));assert.equal(page.status.textContent,data.t('siteFeedHint'));
+ assert.equal(author.children[0].textContent,data.t('siteAuthorUnavailable'));assert(!author.classList.contains('is-loading'));
+ author.children[1].listeners.get('click')();await settle();assert.equal(author.attributes['aria-busy'],'true');
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'恢复后的真实作者'}]));await settle();
+ assert.equal(realCards(page)[0],card);assert.equal(author.textContent,'恢复后的真实作者');
+});
+
+test('pagination advances while author request is pending and binds one shared lookup to actual user IDs',async()=>{
+ const page=boot();await configure(page);
+ const first=Array.from({length:12},(_,i)=>({...work,id:work.id.slice(0,-3)+String(i).padStart(3,'0')}));
+ page.pending.shift().resolve(response(first));await settle();const authorsRequest=page.pending.shift();
+ const next=page.more.listeners.get('click')();const worksRequest=page.pending.shift();assert.equal(new URL(worksRequest.url).searchParams.has('or'),true);
+ worksRequest.resolve(response([{...work,id:'22345678-1234-4234-8234-123456789abc'}]));await next;
+ assert.equal(realCards(page).length,13);assert.equal(page.pending.length,0,'same user shares the still pending author query');
+ authorsRequest.resolve(response([{id:'92345678-1234-4234-8234-123456789abd',display_name:'不相关账号'},{id:work.user_id,display_name:'正确账号'}]));await settle();
+ for(const card of realCards(page))assert.equal(card.children[1].children[1].textContent,'正确账号');
+});
+
+test('an absent profile never fabricates an author identity or accepts unrelated profiles',async()=>{
+ const page=boot();await configure(page);page.pending.shift().resolve(response([work]));await settle();
+ page.pending.shift().resolve(response([{id:'92345678-1234-4234-8234-123456789abd',display_name:'别人的账号'}]));await settle();
+ const author=realCards(page)[0].children[1].children[1];assert.equal(author.children[0].textContent,data.t('siteAuthorUnavailable'));assert.equal(author.textContent,'');assert(!author.classList.contains('is-loading'));
+});
+
+
+test('out-of-order author batches hydrate only cards belonging to each returned user',async()=>{
+ const page=boot();await configure(page);page.pending.shift().resolve(response([work]));await settle();const firstAuthors=page.pending.shift();
+ const other={...work,id:'22345678-1234-4234-8234-123456789abc',user_id:'22345678-1234-4234-8234-123456789abd'};
+ const next=page.more.listeners.get('click')();page.pending.shift().resolve(response([other]));await next;await settle();const secondAuthors=page.pending.shift();
+ secondAuthors.resolve(response([{id:other.user_id,display_name:'第二位真实作者'}]));await settle();
+ assert.equal(realCards(page)[1].children[1].children[1].textContent,'第二位真实作者');assert.equal(realCards(page)[0].children[1].children[1].attributes['aria-busy'],'true');
+ firstAuthors.resolve(response([{id:work.user_id,display_name:'第一位真实作者'}]));await settle();
+ assert.equal(realCards(page)[0].children[1].children[1].textContent,'第一位真实作者');assert.equal(realCards(page)[1].children[1].children[1].textContent,'第二位真实作者');
 });

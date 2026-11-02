@@ -104,18 +104,6 @@ class _AuthRootViewState extends State<AuthRootView> {
   );
   bool get _canSubmit => _passwordRequest != null;
 
-  bool get _showChinaPhonePrefix {
-    if (widget.currentUser.deployment.region != BackendRegion.china) {
-      return false;
-    }
-    final value = _account.text.trim();
-    if (value.isEmpty) return true;
-    // Explicit country codes remain in the input, so do not display +86 twice.
-    if (!RegExp(r'^[0-9 ()-]+$').hasMatch(value)) return false;
-    final digits = value.replaceAll(RegExp(r'[ ()-]'), '');
-    return !digits.startsWith('00') && !digits.startsWith('86');
-  }
-
   Future<void> _submit() async {
     final request = _passwordRequest;
     if (request == null || widget.currentUser.isPerformingAuthAction) return;
@@ -178,34 +166,6 @@ class _AuthRootViewState extends State<AuthRootView> {
                             ? l.authAccountChinaHint
                             : l.authAccountInternationalHint,
                         controller: _account,
-                        leading: _showChinaPhonePrefix
-                            ? Row(
-                                key: const ValueKey(
-                                  'auth-phone-country-prefix',
-                                ),
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    '+86',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: AetherColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Container(
-                                    key: const ValueKey(
-                                      'auth-phone-country-separator',
-                                    ),
-                                    width: 12,
-                                    height: 1,
-                                    color: AetherColors.textTertiary,
-                                  ),
-                                  const SizedBox(width: 12),
-                                ],
-                              )
-                            : null,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.username],
@@ -260,7 +220,7 @@ class _AuthRootViewState extends State<AuthRootView> {
                             ? null
                             : () => Navigator.of(context).push(
                                 MaterialPageRoute<void>(
-                                  builder: (_) => PhoneSignInView(
+                                  builder: (_) => PhoneAuthPage(
                                     currentUser: widget.currentUser,
                                     intent: PhoneIntent.signIn,
                                   ),

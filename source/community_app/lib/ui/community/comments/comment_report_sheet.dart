@@ -124,8 +124,8 @@ class _ReportSheetState extends State<CommunityCommentReportSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '举报这条评论',
+              Text(
+                l.commentReportTitle,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               Text(l.reportSheetSubtitle),

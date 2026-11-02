@@ -104,6 +104,9 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppL10n.localizationsDelegates,
+          supportedLocales: AppL10n.supportedLocales,
           home: Scaffold(
             body: CommunityMasonry(
               itemCount: 3,
@@ -173,6 +176,9 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
         home: Scaffold(
           body: SizedBox(
             width: 180,
@@ -199,6 +205,7 @@ void main() {
       final feed = PagedFeed();
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('en'),
           localizationsDelegates: AppL10n.localizationsDelegates,
           supportedLocales: AppL10n.supportedLocales,
           home: VaultPage(service: feed),
@@ -289,6 +296,9 @@ void main() {
       for (final scale in [2.0, 3.0]) {
         await tester.pumpWidget(
           MaterialApp(
+            locale: const Locale('zh'),
+            localizationsDelegates: AppL10n.localizationsDelegates,
+            supportedLocales: AppL10n.supportedLocales,
             home: MediaQuery(
               data: MediaQueryData(textScaler: TextScaler.linear(scale)),
               child: Scaffold(

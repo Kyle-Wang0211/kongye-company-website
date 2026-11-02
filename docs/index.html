@@ -3,33 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="北京空也科技有限公司官方网站。探索空间记录与三维内容，了解正在开发的 iOS 应用「窗后城」，联系空也科技。">
+  <meta data-i18n-content="siteDescription" name="description" content="北京空也科技有限公司官方网站。探索空间记录与三维内容，了解正在开发的 iOS 应用「窗后城」，联系空也科技。">
   <meta name="theme-color" content="#050505">
-  <title>窗后城 — 让空间，留在身边。</title>
+  <title data-i18n="siteTitle">窗后城 — 让空间，留在身边。</title>
   <link rel="canonical" href="https://kongye.space/">
-  <link rel="stylesheet" href="styles.css?v=aligned-grid-staged-loading-20261102-v6">
-  <script src="community-feed.js?v=aligned-grid-staged-loading-20261102-v6" type="module"></script>
+  <link rel="stylesheet" href="styles.css?v=shared-bilingual-comments-20261103-v8">
+  <script src="community-feed.js?v=shared-bilingual-comments-20261103-v8" type="module"></script>
 </head>
 <body>
-  <a class="skip" href="#main">跳至正文</a>
+  <a class="skip" href="#main" data-i18n="siteSkip">跳至正文</a>
   <header class="site-header wrap">
-    <a class="brand" href="#top" aria-label="窗后城首页"><img class="brand-icon" src="assets/app-icon.png" alt="" width="38" height="38"><span>窗后城<small>CHUANG HOU CHENG</small></span></a>
-    <nav aria-label="主导航"><a href="#community-feed">发现</a><a href="community/?release=aligned-grid-staged-loading-20261102-v6">登录社区 ↗</a><a href="#support">支持</a><a href="#legal-docs">协议</a><a href="#contact">联系 <span aria-hidden="true">↗</span></a></nav>
+    <a class="brand" href="#top" data-i18n-aria="siteHome" aria-label="窗后城首页"><img class="brand-icon" src="assets/app-icon.png" alt="" width="38" height="38"><span><span data-i18n="siteBrand">窗后城</span><small>CHUANG HOU CHENG</small></span></a>
+    <nav style="flex-wrap:wrap" data-i18n-aria="siteMainNav" aria-label="主导航"><a href="#community-feed" data-i18n="siteDiscover">发现</a><a href="community/?release=shared-bilingual-comments-20261103-v8" data-i18n="siteSignIn">登录社区 ↗</a><a href="#support" data-i18n="siteSupport">支持</a><a href="#legal-docs" data-i18n="siteAgreements">协议</a><a href="#contact"><span data-i18n="siteContact">联系</span> <span aria-hidden="true">↗</span></a><button id="site-locale-toggle" type="button" data-i18n-aria="siteLanguageSwitch" aria-label="切换为英文" style="background:none;border:1px solid var(--line);border-radius:3px;padding:2px 7px;font-size:12px;white-space:nowrap;cursor:pointer">中 / EN</button></nav>
   </header>
   <main id="main">
-    <section id="top" class="product-bar wrap"><h1>窗后城</h1><p>记录空间，分享三维作品。</p><a href="community/?release=aligned-grid-staged-loading-20261102-v6">进入完整社区 ↗</a></section>
+    <section id="top" class="product-bar wrap"><h1 data-i18n="siteBrand">窗后城</h1><p data-i18n="siteTagline">记录空间，分享三维作品。</p><a href="community/?release=shared-bilingual-comments-20261103-v8" data-i18n="siteOpenCommunity">进入完整社区 ↗</a></section>
     <section id="community-feed" class="community-section wrap" aria-labelledby="community-title">
-      <div class="community-toolbar"><h2 id="community-title">发现空间</h2><span>社区作品</span></div>
-      <p id="feed-status" role="status" aria-live="polite">正在读取社区作品…</p>
-      <div id="community-grid" class="community-grid"></div><button id="feed-more" type="button">加载更多</button>
+      <div class="community-toolbar"><h2 id="community-title" data-i18n="siteDiscoverSpaces">发现空间</h2><span data-i18n="siteCommunityWorks">社区作品</span></div>
+      <p id="feed-status" role="status" aria-live="polite" data-i18n="siteFeedLoading">正在读取社区作品…</p>
+      <div id="community-grid" class="community-grid"></div><button id="feed-more" type="button" data-i18n="siteLoadMore">加载更多</button>
     </section>
 
-    <section id="contact" class="compact-support wrap"><h2 id="support">支持与联系</h2><p>产品咨询、使用反馈：<a href="mailto:kaidong@kongye.space">kaidong@kongye.space</a></p><nav id="legal-docs"><a href="terms.html">用户协议</a><a href="privacy.html">隐私政策</a><a href="community-rules.html">平台公约</a></nav><small>协议 V1.1 · 2026年11月2日发布 · <a href="publication-notice.html">三维作品发布与审核说明</a></small></section>
+    <section id="contact" class="compact-support wrap"><h2 id="support" data-i18n="siteSupportContact">支持与联系</h2><p><span data-i18n="siteContactLead">产品咨询、使用反馈：</span><a href="mailto:kaidong@kongye.space">kaidong@kongye.space</a></p><nav id="legal-docs"><a href="terms.html" data-i18n="siteTerms">用户协议</a><a href="privacy.html" data-i18n="sitePrivacy">隐私政策</a><a href="community-rules.html" data-i18n="siteRules">平台公约</a></nav><small><span data-i18n="siteAgreementVersion">协议 V1.1 · 2026年11月2日发布 · </span><a href="publication-notice.html" data-i18n="sitePublicationNotice">三维作品发布与审核说明</a></small></section>
     <section id="about" class="section wrap" aria-labelledby="about-title">
-      <div class="section-label"><span>ABOUT KONGYE</span><span>公司介绍</span></div>
-      <div class="about-layout"><h2 id="about-title">空间有形，<br>探索无界。</h2><div><p class="company-name">北京空也科技有限公司</p><p class="english" lang="en">Beijing Kongye Technology Co., Ltd</p><p>空也科技是一家位于中国北京的科技公司，当前以「窗后城」iOS 应用研发为主要产品工作，关注移动设备、空间记录与三维内容之间的连接。</p><p>我们希望让数字空间的记录与体验逐渐融入日常，从熟悉的场景出发，寻找更自然的内容表达方式。本网站是公司的官方信息与联系渠道。</p><dl class="company-facts"><div><dt>所在地</dt><dd>中国 · 北京</dd></div><div><dt>产品</dt><dd>窗后城 · iOS 应用研发</dd></div><div><dt>官方网站</dt><dd>kongye.space</dd></div></dl></div></div>
+      <div class="section-label"><span>ABOUT KONGYE</span><span data-i18n="siteAbout">公司介绍</span></div>
+      <div class="about-layout"><h2 id="about-title" data-i18n="siteAboutHeadline" style="white-space:pre-line">空间有形，
+探索无界。</h2><div><p class="company-name" data-i18n="siteCompany">北京空也科技有限公司</p><p class="english" lang="en">Beijing Kongye Technology Co., Ltd</p><p data-i18n="siteAboutFirst">空也科技是一家位于中国北京的科技公司，当前以「窗后城」iOS 应用研发为主要产品工作，关注移动设备、空间记录与三维内容之间的连接。</p><p data-i18n="siteAboutSecond">我们希望让数字空间的记录与体验逐渐融入日常，从熟悉的场景出发，寻找更自然的内容表达方式。本网站是公司的官方信息与联系渠道。</p><dl class="company-facts"><div><dt data-i18n="siteLocation">所在地</dt><dd data-i18n="siteBeijing">中国 · 北京</dd></div><div><dt data-i18n="siteProduct">产品</dt><dd data-i18n="siteProductValue">窗后城 · iOS 应用研发</dd></div><div><dt data-i18n="siteOfficialWebsite">官方网站</dt><dd>kongye.space</dd></div></dl></div></div>
     </section>
   </main>
-  <footer class="site-footer wrap"><div class="footer-meta"><span>© 2026 北京空也科技有限公司</span><span lang="en">BEIJING KONGYE TECHNOLOGY CO., LTD</span></div><nav aria-label="页脚导航"><a href="terms.html">用户协议</a><a href="privacy.html">隐私政策</a><a href="community-rules.html">平台公约</a><a href="#support">产品支持</a><a href="#top">回到顶部 ↑</a></nav></footer>
+  <footer class="site-footer wrap"><div class="footer-meta"><span data-i18n="siteCopyright">© 2026 北京空也科技有限公司</span><span lang="en">BEIJING KONGYE TECHNOLOGY CO., LTD</span></div><nav data-i18n-aria="siteFooterNav" aria-label="页脚导航"><a href="terms.html" data-i18n="siteTerms">用户协议</a><a href="privacy.html" data-i18n="sitePrivacy">隐私政策</a><a href="community-rules.html" data-i18n="siteRules">平台公约</a><a href="#support" data-i18n="siteProductSupport">产品支持</a><a href="#top" data-i18n="siteBackTop">回到顶部 ↑</a></nav></footer>
 </body>
 </html>

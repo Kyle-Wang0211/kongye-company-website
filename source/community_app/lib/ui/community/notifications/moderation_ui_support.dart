@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 import '../../../community/comments/comment_repository.dart';
 import '../../design_system.dart';
 
@@ -43,12 +45,14 @@ mixin ActiveModerationRefresh<T extends StatefulWidget> on State<T>
   }
 }
 
-String moderationError(Object error) => switch (error) {
-  CommunityCommentException(code: 'identity_changed') => '账号或服务区域已变化，请重新加载',
-  CommunityCommentException(code: 'auth_required') => '请登录后查看审核通知',
+String moderationError(AppL10n l, Object error) => switch (error) {
+  CommunityCommentException(code: 'identity_changed') =>
+    l.moderationIdentityChanged,
+  CommunityCommentException(code: 'auth_required') =>
+    l.moderationSignInRequired,
   CommunityCommentException(code: 'timeout') ||
-  TimeoutException() => '请求超时，请重试；申诉说明已保留',
-  _ => '暂时无法连接，请重试',
+  TimeoutException() => l.moderationRequestTimeout,
+  _ => l.moderationConnectionFailed,
 };
 
 bool moderationIdentityChanged(Object error) =>
@@ -81,7 +85,10 @@ class ModerationMessage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           if (retry != null)
-            TextButton(onPressed: retry, child: const Text('重试')),
+            TextButton(
+              onPressed: retry,
+              child: Text(AppL10n.of(context).authRetry),
+            ),
         ],
       ),
     ),

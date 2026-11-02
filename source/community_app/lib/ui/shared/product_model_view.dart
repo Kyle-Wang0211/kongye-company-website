@@ -13,6 +13,7 @@ import 'browser_model_transport.dart';
 
 import '../../community/shared_viewer_model_path.dart';
 import '../../util/device_log.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Product operations exposed without a platform renderer implementation.
 class ProductViewerCapture {
@@ -66,6 +67,9 @@ class ProductModelView extends StatefulWidget {
     this.autoRotateUntilTouched = false,
     this.background = Colors.black,
     this.active = true,
+    this.pointerEventsEnabled = true,
+    @visibleForTesting this.webActivityUpdatesForTesting,
+    this.pointerEventsEnabledNotifier,
     this.autoRotateSpeed = 0.6,
     this.onFirstFrameReady,
     this.onStillFrame,
@@ -99,6 +103,10 @@ class ProductModelView extends StatefulWidget {
   final bool autoRotateUntilTouched;
   final Color background;
   final bool active;
+  final bool pointerEventsEnabled;
+  @visibleForTesting
+  final bool? webActivityUpdatesForTesting;
+  final ValueNotifier<bool>? pointerEventsEnabledNotifier;
   final double autoRotateSpeed;
   final VoidCallback? onFirstFrameReady;
 
@@ -383,7 +391,27 @@ class _ProductModelViewState extends State<ProductModelView>
       _error = null;
       _cancelCapture();
     }
-    if (_hostReady) _updateActivity();
+    // A web parent's size-only rebuild needs ordinary layout, not another
+    // configure/resume round trip to the same iframe. Keep native behavior.
+    final activityChanged =
+        bindingChanged ||
+        communityChanged ||
+        oldWidget.modelUrl != widget.modelUrl ||
+        oldWidget.active != widget.active ||
+        oldWidget.interactive != widget.interactive ||
+        oldWidget.autoRotate != widget.autoRotate ||
+        oldWidget.autoRotateUntilTouched != widget.autoRotateUntilTouched ||
+        oldWidget.autoRotateSpeed != widget.autoRotateSpeed ||
+        oldWidget.background != widget.background ||
+        oldWidget.concealRenderSource != widget.concealRenderSource ||
+        !identical(oldWidget.localWorkSessions, widget.localWorkSessions) ||
+        oldWidget.resolveLocalPath != widget.resolveLocalPath ||
+        oldWidget.hostBuilder != widget.hostBuilder ||
+        (oldWidget.onSurfacePicked == null) != (widget.onSurfacePicked == null);
+    if (_hostReady &&
+        (!(widget.webActivityUpdatesForTesting ?? kIsWeb) || activityChanged)) {
+      _updateActivity();
+    }
   }
 
   @override
@@ -642,7 +670,10 @@ class _ProductModelViewState extends State<ProductModelView>
           await _controller.load(url: uri, format: format);
         } else {
           final controller = _controller;
-          bool current() => !_disposed && epoch == _epoch && _active &&
+          bool current() =>
+              !_disposed &&
+              epoch == _epoch &&
+              _active &&
               identical(controller, _controller);
           final identity = await loadBrowserModelBytes(
             uri: uri,
@@ -912,13 +943,28 @@ class _ProductModelViewState extends State<ProductModelView>
               ),
       );
     }
+    final viewerL10n = Localizations.of<AppL10n>(context, AppL10n);
+    final viewerUiStrings = viewerL10n == null
+        ? const <String, String>{}
+        : {
+            'locale': viewerL10n.localeName,
+            'title': viewerL10n.sharedViewerTitle,
+            'canvasLabel': viewerL10n.sharedViewerCanvasLabel,
+            'initializing': viewerL10n.sharedViewerInitializing,
+            'loading': viewerL10n.sharedViewerLoading,
+            'failure': viewerL10n.sharedViewerFailure,
+            'skpNotice': viewerL10n.sharedViewerSkpNotice,
+          };
     final host =
         widget.hostBuilder?.call(context, _controller, _ready, _fail) ??
         SharedViewer(
+          uiStrings: viewerUiStrings,
           controller: _controller,
           retainedSession:
               _localLease?.retainedSession ?? _communityLease?.retainedSession,
           active: _active,
+          pointerEventsEnabled: widget.pointerEventsEnabled,
+          pointerEventsEnabledNotifier: widget.pointerEventsEnabledNotifier,
           onReady: _ready,
           onError: _fail,
         );

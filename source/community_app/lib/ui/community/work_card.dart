@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../community/community_service.dart';
 import '../../community/feed_models.dart';
 import '../design_system.dart';
@@ -332,10 +333,12 @@ class _WorkCardState extends State<WorkCard> {
                       child: _coverFailed
                           ? Center(
                               key: ValueKey('work-cover-error-${_work.id}'),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.image_not_supported_outlined,
                                 color: Colors.white54,
-                                semanticLabel: 'Cover unavailable',
+                                semanticLabel: AppL10n.of(
+                                  context,
+                                ).communityCoverUnavailable,
                               ),
                             )
                           : !ready

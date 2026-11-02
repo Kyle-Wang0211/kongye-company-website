@@ -31,6 +31,7 @@ class SharedViewerRetainedSession {
 
   final _listeners = <VoidCallback>{};
   Object? _presentation, _error;
+  Map<String, String> _uiStrings = const {};
   bool _presentationActive = false, _disposed = false;
   bool _rendererReady = false, _ownsTransport = false;
   bool _webViewDisposed = false, _serverClosed = false;
@@ -71,6 +72,27 @@ class SharedViewerRetainedSession {
 
   @internal
   bool ownsPresentation(Object owner) => identical(_presentation, owner);
+
+  @internal
+  void setUiStrings(Object owner, Map<String, String> strings) {
+    if (!ownsPresentation(owner) || _disposed || mapEquals(_uiStrings, strings))
+      return;
+    _uiStrings = Map<String, String>.unmodifiable(strings);
+    unawaited(_sendUiStrings());
+  }
+
+  Future<void> _sendUiStrings() async {
+    final webView = _webView;
+    if (webView == null || _cancelled || _uiStrings.isEmpty) return;
+    try {
+      final packet = jsonEncode(
+          {'type': 'pw-viewer-ui-localization', 'strings': _uiStrings});
+      await webView.runJavaScript(
+          'window.postMessage($packet, window.location.origin);');
+    } catch (error) {
+      debugPrint('Shared Viewer UI localization delivery failed: $error');
+    }
+  }
 
   @internal
   void releasePresentation(Object owner) {
@@ -202,6 +224,10 @@ class SharedViewerRetainedSession {
       return;
     }
     if (decoded is! Map || decoded['protocol'] != sharedViewerProtocol) return;
+    if (decoded['type'] == 'pw-viewer-ui-localization-ready') {
+      unawaited(_sendUiStrings());
+      return;
+    }
     final state = decoded['state'];
     if (!_rendererReady && state is Map && state['status'] == 'error') {
       _fail(SharedViewerException(

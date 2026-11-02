@@ -1,0 +1,31 @@
+{
+  "access_date": "2026-11-02",
+  "sources": [
+    {
+      "claim": "InternationalSMS uses itsownAPI and SenderID; billed sends require actualdeliveryacceptance",
+      "url": "https://help.aliyun.com/zh/sms/user-guide/send-message-intl",
+      "authority": "Alibaba Cloud official documentation",
+      "status": "confirmed"
+    },
+    {
+      "claim": "To/Message required; From/ChannelId optional; mainlandunsupported byinternationalAPI",
+      "url": "https://help.aliyun.com/zh/sms/developer-reference/api-dysmsapi-2018-05-01-sendmessagetoglobe",
+      "authority": "Alibaba Cloud official API reference",
+      "status": "confirmed"
+    }
+  ],
+  "account_observations": {
+    "enterprise_account": true,
+    "default_international_channel_exists": true,
+    "sender_id_application_list_empty": true,
+    "registration_country_options_observed": 232,
+    "global_delivery_verified": false,
+    "international_requests_sent": 0,
+    "remote_changes_submitted": false
+  },
+  "country_catalog": {
+    "revision": "8d8d75272c351b60b87163db5328e439c53a6b56",
+    "regions": 245,
+    "catalog_not_delivery_coverage": true
+  }
+}

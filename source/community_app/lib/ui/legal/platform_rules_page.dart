@@ -6,31 +6,28 @@
 import 'package:flutter/material.dart';
 
 import '../design_system.dart';
-import '../../i18n/locale_notifier.dart';
+import '../../l10n/app_localizations.dart';
 import 'platform_rules_content.dart';
 
 class PlatformRulesPage extends StatelessWidget {
   const PlatformRulesPage({super.key});
 
   /// 统一的打开方式,三个入口都走它,避免各处各写一遍 MaterialPageRoute。
-  static Future<void> open(BuildContext context) => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const PlatformRulesPage()),
-      );
+  static Future<void> open(BuildContext context) => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => const PlatformRulesPage()));
 
   @override
   Widget build(BuildContext context) {
     // 中文版为准:法定义务依据的是中文法条,英文版仅为便利。
-    final isZh = LocaleScope.of(context).isChinese;
-    final sections = isZh ? kPlatformRulesZh : kPlatformRulesEn;
+    final l = AppL10n.of(context);
+    final sections = _platformRulesSections(l);
     return Scaffold(
       backgroundColor: AetherColors.bgCanvas,
       appBar: AppBar(
         backgroundColor: AetherColors.bgCanvas,
         elevation: 0,
-        title: Text(
-          isZh ? '平台公约' : 'Platform Rules',
-          style: AetherTextStyles.h2,
-        ),
+        title: Text(l.mePlatformRules, style: AetherTextStyles.h2),
       ),
       body: SafeArea(
         child: ListView.builder(
@@ -46,11 +43,7 @@ class PlatformRulesPage extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(top: AetherSpacing.xl),
                 child: Text(
-                  isZh
-                      ? '本公约描述的是产品当前的实际规则。规则调整时本页同步更新。'
-                      : 'These rules describe how the product actually behaves today, '
-                          'and are updated when behaviour changes. '
-                          'In case of any discrepancy, the Chinese version prevails.',
+                  l.legalRulesFooter,
                   style: const TextStyle(
                     fontSize: 12,
                     height: 1.6,
@@ -115,3 +108,34 @@ class PlatformRulesPage extends StatelessWidget {
     );
   }
 }
+
+List<RuleSection> _platformRulesSections(AppL10n l) => [
+  RuleSection(l.legalRulesS0Title, [
+    l.legalRulesS0P0,
+    l.legalRulesS0P1,
+    l.legalRulesS0P2,
+    l.legalRulesS0P3,
+    l.legalRulesS0P4,
+    l.legalRulesS0P5,
+    l.legalRulesS0P6,
+  ]),
+  RuleSection(l.legalRulesS1Title, [
+    l.legalRulesS1P0,
+    l.legalRulesS1P1,
+    l.legalRulesS1P2,
+    l.legalRulesS1P3,
+    l.legalRulesS1P4,
+  ]),
+  RuleSection(l.legalRulesS2Title, [
+    l.legalRulesS2P0,
+    l.legalRulesS2P1,
+    l.legalRulesS2P2,
+    l.legalRulesS2P3,
+  ]),
+  RuleSection(l.legalRulesS3Title, [
+    l.legalRulesS3P0,
+    l.legalRulesS3P1,
+    l.legalRulesS3P2,
+  ]),
+  RuleSection(l.legalRulesS4Title, [l.legalRulesS4P0, l.legalRulesS4P1]),
+];

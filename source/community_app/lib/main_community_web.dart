@@ -144,7 +144,6 @@ Future<void> _initialize(
   }
 }
 
-
 class _CommunityWeb extends StatelessWidget {
   const _CommunityWeb({required this.user, required this.locale});
   final CurrentUser user;
@@ -152,29 +151,48 @@ class _CommunityWeb extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LocaleScope(
     notifier: locale,
-    child: AnimatedBuilder(animation: locale, builder: (context, _) => MaterialApp(
-      title: 'PocketWorld', debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: AetherColors.primary),
-        scaffoldBackgroundColor: AetherColors.bg, canvasColor: AetherColors.bg,
-        useMaterial3: true),
-      locale: locale.locale, localizationsDelegates: AppL10n.localizationsDelegates,
-      supportedLocales: AppL10n.supportedLocales,
-      builder: (context, child) => AuthScope(currentUser: user, child: child!),
-      home: AnimatedBuilder(animation: user, builder: (context, _) {
-        final state = user.state;
-        return switch (state) {
-          CurrentUserSignedIn() => Uri.base.queryParameters.containsKey('work')
-              ? PublicWorkEntry(user: user) : const VaultPage(),
-          CurrentUserSignedOut() => Uri.base.queryParameters.containsKey('work')
-              ? PublicWorkEntry(user: user) : AuthRootView(currentUser: user),
-          CurrentUserServiceUnavailable(:final reason) =>
-            _ServiceUnavailableView(currentUser: user, reason: reason),
-          _ => const Scaffold(body: Center(child: CircularProgressIndicator())),
-        };
-      }),
-    )),
+    child: AnimatedBuilder(
+      animation: locale,
+      builder: (context, _) => MaterialApp(
+        title: 'PocketWorld',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: AetherColors.primary),
+          scaffoldBackgroundColor: AetherColors.bg,
+          canvasColor: AetherColors.bg,
+          useMaterial3: true,
+        ),
+        locale: locale.locale,
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
+        builder: (context, child) =>
+            AuthScope(currentUser: user, child: child!),
+        home: AnimatedBuilder(
+          animation: user,
+          builder: (context, _) {
+            final state = user.state;
+            return switch (state) {
+              CurrentUserSignedIn() =>
+                Uri.base.queryParameters.containsKey('work')
+                    ? PublicWorkEntry(user: user)
+                    : const VaultPage(),
+              CurrentUserSignedOut() =>
+                Uri.base.queryParameters.containsKey('work')
+                    ? PublicWorkEntry(user: user)
+                    : AuthRootView(currentUser: user),
+              CurrentUserServiceUnavailable(:final reason) =>
+                _ServiceUnavailableView(currentUser: user, reason: reason),
+              _ => const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
+            };
+          },
+        ),
+      ),
+    ),
   );
 }
+
 class _ServiceUnavailableView extends StatelessWidget {
   const _ServiceUnavailableView({
     required this.currentUser,
@@ -200,12 +218,6 @@ class _ServiceUnavailableView extends StatelessWidget {
                   l.authServiceUnavailable,
                   textAlign: TextAlign.center,
                   style: AetherTextStyles.body,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  reason,
-                  textAlign: TextAlign.center,
-                  style: AetherTextStyles.caption,
                 ),
                 const SizedBox(height: 24),
                 AnimatedBuilder(
@@ -239,4 +251,3 @@ class _ServiceUnavailableView extends StatelessWidget {
     );
   }
 }
-

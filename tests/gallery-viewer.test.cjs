@@ -8,7 +8,7 @@ test('homepage embeds the exact production viewer and existing local models',()=
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  assert(!html.includes('sketchfab.com/models/'));
  const base=path.join(root,'viewer');const m=JSON.parse(fs.readFileSync(path.join(base,'BUNDLE_MANIFEST.json')));
- assert.equal(m.bundle_sha256,'6045a1b87a87ddc9fad1a1dd2b2f10d5e31ec1752f4c2fc1350ac72242b9c1aa');
+ assert.equal(m.bundle_sha256,'186816180c6fd4d745965d92feded8333edef2e35a6660d3499da9aca190817c');
  for(const [name,sha] of Object.entries(m.files))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(base,name))).digest('hex'),sha,name);
 });
 

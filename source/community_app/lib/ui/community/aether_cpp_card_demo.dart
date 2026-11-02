@@ -18,6 +18,8 @@ class AetherCppCardDemo extends StatelessWidget {
     required this.modelUrl,
     this.isFocused = false,
     this.interactive = false,
+    this.pointerEventsEnabled = true,
+    this.pointerEventsEnabledNotifier,
     this.concealRenderSource = false,
     this.quality,
     this.autoRotateUntilTouched = false,
@@ -46,6 +48,8 @@ class AetherCppCardDemo extends StatelessWidget {
   final CommunityViewerSessions? communitySessions;
   final bool isFocused;
   final bool interactive;
+  final bool pointerEventsEnabled;
+  final ValueNotifier<bool>? pointerEventsEnabledNotifier;
   final bool concealRenderSource;
   final double autoRotateSpeed;
   final Color background;
@@ -73,6 +77,8 @@ class AetherCppCardDemo extends StatelessWidget {
     communitySessionKey: communitySessionKey,
     communitySessions: communitySessions,
     interactive: interactive,
+    pointerEventsEnabled: pointerEventsEnabled,
+    pointerEventsEnabledNotifier: pointerEventsEnabledNotifier,
     concealRenderSource: concealRenderSource,
     autoRotate: isFocused && (!interactive || autoRotateUntilTouched),
     autoRotateUntilTouched: autoRotateUntilTouched,

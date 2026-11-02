@@ -67,3 +67,14 @@ The isolated candidate passed 104 Dart tests, 78 JavaScript tests and a 23.30-se
 Release `aligned-grid-staged-loading-20261102-v6` supersedes natural-height media frames with fixed 3:4 contain frames and equal title/metadata regions, as explicitly requested. Data appears in API order before each cover decodes; each cover has an independent shimmer/error state. Initial and paginated shells reserve geometry. Enlarged text uses shared row metrics, including like-button padding. Three missing museum thumbnails reuse the same exact-source-bound canonical public covers as the homepage; publisher-selected thumbnails take precedence. Models are never loaded for a feed card. Work opens in a child page, and cached browser Back restores paging. Descriptions remain in details below the Viewer.
 
 Root verification: 111 Dart and 82 JavaScript tests passed. Final web build took25.09seconds, maximum RSS1,145,536,512bytes and zero swaps. Shared App source is prepared in this archive; no production phone installation was performed. Root's controlled local browser harness held configuration/decode completion to prove metadata-before-cover at stable card bounds; these test gates are not part of the published site.
+
+## Phone input and signup country selector (2026-11-02)
+
+Password/SMS login has no fixed country prefix. Legacy mainland SMS input remains supported; phone signup is reachable from the email signup page and offers searchable flag/calling-code selection from 245 pinned geographic regions. Overseas SMS remains explicitly unavailable until sender registration and the production international delivery route have been verified; email signup remains available. Shared route wrappers and keyboard layouts were verified.
+
+129 serial Dart tests passed, including inline prefix layout at mobile width and enlarged text. No package/dependency upgrades, real SMS, backend mutation or phone installation. Canonical mobile metadata originates from Google libphonenumber v9.0.42; license and derivation notices are in third_party/libphonenumber, and distributed with web output.
+
+
+## Shared bilingual UI and comments, 2026-11-03
+
+The current archive contains the shared phone signup UI (inline country prefix, 245 localized regions), paired AppL10n resources and static exports, localized comments/notification/legal views, inline web comments and real sign-in routing. Every viewer resource remains hash-checked, with at most four fetch/hash workers. Native installation and international account registration are separate acceptance steps; a console delivery test to a user-owned US number succeeded, but international app OTP remains disabled pending backend integration. Existing versioned legal content is preserved.

@@ -19,10 +19,10 @@ import '../../auth/auth_models.dart';
 import '../../auth/current_user.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
-import '../legal/platform_rules_page.dart';
 import '../legal/legal_doc_links_row.dart';
 import 'auth_minimal_widgets.dart';
 import 'otp_verification_view.dart';
+import 'phone_sign_in_view.dart';
 
 class EmailSignUpPage extends StatefulWidget {
   final CurrentUser currentUser;
@@ -96,10 +96,7 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
   Future<void> _submit() async {
     try {
       await widget.currentUser.signUp(
-        SignUpRequest.email(
-          email: _normalizedEmail,
-          password: _password.text,
-        ),
+        SignUpRequest.email(email: _normalizedEmail, password: _password.text),
       );
     } on EmailVerificationPending catch (e) {
       // signup-start has emailed an OTP and stashed the request in
@@ -175,6 +172,21 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
                         onTap: _submit,
                       ),
                       const SizedBox(height: AetherSpacing.xxl),
+                      MinimalLink(
+                        title: l.phoneSignUpWithPhone,
+                        emphasis: MinimalLinkEmphasis.medium,
+                        onTap: working
+                            ? null
+                            : () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => PhoneAuthPage(
+                                    currentUser: widget.currentUser,
+                                    intent: PhoneIntent.signUp,
+                                  ),
+                                ),
+                              ),
+                      ),
+                      const SizedBox(height: AetherSpacing.xl),
                       // [RULES-PUBLIC 2026-08-23] 原来这里是纯文本,原注释自陈
                       // "Plain (not link) for now"。但第六条要求的是"制定**和
                       // 公开**"管理规则与平台公约 —— 显示一句"你已同意"却让人

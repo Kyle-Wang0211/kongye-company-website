@@ -67,6 +67,7 @@ class CommunityCommentsPanel extends StatefulWidget {
 
 class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     with WidgetsBindingObserver {
+  AppL10n get _l => AppL10n.of(context);
   final _text = TextEditingController();
   final _focus = FocusNode();
   final _scroll = ScrollController();
@@ -75,7 +76,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   final _reportRevision = ValueNotifier(0);
   List<CommunityComment> _comments = [];
   final _parentComments = <String, CommunityComment>{};
-  final _latestSectionKey = GlobalKey();
+  CommunityCommentSection _selectedSection = CommunityCommentSection.hot;
   final _sectionIds = <CommunityCommentSection, List<String>>{};
   final _sectionCursors = <CommunityCommentSection, String?>{};
   final _sectionErrors = <CommunityCommentSection, String>{};
@@ -108,6 +109,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   String? _error;
   String? _loadError;
   bool _loading = true;
+  bool _refreshing = false;
   bool _sending = false;
   bool _picking = false;
   bool _emojiOpen = false;
@@ -191,6 +193,22 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     _load(refresh: true);
   }
 
+  Future<void> _manualRefresh() async {
+    if (_refreshing ||
+        _loading ||
+        _sending ||
+        _busyComments.isNotEmpty ||
+        _inflightLoadToken != null) {
+      return;
+    }
+    setState(() => _refreshing = true);
+    try {
+      await _load(refresh: true);
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+  }
+
   @override
   void didUpdateWidget(CommunityCommentsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -203,6 +221,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _text.clear();
       _images.clear();
       _comments = [];
+      _selectedSection = CommunityCommentSection.hot;
       _resetSections();
       _busyComments.clear();
       _page = null;
@@ -335,7 +354,9 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _loadError = null;
     });
     try {
-      final page = await widget.repository.fetch(widget.workId);
+      final page = await widget.repository
+          .fetch(widget.workId)
+          .timeout(const Duration(seconds: 30));
       if (!_current(generation) || token != _loadToken) return;
       if (widget.requireAssetBinding &&
           (widget.expectedAssetSha256 == null ||
@@ -345,8 +366,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
               page.assetSha256 != widget.expectedAssetSha256)) {
         _clearPrivateState(
           widget.expectedAssetSha256 == null
-              ? '模型身份校验中，请稍后重试'
-              : '模型版本已更新，请重新打开评论',
+              ? _l.commentAssetChecking
+              : _l.commentAssetUpdated,
         );
         return;
       }
@@ -389,7 +410,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         _loading = false;
         _loadError = error is CommunityCommentException
             ? error.message
-            : '评论暂时无法加载';
+            : _l.commentLoadFailed;
       });
     } finally {
       if (_inflightLoadToken == token) _inflightLoadToken = null;
@@ -485,8 +506,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       if (error is CommunityCommentException && error.code == 'asset_changed') {
         _clearPrivateState(
           widget.expectedAssetSha256 == null
-              ? '模型身份校验中，请稍后重试'
-              : '模型版本已更新，请重新打开评论',
+              ? _l.commentAssetChecking
+              : _l.commentAssetUpdated,
         );
         return;
       }
@@ -504,7 +525,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         _loading = false;
         _loadError = error is CommunityCommentException
             ? error.message
-            : '评论暂时无法加载';
+            : _l.commentLoadFailed;
       });
       _notifyVisible();
     }
@@ -536,8 +557,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
               page.assetSha256 != widget.expectedAssetSha256)) {
         _clearPrivateState(
           widget.expectedAssetSha256 == null
-              ? '模型身份校验中，请稍后重试'
-              : '模型版本已更新，请重新打开评论',
+              ? _l.commentAssetChecking
+              : _l.commentAssetUpdated,
         );
         return;
       }
@@ -590,7 +611,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       setState(
         () => _sectionErrors[section] = error is CommunityCommentException
             ? error.message
-            : '评论暂时无法加载，请重试',
+            : _l.commentLoadRetry,
       );
     } finally {
       if (_current(generation) && _sectionBusy[section] == requestId) {
@@ -646,6 +667,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           );
           latest.remove(comment.id);
           latest.insert(0, comment.id);
+          _selectedSection = CommunityCommentSection.latest;
         }
         if (comment.published && previous?.published != true) _publicCount++;
         _text.clear();
@@ -658,16 +680,9 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       widget.onClearAnchor?.call();
       _notifyVisible();
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_current(generation) &&
-            _paged &&
-            _latestSectionKey.currentContext != null) {
-          Scrollable.ensureVisible(
-            _latestSectionKey.currentContext!,
-            duration: const Duration(milliseconds: 200),
-          );
-        } else if (_current(generation) && _scroll.hasClients) {
+        if (_current(generation) && _scroll.hasClients) {
           _scroll.animateTo(
-            _scroll.position.maxScrollExtent,
+            _paged ? 0 : _scroll.position.maxScrollExtent,
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
           );
@@ -678,21 +693,22 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       if (_clearInvalidIdentity(error)) return;
       setState(() {
         _sending = false;
-        _error = '发送失败，草稿已保留，请重试';
+        _error = _l.commentSendFailed;
       });
     }
   }
 
   Future<List<CommunityCommentImageDraft>> _defaultPick(int remaining) async {
+    final l = _l;
     final picked = await ImagePicker().pickMultiImage(
       requestFullMetadata: false,
       limit: remaining > 1 ? remaining : null,
     );
-    if (picked.length > remaining) throw const FormatException('最多添加 3 张图片');
+    if (picked.length > remaining) throw FormatException(l.commentImageLimit);
     final drafts = <CommunityCommentImageDraft>[];
     for (final file in picked) {
       if (await file.length() > CommunityCommentImageDraft.maxBytes) {
-        throw const FormatException('每张图片不能超过 2 MiB');
+        throw FormatException(l.commentImageTooLarge);
       }
       final name = file.name;
       final lower = name.toLowerCase();
@@ -728,11 +744,11 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       final selected = await (widget.imagePicker ?? _defaultPick)(remaining);
       if (!_current(generation)) return;
       if (selected.length > remaining) {
-        throw const FormatException('最多添加 3 张图片');
+        throw FormatException(_l.commentImageLimit);
       }
       for (final image in selected) {
         if (image.bytes.length > CommunityCommentImageDraft.maxBytes) {
-          throw const FormatException('每张图片不能超过 2 MiB');
+          throw FormatException(_l.commentImageTooLarge);
         }
         image.validate();
       }
@@ -750,7 +766,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         _picking = false;
         _error = error is FormatException
             ? error.message
-            : '无法添加图片，请选择 JPEG、PNG 或 WebP（每张不超过 2 MiB）';
+            : _l.commentImageAddFailed;
       });
     }
   }
@@ -785,7 +801,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _notifyVisible();
     } catch (error) {
       if (!_current(generation) || _clearInvalidIdentity(error)) return;
-      setState(() => _error = '暂时无法点赞，请重试');
+      setState(() => _error = _l.commentLikeFailed);
     } finally {
       if (_current(generation)) {
         setState(() => _busyComments.remove(comment.id));
@@ -812,7 +828,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _notifyVisible();
     } catch (error) {
       if (!_current(generation) || _clearInvalidIdentity(error)) return;
-      setState(() => _error = '暂时无法删除，请重试');
+      setState(() => _error = _l.commentDeleteFailed);
     } finally {
       if (_current(generation)) {
         setState(() => _busyComments.remove(comment.id));
@@ -822,7 +838,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
 
   void _edit(CommunityComment comment) {
     if (_sending || _hasDraft) {
-      setState(() => _error = '请先发送或清空当前草稿，再修改评论');
+      setState(() => _error = _l.commentEditDraftFirst);
       return;
     }
     _text.text = comment.body;
@@ -833,7 +849,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _anchor = comment.anchor;
     });
     if (comment.attachments.isNotEmpty) {
-      setState(() => _error = '请重新选择要发送的图片');
+      setState(() => _error = _l.commentReselectImages);
     }
     _focus.requestFocus();
   }
@@ -881,28 +897,62 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                           children: [
                             Expanded(
                               child: Text(
-                                '用户评论 $_publicCount',
+                                _l.commentCount(_publicCount),
                                 style: AetherTextStyles.h3,
                               ),
                             ),
                             IconButton(
-                              tooltip: '刷新评论',
+                              tooltip: _l.commentRefresh,
                               onPressed:
                                   _loading ||
+                                      _refreshing ||
+                                      _inflightLoadToken != null ||
                                       _sending ||
                                       _busyComments.isNotEmpty
                                   ? null
-                                  : () => _load(refresh: true),
-                              icon: const Icon(Icons.refresh_rounded, size: 20),
+                                  : _manualRefresh,
+                              icon: _refreshing
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.refresh_rounded, size: 20),
                             ),
                             IconButton(
-                              tooltip: '关闭评论',
+                              tooltip: _l.commentClose,
                               onPressed: widget.onClose,
                               icon: const Icon(Icons.close_rounded, size: 20),
                             ),
                           ],
                         ),
                       ),
+                      if (_paged)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                          child: SegmentedButton<CommunityCommentSection>(
+                            showSelectedIcon: false,
+                            segments: [
+                              ButtonSegment(
+                                value: CommunityCommentSection.hot,
+                                label: Text(_l.commentHot),
+                              ),
+                              ButtonSegment(
+                                value: CommunityCommentSection.latest,
+                                label: Text(_l.commentLatest),
+                              ),
+                            ],
+                            selected: {_selectedSection},
+                            onSelectionChanged: (selection) {
+                              setState(
+                                () => _selectedSection = selection.single,
+                              );
+                              if (_scroll.hasClients) _scroll.jumpTo(0);
+                            },
+                          ),
+                        ),
                       const Divider(height: 1, color: AetherColors.border),
                       Expanded(child: _list()),
                       const Divider(height: 1, color: AetherColors.border),
@@ -950,7 +1000,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 style: AetherTextStyles.bodySm,
                 textAlign: TextAlign.center,
               ),
-              TextButton(onPressed: _load, child: const Text('重新加载')),
+              TextButton(onPressed: _load, child: Text(_l.commentReload)),
             ],
           ),
         ),
@@ -960,36 +1010,20 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       return SingleChildScrollView(
         controller: _scroll,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  final target = _latestSectionKey.currentContext;
-                  if (target != null) {
-                    Scrollable.ensureVisible(
-                      target,
-                      duration: const Duration(milliseconds: 200),
-                    );
-                  }
-                },
-                child: const Text('查看最新'),
-              ),
-            ),
-            _section(CommunityCommentSection.hot, '热评'),
-            _section(CommunityCommentSection.latest, '最新'),
-          ],
+        child: _section(
+          _selectedSection,
+          _selectedSection == CommunityCommentSection.hot
+              ? _l.commentHot
+              : _l.commentLatest,
         ),
       );
     }
     if (_comments.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Text(
-            '还没有公开评论，来聊聊这个作品',
+            _l.commentEmpty,
             style: AetherTextStyles.bodySm,
             textAlign: TextAlign.center,
           ),
@@ -1016,16 +1050,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       key: ValueKey('comment-section-${section.name}'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(
-            title,
-            key: section == CommunityCommentSection.latest
-                ? _latestSectionKey
-                : null,
-            style: AetherTextStyles.h3,
-          ),
-        ),
         for (final row in rows)
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
@@ -1033,7 +1057,9 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           ),
         if (!busy && error == null && rows.isEmpty)
           Text(
-            section == CommunityCommentSection.hot ? '暂无热评' : '还没有最新评论',
+            section == CommunityCommentSection.hot
+                ? _l.commentHotEmpty
+                : _l.commentLatestEmpty,
             style: AetherTextStyles.caption,
           ),
         if (busy)
@@ -1052,7 +1078,11 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           TextButton(
             key: ValueKey('comment-more-${section.name}'),
             onPressed: busy ? null : () => _loadSection(section),
-            child: Text(error != null ? '重试$title' : '加载更多$title'),
+            child: Text(
+              error != null
+                  ? _l.commentRetrySection(title)
+                  : _l.commentMoreSection(title),
+            ),
           ),
       ],
     );
@@ -1066,9 +1096,9 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         _parentComments[comment.parentId];
     final privateLabel = switch (comment.status) {
       CommunityCommentStatus.pending ||
-      CommunityCommentStatus.review => '待发布 · 仅自己可见',
-      CommunityCommentStatus.rejected => '未通过审核 · 仅自己可见',
-      CommunityCommentStatus.error => '提交异常 · 仅自己可见',
+      CommunityCommentStatus.review => _l.commentPrivatePending,
+      CommunityCommentStatus.rejected => _l.commentPrivateRejected,
+      CommunityCommentStatus.error => _l.commentPrivateError,
       _ => null,
     };
     return Row(
@@ -1118,7 +1148,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        '作者回复',
+                        _l.commentAuthorReply,
                         style: AetherTextStyles.caption.copyWith(
                           color: AetherColors.primary,
                           fontWeight: FontWeight.w600,
@@ -1126,9 +1156,12 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       ),
                     ),
                   if (mine)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(left: 6),
-                      child: Text('我', style: AetherTextStyles.caption),
+                      child: Text(
+                        _l.commentMe,
+                        style: AetherTextStyles.caption,
+                      ),
                     ),
                 ],
               ),
@@ -1136,16 +1169,18 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 Padding(
                   padding: const EdgeInsets.only(top: 3),
                   child: Text(
-                    '回复 ${parent?.authorName ?? '评论'}',
+                    _l.commentReplyTo(
+                      parent?.authorName ?? _l.commentReplyFallback,
+                    ),
                     style: AetherTextStyles.caption,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               if (hidden) ...[
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 4),
-                  child: Text('该评论因违反社区规范已被隐藏', style: AetherTextStyles.body),
+                  child: Text(_l.commentHidden, style: AetherTextStyles.body),
                 ),
                 if (comment.moderationReason != null)
                   Padding(
@@ -1161,7 +1196,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                     onPressed: () => widget.onModerationCaseSelected!(
                       comment.moderationCaseId!,
                     ),
-                    child: const Text('查看原因与申诉'),
+                    child: Text(_l.commentViewReasonAppeal),
                   ),
               ],
               if (!hidden && comment.body.isNotEmpty)
@@ -1190,7 +1225,10 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   ),
                   onPressed: () => widget.onCommentSelected?.call(comment),
                   icon: const Icon(Icons.location_on_outlined, size: 15),
-                  label: const Text('查看模型点位', style: TextStyle(fontSize: 12)),
+                  label: Text(
+                    _l.commentViewPoint,
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               if (privateLabel != null)
                 Padding(
@@ -1216,7 +1254,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                     style: AetherTextStyles.caption,
                   ),
                   if (comment.published && _canComment)
-                    _textAction('回复', () {
+                    _textAction(_l.commentReply, () {
                       _changed(() => _reply = comment);
                       _focus.requestFocus();
                     }),
@@ -1224,7 +1262,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       !mine &&
                       widget.currentUserId != null &&
                       widget.repository is CommunityCommentReportRepository)
-                    _textAction('举报', () => _reportComment(comment)),
+                    _textAction(_l.reportAction, () => _reportComment(comment)),
                   if (comment.published)
                     InkWell(
                       onTap:
@@ -1234,8 +1272,9 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                           : () => _like(comment),
                       borderRadius: BorderRadius.circular(12),
                       child: Semantics(
-                        label:
-                            '${comment.likedByMe ? '取消点赞' : '点赞'} ${comment.likesCount}',
+                        label: comment.likedByMe
+                            ? _l.commentUnlikeCount(comment.likesCount)
+                            : _l.commentLikeCount(comment.likesCount),
                         button: true,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1262,10 +1301,10 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   if (mine &&
                       (comment.status == CommunityCommentStatus.rejected ||
                           comment.status == CommunityCommentStatus.error))
-                    _textAction('修改重发', () => _edit(comment)),
+                    _textAction(_l.commentEditResend, () => _edit(comment)),
                   if (mine)
                     _textAction(
-                      '删除',
+                      _l.meActionDelete,
                       _busyComments.contains(comment.id)
                           ? null
                           : () => _remove(comment),
@@ -1329,7 +1368,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     CommunityCommentAttachment attachment,
     int index,
   ) => Semantics(
-    label: '评论图片 ${index + 1}',
+    label: _l.commentImageNumber(index + 1),
     button: true,
     child: InkWell(
       onTap: () => setState(() {
@@ -1362,7 +1401,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     scopesRoute: true,
     explicitChildNodes: true,
     namesRoute: true,
-    label: '评论图片预览',
+    label: _l.commentImagePreview,
     child: Material(
       color: AetherColors.bgCanvas,
       child: Column(
@@ -1370,7 +1409,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           Align(
             alignment: Alignment.topRight,
             child: IconButton(
-              tooltip: '关闭图片',
+              tooltip: _l.commentCloseImage,
               onPressed: () => setState(() {
                 _previewAttachment = null;
                 _previewCommentId = null;
@@ -1384,9 +1423,9 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 child: Image.network(
                   _previewAttachment!.url,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Padding(
+                  errorBuilder: (_, _, _) => Padding(
                     padding: EdgeInsets.all(24),
-                    child: Text('图片暂时无法加载'),
+                    child: Text(_l.commentImageLoadFailed),
                   ),
                 ),
               ),
@@ -1397,7 +1436,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     ),
   );
 
-  String _date(DateTime value) => formatCommunityCommentTime(value);
+  String _date(DateTime value) =>
+      formatCommunityCommentTime(value, locale: _l.localeName);
 
   Widget _composer() => SafeArea(
     top: false,
@@ -1416,13 +1456,13 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 children: [
                   if (_reply != null)
                     _chip(
-                      '回复 ${_reply!.authorName}',
-                      '取消回复',
+                      _l.commentReplyTo(_reply!.authorName),
+                      _l.commentCancelReply,
                       () => _changed(() => _reply = null),
                       Icons.reply_rounded,
                     ),
                   if (_anchor != null)
-                    _chip('已选择模型点位', '移除模型点位', () {
+                    _chip(_l.commentPointSelected, _l.commentRemovePoint, () {
                       _changed(() => _anchor = null);
                       widget.onClearAnchor?.call();
                     }, Icons.location_on_outlined),
@@ -1464,7 +1504,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                                 style: IconButton.styleFrom(
                                   backgroundColor: AetherColors.bgCanvas,
                                 ),
-                                tooltip: '移除图片 ${i + 1}',
+                                tooltip: _l.commentRemoveImage(i + 1),
                                 padding: EdgeInsets.zero,
                                 iconSize: 16,
                                 onPressed: _sending
@@ -1496,7 +1536,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           if (widget.currentUserId == null && widget.onSignIn != null)
             TextButton(
               onPressed: widget.onSignIn,
-              child: const Text('登录后发表评论'),
+              child: Text(_l.commentSignIn),
             ),
           TextField(
             key: const Key('comment-input'),
@@ -1508,12 +1548,12 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             style: AetherTextStyles.body,
             decoration: InputDecoration(
               hintText: widget.currentUserId == null
-                  ? '登录后发表评论'
+                  ? _l.commentSignIn
                   : _page == null
-                  ? '评论服务暂不可用'
+                  ? _l.commentServiceUnavailable
                   : !_canComment
-                  ? '暂时无法评论'
-                  : '说点什么…',
+                  ? _l.commentUnavailable
+                  : _l.commentComposerHint,
               counterText: '',
               filled: true,
               fillColor: AetherColors.bgElevated,
@@ -1530,7 +1570,10 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '${CommunityCommentDraft.textCodeUnits(_text.text)}/${CommunityCommentDraft.maxTextCodeUnits} · 表情可能占多个长度单位',
+              _l.commentLength(
+                CommunityCommentDraft.textCodeUnits(_text.text),
+                CommunityCommentDraft.maxTextCodeUnits,
+              ),
               key: const Key('comment-length'),
               style: AetherTextStyles.caption.copyWith(
                 color: _withinTextLimit
@@ -1544,7 +1587,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             child: Row(
               children: [
                 IconButton(
-                  tooltip: '添加表情',
+                  tooltip: _l.commentAddEmoji,
                   onPressed: !_canComment || _sending
                       ? null
                       : () => setState(() => _emojiOpen = !_emojiOpen),
@@ -1554,7 +1597,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   ),
                 ),
                 IconButton(
-                  tooltip: '添加图片',
+                  tooltip: _l.commentAddImage,
                   onPressed:
                       !_canComment ||
                           _sending ||
@@ -1574,7 +1617,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       : const Icon(Icons.image_outlined, size: 22),
                 ),
                 IconButton(
-                  tooltip: '选择模型点位',
+                  tooltip: _l.commentSelectPoint,
                   onPressed: !_canComment || _sending
                       ? null
                       : widget.onPickPoint,
@@ -1608,8 +1651,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            '发送',
+                        : Text(
+                            _l.commentSend,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,

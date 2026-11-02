@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 import '../../../community/comments/comment_moderation_models.dart';
 import '../../../community/comments/comment_moderation_repository.dart';
 import '../../design_system.dart';
@@ -40,7 +42,7 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
   final Set<String> _acknowledgedRead = {};
   final Set<String> _markingRead = {};
   late final ValueNotifier<_InboxIdentity> _identity;
-  String? _error;
+  Object? _error;
   int _generation = 0;
   bool _loading = false;
   bool _opening = false;
@@ -109,7 +111,7 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
       if (!mounted || generation != _generation) return;
       setState(() {
         _notices = null;
-        _error = moderationError(error);
+        _error = error;
       });
       if (moderationIdentityChanged(error)) {
         _acknowledgedRead.clear();
@@ -149,7 +151,7 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
           moderationIdentityChanged(error)) {
         setState(() {
           _notices = null;
-          _error = moderationError(error);
+          _error = error;
         });
         _identity.value = (
           repository: widget.repository,
@@ -202,21 +204,26 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
     return Scaffold(
       backgroundColor: AetherColors.bgCanvas,
       appBar: AppBar(
-        title: const Text('系统收件箱'),
+        title: Text(AppL10n.of(context).moderationInboxTitle),
         backgroundColor: AetherColors.bgCanvas,
         foregroundColor: AetherColors.textPrimary,
         actions: [
           IconButton(
-            tooltip: '刷新通知',
+            tooltip: AppL10n.of(context).moderationRefreshNotices,
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh),
           ),
         ],
       ),
       body: !_signedIn
-          ? const ModerationMessage(message: '请登录后查看审核通知')
+          ? ModerationMessage(
+              message: AppL10n.of(context).moderationSignInRequired,
+            )
           : _error != null
-          ? ModerationMessage(message: _error!, retry: _load)
+          ? ModerationMessage(
+              message: moderationError(AppL10n.of(context), _error!),
+              retry: _load,
+            )
           : notices == null
           ? const Center(
               child: CircularProgressIndicator(color: AetherColors.primary),
@@ -227,9 +234,11 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
               child: notices.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        SizedBox(height: 120),
-                        ModerationMessage(message: '暂无审核通知'),
+                      children: [
+                        const SizedBox(height: 120),
+                        ModerationMessage(
+                          message: AppL10n.of(context).moderationNoNotices,
+                        ),
                       ],
                     )
                   : ListView.separated(
@@ -251,9 +260,15 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
     final unread =
         notice.readAt == null && !_acknowledgedRead.contains(notice.id);
     final title = switch (notice.kind) {
-      CommunityCommentNoticeKind.hidden => '评论已隐藏',
-      CommunityCommentNoticeKind.restored => '评论已恢复',
-      CommunityCommentNoticeKind.appealRejected => '申诉未通过',
+      CommunityCommentNoticeKind.hidden => AppL10n.of(
+        context,
+      ).moderationCommentHidden,
+      CommunityCommentNoticeKind.restored => AppL10n.of(
+        context,
+      ).moderationCommentRestored,
+      CommunityCommentNoticeKind.appealRejected => AppL10n.of(
+        context,
+      ).moderationAppealRejected,
     };
     final icon = switch (notice.kind) {
       CommunityCommentNoticeKind.hidden => Icons.visibility_off_outlined,
@@ -281,7 +296,7 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
                         Semantics(
                           key: Key('notice-unread-${notice.id}'),
                           container: true,
-                          label: '未读',
+                          label: AppL10n.of(context).moderationUnread,
                           child: const Icon(
                             Icons.circle,
                             size: 7,
@@ -294,7 +309,8 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
                   Text(notice.reasonText, style: AetherTextStyles.body),
                   const SizedBox(height: AetherSpacing.sm),
                   Text(
-                    notice.workTitle ?? '相关作品中的评论',
+                    notice.workTitle ??
+                        AppL10n.of(context).moderationRelatedWorkComment,
                     style: AetherTextStyles.bodySm,
                   ),
                   if (notice.commentPreview?.isNotEmpty ?? false)
@@ -310,7 +326,10 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
                     style: AetherTextStyles.caption,
                   ),
                   const SizedBox(height: AetherSpacing.sm),
-                  const Text('查看处理详情', style: AetherTextStyles.bodySm),
+                  Text(
+                    AppL10n.of(context).moderationViewCase,
+                    style: AetherTextStyles.bodySm,
+                  ),
                 ],
               ),
             ),

@@ -4,27 +4,69 @@
 //   1) country code + national number → provider issues verificationID
 //   2) enter 6-digit code → sign in / sign up
 //
-// [PHONE-AUTH 2026-08-23] 这一页此前从未被接入(原注释:"Not surfaced by
-// AuthRootView today"),所以里面的文案一直是硬编码中文。现已接上 —— 依据是
-// 《互联网用户账号信息管理规定》第九条:真实身份认证必须"基于**移动电话号码**、
-// 身份证件号码或者统一社会信用代码等方式",**邮箱不在这个列举里**,
-// 而且"用户不提供真实身份信息的,不得为其提供相关服务"。
-//
-// ⚠️ 服务端已完备(signInWithOtp + verifyOTP,注册路径一次成型),但要真正发出
-//    短信还需要:①Dashboard 启用 Phone provider ②配置 Send SMS Hook 指向
-//    supabase/functions/send-sms-hook ③给该函数配阿里云短信的 4 个 secret。
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../auth/auth_models.dart';
 import '../../auth/current_user.dart';
+import '../../auth/phone_country_catalog.dart';
+import '../../auth/phone_number_input.dart';
 import '../design_system.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/phone_country_names.dart';
 import '../legal/legal_doc_links_row.dart';
 import 'auth_shared_widgets.dart';
+import 'auth_minimal_widgets.dart';
+import 'phone_country_picker.dart';
 
 enum PhoneIntent { signIn, signUp }
+
+/// Page shell shared by the sign-in and sign-up routes. The form below stays
+/// embeddable for callers that already provide their own page structure.
+class PhoneAuthPage extends StatelessWidget {
+  final CurrentUser currentUser;
+  final PhoneIntent intent;
+
+  const PhoneAuthPage({
+    super.key,
+    required this.currentUser,
+    required this.intent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppL10n.of(context);
+    final signingUp = intent == PhoneIntent.signUp;
+    return Scaffold(
+      backgroundColor: AetherColors.bgCanvas,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const AuthTopBar(leading: AuthTopBarBack()),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AetherSpacing.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AuthHeading(
+                      title: signingUp ? l.authSignUp : l.authPhoneEntry,
+                      subtitle: signingUp
+                          ? l.authCreateAccount
+                          : l.authWelcomeBack,
+                    ),
+                    const SizedBox(height: AetherSpacing.xl),
+                    PhoneSignInView(currentUser: currentUser, intent: intent),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class PhoneSignInView extends StatefulWidget {
   final CurrentUser currentUser;
@@ -41,7 +83,7 @@ class PhoneSignInView extends StatefulWidget {
 }
 
 class _PhoneSignInViewState extends State<PhoneSignInView> {
-  final _countryCode = TextEditingController(text: '+86');
+  PhoneCountry _country = phoneCountryForIso('CN');
   final _nationalNumber = TextEditingController();
   final _displayName = TextEditingController();
   final _code = TextEditingController();
@@ -67,26 +109,26 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   @override
   void dispose() {
-    _countryCode.dispose();
     _nationalNumber.dispose();
     _displayName.dispose();
     _code.dispose();
     super.dispose();
   }
 
-  String get _e164 {
-    final cc = _countryCode.text.replaceAll(RegExp(r'[^0-9]'), '');
-    final number = _nationalNumber.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (cc.isEmpty || number.isEmpty) return '';
-    return '+$cc$number';
-  }
+  bool get _isSignUp => widget.intent == PhoneIntent.signUp;
 
-  bool get _canStart =>
-      _e164.isNotEmpty &&
-      _nationalNumber.text.replaceAll(RegExp(r'[^0-9]'), '').length >= 6;
+  String get _e164 =>
+      (_isSignUp
+          ? normalizePhoneSignup(_nationalNumber.text, _country)
+          : normalizePhoneLogin(_nationalNumber.text)) ??
+      '';
+
+  // Provider readiness is separate from metadata coverage. Keep overseas
+  // sends disabled until international SMS delivery is explicitly verified.
+  bool get _canStart => _e164.isNotEmpty && _e164.startsWith('+86');
 
   Future<void> _startVerification() async {
-    if (!_beginOperation()) return;
+    if (!_canStart || !_beginOperation()) return;
     try {
       final result = await widget.currentUser.startPhoneVerification(_e164);
       if (!mounted) return;
@@ -137,33 +179,113 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
     return _phoneEntryStep(l, working);
   }
 
+  Future<void> _selectCountry() async {
+    final country = await showPhoneCountryPicker(context);
+    if (country != null && mounted) {
+      setState(() => _country = country);
+    }
+  }
+
+  Widget _countryPrefix(bool working) {
+    final l = AppL10n.of(context);
+    final countryLabel = l.phoneCountryCallingCodeLabel(
+      phoneCountryName(l, _country.iso),
+      _country.callingCode,
+    );
+    return SizedBox(
+      width: 116,
+      child: Row(
+        children: [
+          Expanded(
+            child: Tooltip(
+              message: countryLabel,
+              excludeFromSemantics: true,
+              child: TextButton(
+                key: const ValueKey('phone-country-selector'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AetherColors.textPrimary,
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                ),
+                onPressed: working ? null : _selectCountry,
+                child: Semantics(
+                  label: countryLabel,
+                  excludeSemantics: true,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _country.flag,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '+${_country.callingCode}',
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        const Icon(Icons.arrow_drop_down, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            key: const ValueKey('phone-country-inline-separator'),
+            width: 1,
+            height: 24,
+            color: AetherColors.border,
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+    );
+  }
+
   Widget _phoneEntryStep(AppL10n l, bool working) {
     return Column(
       children: [
-        Row(
-          children: [
-            AuthField(
-              title: '+86',
-              controller: _countryCode,
-              keyboard: AuthFieldKeyboard.phone,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
-              ],
-              width: 84,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(width: AetherSpacing.sm),
-            Expanded(
-              child: AuthField(
-                title: l.authPhoneNumberHint,
-                controller: _nationalNumber,
-                keyboard: AuthFieldKeyboard.phone,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-          ],
+        AuthField(
+          title: l.authPhoneNumberHint,
+          controller: _nationalNumber,
+          leading: _isSignUp ? _countryPrefix(working) : null,
+          inputFormatters: [LengthLimitingTextInputFormatter(64)],
+          keyboard: AuthFieldKeyboard.phone,
+          onChanged: (_) => setState(() {}),
         ),
+        if (_isSignUp) ...[
+          const SizedBox(height: AetherSpacing.sm),
+          Text(
+            _country.mobileExample.isEmpty
+                ? l.phoneMobileFormatUnavailable
+                : l.phoneMobileExample(_country.mobileExample),
+            key: const ValueKey('phone-number-format-help'),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AetherColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AetherSpacing.sm),
+          Text(
+            l.phoneOverseasSignupUnavailable,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AetherColors.textSecondary,
+            ),
+          ),
+        ] else ...[
+          const SizedBox(height: AetherSpacing.sm),
+          Text(
+            l.phoneLoginHelp,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AetherColors.textSecondary,
+            ),
+          ),
+        ],
         if (widget.intent == PhoneIntent.signUp) ...[
           const SizedBox(height: AetherSpacing.md),
           AuthField(
@@ -183,15 +305,16 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
         // 法律文件的可达性必须两条路径都有。
         LegalDocLinksRow(prefix: l.authTermsAcceptancePrefix),
         const SizedBox(height: AetherSpacing.md),
-        Text(
-          l.authPhoneWillSend(_e164.isEmpty ? l.authPhoneYourNumber : _e164),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AetherColors.textTertiary,
-            height: 1.4,
+        if (_canStart)
+          Text(
+            l.authPhoneWillSend(_e164.isEmpty ? l.authPhoneYourNumber : _e164),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AetherColors.textTertiary,
+              height: 1.4,
+            ),
           ),
-        ),
       ],
     );
   }

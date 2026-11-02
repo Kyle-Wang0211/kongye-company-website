@@ -14,6 +14,9 @@ class SharedViewer extends StatefulWidget {
       this.onReady,
       this.onError,
       this.active = true,
+      this.pointerEventsEnabled = true,
+      this.pointerEventsEnabledNotifier,
+      this.uiStrings = const {},
       this.webEntryUri,
       this.retainedSession});
   final SharedViewerController controller;
@@ -21,6 +24,9 @@ class SharedViewer extends StatefulWidget {
   final ValueChanged<Object>? onError;
   final Uri? webEntryUri;
   final bool active;
+  final bool pointerEventsEnabled;
+  final ValueNotifier<bool>? pointerEventsEnabledNotifier;
+  final Map<String, String> uiStrings;
   final SharedViewerRetainedSession? retainedSession;
   @override
   State<SharedViewer> createState() => _SharedViewerState();
@@ -60,6 +66,7 @@ class _SharedViewerState extends State<SharedViewer>
       _session = session;
       _owned = supplied == null;
       session.acquirePresentation(this);
+      session.setUiStrings(this, widget.uiStrings);
       _leased = true;
       final epoch = _epoch;
       unawaited(session.waitForPresentationDrain(this).then((_) {
@@ -187,6 +194,7 @@ class _SharedViewerState extends State<SharedViewer>
         _sessionChanged();
       }
     }
+    _session?.setUiStrings(this, widget.uiStrings);
     _syncActivity();
   }
 
@@ -209,10 +217,11 @@ class _SharedViewerState extends State<SharedViewer>
     if (_localError != null ||
         session?.error != null ||
         session?.isDisposed == true) {
-      return const ColoredBox(
+      return ColoredBox(
           color: Color(0xff000000),
           child: Center(
-              child: Text('3D Viewer unavailable',
+              child: Text(
+                  widget.uiStrings['failure'] ?? '3D Viewer unavailable',
                   textDirection: TextDirection.ltr)));
     }
     final controller =

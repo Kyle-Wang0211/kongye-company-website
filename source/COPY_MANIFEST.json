@@ -1,16 +1,16 @@
 [
   {
     "path": "source/community_app/README.md",
-    "bytes": 8358,
-    "sha256": "3a8f8f9f89e7a94e953cd9a48608ee4a3973f49d69b04585d7abe0cc0b501ff4",
+    "bytes": 9870,
+    "sha256": "a29b412e10611aa7c98e8c6ecac92105a1d8d0ad482ed69efefe3f64f2a61e3f",
     "reasons": [
       "generated-public-package-documentation"
     ]
   },
   {
     "path": "source/community_app/SOURCE_IDENTITY.json",
-    "bytes": 1648,
-    "sha256": "23544c25f3c28be88b66f05612fa50300654cff19da3571dbf9edf80498001a5",
+    "bytes": 1641,
+    "sha256": "89e4219c7c6ac738beac315287c74d5426bc4e34f4dccc6e764deba972be3694",
     "reasons": [
       "generated-public-package-documentation"
     ]
@@ -396,6 +396,22 @@
     ]
   },
   {
+    "path": "source/community_app/lib/auth/phone_country_catalog.dart",
+    "bytes": 33965,
+    "sha256": "1e6bdfffb4948b3c69a7da5b6080a415b22defd9cae944db0f8c8073a6e31cb6",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/auth/phone_number_input.dart",
+    "bytes": 2005,
+    "sha256": "9d0ae10e77d0a456d1fbb580f0536379c4f92c23f713fc22b073d9b7e1d1d67c",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
     "path": "source/community_app/lib/auth/supabase_auth_service.dart",
     "bytes": 23310,
     "sha256": "bc675087525edb56aa60effea0d4d6f5e1c2a0c94cd3f36dbc5b32dd9cfdb720",
@@ -461,8 +477,8 @@
   },
   {
     "path": "source/community_app/lib/community/comments/comment_time.dart",
-    "bytes": 998,
-    "sha256": "74eee6efaaa98923701318f9eaa86a5b07cd1e38c76356a803aed9cb50d31544",
+    "bytes": 1209,
+    "sha256": "87ef51a80ab22999aa7dae92b30dbd0067a0895606b344a3c6f449682e6b8017",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -597,8 +613,8 @@
   },
   {
     "path": "source/community_app/lib/l10n/app_en.arb",
-    "bytes": 21243,
-    "sha256": "cb594c697b03abd2651bdab54395ee6ee0e376d9c23f6b747e93fd7bfd9a899d",
+    "bytes": 111440,
+    "sha256": "5b0d9c2b8a93f65d20bd976eddb00fbfc4df0b432bd29f1787a4d0e5155770b9",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -606,8 +622,8 @@
   },
   {
     "path": "source/community_app/lib/l10n/app_localizations.dart",
-    "bytes": 61629,
-    "sha256": "c2958eb13fcf179858e7b046cf83553613ac87c3a89e03f1db6cb3acef707017",
+    "bytes": 238914,
+    "sha256": "04d4b2abd2e9733ef8c7dc579b149dc99698d605db1f0d412e5c3d5fc6f5c995",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -615,8 +631,8 @@
   },
   {
     "path": "source/community_app/lib/l10n/app_localizations_en.dart",
-    "bytes": 26729,
-    "sha256": "d2f427ce210acfd0682bea57b68ebd279a2eb658b86842321e9223845e25170d",
+    "bytes": 134556,
+    "sha256": "0607d1620b45625793481f52c017c0f8dbe8e844485c58fb05a5db0674e6e5e0",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -624,8 +640,8 @@
   },
   {
     "path": "source/community_app/lib/l10n/app_localizations_zh.dart",
-    "bytes": 25766,
-    "sha256": "7aea54f36a472cdf4c43606fd1a04200e650d227e7ac6849c5d10040eacf5944",
+    "bytes": 122577,
+    "sha256": "67f0d40930c49048954b3a23cb18354cf58b5e059f6b7b6f83e4ffab5dc2c2bd",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -633,17 +649,25 @@
   },
   {
     "path": "source/community_app/lib/l10n/app_zh.arb",
-    "bytes": 18250,
-    "sha256": "28381cc412be7e7375a0d7b18cd65eb9cfa3020226c6cb2ee82ed6990b026740",
+    "bytes": 96393,
+    "sha256": "1a88568d4a122945870d264c2ff60ec4c4979aae26e9fdadea1c997356159dab",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
   },
   {
+    "path": "source/community_app/lib/l10n/phone_country_names.dart",
+    "bytes": 7107,
+    "sha256": "59d9bc7f4dc02d347214f3a898bfb4c8336632130cc8dc877fd88a1ab41e8671",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
     "path": "source/community_app/lib/main_community_web.dart",
-    "bytes": 9261,
-    "sha256": "c62f5bc178c837e4622714c91df5c0af455b352e621e01d1936668f7439a945f",
+    "bytes": 9331,
+    "sha256": "7fd2f64099d82b1b482099ecb42a875497992a06eb990c5209541e2b90336b5c",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -674,24 +698,24 @@
   },
   {
     "path": "source/community_app/lib/ui/auth/auth_root_view.dart",
-    "bytes": 11239,
-    "sha256": "78ab44eeb621a6e5f5a86af9c8b93f1a6ab1bac9e0cb65667f20bad07febde79",
+    "bytes": 9360,
+    "sha256": "cb079649665b43f30261a2d746cf4be75249cc8f19dc0e33620aa4f3f2ea888d",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/auth/auth_shared_widgets.dart",
-    "bytes": 9925,
-    "sha256": "8fc29e7e41020c9778bfce1e3110d813981944c472eaaa988721a310591cf04e",
+    "bytes": 10056,
+    "sha256": "e4d8007960960056f0fdeb958837d0f39651df41761066ddeed45657762c1bef",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/auth/email_sign_in_view.dart",
-    "bytes": 7827,
-    "sha256": "7a48c10b6bf3b54198160aac9949044bb1274c11a6f35b5d756de78e6efb2e7a",
+    "bytes": 8525,
+    "sha256": "af2ed6b4a46b2ad4c1ce1d6858045147fc6a6e4f2633edda0c45e2d5ee027d1c",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -705,9 +729,17 @@
     ]
   },
   {
+    "path": "source/community_app/lib/ui/auth/phone_country_picker.dart",
+    "bytes": 2508,
+    "sha256": "2baa996a312e05e264d7c8efb8e1387bd3e0eb11849962b36392700bba7dd833",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
     "path": "source/community_app/lib/ui/auth/phone_sign_in_view.dart",
-    "bytes": 8212,
-    "sha256": "30fdf2727f9164ecadd7b914791f2b55a0dba4ab31a05acef1eb12ba7a1a2bd3",
+    "bytes": 11898,
+    "sha256": "91de6812b6e7af4bad4f58e41a5dcf7325de7682cb860f39788a3b1aed79cf2d",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -722,8 +754,8 @@
   },
   {
     "path": "source/community_app/lib/ui/community/aether_cpp_card_demo.dart",
-    "bytes": 3577,
-    "sha256": "80820658b85d95234c7d6a901b323dda09026d996026f2b8c19a3a82b17c9530",
+    "bytes": 3860,
+    "sha256": "9d70bd3cc8ea25788c19e64a8101618ae4dc406ad50dd5556c9d33db2f2fd77c",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -746,18 +778,26 @@
   },
   {
     "path": "source/community_app/lib/ui/community/comments/comment_report_sheet.dart",
-    "bytes": 6297,
-    "sha256": "4d7511cb2d551e46bd32942bc078e24fa5817884be90500d2b0db0d7db9c08e1",
+    "bytes": 6291,
+    "sha256": "12f34f58ddaedcc17ba6311b1a82ff42feea28af3de45fe1d176402e295fe2af",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/community/comments/community_comments_panel.dart",
-    "bytes": 59408,
-    "sha256": "41dd40e770cab3d71b0e7f490282975baed6d390a53d87e3b33f26b35ce746ed",
+    "bytes": 60640,
+    "sha256": "92ed102d43c69126767d051c401ca4bcf069ce187d93eb2b142cc3d2b2c34b98",
     "reasons": [
       "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/community_loading.dart",
+    "bytes": 3184,
+    "sha256": "ae4fbb32fc8f17f7328219901ca0f0838651fcf72869785ab55bd1f99f1438f0",
+    "reasons": [
+      "aligned-community-production-source-and-regression"
     ]
   },
   {
@@ -794,42 +834,50 @@
   },
   {
     "path": "source/community_app/lib/ui/community/notifications/community_comment_case_page.dart",
-    "bytes": 12887,
-    "sha256": "22137f0e60dc2ada2a229b5a483520eec1a712083fa93fc0ae048f16dbc3c0c3",
+    "bytes": 14240,
+    "sha256": "babec2dd7fbd699ed86f90a5c5972b3327ed2b516d0c235ba6223d7e15dda2d8",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/community/notifications/community_comment_inbox_button.dart",
-    "bytes": 4296,
-    "sha256": "910e6a27e424a66beb7e698d124846f53dc020a5334dfa8bdf5f73ab8251f877",
+    "bytes": 4408,
+    "sha256": "b994c77fc44676c8ee7d3de2f3e2ba343752bce0c725b69a074485e58933a776",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/community/notifications/community_comment_inbox_page.dart",
-    "bytes": 10834,
-    "sha256": "c8fc8259023bf8e62cee2d387e515b89407405ff7ca92b422f3f298cc207f32c",
+    "bytes": 11362,
+    "sha256": "e19599d4335071294dcf5ba46c3b5d95ee9fcdb1083c76452e51d870ef1be723",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/community/notifications/moderation_ui_support.dart",
-    "bytes": 3009,
-    "sha256": "8a6d6071422f9cc22f4a63fd947e368cff20a9816457d8eed1b0226e646e71ec",
+    "bytes": 3077,
+    "sha256": "4dfc9ded4fb4ff8349e877fca853f54f80e70b11ceb21b2d3cfba9d3dee9e9ce",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/community/public_work_entry.dart",
-    "bytes": 3543,
-    "sha256": "2f0d0653f9bd533a824d8aceabcfef5c4ae1103c6f1c4c42b58327a24262de6a",
+    "bytes": 3767,
+    "sha256": "88000681e0b2be4a3b14dc2989351aecc2a9d8333ebdbe35422d967c00259ff5",
     "reasons": [
       "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/community/published_cover.dart",
+    "bytes": 797,
+    "sha256": "04eab2128be83f793a248bc3859e10d87ed282562543e100a6c3cebe565ed3be",
+    "reasons": [
+      "aligned-community-production-source-and-regression"
     ]
   },
   {
@@ -850,16 +898,16 @@
   },
   {
     "path": "source/community_app/lib/ui/community/work_card.dart",
-    "bytes": 17593,
-    "sha256": "a4c98e3ce072a99149ca2687703c87cccd421314cf2220c9d6cadaeb3b5c17ac",
+    "bytes": 17726,
+    "sha256": "73bab2bca62db3d4443e6d20913747b9d5f14e2c1d20bda6e3988cc56e67c736",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/community/work_detail_page.dart",
-    "bytes": 47851,
-    "sha256": "599e9a9dc0d52b60bb73740cbe917f3422e8ab9f7a0d7be59a787f92f24811f2",
+    "bytes": 52403,
+    "sha256": "ca1017b580092d4a102b62724e410d528bf7cd3c40eb84858b3922238dd542f6",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -890,8 +938,8 @@
   },
   {
     "path": "source/community_app/lib/ui/legal/legal_doc_page.dart",
-    "bytes": 5054,
-    "sha256": "c528c27780ddd399c1917e090947af127db1f978c312aaed0ac6a674401d18a3",
+    "bytes": 5208,
+    "sha256": "51ac0df0d4c2e32e5a9e3a6eecc3bdb914ee9fa4a12796447f85d5816728ef97",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -906,26 +954,34 @@
   },
   {
     "path": "source/community_app/lib/ui/legal/platform_rules_page.dart",
-    "bytes": 4579,
-    "sha256": "44ea3a12ec699f1895cffda7ccbc99ad1d533fe6402d7eb2f677a5d902583636",
+    "bytes": 4867,
+    "sha256": "2e25034fed29422ce60e82a0346634c764a27e23ab71afd3398230b25a33fe14",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/legal/privacy_policy_content.dart",
-    "bytes": 21213,
-    "sha256": "4c0ba2d460068b8b71a0d415fa43ef42a46767b3b62fe822192f8df6f85ffa7e",
+    "bytes": 24904,
+    "sha256": "49cb5844a8889520c0c0a459e2fc711499b2f3d51a77de3df806131a4f86175d",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/legal/user_agreement_content.dart",
-    "bytes": 27804,
-    "sha256": "84cb4330f761d35683caa9a14f3164f14617675ad6f124ca022383926e5cf53b",
+    "bytes": 31849,
+    "sha256": "cae61f481f3e41f76a7d8418cda12c393337657c9d2e015c382c0e8c682aecbd",
     "reasons": [
       "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/me_page.dart",
+    "bytes": 56464,
+    "sha256": "8b74fdf0cf90ba2014b51d425a384da2fabc372a38036e7aed187653b27e0e4e",
+    "reasons": [
+      "approved-shared-ui-and-tests"
     ]
   },
   {
@@ -934,6 +990,14 @@
     "sha256": "51290fda2815ef28fe28184eb3ebcd140e868af929b8d4f3317ecc9ddd7529e9",
     "reasons": [
       "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/official_capture/capture_exit_dialog.dart",
+    "bytes": 13269,
+    "sha256": "d69354595971d2183a1ef7279d996f3fa6d7981de82cca598adf8ae354aba264",
+    "reasons": [
+      "approved-shared-ui-and-tests"
     ]
   },
   {
@@ -994,18 +1058,26 @@
   },
   {
     "path": "source/community_app/lib/ui/shared/product_model_view.dart",
-    "bytes": 34379,
-    "sha256": "a4394d3d55fa5e110ab2ab0544e323d971358b4017a6d6787f48acd571528ac6",
+    "bytes": 36576,
+    "sha256": "911a1ee5ff586cf1639ca496f6618c41595efb8f835f836b93658af411880d63",
     "reasons": [
       "actual-web-build-dependency"
     ]
   },
   {
     "path": "source/community_app/lib/ui/shared/product_point_view.dart",
-    "bytes": 14377,
-    "sha256": "f31ac7a7abd7b4c03a4f5b8c7f88b1bf531634cb2c6b75ca10e9266ee8c8d327",
+    "bytes": 14958,
+    "sha256": "318e22e14cd4721ea025a8ebe0af29ed7a4ecf854a814e2eb5b52ba957393ab2",
     "reasons": [
       "actual-web-build-dependency"
+    ]
+  },
+  {
+    "path": "source/community_app/lib/ui/splash_solving_orb.dart",
+    "bytes": 19216,
+    "sha256": "b4ab0d127341154933aa2005dd8b0827c863eb712ce355cd50a1b3e03e8cb6b8",
+    "reasons": [
+      "approved-shared-ui-and-tests"
     ]
   },
   {
@@ -1018,8 +1090,8 @@
   },
   {
     "path": "source/community_app/lib/ui/vault_page.dart",
-    "bytes": 35368,
-    "sha256": "bb614b75afc97ef68c41734de142add4303da2043453114e04d4ccf4d7d8a4e9",
+    "bytes": 35496,
+    "sha256": "1b2112f3906af8425d2f545da5500a8dfe395af3ca25f4047cb0f716c7384cee",
     "reasons": [
       "actual-web-build-dependency"
     ]
@@ -1108,8 +1180,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/native_retained_session.dart",
-    "bytes": 11982,
-    "sha256": "2f5bf20a0299c5a61f499f472c4641dd4ed52f4cae94ea05ee34146a6fd90046",
+    "bytes": 12881,
+    "sha256": "026cacbab781c251bc8ac59a852cab7f148d5854616a442d53361ba101e1727b",
     "reasons": [
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
@@ -1152,24 +1224,24 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_native.dart",
-    "bytes": 6734,
-    "sha256": "61ae4ddf1e236a121f5c8f52ccf84ee92289837ebb869cd668cb8d9dd7635b51",
+    "bytes": 7129,
+    "sha256": "904795506977198464793baf496d6ecb08041bccefcea46b7bdee75610ab1b43",
     "reasons": [
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_unsupported.dart",
-    "bytes": 811,
-    "sha256": "501f0bd1b5147b82d7a8369928a0f427622ec0f4e43b7910b4d12758b6813713",
+    "bytes": 1091,
+    "sha256": "0fb8c9b4b8add9cfcd9d70e9e0955512b5e348db0df1068cf910d3576dd87595",
     "reasons": [
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/lib/src/viewer_web.dart",
-    "bytes": 6561,
-    "sha256": "d20d6c57adaaf8eb10072c33dd9d97abeabc90645c706cdee5665159a9047499",
+    "bytes": 9050,
+    "sha256": "2613f50ef636856a328419179123ac2a2c60bdb78f3dc60c7a1c636bbb08cf13",
     "reasons": [
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
@@ -1216,6 +1288,22 @@
     ]
   },
   {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/bundle_verification_loading.test.mjs",
+    "bytes": 3691,
+    "sha256": "8ba76d009624534bb3f44d8b09d2c22cd9544e6af799ea4d4edba5907ccf68ff",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/direct_gesture_camera.test.mjs",
+    "bytes": 5779,
+    "sha256": "defcaa45b5ac6b4d5932578aedf4aad03a986afdbabce70a146fc3a014530424",
+    "reasons": [
+      "production-viewer-camera-regression"
+    ]
+  },
+  {
     "path": "source/community_app/packages/pw_shared_viewer/tests/fixtures/skp/LICENSE",
     "bytes": 1075,
     "sha256": "7c70ac0b7916390744a5f6361c59008cada08149a54348530b767953e050dbc6",
@@ -1253,6 +1341,14 @@
     "sha256": "e607c0a8876f27691e3b8b04b662c9b636e7f564634f559086afd25be56bf142",
     "reasons": [
       "spatial-comment-release-source"
+    ]
+  },
+  {
+    "path": "source/community_app/packages/pw_shared_viewer/tests/initial_cover_camera.test.mjs",
+    "bytes": 5660,
+    "sha256": "a1fd2c2a0c8d0149b709cd9c0862fa395fbed98f3a4651d56464172ed73b3b51",
+    "reasons": [
+      "production-viewer-camera-regression"
     ]
   },
   {
@@ -1306,7 +1402,7 @@
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json",
     "bytes": 3196,
-    "sha256": "fccf78c5561d62073cf9a2a52ab221d2ac446ea7e50ee75fdf6025b395d1fa9c",
+    "sha256": "0871e0629206fb22e3c224f2d30ff8efedfc01de707afaf9b18c3d305e0547d3",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1369,8 +1465,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/bundle_identity.mjs",
-    "bytes": 2165,
-    "sha256": "ddbe24cc4e7884d82a427ec6f1e263acdc07f0c1f99e7afba4828eabede216c9",
+    "bytes": 2683,
+    "sha256": "07cb9352c34f7e6340c8b6805d1fb897c7d0d2b4cb571c715578586ba656c239",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1399,8 +1495,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/web/index.html",
-    "bytes": 3600,
-    "sha256": "17a2a6f291688b9afe365a9f8ae35b3aea84c4acabf5c25f9a90d60b2a2a195a",
+    "bytes": 5617,
+    "sha256": "65edd1c06452fd4ea1fac22d837cfde177d288dc987a048038719c6bc21af448",
     "reasons": [
       "actual-web-build-dependency",
       "unchanged-pubspec-asset-declaration",
@@ -1607,9 +1703,49 @@
     ]
   },
   {
+    "path": "source/community_app/test/auth_login_prefix_test.dart",
+    "bytes": 3899,
+    "sha256": "4bc35ea51e280535e52ae0857ab4ad0e2f253f8e127f219a11a37c8b782d5265",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_aligned_grid_test.dart",
+    "bytes": 12551,
+    "sha256": "0a3e0e7c8b6cb9755c218b94afd4f26fd44393a498957c7028341866b03d989e",
+    "reasons": [
+      "aligned-community-production-source-and-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_anonymous_panel_test.dart",
+    "bytes": 3616,
+    "sha256": "99dac019ef12da87f0933eb6d272e0c8a5f88bb411debafcbd85d31f12fa9883",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_author_reply_test.dart",
+    "bytes": 3233,
+    "sha256": "6e96a6c6b7aa4d5c8e22417404650ab3bbbc5a7c5fae56b35a064e2130964dfa",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_comment_actions_test.dart",
+    "bytes": 31354,
+    "sha256": "85fbe3a347cfdebae4e6d39a64634ade9e28ba3aa55e41b7d744d769fc4081b7",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
     "path": "source/community_app/test/community_comment_time_test.dart",
-    "bytes": 2102,
-    "sha256": "f88b51edeee2d05801115b7e28835885ec24e6809523e4f041dac8efe226f711",
+    "bytes": 3389,
+    "sha256": "389de8d6a8eff705e5f23c5e6f301e02a29172692ff7817a7168327b095070cc",
     "reasons": [
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
@@ -1620,6 +1756,102 @@
     "sha256": "c81daa3defc6f3e33bdd8e496282b10177fa273132f800f3f468db9a5252a508",
     "reasons": [
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_comments_feed_panel_test.dart",
+    "bytes": 12484,
+    "sha256": "f4dbd0bd58c59ee9f6333cbe817b3cbb77964e673ccf61ebb80cfd46e5c1e0b4",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_comments_panel_test.dart",
+    "bytes": 32679,
+    "sha256": "c4a176a615ab60d0619ff8f9ecc74483438f0931a989610e0096cced6b29894b",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
+    "path": "source/community_app/test/community_published_cover_test.dart",
+    "bytes": 1042,
+    "sha256": "b6bdc1690a19ffa4a5f8cf619f275c5d08bf3048c47b42cf1c39a57ceb0cd2dd",
+    "reasons": [
+      "aligned-community-production-source-and-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/phone_auth_routes_test.dart",
+    "bytes": 4604,
+    "sha256": "bfe38a364f1061f21fd463cd10849a546ca60a5cb725c380e40814ac9c1edfd0",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/phone_bilingual_test.dart",
+    "bytes": 4388,
+    "sha256": "3bbc2eedec058050af81f42ba7c23ed4539e9f2737db8b367bbc8d149d70a918",
+    "reasons": [
+      "approved-shared-ui-and-tests"
+    ]
+  },
+  {
+    "path": "source/community_app/test/phone_country_ui_test.dart",
+    "bytes": 4450,
+    "sha256": "42018a3bf62a0a7c3ab9353961b430d48cf8ffb927c95b073270f059673cc402",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/phone_inline_country_prefix_test.dart",
+    "bytes": 3859,
+    "sha256": "98fea05f9dcba21d5373ac7cabf6b43a5e0b04331deac0e391030df56a0c1079",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/phone_number_input_test.dart",
+    "bytes": 3199,
+    "sha256": "9d8c9161ba866ed47b071760a390ccaf66f559d4537406e7734ae6fb5d264082",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/test/phone_sign_in_singleflight_test.dart",
+    "bytes": 11629,
+    "sha256": "4f348dabca5e5bd5c4729f81b8ccd9d63e6d50b92f1b95db146572fd0e4901b3",
+    "reasons": [
+      "shared-auth-source-or-regression"
+    ]
+  },
+  {
+    "path": "source/community_app/third_party/libphonenumber/LICENSE",
+    "bytes": 10173,
+    "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+    "reasons": [
+      "vendored-data-license-and-provenance"
+    ]
+  },
+  {
+    "path": "source/community_app/third_party/libphonenumber/NOTICE",
+    "bytes": 958,
+    "sha256": "daef63de8df58953e157562dc295ca78958bb55ed39ab1af27fa85ddec72fd5e",
+    "reasons": [
+      "vendored-data-license-and-provenance"
+    ]
+  },
+  {
+    "path": "source/community_app/third_party/libphonenumber/PROVENANCE.json",
+    "bytes": 789,
+    "sha256": "c1e0e1189e57a3d479734beaabfd95ddfa08c2bfb45253987140469b5924cb6b",
+    "reasons": [
+      "vendored-data-license-and-provenance"
     ]
   },
   {
@@ -1729,53 +1961,5 @@
       "actual-web-build-dependency",
       "web-entry-localizations-pure-tests-and-shared-viewer-source"
     ]
-  },
-  {
-    "path": "source/community_app/packages/pw_shared_viewer/tests/initial_cover_camera.test.mjs",
-    "reasons": [
-      "production-viewer-camera-regression"
-    ],
-    "sha256": "a1fd2c2a0c8d0149b709cd9c0862fa395fbed98f3a4651d56464172ed73b3b51",
-    "bytes": 5660
-  },
-  {
-    "path": "source/community_app/packages/pw_shared_viewer/tests/direct_gesture_camera.test.mjs",
-    "reasons": [
-      "production-viewer-camera-regression"
-    ],
-    "sha256": "defcaa45b5ac6b4d5932578aedf4aad03a986afdbabce70a146fc3a014530424",
-    "bytes": 5779
-  },
-  {
-    "path": "source/community_app/lib/ui/community/community_loading.dart",
-    "reasons": [
-      "aligned-community-production-source-and-regression"
-    ],
-    "bytes": 3184,
-    "sha256": "ae4fbb32fc8f17f7328219901ca0f0838651fcf72869785ab55bd1f99f1438f0"
-  },
-  {
-    "path": "source/community_app/lib/ui/community/published_cover.dart",
-    "reasons": [
-      "aligned-community-production-source-and-regression"
-    ],
-    "bytes": 797,
-    "sha256": "04eab2128be83f793a248bc3859e10d87ed282562543e100a6c3cebe565ed3be"
-  },
-  {
-    "path": "source/community_app/test/community_aligned_grid_test.dart",
-    "reasons": [
-      "aligned-community-production-source-and-regression"
-    ],
-    "bytes": 12039,
-    "sha256": "7ae18d468a58e7e594a6151d218afa838d36dfb55afc7dc44aa76ac64872fd85"
-  },
-  {
-    "path": "source/community_app/test/community_published_cover_test.dart",
-    "reasons": [
-      "aligned-community-production-source-and-regression"
-    ],
-    "bytes": 1042,
-    "sha256": "b6bdc1690a19ffa4a5f8cf619f275c5d08bf3048c47b42cf1c39a57ceb0cd2dd"
   }
 ]

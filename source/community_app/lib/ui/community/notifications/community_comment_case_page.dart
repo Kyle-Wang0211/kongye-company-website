@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 import '../../../community/comments/comment_moderation_models.dart';
 import '../../../community/comments/comment_moderation_repository.dart';
 import '../../design_system.dart';
@@ -33,7 +35,7 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
         ActiveModerationRefresh<CommunityCommentCasePage> {
   final _statement = TextEditingController();
   CommunityCommentModerationCase? _case;
-  String? _error;
+  Object? _error;
   String? _requestId;
   String _lastStatement = '';
   int _generation = 0;
@@ -110,7 +112,7 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
       }
       setState(() {
         _case = null;
-        _error = moderationError(error);
+        _error = error;
         if (moderationIdentityChanged(error)) {
           _statement.clear();
           _requestId = null;
@@ -165,7 +167,7 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
     } catch (error) {
       if (!mounted || generation != _generation) return;
       setState(() {
-        _error = moderationError(error);
+        _error = error;
         if (moderationIdentityChanged(error)) {
           _case = null;
           _statement.clear();
@@ -195,22 +197,27 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
     return Scaffold(
       backgroundColor: AetherColors.bgCanvas,
       appBar: AppBar(
-        title: const Text('评论处理详情'),
+        title: Text(AppL10n.of(context).moderationCaseTitle),
         backgroundColor: AetherColors.bgCanvas,
         foregroundColor: AetherColors.textPrimary,
         actions: [
           IconButton(
-            tooltip: '刷新处理结果',
+            tooltip: AppL10n.of(context).moderationRefreshCase,
             onPressed: _loading || _submitting ? null : _load,
             icon: const Icon(Icons.refresh),
           ),
         ],
       ),
       body: !_signedIn
-          ? const ModerationMessage(message: '请登录后查看审核通知')
+          ? ModerationMessage(
+              message: AppL10n.of(context).moderationSignInRequired,
+            )
           : detail == null
           ? _error != null
-                ? ModerationMessage(message: _error!, retry: _load)
+                ? ModerationMessage(
+                    message: moderationError(AppL10n.of(context), _error!),
+                    retry: _load,
+                  )
                 : const Center(
                     child: CircularProgressIndicator(
                       color: AetherColors.primary,
@@ -236,47 +243,64 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
                     ),
                     const SizedBox(height: AetherSpacing.lg),
                     Text(
-                      detail.isHidden ? '评论已隐藏' : '评论已恢复',
+                      detail.isHidden
+                          ? AppL10n.of(context).moderationCommentHidden
+                          : AppL10n.of(context).moderationCommentRestored,
                       style: AetherTextStyles.h1,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AetherSpacing.sm),
                     Text(
-                      detail.isHidden ? '这条评论目前对其他人不可见。' : '服务端确认这条评论已恢复可见。',
+                      detail.isHidden
+                          ? AppL10n.of(context).moderationCommentHiddenBody
+                          : AppL10n.of(context).moderationCommentRestoredBody,
                       style: AetherTextStyles.bodySm,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AetherSpacing.xxl),
-                    const Text('处理原因', style: AetherTextStyles.h3),
+                    Text(
+                      AppL10n.of(context).moderationReason,
+                      style: AetherTextStyles.h3,
+                    ),
                     const SizedBox(height: AetherSpacing.sm),
                     Text(detail.reasonText, style: AetherTextStyles.body),
                     const SizedBox(height: AetherSpacing.lg),
                     Text(
-                      '处理时间：${moderationDate(detail.decidedAt)}',
+                      AppL10n.of(context).moderationDecisionTime(
+                        moderationDate(detail.decidedAt),
+                      ),
                       style: AetherTextStyles.bodySm,
                     ),
                     const Divider(
                       height: AetherSpacing.xxl,
                       color: AetherColors.border,
                     ),
-                    const Text('关联内容', style: AetherTextStyles.h3),
+                    Text(
+                      AppL10n.of(context).moderationRelatedContent,
+                      style: AetherTextStyles.h3,
+                    ),
                     const SizedBox(height: AetherSpacing.sm),
                     Text(
-                      detail.workTitle ?? '该评论所属作品',
+                      detail.workTitle ??
+                          AppL10n.of(context).moderationCommentWork,
                       style: AetherTextStyles.bodySm,
                     ),
                     const SizedBox(height: AetherSpacing.xs),
                     Text(
-                      detail.commentPreview ?? '该条评论目前已隐藏，可在此查看处理结果并提出申诉。',
+                      detail.commentPreview ??
+                          AppL10n.of(context).moderationHiddenPreview,
                       style: AetherTextStyles.bodySm,
                     ),
                     const SizedBox(height: AetherSpacing.xl),
                     ..._appealResult(detail),
                     if (_canAppeal) ...[
-                      const Text('申请复核', style: AetherTextStyles.h3),
+                      Text(
+                        AppL10n.of(context).moderationRequestReview,
+                        style: AetherTextStyles.h3,
+                      ),
                       const SizedBox(height: AetherSpacing.sm),
-                      const Text(
-                        '请说明需要复核的原因。申诉处理期间，评论保持隐藏。',
+                      Text(
+                        AppL10n.of(context).moderationRequestReviewBody,
                         style: AetherTextStyles.bodySm,
                       ),
                       const SizedBox(height: AetherSpacing.md),
@@ -289,11 +313,17 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
                         maxLength: null,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
-                          labelText: '申诉说明',
-                          hintText: '补充上下文或说明你认为需要复核的地方',
+                          labelText: AppL10n.of(
+                            context,
+                          ).moderationAppealStatement,
+                          hintText: AppL10n.of(
+                            context,
+                          ).moderationAppealStatementHint,
                           counterText: '${_statement.text.length}/1000',
                           errorText: _statement.text.length > 1000
-                              ? '申诉说明不能超过 1000 字符'
+                              ? AppL10n.of(
+                                  context,
+                                ).moderationAppealStatementTooLong
                               : null,
                           alignLabelWithHint: true,
                           border: OutlineInputBorder(
@@ -312,15 +342,22 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
                         onPressed: !_submitting && _validStatement
                             ? _submit
                             : null,
-                        child: Text(_submitting ? '正在提交…' : '提交申诉'),
+                        child: Text(
+                          _submitting
+                              ? AppL10n.of(context).moderationSubmitting
+                              : AppL10n.of(context).moderationSubmitAppeal,
+                        ),
                       ),
                     ],
                     if (_error != null) ...[
                       const SizedBox(height: AetherSpacing.md),
                       Text(
-                        _error!,
+                        moderationError(AppL10n.of(context), _error!),
                         style: AetherTextStyles.bodySm,
-                        semanticsLabel: _error,
+                        semanticsLabel: moderationError(
+                          AppL10n.of(context),
+                          _error!,
+                        ),
                       ),
                     ],
                     const SizedBox(height: AetherSpacing.lg),
@@ -334,9 +371,15 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
   List<Widget> _appealResult(CommunityCommentModerationCase detail) {
     final title = switch (detail.appealStatus) {
       CommunityCommentAppealStatus.none => null,
-      CommunityCommentAppealStatus.submitted => '申诉已提交',
-      CommunityCommentAppealStatus.approved => '申诉已通过',
-      CommunityCommentAppealStatus.rejected => '申诉未通过',
+      CommunityCommentAppealStatus.submitted => AppL10n.of(
+        context,
+      ).moderationAppealSubmitted,
+      CommunityCommentAppealStatus.approved => AppL10n.of(
+        context,
+      ).moderationAppealApproved,
+      CommunityCommentAppealStatus.rejected => AppL10n.of(
+        context,
+      ).moderationAppealRejected,
     };
     if (title == null) return [];
     return [
@@ -344,8 +387,9 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
       const SizedBox(height: AetherSpacing.sm),
       Text(
         detail.appealStatus == CommunityCommentAppealStatus.submitted
-            ? '请等待复核结果。处理期间评论保持隐藏，无需重复提交。'
-            : detail.appealResult ?? '处理结果以当前评论状态为准。',
+            ? AppL10n.of(context).moderationAppealPendingBody
+            : detail.appealResult ??
+                  AppL10n.of(context).moderationAppealResultFallback,
         style: AetherTextStyles.body,
       ),
       const SizedBox(height: AetherSpacing.xl),

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'local_work_viewer_session.dart';
 
 /// Injects the surface only in deterministic widget tests. Product callers use
@@ -382,6 +383,20 @@ class _ProductPointViewState extends State<ProductPointView> {
     super.dispose();
   }
 
+  Map<String, String> _viewerUiStrings(BuildContext context) {
+    final l = Localizations.of<AppL10n>(context, AppL10n);
+    if (l == null) return const {};
+    return {
+      'locale': l.localeName,
+      'title': l.sharedViewerTitle,
+      'canvasLabel': l.sharedViewerCanvasLabel,
+      'initializing': l.sharedViewerInitializing,
+      'loading': l.sharedViewerLoading,
+      'failure': l.sharedViewerFailure,
+      'skpNotice': l.sharedViewerSkpNotice,
+    };
+  }
+
   @override
   Widget build(BuildContext context) =>
       !_controllerReady || !(widget.localWork?.store.isActive ?? true)
@@ -389,10 +404,10 @@ class _ProductPointViewState extends State<ProductPointView> {
           color: widget.background,
           child: _error == null
               ? const SizedBox.expand()
-              : const Center(
+              : Center(
                   child: Text(
-                    '暂时无法显示模型，本地数据已保留',
-                    style: TextStyle(color: Colors.white70),
+                    AppL10n.of(context).viewerModelUnavailableDataKept,
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ),
         )
@@ -409,6 +424,7 @@ class _ProductPointViewState extends State<ProductPointView> {
               children: [
                 widget.viewerBuilder?.call(_controller, _onReady, _onError) ??
                     SharedViewer(
+                      uiStrings: _viewerUiStrings(context),
                       controller: _controller,
                       retainedSession:
                           _localLease?.retainedSession ??
@@ -417,13 +433,13 @@ class _ProductPointViewState extends State<ProductPointView> {
                       onError: _onError,
                     ),
                 if (_error != null)
-                  const Align(
+                  Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: Text(
-                        '暂时无法显示模型，本地数据已保留',
-                        style: TextStyle(color: Colors.white70),
+                        AppL10n.of(context).viewerModelUnavailableDataKept,
+                        style: const TextStyle(color: Colors.white70),
                       ),
                     ),
                   ),

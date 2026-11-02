@@ -19,12 +19,25 @@ export async function verifyBundle({ manifest, fetchResource, crypto = globalThi
   if (await sha256(new TextEncoder().encode(JSON.stringify(canonical))) !== manifest.bundle_sha256) {
     throw new Error('Bundle manifest identity mismatch');
   }
-  // Keep at most one extra asset buffer alive, including on memory-constrained phones.
-  for (const path of paths) {
-    if (await sha256(await fetchResource(path)) !== manifest.files[path]) {
-      throw new Error(`Viewer resource identity mismatch: ${path}`);
+  // Four workers bound fetched buffers while overlapping network round trips.
+  // A worker finishes hashing before taking another path. On failure, stop
+  // dispatching and settle all in-flight fetches/hashes before rejecting.
+  let nextPath = 0;
+  let failed = false, firstError;
+  async function verifyNext() {
+    while (!failed && nextPath < paths.length) {
+      const path = paths[nextPath++];
+      try {
+        if (await sha256(await fetchResource(path)) !== canonical[path]) {
+          throw new Error(`Viewer resource identity mismatch: ${path}`);
+        }
+      } catch (error) {
+        if (!failed) { failed = true; firstError = error; }
+      }
     }
   }
+  await Promise.all(Array.from({ length: Math.min(4, paths.length) }, verifyNext));
+  if (failed) throw firstError;
   return manifest.bundle_sha256;
 }
 

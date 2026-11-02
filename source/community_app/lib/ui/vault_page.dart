@@ -405,7 +405,10 @@ class _VaultPageState extends State<VaultPage> {
           return const _LoadingState();
         }
         if (snap.hasError) {
-          return _ErrorState(message: snap.error.toString(), onRetry: _refresh);
+          return _ErrorState(
+            message: AppL10n.of(context).communityFeedLoadFailed,
+            onRetry: _refresh,
+          );
         }
         final fetchedWorks = snap.data ?? const <FeedWork>[];
         final works = fetchedWorks.map((work) {
@@ -480,7 +483,7 @@ class _VaultPageState extends State<VaultPage> {
                       child: TextButton(
                         onPressed: () =>
                             unawaited(_maybeLoadMore(fetchedWorks)),
-                        child: const Text('Retry'),
+                        child: Text(AppL10n.of(context).authRetry),
                       ),
                     )
                   : null,
@@ -674,7 +677,10 @@ class _ErrorState extends StatelessWidget {
         ),
         const SizedBox(height: AetherSpacing.lg),
         Center(
-          child: TextButton(onPressed: onRetry, child: const Text('Retry')),
+          child: TextButton(
+            onPressed: onRetry,
+            child: Text(AppL10n.of(context).authRetry),
+          ),
         ),
       ],
     );

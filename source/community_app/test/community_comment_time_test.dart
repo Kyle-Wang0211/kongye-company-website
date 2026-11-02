@@ -74,4 +74,52 @@ void main() {
     );
     expect(formatCommunityCommentTime(DateTime(2027, 1, 1), now: now), '1月1日');
   });
+  test(
+    'English and Chinese preserve the same calendar and elapsed boundaries',
+    () {
+      for (final locale in ['en', 'zh']) {
+        final english = locale == 'en';
+        expect(
+          formatCommunityCommentTime(
+            now.subtract(const Duration(hours: 24)),
+            now: now,
+            locale: locale,
+          ),
+          '18:30',
+        );
+        expect(
+          formatCommunityCommentTime(
+            now.subtract(const Duration(hours: 24, milliseconds: 1)),
+            now: now,
+            locale: locale,
+          ),
+          english ? 'Yesterday' : '昨天',
+        );
+        expect(
+          formatCommunityCommentTime(
+            DateTime(2026, 11, 1, 23),
+            now: now,
+            locale: locale,
+          ),
+          english ? '2 days ago' : '前天',
+        );
+        expect(
+          formatCommunityCommentTime(
+            DateTime(2026, 10, 31, 23),
+            now: now,
+            locale: locale,
+          ),
+          english ? '10/31' : '10月31日',
+        );
+        expect(
+          formatCommunityCommentTime(
+            now.add(const Duration(milliseconds: 1)),
+            now: now,
+            locale: locale,
+          ),
+          english ? '11/3' : '11月3日',
+        );
+      }
+    },
+  );
 }

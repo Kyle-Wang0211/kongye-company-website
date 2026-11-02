@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 import '../../../community/comments/comment_moderation_repository.dart';
 import '../../design_system.dart';
 import 'moderation_ui_support.dart';
@@ -104,16 +106,16 @@ class _CommunityCommentInboxButtonState
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: '收件箱',
+    tooltip: AppL10n.of(context).moderationInbox,
     onPressed: widget.onPressed,
     icon: Semantics(
       label: _failed
-          ? '收件箱，通知加载失败，仍可打开'
+          ? AppL10n.of(context).moderationInboxLoadFailedLabel
           : _unread == true
-          ? '收件箱，有未读审核通知'
+          ? AppL10n.of(context).moderationInboxUnreadLabel
           : _unread == false
-          ? '收件箱，无未读审核通知'
-          : '收件箱，通知尚未加载',
+          ? AppL10n.of(context).moderationInboxReadLabel
+          : AppL10n.of(context).moderationInboxNotLoadedLabel,
       child: Stack(
         clipBehavior: Clip.none,
         children: [

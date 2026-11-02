@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/current_user.dart';
+import '../../l10n/app_localizations.dart';
 import '../../community/community_service.dart';
 import '../../community/feed_models.dart';
 import '../../community/public_work_repository.dart';
@@ -18,6 +19,7 @@ class PublicWorkEntry extends StatefulWidget {
 
 class _PublicWorkEntryState extends State<PublicWorkEntry> {
   late Future<FeedWork> _work;
+  bool _signInPending = false;
   late final service = CommunityService();
   @override
   void initState() {
@@ -33,10 +35,16 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
   }
 
   Future<void> _signIn() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => PublicWorkSignIn(user: widget.user)),
-    );
-    if (mounted) setState(() {});
+    if (_signInPending || !mounted) return;
+    _signInPending = true;
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => PublicWorkSignIn(user: widget.user)),
+      );
+    } finally {
+      _signInPending = false;
+      if (mounted) setState(() {});
+    }
   }
 
   @override
@@ -52,15 +60,15 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
       }
       if (snapshot.hasError) {
         return Scaffold(
-          appBar: AppBar(title: const Text('社区作品')),
+          appBar: AppBar(title: Text(AppL10n.of(context).publicWorkTitle)),
           body: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('作品暂不可访问，请检查链接或稍后重试。'),
+                Text(AppL10n.of(context).publicWorkUnavailable),
                 TextButton(
                   onPressed: () => setState(_reload),
-                  child: const Text('重新加载'),
+                  child: Text(AppL10n.of(context).commentReload),
                 ),
               ],
             ),
@@ -104,7 +112,7 @@ class _WorkSignInState extends State<PublicWorkSignIn> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('登录后发表评论')),
+    appBar: AppBar(title: Text(AppL10n.of(context).commentSignIn)),
     body: AuthRootView(currentUser: widget.user),
   );
   @override

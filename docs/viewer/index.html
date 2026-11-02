@@ -25,9 +25,46 @@
     const canvas = document.querySelector('#viewer');
     const status = document.querySelector('#status');
     let resizeObserver;
+    const uiKeys = ['title', 'canvasLabel', 'initializing', 'loading', 'failure', 'skpNotice'];
+    let uiStrings = {
+      title: 'PocketWorld Shared Viewer', canvasLabel: '3D作品', initializing: '正在初始化…',
+      loading: '正在加载…', failure: '暂时无法显示作品，请重试。',
+      skpNotice: 'SKP 转换预览：复杂结构可能存在差异',
+    };
+    let lastState = { status: 'initializing' };
+    function renderUi() {
+      document.title = uiStrings.title;
+      canvas.setAttribute('aria-label', uiStrings.canvasLabel);
+      status.textContent = lastState.error || lastState.status === 'error' ? uiStrings.failure :
+        lastState.status === 'initializing' ? uiStrings.initializing :
+        lastState.status === 'loading' ? uiStrings.loading :
+        lastState.format === 'skp' ? uiStrings.skpNotice : '';
+    }
+    function onUiLocalization(event) {
+      if (event.origin !== window.location.origin ||
+          (event.source !== window.parent && event.source !== window)) return;
+      if (event.data?.type !== 'pw-viewer-ui-localization') return;
+      const strings = event.data.strings;
+      if (!strings || typeof strings !== 'object' || !['zh', 'en'].includes(strings.locale)) return;
+      const updates = {};
+      for (const key of uiKeys) {
+        if (typeof strings[key] === 'string' && strings[key].length > 0 && strings[key].length <= 2048) {
+          updates[key] = strings[key];
+        }
+      }
+      uiStrings = { ...uiStrings, ...updates };
+      document.documentElement.lang = strings.locale;
+      renderUi();
+    }
+    window.addEventListener('message', onUiLocalization);
+    const localizationReady = { protocol: 'PW_SHARED_VIEWER_V1', type: 'pw-viewer-ui-localization-ready' };
+    if (window.PWSharedHost?.postMessage) window.PWSharedHost.postMessage(JSON.stringify(localizationReady));
+    else if (window.parent !== window && window.location.origin !== 'null') {
+      window.parent.postMessage(localizationReady, window.location.origin);
+    }
     function stateChanged(state) {
-      status.textContent = state.error || (state.status === 'loading' ? '正在加载…' :
-        state.format === 'skp' ? 'SKP 转换预览：复杂结构可能存在差异' : '');
+      lastState = state;
+      renderUi();
       window.dispatchEvent(new CustomEvent('pw-viewer-state', { detail: state }));
     }
     window.pwSharedViewerReady = verifyLocalBundle().then(bundleIdentity =>
@@ -54,6 +91,7 @@
           if (!controller.getState().disposed) controller.pause();
           return;
         }
+        window.removeEventListener('message', onUiLocalization);
         resizeObserver?.disconnect();
         window.removeEventListener('resize', resize);
         document.removeEventListener('visibilitychange', visibility);
@@ -64,8 +102,10 @@
       return controller;
     });
     window.pwSharedViewerReady.catch(error => {
-      status.textContent = error instanceof Error ? error.message : String(error);
-      window.dispatchEvent(new CustomEvent('pw-viewer-error', { detail: status.textContent }));
+      const diagnostic = error instanceof Error ? error.message : String(error);
+      lastState = { status: 'error', error: diagnostic };
+      renderUi();
+      window.dispatchEvent(new CustomEvent('pw-viewer-error', { detail: diagnostic }));
     });
     installHostBridge(window);
   </script>

@@ -42,9 +42,9 @@
 //       "无第三方SDK/不跟踪"只拦第三方组件与跨App跟踪,不拦第一方统计,
 //       接自建埋点时那两句**不要动**。详见 README 触发器。
 //
-// 语言:仅中文。四个拍板之一 —— 法律文件双语 = 双倍分叉风险,
-// App 英文界面同样显示中文正文 + 一句英文说明"本文件以中文为准"。
+// 显示语言:中英文本由 AppL10n 统一提供;英文仅供阅读参考,中文为准。
 
+import '../../l10n/app_localizations.dart';
 import 'legal_doc_model.dart';
 
 /// 版本号。每次修订 +1,并保留历史版本(政策第七章对用户承诺了这一点)。
@@ -241,5 +241,103 @@ const List<LegalSection> kPrivacyPolicyZh = [
     LegalParagraph('个人信息保护负责人邮箱:【联系邮箱待填写 —— 上线前必须替换为真实可达邮箱,与平台公约页同一个】'),
     LegalParagraph('我们在验证您的身份后于 15 个工作日内答复。'
         '对答复不满意的,您可以向网信、电信、公安、市场监管等部门投诉举报,或依法向人民法院提起诉讼。'),
+  ]),
+];
+
+/// Localized display copy. Chinese constants above remain the governing text.
+List<LegalSection> privacyPolicySections(AppL10n l) => [
+  LegalSection(l.legalPrivacyS0Title, [
+    LegalParagraph(l.legalPrivacyS0P0),
+    LegalParagraph(l.legalPrivacyS0P1),
+    LegalParagraph(l.legalPrivacyS0P2),
+    LegalParagraph(l.legalPrivacyS0P3),
+    LegalParagraph(l.legalPrivacyS0P4),
+    LegalParagraph(l.legalPrivacyS0P5),
+    LegalParagraph(l.legalPrivacyS0P6, emphasized: true),
+    LegalParagraph(l.legalPrivacyS0P7),
+  ]),
+  LegalSection(l.legalPrivacyS1Title, [
+    LegalParagraph(l.legalPrivacyS1P0),
+    LegalParagraph(l.legalPrivacyS1P1),
+    LegalParagraph(l.legalPrivacyS1P2),
+    LegalParagraph(l.legalPrivacyS1P3),
+    LegalParagraph(l.legalPrivacyS1P4, emphasized: true),
+    LegalParagraph(l.legalPrivacyS1P5),
+    LegalParagraph(l.legalPrivacyS1P6),
+    LegalParagraph(l.legalPrivacyS1P7),
+    LegalParagraph(l.legalPrivacyS1P8),
+    LegalParagraph(l.legalPrivacyS1P9),
+    LegalParagraph(l.legalPrivacyS1P10),
+    LegalParagraph(l.legalPrivacyS1P11),
+    LegalParagraph(l.legalPrivacyS1P12, emphasized: true),
+    LegalParagraph(l.legalPrivacyS1P13),
+    LegalParagraph(l.legalPrivacyS1P14, emphasized: true),
+    LegalParagraph(l.legalPrivacyS1P15),
+    LegalParagraph(l.legalPrivacyS1P16),
+    LegalParagraph(l.legalPrivacyS1P17),
+    LegalParagraph(l.legalPrivacyS1P18),
+    LegalParagraph(l.legalPrivacyS1P19),
+    LegalParagraph(l.legalPrivacyS1P20),
+    LegalParagraph(l.legalPrivacyS1P21),
+    LegalParagraph(l.legalPrivacyS1P22),
+    LegalParagraph(l.legalPrivacyS1P23),
+  ]),
+  LegalSection(l.legalPrivacyS2Title, [
+    LegalParagraph(l.legalPrivacyS2P0),
+    LegalParagraph(l.legalPrivacyS2P1),
+    LegalParagraph(l.legalPrivacyS2P2),
+    LegalParagraph(l.legalPrivacyS2P3),
+    LegalParagraph(l.legalPrivacyS2P4),
+  ]),
+  LegalSection(l.legalPrivacyS3Title, [
+    LegalParagraph(l.legalPrivacyS3P0),
+    LegalParagraph(l.legalPrivacyS3P1),
+    LegalParagraph(l.legalPrivacyS3P2),
+    LegalParagraph(l.legalPrivacyS3P3),
+    LegalParagraph(l.legalPrivacyS3P4),
+    LegalParagraph(l.legalPrivacyS3P5),
+    LegalParagraph(l.legalPrivacyS3P6),
+    LegalParagraph(l.legalPrivacyS3P7, emphasized: true),
+    LegalParagraph(l.legalPrivacyS3P8),
+  ]),
+  LegalSection(l.legalPrivacyS4Title, [
+    LegalParagraph(l.legalPrivacyS4P0),
+    LegalParagraph(l.legalPrivacyS4P1),
+    LegalParagraph(l.legalPrivacyS4P2, emphasized: true),
+    LegalParagraph(l.legalPrivacyS4P3),
+    LegalParagraph(l.legalPrivacyS4P4),
+    LegalParagraph(l.legalPrivacyS4P5),
+  ]),
+  LegalSection(l.legalPrivacyS5Title, [
+    LegalParagraph(l.legalPrivacyS5P0),
+    LegalParagraph(l.legalPrivacyS5P1),
+    LegalParagraph(l.legalPrivacyS5P2),
+    LegalParagraph(l.legalPrivacyS5P3),
+    LegalParagraph(l.legalPrivacyS5P4),
+    LegalParagraph(l.legalPrivacyS5P5),
+    LegalParagraph(l.legalPrivacyS5P6),
+    LegalParagraph(l.legalPrivacyS5P7),
+  ]),
+  LegalSection(l.legalPrivacyS6Title, [
+    LegalParagraph(l.legalPrivacyS6P0),
+    LegalParagraph(l.legalPrivacyS6P1),
+    LegalParagraph(l.legalPrivacyS6P2, emphasized: true),
+  ]),
+  LegalSection(l.legalPrivacyS7Title, [
+    LegalParagraph(l.legalPrivacyS7P0, emphasized: true),
+    LegalParagraph(l.legalPrivacyS7P1),
+    LegalParagraph(l.legalPrivacyS7P2),
+    LegalParagraph(l.legalPrivacyS7P3),
+  ]),
+  LegalSection(l.legalPrivacyS8Title, [
+    LegalParagraph(l.legalPrivacyS8P0),
+    LegalParagraph(l.legalPrivacyS8P1, emphasized: true),
+    LegalParagraph(l.legalPrivacyS8P2),
+  ]),
+  LegalSection(l.legalPrivacyS9Title, [
+    LegalParagraph(l.legalPrivacyS9P0),
+    LegalParagraph(l.legalPrivacyS9P1),
+    LegalParagraph(l.legalPrivacyS9P2),
+    LegalParagraph(l.legalPrivacyS9P3),
   ]),
 ];

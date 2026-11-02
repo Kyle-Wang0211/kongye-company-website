@@ -1,9 +1,12 @@
-(() => {
+(async () => {
+  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=shared-bilingual-comments-20261103-v8');await localeReady;
   const cards = Array.from(document.querySelectorAll('.scan-card'));
+  const render=()=>cards.forEach(card=>{card.querySelector('summary > span').firstChild.nodeValue=t(card.open?'siteGalleryCollapse':'siteGalleryRotate');});
+  window.addEventListener(localeEvent,render);render();
   cards.forEach(card => {
     card.addEventListener('toggle', () => {
       const frame = card.querySelector('iframe');
-      card.querySelector('summary > span').firstChild.nodeValue = card.open ? '收起 3D ' : '旋转查看 3D ';
+      card.querySelector('summary > span').firstChild.nodeValue = t(card.open ? 'siteGalleryCollapse' : 'siteGalleryRotate');
       if (card.open) {
         cards.forEach(other => {
           if (other !== card) {

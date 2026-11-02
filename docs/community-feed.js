@@ -1,32 +1,60 @@
-import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl} from './community-data.mjs';
-import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=aligned-grid-staged-loading-20261102-v6';
+import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=shared-bilingual-comments-20261103-v8';
+import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=shared-bilingual-comments-20261103-v8';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
-let config,cursor,busy=false,shareResolved=false,pageFailed=false;const seen=new Set(),authors=new Map();
+let config,cursor,busy=false,shareResolved=false,pageFailed=false;const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 const headers=()=>({apikey:config.anonKey,Authorization:'Bearer '+config.anonKey});
-async function read(url){const response=await fetch(url,{headers:headers(),signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('社区暂时未能连接，请重试或进入完整社区');const rows=await response.json();if(!Array.isArray(rows))throw Error('社区返回格式异常');return rows;}
-function authorName(work){return authors.get(work.user_id)?.display_name||'unknown';}
+async function read(url){const response=await fetch(url,{headers:headers(),signal:AbortSignal.timeout(15000)});if(!response.ok)throw translatedError('siteFeedConnection');const rows=await response.json();if(!Array.isArray(rows))throw translatedError('siteFeedFormat');return rows;}
+function renderAuthor(id,author,avatar){
+ const profile=authors.get(id);
+ author.classList.remove('is-loading');avatar.classList.remove('is-loading');
+ delete author.dataset.i18nAria;author.removeAttribute('aria-label');author.setAttribute('aria-busy','false');
+ author.replaceChildren();author.style.display='';
+ if(profile){author.textContent=profile.display_name;return;}
+ if(!id||authorFailures.has(id)){
+  author.style.display='flex';const label=document.createElement('span');label.style.cssText='overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1';localizeElement(label,'siteAuthorUnavailable');author.append(label);
+  if(id){const retry=document.createElement('button');retry.type='button';retry.style.cssText='background:none;border:0;padding:0 0 0 5px;font:inherit;cursor:pointer;flex:none';localizeElement(retry,'siteAuthorRetry');retry.addEventListener('click',()=>void readAuthors([{user_id:id}]));author.append(retry);}
+  return;
+ }
+ author.textContent='';author.classList.add('is-loading');avatar.classList.add('is-loading');
+ author.setAttribute('aria-busy','true');localizeElement(author,'siteAuthorLoading',{},'aria-label');
+}
+function refreshAuthor(id){for(const {author,avatar} of authorNodes.get(id)||[])renderAuthor(id,author,avatar);}
 function openWork(work){
  try{
   checkModel(work);
-  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','aligned-grid-staged-loading-20261102-v6');
+  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','shared-bilingual-comments-20261103-v8');
   location.assign(url.href);
- }catch(e){status.textContent=e.message;}
+ }catch(e){localizeElement(status,e.localeKey||'siteFeedRetry');}
 }
 async function readAuthors(rows){
- const ids=[...new Set(rows.map(w=>w.user_id).filter(Boolean))].filter(id=>!authors.has(id));
+ const ids=[...new Set(rows.map(w=>w.user_id).filter(Boolean))].filter(id=>!authors.has(id)&&!authorRequests.has(id));
  if(!ids.length)return;
- for(const profile of await read(authorUrl(config.origin,ids)))authors.set(profile.id,profile);
+ for(const id of ids){authorFailures.delete(id);refreshAuthor(id);}
+ const request=Promise.resolve().then(()=>read(authorUrl(config.origin,ids)));
+ for(const id of ids)authorRequests.set(id,request);
+ try{
+  for(const profile of await request){
+   if(ids.includes(profile?.id)&&typeof profile.display_name==='string'&&profile.display_name.trim())authors.set(profile.id,profile);
+  }
+ }catch{/* Author lookup cannot invalidate already loaded works or pagination. */}
+ finally{
+  for(const id of ids){
+   if(authorRequests.get(id)===request)authorRequests.delete(id);
+   if(!authors.has(id))authorFailures.add(id);
+   refreshAuthor(id);
+  }
+ }
 }
 function cardFor(work){
  const card=document.createElement('article');card.className='community-card';
- const open=document.createElement('button');open.type='button';open.className='community-open';open.setAttribute('aria-label','查看 '+(work.title||'未命名作品'));
+ const open=document.createElement('button');open.type='button';open.className='community-open';localizeElement(open,'siteViewWork',{title:work.title||t('siteUntitled')},'aria-label');
  const picture=document.createElement('div');picture.className='community-picture';
  if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){
   try{
-   const img=document.createElement('img');img.alt=work.title||'三维作品';img.className='community-cover-image';img.loading='lazy';img.decoding='async';
+   const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';img.loading='lazy';img.decoding='async';
    picture.classList.add('is-loading');picture.dataset.mediaState='loading';
    let settled=false,deadline,observer;
-   const fail=()=>{if(settled)return;settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='error';img.remove();picture.textContent='封面暂不可用';};
+   const fail=()=>{if(settled)return;settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='error';img.remove();localizeElement(picture,'siteCoverUnavailable');};
    const startDeadline=()=>{if(!settled&&!deadline)deadline=setTimeout(fail,30000);};
    if(typeof IntersectionObserver==='function'){observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){startDeadline();observer.disconnect();}},{rootMargin:'600px'});observer.observe(picture);}else startDeadline();
    img.addEventListener('load',async()=>{
@@ -37,17 +65,19 @@ function cardFor(work){
    },{once:true});
    img.addEventListener('error',fail,{once:true});picture.append(img);
    img.src=work.thumbnail_storage_path?assetUrl(config.origin,'thumbnails',work.thumbnail_storage_path):new URL(workCovers[work.model_storage_path],location.href).href;
-  }catch{picture.classList.remove('is-loading');picture.dataset.mediaState='error';picture.textContent='封面暂不可用';}
- }else{picture.dataset.mediaState='empty';picture.textContent='暂无封面';}
- const label=document.createElement('span');label.className='community-card-title';label.textContent=work.title||'未命名作品';open.append(picture,label);open.addEventListener('click',()=>openWork(work));
+  }catch{picture.classList.remove('is-loading');picture.dataset.mediaState='error';localizeElement(picture,'siteCoverUnavailable');}
+ }else{picture.dataset.mediaState='empty';localizeElement(picture,'siteNoCover');}
+ const label=document.createElement('span');label.className='community-card-title';work.title?label.textContent=work.title:localizeElement(label,'siteUntitled');open.append(picture,label);open.addEventListener('click',()=>openWork(work));
  const row=document.createElement('div');row.className='community-author-row';
  const avatar=document.createElement('span');avatar.className='community-avatar';avatar.setAttribute('aria-hidden','true');
- const author=document.createElement('span');author.className='community-author';author.textContent=authorName(work);
- const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=aligned-grid-staged-loading-20261102-v6';like.setAttribute('aria-label','登录后点赞');
+ const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
+ if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
+ authorNodes.get(work.user_id).add({author,avatar});renderAuthor(work.user_id,author,avatar);
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=shared-bilingual-comments-20261103-v8';localizeElement(like,'siteLikeSignIn',{},'aria-label');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);
- const date=publishedLabel(work.published_at);const time=document.createElement('time');if(date){time.dateTime=work.published_at;time.textContent=date;}else time.setAttribute('aria-hidden','true');card.append(time);
+ const date=publishedLabel(work.published_at);const time=document.createElement('time');time.dataset.publishedAt=work.published_at||'';if(date){time.dateTime=work.published_at;time.textContent=date;}else time.setAttribute('aria-hidden','true');card.append(time);
  return card;
 }
 function loadingShells(){
@@ -60,17 +90,17 @@ function loadingShells(){
  return shells;
 }
 async function load(){
- if(busy)return;busy=true;pageFailed=false;more.disabled=true;grid.setAttribute('aria-busy','true');const shells=loadingShells();status.textContent='正在读取社区作品…';
+ if(busy)return;busy=true;pageFailed=false;more.disabled=true;grid.setAttribute('aria-busy','true');const shells=loadingShells();localizeElement(status,'siteFeedLoading');
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
- if(config.origin!=='https://api.kongye.space')throw Error('社区配置不可用');
+ if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
  const rows=await read(feedUrl(config.origin,cursor));
- await readAuthors(rows);
  for(const shell of shells)shell.remove();
  for(const work of rows){if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
- cursor=rows.at(-1)||cursor;more.textContent='加载更多';status.textContent=seen.size?'点击作品，旋转、缩放查看。':'社区暂时没有公开作品。';more.hidden=rows.length<12;
+ void readAuthors(rows);
+ cursor=rows.at(-1)||cursor;localizeElement(more,'siteLoadMore');localizeElement(status,seen.size?'siteFeedHint':'siteFeedEmpty');more.hidden=rows.length<12;
  await openSharedWork();
- }catch(e){pageFailed=true;status.textContent=e.message||'社区暂时未能连接，请重试';more.textContent='重新加载';more.hidden=false;}
+ }catch(e){pageFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{for(const shell of shells)shell.remove();busy=false;more.disabled=false;grid.setAttribute('aria-busy','false');}
 }
 more.addEventListener('click',load);
@@ -79,9 +109,18 @@ async function openSharedWork(){
  if(shareResolved)return;
  const params=new URL(location.href).searchParams;
  const id=params.get('work')||legacyWorkIds[params.get('example')];
- if(!id){shareResolved=true;if(params.has('example'))status.textContent='分享的作品暂不可访问。';return;}
+ if(!id){shareResolved=true;if(params.has('example'))localizeElement(status,'siteSharedUnavailable');return;}
  const rows=await read(workUrl(config.origin,id));
- if(!rows[0]){shareResolved=true;status.textContent='分享的作品暂不可访问，可能已取消公开。';return;}
- await readAuthors(rows);openWork(rows[0]);shareResolved=true;
+ if(!rows[0]){shareResolved=true;localizeElement(status,'siteSharedNotPublic');return;}
+ openWork(rows[0]);shareResolved=true;
 }
-load();
+window.addEventListener(localeEvent,()=>{
+ for(const time of grid.querySelectorAll('time[data-published-at]'))time.textContent=publishedLabel(time.dataset.publishedAt);
+ for(const img of grid.querySelectorAll('[data-i18n-alt]'))img.alt=t(img.dataset.i18nAlt);
+ for(const open of grid.querySelectorAll('[data-i18n-values]')){
+  const title=open.querySelector('.community-card-title');
+  if(title?.dataset.i18n==='siteUntitled')localizeElement(open,'siteViewWork',{title:t('siteUntitled')},'aria-label');
+ }
+});
+if(document.documentElement)initSiteLocale().then(load).catch(()=>{more.hidden=false;more.disabled=false;});
+else load();

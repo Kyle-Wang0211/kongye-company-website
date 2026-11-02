@@ -37,6 +37,7 @@
 //    【公司名称待注册后填写】【公司注册地待定后填写】【联系邮箱待填写】
 //    【生效日期待上线前填写】
 
+import '../../l10n/app_localizations.dart';
 import 'legal_doc_model.dart';
 
 const String kUserAgreementVersion = 'V1.0';
@@ -313,5 +314,106 @@ const List<LegalSection> kUserAgreementZh = [
     LegalParagraph('运营者:【公司名称待注册后填写】'),
     LegalParagraph('联系邮箱:【联系邮箱待填写 —— 上线前必须替换为真实可达邮箱,与平台公约页、隐私政策同一个】'),
     LegalParagraph('我们在收到您的意见、投诉或申诉后 15 个工作日内处理并反馈。'),
+  ]),
+];
+
+/// Localized display copy. Chinese constants above remain the governing text.
+List<LegalSection> userAgreementSections(AppL10n l) => [
+  LegalSection(l.legalAgreementS0Title, [
+    LegalParagraph(l.legalAgreementS0P0, emphasized: true),
+    LegalParagraph(l.legalAgreementS0P1),
+    LegalParagraph(l.legalAgreementS0P2),
+    LegalParagraph(l.legalAgreementS0P3),
+  ]),
+  LegalSection(l.legalAgreementS1Title, [
+    LegalParagraph(l.legalAgreementS1P0),
+    LegalParagraph(l.legalAgreementS1P1, emphasized: true),
+    LegalParagraph(l.legalAgreementS1P2),
+    LegalParagraph(l.legalAgreementS1P3),
+    LegalParagraph(l.legalAgreementS1P4),
+    LegalParagraph(l.legalAgreementS1P5),
+    LegalParagraph(l.legalAgreementS1P6),
+    LegalParagraph(l.legalAgreementS1P7),
+  ]),
+  LegalSection(l.legalAgreementS2Title, [
+    LegalParagraph(l.legalAgreementS2P0, emphasized: true),
+    LegalParagraph(l.legalAgreementS2P1),
+    LegalParagraph(l.legalAgreementS2P2),
+    LegalParagraph(l.legalAgreementS2P3),
+    LegalParagraph(l.legalAgreementS2P4),
+  ]),
+  LegalSection(l.legalAgreementS3Title, [
+    LegalParagraph(l.legalAgreementS3P0, emphasized: true),
+    LegalParagraph(l.legalAgreementS3P1),
+    LegalParagraph(l.legalAgreementS3P2),
+    LegalParagraph(l.legalAgreementS3P3),
+    LegalParagraph(l.legalAgreementS3P4),
+  ]),
+  LegalSection(l.legalAgreementS4Title, [
+    LegalParagraph(l.legalAgreementS4P0),
+    LegalParagraph(l.legalAgreementS4P1, emphasized: true),
+    LegalParagraph(l.legalAgreementS4P2),
+    LegalParagraph(l.legalAgreementS4P3),
+    LegalParagraph(l.legalAgreementS4P4),
+  ]),
+  LegalSection(l.legalAgreementS5Title, [
+    LegalParagraph(l.legalAgreementS5P0),
+    LegalParagraph(l.legalAgreementS5P1, emphasized: true),
+    LegalParagraph(l.legalAgreementS5P2, emphasized: true),
+    LegalParagraph(l.legalAgreementS5P3, emphasized: true),
+    LegalParagraph(l.legalAgreementS5P4, emphasized: true),
+    LegalParagraph(l.legalAgreementS5P5),
+    LegalParagraph(l.legalAgreementS5P6),
+    LegalParagraph(l.legalAgreementS5P7),
+  ]),
+  LegalSection(l.legalAgreementS6Title, [
+    LegalParagraph(l.legalAgreementS6P0),
+    LegalParagraph(l.legalAgreementS6P1),
+    LegalParagraph(l.legalAgreementS6P2),
+    LegalParagraph(l.legalAgreementS6P3),
+  ]),
+  LegalSection(l.legalAgreementS7Title, [
+    LegalParagraph(l.legalAgreementS7P0),
+    LegalParagraph(l.legalAgreementS7P1),
+  ]),
+  LegalSection(l.legalAgreementS8Title, [
+    LegalParagraph(l.legalAgreementS8P0),
+    LegalParagraph(l.legalAgreementS8P1, emphasized: true),
+    LegalParagraph(l.legalAgreementS8P2),
+    LegalParagraph(l.legalAgreementS8P3),
+    LegalParagraph(l.legalAgreementS8P4),
+  ]),
+  LegalSection(l.legalAgreementS9Title, [
+    LegalParagraph(l.legalAgreementS9P0, emphasized: true),
+    LegalParagraph(l.legalAgreementS9P1, emphasized: true),
+    LegalParagraph(l.legalAgreementS9P2, emphasized: true),
+    LegalParagraph(l.legalAgreementS9P3),
+    LegalParagraph(l.legalAgreementS9P4),
+    LegalParagraph(l.legalAgreementS9P5),
+  ]),
+  LegalSection(l.legalAgreementS10Title, [
+    LegalParagraph(l.legalAgreementS10P0, emphasized: true),
+    LegalParagraph(l.legalAgreementS10P1),
+    LegalParagraph(l.legalAgreementS10P2),
+    LegalParagraph(l.legalAgreementS10P3),
+  ]),
+  LegalSection(l.legalAgreementS11Title, [
+    LegalParagraph(l.legalAgreementS11P0),
+    LegalParagraph(l.legalAgreementS11P1),
+    LegalParagraph(l.legalAgreementS11P2),
+    LegalParagraph(l.legalAgreementS11P3),
+  ]),
+  LegalSection(l.legalAgreementS12Title, [
+    LegalParagraph(l.legalAgreementS12P0),
+    LegalParagraph(l.legalAgreementS12P1, emphasized: true),
+    LegalParagraph(l.legalAgreementS12P2),
+    LegalParagraph(l.legalAgreementS12P3),
+    LegalParagraph(l.legalAgreementS12P4),
+    LegalParagraph(l.legalAgreementS12P5),
+  ]),
+  LegalSection(l.legalAgreementS13Title, [
+    LegalParagraph(l.legalAgreementS13P0),
+    LegalParagraph(l.legalAgreementS13P1),
+    LegalParagraph(l.legalAgreementS13P2),
   ]),
 ];

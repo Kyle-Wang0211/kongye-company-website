@@ -11,12 +11,7 @@ import 'package:flutter/services.dart';
 
 import '../design_system.dart';
 
-enum AuthFieldKeyboard {
-  text,
-  email,
-  phone,
-  number,
-}
+enum AuthFieldKeyboard { text, email, phone, number }
 
 extension _KeyboardTypeMap on AuthFieldKeyboard {
   TextInputType get flutter {
@@ -42,6 +37,7 @@ class AuthField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final void Function(String)? onChanged;
   final double? width;
+  final Widget? leading;
   // iOS Keychain / Android autofill hints. Set to e.g.
   // [AutofillHints.username] for email, [AutofillHints.password] for
   // sign-in password, [AutofillHints.newPassword] for sign-up / reset
@@ -60,6 +56,7 @@ class AuthField extends StatelessWidget {
     this.textInputAction,
     this.onChanged,
     this.width,
+    this.leading,
     this.autofillHints,
   });
 
@@ -83,11 +80,12 @@ class AuthField extends StatelessWidget {
       enableSuggestions: !shouldDisableInputAssistance,
       autofillHints: autofillHints,
       textCapitalization: TextCapitalization.none,
-      style: const TextStyle(
-        fontSize: 15,
-        color: AetherColors.textPrimary,
-      ),
+      style: const TextStyle(fontSize: 15, color: AetherColors.textPrimary),
       decoration: InputDecoration(
+        prefixIcon: leading,
+        prefixIconConstraints: leading == null
+            ? null
+            : const BoxConstraints(minWidth: 0, minHeight: 48),
         hintText: title,
         hintStyle: const TextStyle(
           color: AetherColors.textTertiary,
@@ -105,10 +103,7 @@ class AuthField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AetherRadii.md),
-          borderSide: const BorderSide(
-            color: AetherColors.primary,
-            width: 1.4,
-          ),
+          borderSide: const BorderSide(color: AetherColors.primary, width: 1.4),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AetherRadii.md),

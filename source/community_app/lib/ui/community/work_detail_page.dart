@@ -32,8 +32,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show compute, visibleForTesting;
+import 'package:flutter/foundation.dart'
+    show compute, visibleForTesting, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 
@@ -48,6 +51,8 @@ import '../../community/social_profile_models.dart';
 import '../../community/social_profile_repository.dart';
 import '../../community/thumb_baker.dart';
 import '../../l10n/app_localizations.dart';
+import '../../auth/auth_scope.dart';
+import 'public_work_entry.dart' show PublicWorkSignIn;
 import '../design_system.dart';
 import 'aether_cpp_card_demo.dart';
 import 'comments/community_comments_panel.dart';
@@ -83,6 +88,8 @@ class WorkDetailPage extends StatefulWidget {
   final Future<String> Function(String)? resolveModelPath;
 
   final VoidCallback? onSignIn;
+  @visibleForTesting
+  final bool? webCommentLayoutForTesting;
 
   const WorkDetailPage({
     super.key,
@@ -90,6 +97,7 @@ class WorkDetailPage extends StatefulWidget {
     required this.service,
     this.reportRepository,
     this.onSignIn,
+    this.webCommentLayoutForTesting,
     this.onWorkUpdated,
     this.commentRepository,
     this.communitySessions,
@@ -105,6 +113,13 @@ class WorkDetailPage extends StatefulWidget {
 
 class _WorkDetailPageState extends State<WorkDetailPage> {
   bool _commentsOpen = false;
+  double _commentSidebarWidth = 360;
+  final _commentViewerPointerEvents = ValueNotifier<bool>(true);
+  final _commentResizeFocus = FocusNode(
+    debugLabel: 'community-comments-resize',
+  );
+  bool _signInPending = false;
+  bool get _webCommentLayout => widget.webCommentLayoutForTesting ?? kIsWeb;
   bool _commentsEnabled = false;
   bool _commentsEverOpened = false;
   SharedSurfaceMarkerLayout? _commentLayout;
@@ -155,6 +170,26 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       '${EndpointConfigResolver.current?.deployment.namespace}:'
       '${EndpointConfigResolver.current?.supabaseUrl}:$_commentIdentityEpoch';
 
+  Future<void> _requestSignIn() async {
+    if (_signInPending || !mounted) return;
+    final supplied = widget.onSignIn;
+    if (supplied != null) {
+      supplied();
+      return;
+    }
+    final user = context.getInheritedWidgetOfExactType<AuthScope>()?.notifier;
+    if (user == null) return;
+    _signInPending = true;
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => PublicWorkSignIn(user: user)),
+      );
+    } finally {
+      _signInPending = false;
+      if (mounted) setState(() {});
+    }
+  }
+
   void _showComments() {
     setState(() {
       _commentsEverOpened = true;
@@ -166,6 +201,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   void _toggleComments() {
+    _commentViewerPointerEvents.value = true;
     setState(() {
       _commentsEnabled = !_commentsEnabled;
       if (_commentsEnabled) _commentsEverOpened = true;
@@ -203,6 +239,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   void _closeComments() {
+    _commentViewerPointerEvents.value = true;
     FocusScope.of(context).unfocus();
     setState(() {
       _commentsOpen = false;
@@ -218,9 +255,9 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     } catch (_) {
       if (mounted && enabled) {
         setState(() => _selectingCommentPoint = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('点位选择暂不可用，请稍后重试')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppL10n.of(context).commentPointUnavailable)),
+        );
       }
     }
   }
@@ -545,7 +582,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         content: Text(l.workDeleteDialogBody, style: AetherTextStyles.body),
         actions: [
           if (widget.service.currentUserId == null && widget.onSignIn != null)
-            TextButton(onPressed: widget.onSignIn, child: const Text('登录')),
+            TextButton(onPressed: widget.onSignIn, child: Text(l.authSignIn)),
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
@@ -730,6 +767,9 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
 
   @override
   void dispose() {
+    _commentViewerPointerEvents.value = true;
+    _commentViewerPointerEvents.dispose();
+    _commentResizeFocus.dispose();
     _commentAuth?.cancel();
     unawaited(_setPicking(false));
     widget.service.lastLikeResult.removeListener(_onLikeResult);
@@ -858,6 +898,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         // 是被同一个开关绑死的 —— autoRotateUntilTouched 把这层绑定解开:
         // 打开就转,用户一上手就永久让位给手势。
         return AetherCppCardDemo(
+          pointerEventsEnabledNotifier: _commentViewerPointerEvents,
           key: ValueKey('work-mesh-${widget.work.id}'),
           modelUrl: widget.service.modelUrlFor(widget.work.modelStoragePath!),
           communitySessionKey: jsonEncode([
@@ -928,47 +969,119 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       top: top.toDouble(),
       width: width,
       height: height,
-      child: Offstage(
-        offstage: !_floatingCommentsVisible,
-        child: TickerMode(
-          enabled: _commentsOpen || _commentsEnabled,
-          child: DecoratedBox(
-            key: const ValueKey('floating-surface-comments'),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white24),
-              boxShadow: const [
-                BoxShadow(color: Colors.black54, blurRadius: 20),
-              ],
+      child: _commentPanel(),
+    );
+  }
+
+  Widget _commentPanel() => Offstage(
+    offstage: !_floatingCommentsVisible,
+    child: TickerMode(
+      enabled: _commentsOpen || _commentsEnabled,
+      child: DecoratedBox(
+        key: const ValueKey('floating-surface-comments'),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white24),
+          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 20)],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: CommunityCommentsPanel(
+            key: ValueKey(_commentPartition),
+            workId: widget.work.id,
+            workAuthorId: widget.work.userId,
+            active: _commentsOpen || _commentsEnabled,
+            presentationVisible: _floatingCommentsVisible,
+            repository: _commentRepository,
+            requireAssetBinding: true,
+            expectedAssetSha256: _surfaceAssetSha256,
+            imagePicker: widget.commentImagePicker,
+            currentUserId: widget.service.currentUserId,
+            onSignIn:
+                widget.onSignIn != null ||
+                    context.getInheritedWidgetOfExactType<AuthScope>() != null
+                ? _requestSignIn
+                : null,
+            selectedAnchor: _commentAnchor,
+            onPickPoint: _surfaceViewer == null || _surfaceAssetSha256 == null
+                ? null
+                : _pickCommentPoint,
+            onClearAnchor: () => setState(() => _commentAnchor = null),
+            onClose: _closeComments,
+            onCommentSelected: _focusComment,
+            onVisibleCommentsChanged: _commentsChanged,
+            onModerationCaseSelected: (caseId) => openCommentModerationCase(
+              context,
+              caseId: caseId,
+              repository: widget.commentModerationRepository,
+              userIdReader: () => widget.service.currentUserId,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: CommunityCommentsPanel(
-                key: ValueKey(_commentPartition),
-                workId: widget.work.id,
-                workAuthorId: widget.work.userId,
-                active: _commentsOpen || _commentsEnabled,
-                presentationVisible: _floatingCommentsVisible,
-                repository: _commentRepository,
-                requireAssetBinding: true,
-                expectedAssetSha256: _surfaceAssetSha256,
-                imagePicker: widget.commentImagePicker,
-                currentUserId: widget.service.currentUserId,
-                onSignIn: widget.onSignIn,
-                selectedAnchor: _commentAnchor,
-                onPickPoint:
-                    _surfaceViewer == null || _surfaceAssetSha256 == null
-                    ? null
-                    : _pickCommentPoint,
-                onClearAnchor: () => setState(() => _commentAnchor = null),
-                onClose: _closeComments,
-                onCommentSelected: _focusComment,
-                onVisibleCommentsChanged: _commentsChanged,
-                onModerationCaseSelected: (caseId) => openCommentModerationCase(
-                  context,
-                  caseId: caseId,
-                  repository: widget.commentModerationRepository,
-                  userIdReader: () => widget.service.currentUserId,
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _commentResizeHandle(double width, double maxWidth) {
+    final l = AppL10n.of(context);
+    void adjust(double change) {
+      setState(
+        () => _commentSidebarWidth =
+            (_commentSidebarWidth.clamp(280.0, maxWidth) + change).clamp(
+              280.0,
+              maxWidth,
+            ),
+      );
+    }
+
+    return Semantics(
+      label: l.commentResizePanel,
+      hint: l.commentResizePanelHint,
+      value: l.commentPanelWidth(width.round()),
+      increasedValue: l.commentPanelWidth(
+        math.min(width + 20, maxWidth).round(),
+      ),
+      decreasedValue: l.commentPanelWidth(math.max(width - 20, 280).round()),
+      onIncrease: width < maxWidth ? () => adjust(20) : null,
+      onDecrease: width > 280 ? () => adjust(-20) : null,
+      child: Focus(
+        focusNode: _commentResizeFocus,
+        onKeyEvent: (_, event) {
+          if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+            return KeyEventResult.ignored;
+          }
+          if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            adjust(20);
+            return KeyEventResult.handled;
+          }
+          if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+            adjust(-20);
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: MouseRegion(
+          cursor: SystemMouseCursors.resizeLeftRight,
+          child: Listener(
+            onPointerDown: (_) => _commentViewerPointerEvents.value = false,
+            onPointerUp: (_) => _commentViewerPointerEvents.value = true,
+            onPointerCancel: (_) => _commentViewerPointerEvents.value = true,
+            child: GestureDetector(
+              key: const ValueKey('community-comments-resize'),
+              dragStartBehavior: DragStartBehavior.down,
+              behavior: HitTestBehavior.opaque,
+              onTap: _commentResizeFocus.requestFocus,
+              onHorizontalDragStart: (_) => _commentResizeFocus.requestFocus(),
+              onHorizontalDragEnd: (_) =>
+                  _commentViewerPointerEvents.value = true,
+              onHorizontalDragCancel: () =>
+                  _commentViewerPointerEvents.value = true,
+              onHorizontalDragUpdate: (details) => adjust(-details.delta.dx),
+              child: const Center(
+                child: SizedBox(
+                  width: 2,
+                  height: 40,
+                  child: ColoredBox(color: Colors.white38),
                 ),
               ),
             ),
@@ -977,6 +1090,107 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       ),
     );
   }
+
+  Widget _webCommentsBody(BoxConstraints viewport) {
+    final wide = viewport.maxWidth >= 760;
+    const dividerWidth = 8.0;
+    // The sidebar never covers the model: reserve a usable 320px viewer.
+    final maxWidth = math.min(
+      viewport.maxWidth * .5,
+      viewport.maxWidth - dividerWidth - 320,
+    );
+    final width = wide
+        ? _commentSidebarWidth.clamp(280.0, maxWidth)
+        : viewport.maxWidth;
+    final showDivider = wide && _floatingCommentsVisible;
+    if (!showDivider && !_commentViewerPointerEvents.value) {
+      _commentViewerPointerEvents.value = true;
+    }
+    final panel = SizedBox(
+      key: const ValueKey('inline-community-comments'),
+      width: wide ? (_floatingCommentsVisible ? width : 0) : double.infinity,
+      height: wide
+          ? double.infinity
+          : (_floatingCommentsVisible
+                ? math.min(460.0, viewport.maxHeight * .62)
+                : 0),
+      child: _commentsEverOpened && _supportsSurfaceComments
+          ? _commentPanel()
+          : null,
+    );
+    // Flex keeps the same renderer element even when the viewport crosses the
+    // desktop/narrow breakpoint. Width preference survives close and reopen.
+    return Flex(
+      direction: wide ? Axis.horizontal : Axis.vertical,
+      children: [
+        Expanded(child: _viewerControls(viewport)),
+        SizedBox(
+          width: showDivider ? dividerWidth : 0,
+          height: showDivider ? double.infinity : 0,
+          child: showDivider ? _commentResizeHandle(width, maxWidth) : null,
+        ),
+        panel,
+      ],
+    );
+  }
+
+  Widget _viewerControls(BoxConstraints viewport) => Stack(
+    children: [
+      Positioned.fill(child: _buildBody()),
+      if (!_webCommentLayout && _commentsEverOpened && _supportsSurfaceComments)
+        _floatingComments(viewport),
+      if (_supportsSurfaceComments)
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton.filledTonal(
+                key: const ValueKey('work-detail-comment-toggle'),
+                tooltip: _commentsEnabled
+                    ? AppL10n.of(context).commentHideOnModel
+                    : AppL10n.of(context).commentShowOnModel,
+                isSelected: _commentsEnabled,
+                onPressed: _toggleComments,
+                icon: const Icon(Icons.chat_bubble_outline_rounded),
+                selectedIcon: const Icon(Icons.chat_bubble_rounded),
+              ),
+              if (_commentsEnabled && !_commentsOpen)
+                TextButton(
+                  onPressed: _showComments,
+                  style: TextButton.styleFrom(foregroundColor: Colors.white),
+                  child: Text(AppL10n.of(context).commentAllWrite),
+                ),
+            ],
+          ),
+        ),
+      if (_selectingCommentPoint)
+        Positioned(
+          left: 20,
+          right: 20,
+          bottom: 76,
+          child: IgnorePointer(
+            child: Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: .75),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Text(
+                    AppL10n.of(context).commentPickPointHint,
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1026,75 +1240,9 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             children: [
               Expanded(
                 child: LayoutBuilder(
-                  builder: (context, viewport) => Stack(
-                    children: [
-                      Positioned.fill(child: _buildBody()),
-                      if (_commentsEverOpened && _supportsSurfaceComments)
-                        _floatingComments(viewport),
-                      if (_supportsSurfaceComments)
-                        Positioned(
-                          right: 16,
-                          bottom: 16,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              IconButton.filledTonal(
-                                key: const ValueKey(
-                                  'work-detail-comment-toggle',
-                                ),
-                                tooltip: _commentsEnabled ? '关闭模型评论' : '显示模型评论',
-                                isSelected: _commentsEnabled,
-                                onPressed: _toggleComments,
-                                icon: const Icon(
-                                  Icons.chat_bubble_outline_rounded,
-                                ),
-                                selectedIcon: const Icon(
-                                  Icons.chat_bubble_rounded,
-                                ),
-                              ),
-                              if (_commentsEnabled && !_commentsOpen)
-                                TextButton(
-                                  onPressed: _showComments,
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('全部评论 / 写评论'),
-                                ),
-                            ],
-                          ),
-                        ),
-                      if (_selectingCommentPoint)
-                        Positioned(
-                          left: 20,
-                          right: 20,
-                          bottom: 76,
-                          child: IgnorePointer(
-                            child: Center(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: .75),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 10,
-                                  ),
-                                  child: Text(
-                                    '点一下模型表面，选择评论位置',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                  builder: (context, viewport) => _webCommentLayout
+                      ? _webCommentsBody(viewport)
+                      : _viewerControls(viewport),
                 ),
               ),
               ValueListenableBuilder<Set<String>>(
@@ -1179,7 +1327,10 @@ class _MetaRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
                   icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-                  label: const Text('全部评论', style: TextStyle(fontSize: 12)),
+                  label: Text(
+                    AppL10n.of(context).commentAll,
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
                 const SizedBox(width: 4),
               ],
