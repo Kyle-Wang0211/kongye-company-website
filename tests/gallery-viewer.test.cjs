@@ -22,3 +22,10 @@ test('product leads the page and company identity remains at the bottom',()=>{
  assert(html.indexOf('id="about"')>html.indexOf('id="contact"'));
  assert(html.includes('北京空也科技有限公司'));
 });
+test('public community leads the page without marketing hero or eager renderers',()=>{
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ assert(!html.includes('class="hero wrap"'));
+ assert(html.indexOf('id="community-feed"')<html.indexOf('id="showcase"'));
+ assert(!/<iframe[^>]+src="community\//.test(html));
+ assert(html.includes('community-feed.js'));
+});
