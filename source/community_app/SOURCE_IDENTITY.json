@@ -5,10 +5,17 @@
   "pinned_sdk": "Flutter 3.47.1 revision 6655482ec06e547f90abf8ae7590466f4415978d; engine 5d531788691ec3404cac0cee66ead4007b177363; Dart 3.13.1",
   "pubspec_lock_sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
   "file_count": 200,
-  "bytes": 92957631,
+  "bytes": 92957545,
   "external_dependency_classes": [
     "locked-public-package",
     "pinned-sdk-or-tool"
   ],
-  "shared_viewer_bundle_sha256": "3bb8afdfadcff8a7287a635d7f7c66b7fb449c8df8334794e1c3f2d8ebc7efb0"
+  "shared_viewer_bundle_sha256": "3bb8afdfadcff8a7287a635d7f7c66b7fb449c8df8334794e1c3f2d8ebc7efb0",
+  "archive_only_normalizations": [
+    {
+      "path": "packages/pw_shared_viewer/tests/browser_floating_comments_frontend.cjs",
+      "original_sha256": "3ae4ddf2e81ce650fbfa88725ca85e6c48b8f5574ff8225e152d20d998feb79d",
+      "change": "Optional browser harness resolves the supplied Playwright package by name rather than an author workstation path. Not executed as part of this release."
+    }
+  ]
 }

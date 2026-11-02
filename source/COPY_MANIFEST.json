@@ -1,16 +1,16 @@
 [
   {
     "path": "source/community_app/README.md",
-    "bytes": 4795,
-    "sha256": "4c9a51ac6af18a2006fde18080a7e28b2cb96e1add3790d255e794cf4a3e9b00",
+    "bytes": 5129,
+    "sha256": "19290bbc3c98a8114154c8a9c62ea88ff400259320cbbfc83ad52bde513625b5",
     "reasons": [
       "generated-public-package-documentation"
     ]
   },
   {
     "path": "source/community_app/SOURCE_IDENTITY.json",
-    "bytes": 791,
-    "sha256": "ea9315842910017304561935bad21d4804380561490ef20f0228d292c2fc238e",
+    "bytes": 1194,
+    "sha256": "0e20507296dd55af87c0f6a1b2b6900b8c7aead7f51b77a0718ad0ba3f2ec019",
     "reasons": [
       "generated-public-package-documentation"
     ]
@@ -1185,8 +1185,8 @@
   },
   {
     "path": "source/community_app/packages/pw_shared_viewer/tests/browser_floating_comments_frontend.cjs",
-    "bytes": 11177,
-    "sha256": "3ae4ddf2e81ce650fbfa88725ca85e6c48b8f5574ff8225e152d20d998feb79d",
+    "bytes": 11091,
+    "sha256": "76ee8eabef456be9108b9606e53dea4944b6337af77be50482ca9b8ee5cd2377",
     "reasons": [
       "spatial-comment-release-source"
     ]

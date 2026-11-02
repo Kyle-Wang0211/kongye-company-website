@@ -9,7 +9,7 @@ This directory contains the Flutter source inputs for the website's community en
 - Entrypoint: `lib/main_community_web.dart`.
 - Verified SDK: Flutter **3.47.1**, framework revision `6655482ec06e547f90abf8ae7590466f4415978d`, engine revision `5d531788691ec3404cac0cee66ead4007b177363`, Dart **3.13.1**.
 
-The source files, dependency declarations and lockfile are copied unchanged. Generated build directories, machine-specific package mappings, logs and private build definitions are omitted. The package follows the actual successful web build dependency records, includes all declared asset inputs and local path dependency manifests, and retains the shared viewer source and its license notices. Unrelated native capture code and VM-only implementation branches are omitted.
+The production source files, dependency declarations and lockfile are copied unchanged. Generated build directories, machine-specific package mappings, logs and private build definitions are omitted. The package follows the actual successful web build dependency records, includes all declared asset inputs and local path dependency manifests, and retains the shared viewer source and its license notices. Unrelated native capture code and VM-only implementation branches are omitted.
 
 ## Build configuration
 
@@ -47,3 +47,5 @@ The unchanged application `pubspec.yaml` declares model assets even where a webs
 Sculpt-based surface pins open the corresponding approved comment inside the shared viewer; the explicit all-comments entry retains the full list and authenticated replies. The upstream reference remains revision `2e0e11d76650748ffd577b45943cd063cf097cb4`; content cards and zoom reveal are product adaptations. Public readers cannot submit comments. Thirty-second paged refresh commits a validated, model-bound snapshot atomically instead of temporarily clearing the selected marker.
 
 The shared viewer JavaScript tests are included under `packages/pw_shared_viewer/tests/` (22 focused checks were run for this candidate). Application widget regressions are preserved in `../patches/spatial-comment-regressions-20261102.patch`; they require the complete original VM test source tree. This web archive does not claim to supply that unrelated native capture source.
+
+The optional `browser_floating_comments_frontend.cjs` harness expects a separately supplied Playwright package. Its machine-specific module path was normalized for this archive; this optional browser harness was not executed for the release and is not part of the 22 focused checks. Shipped viewer sources are unaffected.
