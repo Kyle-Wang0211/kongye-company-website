@@ -61,7 +61,7 @@ test('legacy links and new shares resolve to the same real work identity',async(
  const lookup=page.pending.shift();assert.equal(new URL(lookup.url).searchParams.get('id'),'eq.'+legacyWorkIds[slug]);
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();
- assert.equal(page.dialog.open,true);assert(page.dialog.parts.iframe.src.includes('model='));
+ assert.equal(page.dialog.open,true);assert.equal(new URL(page.dialog.parts.iframe.src).pathname,'/community/');assert.equal(new URL(page.dialog.parts.iframe.src).searchParams.get('work'),legacyWorkIds[slug]);
  await page.elements['#share-work'].listeners.get('click')();
  const shared=new URL(page.elements['#share-status'].textContent);assert.equal(shared.searchParams.get('work'),legacyWorkIds[slug]);assert(!shared.searchParams.has('example'));
 });

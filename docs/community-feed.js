@@ -16,7 +16,9 @@ function openWork(work){
  const meta=document.querySelector('#work-meta');meta.replaceChildren();
  const info=document.createElement('p');info.textContent=authorName(work)+(publishedLabel(work.published_at)?' · '+publishedLabel(work.published_at):'');meta.append(info);
  if(work.description){const description=document.createElement('p');description.textContent=work.description;meta.append(description);}
- dialog.showModal();const url=new URL('viewer/index.html',location.href);url.searchParams.set('model',modelUrl(config.origin,work.model_storage_path));url.searchParams.set('format',work.format);frame.src=url.href;
+ const url=new URL('community/',location.href);url.searchParams.set('work',work.id);
+ dialog.querySelectorAll('.work-actions a').forEach(link=>link.href=url.href);
+ dialog.showModal();frame.src=url.href;
  }catch(e){status.textContent=e.message;}
 }
 async function readAuthors(rows){
@@ -33,7 +35,7 @@ function cardFor(work){
  const row=document.createElement('div');row.className='community-author-row';
  const avatar=document.createElement('span');avatar.className='community-avatar';avatar.setAttribute('aria-hidden','true');
  const author=document.createElement('span');author.className='community-author';author.textContent=authorName(work);
- const like=document.createElement('a');like.className='community-like';like.href='community/';like.setAttribute('aria-label','登录后点赞');
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id);like.setAttribute('aria-label','登录后点赞');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);

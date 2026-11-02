@@ -29,7 +29,14 @@ export function authorUrl(origin,ids){
 }
 // Same count thresholds as production WorkCard.formatCount.
 export function formatCount(n){if(!Number.isSafeInteger(n)||n<0)return '';if(n>=10000)return Math.round(n/1000)+'K';if(n>=1000)return (n/1000).toFixed(1)+'K';return String(n);}
-export function publishedLabel(value){const date=new Date(value);return value&&Number.isFinite(date.getTime())?new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(date):'';}
+export function publishedLabel(value,now=new Date()){
+ const date=new Date(value);if(!value||!Number.isFinite(date.getTime())||!Number.isFinite(now.getTime()))return '';
+ const elapsed=now.getTime()-date.getTime();
+ if(elapsed>=0&&elapsed<=86400000)return String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0');
+ const day=d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());const days=(day(now)-day(date))/86400000;
+ if(days===1)return '昨天';if(days===2)return '前天';
+ return (date.getMonth()+1)+'月'+date.getDate()+'日';
+}
 
 export function modelUrl(origin,path){
  if(typeof path==='string'&&/^[a-f0-9]{64}\/source[.]glb$/.test(path)){const url=new URL('/functions/v1/publication-model',origin);url.searchParams.set('path',path);return url.href;}

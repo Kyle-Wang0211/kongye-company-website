@@ -6,8 +6,20 @@ test('large, unknown size and unsupported models do not allocate a viewer',()=>{
 test('shared work links keep all public access filters',()=>{const u=workUrl('https://api.kongye.space','12345678-1234-1234-1234-123456789abc');assert.equal(u.searchParams.get('id'),'eq.12345678-1234-1234-1234-123456789abc');assert.equal(u.searchParams.get('visibility'),'eq.public');assert.equal(u.searchParams.get('moderation_status'),'eq.ok');assert.throws(()=>workUrl('https://api.kongye.space','x,visibility.eq.private'));});
 
 test('author projection contains public presentation fields only and is bounded',()=>{const u=authorUrl('https://api.kongye.space',['12345678-1234-1234-1234-123456789abc']);assert.equal(u.pathname,'/rest/v1/community_author_profiles');assert.equal(u.searchParams.get('select'),'id,display_name,avatar_url,handle');assert.throws(()=>authorUrl('https://api.kongye.space',['x),email.eq.secret']));assert.throws(()=>authorUrl('https://api.kongye.space',Array.from({length:13},(_,i)=>String(i).padStart(36,'a'))));});
-test('counts match production WorkCard and timestamps are actual valid values',()=>{assert.deepEqual([0,999,1000,9999,10000,11500].map(formatCount),['0','999','1.0K','10.0K','10K','12K']);assert.equal(formatCount(null),'');assert.equal(publishedLabel(null),'');assert.equal(publishedLabel('invalid'),'');assert(publishedLabel('2026-11-02T02:00:00Z').includes('2026'));});
+test('counts match production WorkCard and timestamps are actual valid values',()=>{assert.deepEqual([0,999,1000,9999,10000,11500].map(formatCount),['0','999','1.0K','10.0K','10K','12K']);assert.equal(formatCount(null),'');assert.equal(publishedLabel(null),'');assert.equal(publishedLabel('invalid'),'');assert.equal(publishedLabel(new Date(2026,10,2,10).toISOString(),new Date(2026,10,2,12)),'10:00');});
 
 test('the three former local links point to real backend works, with no separate local feed',async()=>{const {legacyWorkIds}=await import('../docs/community-work-links.mjs');assert.equal(Object.keys(legacyWorkIds).length,3);assert.equal(new Set(Object.values(legacyWorkIds)).size,3);for(const id of Object.values(legacyWorkIds))assert.match(id,/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../docs/community-feed.js',import.meta.url),'utf8');assert(!js.includes('community-examples.mjs'));assert(!js.includes('selectedExample'));});
 
 test('new production publication assets use the review-checked signed delivery endpoint',()=>{const path='a'.repeat(64)+'/source.glb';const u=new URL(modelUrl('https://api.kongye.space',path));assert.equal(u.pathname,'/functions/v1/publication-model');assert.equal(u.searchParams.get('path'),path);assert(modelUrl('https://api.kongye.space','owner/legacy.glb').includes('/object/public/works/'));});
+
+test('publication times follow rolling24h then local calendar yesterday/previousday/date',()=>{
+ const now=new Date(2026,10,4,13,45);
+ assert.equal(publishedLabel(new Date(2026,10,3,13,46).toISOString(),now),'13:46');
+ assert.equal(publishedLabel(new Date(now.getTime()-86400000+1).toISOString(),now),'13:45');
+ assert.equal(publishedLabel(new Date(now.getTime()-86400000).toISOString(),now),'13:45');
+ assert.equal(publishedLabel(new Date(now.getTime()-86400000-1).toISOString(),now),'昨天');
+ assert.equal(publishedLabel(new Date(2026,10,2,18).toISOString(),now),'前天');
+ assert.equal(publishedLabel(new Date(2026,10,1,18).toISOString(),now),'11月1日');
+ assert.equal(publishedLabel('invalid',now),'');
+ assert.equal(publishedLabel(new Date(2026,10,5,18).toISOString(),now),'11月5日');
+});
