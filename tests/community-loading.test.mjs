@@ -120,7 +120,7 @@ test('legacy links and new shares resolve to the same real work identity',async(
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  assert.equal(page.pending.length,0);
  assert.equal(page.dialog.open,undefined);assert.equal(new URL(page.navigations.at(-1)).pathname,'/community/');assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'shared-bilingual-comments-20261103-v8');
+ assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'community-account-20261103-v9');
 });
 
 for(const failure of ['config','lookup'])test('direct work link recovers after '+failure+' failure',async()=>{

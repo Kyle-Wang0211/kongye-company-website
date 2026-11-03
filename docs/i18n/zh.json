@@ -1070,5 +1070,10 @@
   "siteAuthorRetry": "重试",
   "commentResizePanel": "调整评论栏宽度",
   "commentResizePanelHint": "向左拖动加宽，向右拖动缩窄。也可使用左右方向键调整。",
-  "commentPanelWidth": "{width} 像素"
+  "commentPanelWidth": "{width} 像素",
+  "siteCommunity": "社区",
+  "siteLogin": "登录",
+  "siteRegister": "注册",
+  "siteAccount": "个人中心",
+  "siteAccountRetry": "重试账号信息"
 }

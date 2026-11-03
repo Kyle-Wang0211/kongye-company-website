@@ -1,5 +1,5 @@
-import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=shared-bilingual-comments-20261103-v8';
-import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=shared-bilingual-comments-20261103-v8';
+import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=community-account-20261103-v9';
+import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=community-account-20261103-v9';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
 let config,cursor,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 const headers=()=>({apikey:config.anonKey,Authorization:'Bearer '+config.anonKey});
@@ -22,7 +22,7 @@ function refreshAuthor(id){for(const {author,avatar} of authorNodes.get(id)||[])
 function openWork(work){
  try{
   checkModel(work);
-  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','shared-bilingual-comments-20261103-v8');
+  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','community-account-20261103-v9');
   location.assign(url.href);
  }catch(e){localizeElement(status,e.localeKey||'siteFeedRetry');}
 }
@@ -75,7 +75,7 @@ function cardFor(work){
  const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
  if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
  authorNodes.get(work.user_id).add({author,avatar});renderAuthor(work.user_id,author,avatar);
- const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=shared-bilingual-comments-20261103-v8';localizeElement(like,'siteLikeSignIn',{},'aria-label');
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=community-account-20261103-v9';localizeElement(like,'siteLikeSignIn',{},'aria-label');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);

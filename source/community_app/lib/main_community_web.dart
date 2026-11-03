@@ -179,7 +179,7 @@ class _CommunityWeb extends StatelessWidget {
               CurrentUserSignedOut() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
-                    : AuthRootView(currentUser: user),
+                    : AuthRootView(currentUser: user, initialSignUp: Uri.base.queryParameters['auth'] == 'signup'),
               CurrentUserServiceUnavailable(:final reason) =>
                 _ServiceUnavailableView(currentUser: user, reason: reason),
               _ => const Scaffold(

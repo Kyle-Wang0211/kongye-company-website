@@ -1,0 +1,12 @@
+{
+  "release": "community-account-20261103-v9",
+  "base_revision": "b6f1f55522d22d6e862201fd73da8663d4917b93",
+  "compiled_main_sha256": "d8d9bfe84afce17210176c17edc37f3c899d91a851401c52e556b1600681aa33",
+  "node_tests": 39,
+  "flutter_build_exit": 0,
+  "build_profile": "same existing generated browser graph excludes unused liquid_glass_renderer asset edge; SDK and lock unchanged",
+  "phone_changed": false,
+  "auth_backend": "existing China primary; official Supabase JS session lifecycle shared storageKey",
+  "live_signed_in_acceptance": "pending real browser login; no account created or credentials copied",
+  "review": "independent read-only reviewer; SDK script and signup return fixes checked; no remaining blockers"
+}

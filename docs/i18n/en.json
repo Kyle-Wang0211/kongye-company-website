@@ -1070,5 +1070,10 @@
   "siteAuthorRetry": "Retry",
   "commentResizePanel": "Resize comments panel",
   "commentResizePanelHint": "Drag left to widen or right to narrow. Use the left and right arrow keys to adjust.",
-  "commentPanelWidth": "{width} pixels"
+  "commentPanelWidth": "{width} pixels",
+  "siteCommunity": "Community",
+  "siteLogin": "Log in",
+  "siteRegister": "Sign up",
+  "siteAccount": "My account",
+  "siteAccountRetry": "Retry account"
 }

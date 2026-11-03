@@ -7,19 +7,19 @@
   <meta name="theme-color" content="#050505">
   <title data-i18n="siteTitle">窗后城 — 让空间，留在身边。</title>
   <link rel="canonical" href="https://kongye.space/">
-  <link rel="stylesheet" href="styles.css?v=shared-bilingual-comments-20261103-v8">
-  <script src="community-feed.js?v=community-foreground-sync-20261103-v1" type="module"></script>
+  <link rel="stylesheet" href="styles.css?v=community-account-20261103-v9">
+  <script defer src="vendor/supabase/supabase-2.112.0.js"></script>
+  <script src="community-account.mjs?v=community-account-20261103-v9" type="module"></script>
+  <script src="community-feed.js?v=community-account-20261103-v9" type="module"></script>
 </head>
 <body>
   <a class="skip" href="#main" data-i18n="siteSkip">跳至正文</a>
-  <header class="site-header wrap">
-    <a class="brand" href="#top" data-i18n-aria="siteHome" aria-label="窗后城首页"><img class="brand-icon" src="assets/app-icon.png" alt="" width="38" height="38"><span><span data-i18n="siteBrand">窗后城</span><small>CHUANG HOU CHENG</small></span></a>
-    <nav style="flex-wrap:wrap" data-i18n-aria="siteMainNav" aria-label="主导航"><a href="#community-feed" data-i18n="siteDiscover">发现</a><a href="community/?release=shared-bilingual-comments-20261103-v8" data-i18n="siteSignIn">登录社区 ↗</a><a href="#support" data-i18n="siteSupport">支持</a><a href="#legal-docs" data-i18n="siteAgreements">协议</a><a href="#contact"><span data-i18n="siteContact">联系</span> <span aria-hidden="true">↗</span></a><button id="site-locale-toggle" type="button" data-i18n-aria="siteLanguageSwitch" aria-label="切换为英文" style="background:none;border:1px solid var(--line);border-radius:3px;padding:2px 7px;font-size:12px;white-space:nowrap;cursor:pointer">中 / EN</button></nav>
+  <header class="site-header community-header wrap">
+    <a class="community-brand" href="#top" data-i18n="siteCommunity">社区</a>
+    <nav id="account-nav" aria-label="账号" aria-busy="true"><a href="community/?auth=signin" data-i18n="siteLogin">登录</a><a href="community/?auth=signup" data-i18n="siteRegister">注册</a></nav>
   </header>
   <main id="main">
-    <section id="top" class="product-bar wrap"><h1 data-i18n="siteBrand">窗后城</h1><p data-i18n="siteTagline">记录空间，分享三维作品。</p><a href="community/?release=shared-bilingual-comments-20261103-v8" data-i18n="siteOpenCommunity">进入完整社区 ↗</a></section>
-    <section id="community-feed" class="community-section wrap" aria-labelledby="community-title">
-      <div class="community-toolbar"><h2 id="community-title" data-i18n="siteDiscoverSpaces">发现空间</h2><span data-i18n="siteCommunityWorks">社区作品</span></div>
+    <section id="top" class="community-section wrap" aria-label="社区作品">
       <p id="feed-status" role="status" aria-live="polite" data-i18n="siteFeedLoading">正在读取社区作品…</p>
       <div id="community-grid" class="community-grid"></div><button id="feed-more" type="button" data-i18n="siteLoadMore">加载更多</button>
     </section>

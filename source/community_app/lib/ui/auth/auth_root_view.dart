@@ -33,8 +33,9 @@ import 'reset_password_view.dart';
 
 class AuthRootView extends StatefulWidget {
   final CurrentUser currentUser;
+  final bool initialSignUp;
 
-  const AuthRootView({super.key, required this.currentUser});
+  const AuthRootView({super.key, required this.currentUser, this.initialSignUp = false});
 
   @override
   State<AuthRootView> createState() => _AuthRootViewState();
@@ -49,6 +50,11 @@ class _AuthRootViewState extends State<AuthRootView> {
   void initState() {
     super.initState();
     widget.currentUser.addListener(_onUserChanged);
+    if (widget.initialSignUp) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _pushSignUp();
+      });
+    }
   }
 
   @override
