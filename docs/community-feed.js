@@ -1,14 +1,19 @@
 import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=streaming-profiles-20261103-v14';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=streaming-profiles-20261103-v14';
-import {createPublicAvatarReader} from './community-public-avatar.mjs';
+import {createPublicAvatarReader} from './community-public-avatar.mjs?v=homepage-cache-20261104-v15';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
-let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+const authorFreshness=new Map(),authorLifetime=300000;
+try{const saved=JSON.parse(sessionStorage.getItem('pw-public-authors-v1')||'[]');for(const [id,row] of saved)if(row.until>Date.now()&&row.until<=Date.now()+authorLifetime&&typeof row.profile?.display_name==='string'&&row.profile.id===id){authors.set(id,row.profile);authorFreshness.set(id,row.until);}}catch{}
+function saveAuthors(){try{sessionStorage.setItem('pw-public-authors-v1',JSON.stringify([...authors].slice(-256).map(([id,profile])=>[id,{profile,until:authorFreshness.get(id)||0}])));}catch{}}
 const headers=()=>({apikey:config.anonKey,Authorization:'Bearer '+config.anonKey});
 async function read(url){const response=await fetch(url,{headers:headers(),cache:'no-store',signal:AbortSignal.timeout(15000)});if(!response.ok)throw translatedError('siteFeedConnection');const rows=await response.json();if(!Array.isArray(rows))throw translatedError('siteFeedFormat');return rows;}
 let avatarReader;const avatarTokens=new WeakMap(),avatarObservers=new Map();
 function renderAvatar(avatar,id,profile){
+ // Keep already decoded pixels while the same public author is revalidated.
+ if(profile&&avatar.dataset.authorId===id&&avatar.querySelector('img'))return;
  avatarObservers.get(avatar)?.disconnect();avatarObservers.delete(avatar);
- avatar.replaceChildren();avatar.style.color='';
+ avatar.replaceChildren();avatar.style.color='';avatar.dataset.authorId=id||'';
  const token={};avatarTokens.set(avatar,token);if(!profile)return;
  const epoch=authorEpoch;const current=()=>epoch===authorEpoch&&avatarTokens.get(avatar)===token;
  const load=async()=>{
@@ -58,7 +63,7 @@ function openWork(work){
  }catch(e){localizeElement(status,e.localeKey||'siteFeedRetry');}
 }
 async function readAuthors(rows){
- const ids=[...new Set(rows.map(w=>w.user_id).filter(Boolean))].filter(id=>!authors.has(id)&&!authorRequests.has(id));
+ const ids=[...new Set(rows.map(w=>w.user_id).filter(Boolean))].filter(id=>(!authors.has(id)||(authorFreshness.get(id)||0)<=Date.now())&&!authorRequests.has(id));
  if(!ids.length)return;
  for(const id of ids){authorFailures.delete(id);refreshAuthor(id);}
  const epoch=authorEpoch;
@@ -67,8 +72,9 @@ async function readAuthors(rows){
  try{
   const profiles=await request;if(epoch!==authorEpoch)return;
   for(const profile of profiles){
-   if(ids.includes(profile?.id)&&typeof profile.display_name==='string'&&profile.display_name.trim())authors.set(profile.id,profile);
+   if(ids.includes(profile?.id)&&typeof profile.display_name==='string'&&profile.display_name.trim()){authors.set(profile.id,profile);authorFreshness.set(profile.id,Date.now()+authorLifetime);}
   }
+  saveAuthors();
  }catch{/* Author lookup cannot invalidate already loaded works or pagination. */}
  finally{
   for(const id of epoch===authorEpoch?ids:[]){
@@ -84,7 +90,7 @@ function cardFor(work){
  const picture=document.createElement('div');picture.className='community-picture';
  if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){
   try{
-   const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';img.loading='lazy';img.decoding='async';
+   const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';img.loading=seen.size<4?'eager':'lazy';if(seen.size<2)img.fetchPriority='high';img.decoding='async';
    picture.classList.add('is-loading');picture.dataset.mediaState='loading';
    let settled=false,deadline,observer;
    const fail=()=>{if(settled)return;settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='error';img.remove();localizeElement(picture,'siteCoverUnavailable');};
@@ -127,7 +133,7 @@ async function load(){
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
- const rows=await read(feedUrl(config.origin,cursor));
+ const rows=await read(feedUrl(config.origin,cursor));lastFeedRead=Date.now();
  for(const shell of shells)shell.remove();
  for(const work of rows){if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
  void readAuthors(rows);
@@ -138,8 +144,8 @@ async function load(){
 }
 // Refresh the loaded window atomically, not just the next (older) page.
 // Foreground events and backend notifications share this single-flight entry.
-function requestRefresh(){
- if(document.visibilityState==='hidden')return;
+function requestRefresh(force=false){
+ if(document.visibilityState==='hidden'||(!force&&(!config||Date.now()-lastFeedRead<60000)))return;
  refreshPending=true;
  if(refreshTimer!==undefined)return;
  refreshTimer=setTimeout(()=>{refreshTimer=undefined;drainRefresh();},100);
@@ -159,7 +165,8 @@ async function refreshLoaded(){
   const anchor=[...cards.entries()].filter(([id])=>keep.has(id)).map(([,entry])=>entry.card).find(card=>card.getBoundingClientRect?.().bottom>0);
   const before=anchor?.getBoundingClientRect?.().top;
   for(const [id,entry] of cards)if(!keep.has(id)){entry.card.remove();cards.delete(id);}
-  authorEpoch++;avatarReader?.clear();for(const observer of avatarObservers.values())observer.disconnect();avatarObservers.clear();authors.clear();authorRequests.clear();authorFailures.clear();authorNodes.clear();seen.clear();
+  // Browser back/forward restoration keeps decoded covers and existing author pixels.
+  authorFailures.clear();authorNodes.clear();seen.clear();
   for(const work of rows){
    if(seen.has(work.id))continue;
    let entry=cards.get(work.id);
@@ -169,9 +176,9 @@ async function refreshLoaded(){
    }
    if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
    const nodes=authorNodes.get(work.user_id);if(![...nodes].some(node=>node.author===entry.author))nodes.add({author:entry.author,avatar:entry.avatar});
-   renderAuthor(work.user_id,entry.author,entry.avatar);grid.append(entry.card);seen.add(work.id);
+   grid.append(entry.card);seen.add(work.id);
   }
-  cursor=nextCursor;more.hidden=!hasMore;pageFailed=false;refreshFailed=false;localizeElement(more,'siteLoadMore');localizeElement(status,rows.length?'siteFeedHint':'siteFeedEmpty');
+  lastFeedRead=Date.now();cursor=nextCursor;more.hidden=!hasMore;pageFailed=false;refreshFailed=false;localizeElement(more,'siteLoadMore');localizeElement(status,rows.length?'siteFeedHint':'siteFeedEmpty');
   if(anchor?.isConnected&&Number.isFinite(before))window.scrollBy?.(0,anchor.getBoundingClientRect().top-before);
   // Author endpoint accepts at most twelve IDs; each batch is independent.
   for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));
@@ -179,12 +186,12 @@ async function refreshLoaded(){
  }catch(e){pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{busy=false;more.disabled=false;drainRefresh();syncPaging();}
 }
-window.addEventListener('focus',requestRefresh);
-window.addEventListener('pageshow',requestRefresh);
+window.addEventListener('focus',()=>requestRefresh());
+window.addEventListener('pageshow',()=>requestRefresh());
 document.addEventListener?.('visibilitychange',()=>{if(document.visibilityState==='visible')requestRefresh();});
 // Pure invalidation hook; does not claim a backend subscription is connected.
-window.addEventListener('pw-community-feed-invalidated',requestRefresh);
-more.addEventListener('click',()=>refreshFailed?requestRefresh():load());
+window.addEventListener('pw-community-feed-invalidated',()=>requestRefresh(true));
+more.addEventListener('click',()=>refreshFailed?requestRefresh(true):load());
 function syncPaging(){
  if(!paging)return; // The button remains an accessible fallback on older browsers.
  const automatic=!pageFailed;

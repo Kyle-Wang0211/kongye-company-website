@@ -1,37 +1,67 @@
 import {localizeElement,localeReady} from './site-l10n.mjs?v=streaming-profiles-20261103-v14';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
-let client,revision=0;
+const lifetime=300000,storageKey='pw-current-account-presentation-v1';
+let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false;
+const cache=new Map();
+function forget(){cache.clear();try{sessionStorage.removeItem(storageKey);}catch{}}
 function guest(){
- summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,'siteGuest');summary.append(avatar,label);actions.replaceChildren();
- for(const [mode,key] of [['signin','siteLogin'],['signup','siteRegister']]){
-  const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);actions.append(a);
- }
+ displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,'siteGuest');summary.append(avatar,label);actions.replaceChildren();
+ for(const [mode,key] of [['signin','siteLogin'],['signup','siteRegister']]){const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);actions.append(a);}
  nav.setAttribute('aria-busy','false');
 }
 function retry(){
- guest();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);nav.setAttribute('aria-busy','false');
+ if(displayedId)return; // A transient refresh failure keeps the current presentation.
+ guest();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);
 }
-async function refresh(){
- const current=++revision;
+function render(account,src){
+ if(displayedId!==account.id){
+  summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/';localizeElement(profileLink,'siteAccount');actions.append(profileLink);
+  const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');const name=document.createElement('span');name.className='community-account-name';summary.append(avatar,name);displayedId=account.id;
+ }
+ const name=summary.querySelector('.community-account-name');
+ if(account.name){delete name.dataset.i18n;name.textContent=account.name;}else localizeElement(name,'siteAccount');
+ if(src){const current=summary.querySelector('img');if(current?.getAttribute('src')!==src){const img=document.createElement('img');img.alt='';img.width=34;img.height=34;img.src=src;(current||summary.querySelector('.account-avatar-pending')).replaceWith(img);}}
+ nav.setAttribute('aria-busy','false');
+}
+async function cachedPresentation(id){
+ const memory=cache.get(id);if(memory?.until>Date.now())return memory;
  try{
-  const account=await readAccount(client);
+  const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');
+  if(saved?.account?.id!==id||typeof saved.account.name!=='string'||!Number.isFinite(saved.until)||saved.until<=Date.now()||saved.until>Date.now()+lifetime)return null;
+  const src=saved.avatar?await avatarDataUrl(saved.avatar):null;
+  const row={...saved,src};cache.set(id,row);return row;
+ }catch{return null;}
+}
+async function update(){
+ const current=revision;
+ try{
+  const {data,error}=await client.auth.getSession();if(error)throw error;
   if(current!==revision)return;
-  if(!account){guest();return;}
-  const link=summary;actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/';localizeElement(profileLink,'siteAccount');actions.append(profileLink);link.replaceChildren();
-  const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');
-  const name=document.createElement('span');name.className='community-account-name';name.textContent=account.name||'';
-  if(!account.name)localizeElement(name,'siteAccount');
-  link.append(avatar,name);nav.setAttribute('aria-busy','false');
-  // Avatar errors must not turn a verified signed-in account into a guest.
-  const {data,error}=await client.functions.invoke('ensure-generated-avatar',{body:{}});
-  if(error)return;
-  const src=await avatarDataUrl(data?.avatar);
+  const id=data.session?.user.id;
+  if(!id){forget();guest();return;}
+  if(displayedId&&displayedId!==id)guest();
+  const saved=await cachedPresentation(id);if(current!==revision)return;
+  if(saved){render(saved.account,saved.src);return;}
+  const account=await readAccount(client);if(current!==revision)return;
+  if(!account){forget();guest();return;}
+  render(account);
+  // Keep existing pixels while refreshing; failed avatar transport never signs out a user.
+  const {data:result,error:avatarError}=await client.functions.invoke('ensure-generated-avatar',{body:{}});
+  const avatar=avatarError?null:result?.avatar;
+  const src=avatar?await avatarDataUrl(avatar):null;
   const {data:latest}=await client.auth.getSession();
-  if(!src||current!==revision||latest.session?.user.id!==account.id)return;
-  const img=document.createElement('img');img.alt='';img.width=34;img.height=34;img.src=src;avatar.replaceWith(img);
+  if(current!==revision||latest.session?.user.id!==account.id)return;
+  render(account,src);
+  const row={account,avatar:src?avatar:null,src,until:Date.now()+(src?lifetime:30000)};cache.clear();cache.set(id,row);
+  try{sessionStorage.setItem(storageKey,JSON.stringify({account,avatar:row.avatar,until:row.until}));}catch{}
  }catch{if(current===revision)retry();}
 }
+function refresh(){
+ if(pending){rerun=true;return pending;}
+ pending=update().finally(()=>{pending=null;if(rerun){rerun=false;schedule();}});return pending;
+}
+function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;void refresh();},0);}
 async function start(){
  await localeReady;
  const response=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('Configuration unavailable');
@@ -40,10 +70,18 @@ async function start(){
   auth:{storageKey:'sb-api-auth-token',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},
   global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}
  });
- client.auth.onAuthStateChange(()=>{revision++;setTimeout(()=>void refresh(),0);});
- window.addEventListener('pageshow',()=>void refresh());
- window.addEventListener('focus',()=>void refresh());
- window.addEventListener('storage',event=>{if(event.key==='sb-api-auth-token'||event.key===null){revision++;void refresh();}});
+ client.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_OUT'||(displayedId&&displayedId!==session?.user.id)){revision++;forget();guest();}
+  else if(event==='USER_UPDATED'){revision++;forget();}
+  schedule();
+ });
+ window.addEventListener('pageshow',schedule);window.addEventListener('focus',schedule);
+ window.addEventListener('storage',event=>{
+  if(event.key!=='sb-api-auth-token'&&event.key!==null)return;
+  revision++;let nextId;try{nextId=event.newValue?JSON.parse(event.newValue)?.user?.id:null;}catch{}
+  if(event.key===null||!nextId||nextId!==displayedId){forget();guest();}
+  schedule();
+ });
  await refresh();
 }
 void start().catch(retry);
