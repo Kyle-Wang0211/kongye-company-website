@@ -129,7 +129,7 @@ function loadingShells(){
  return shells;
 }
 async function load(){
- if(busy)return;busy=true;pageFailed=false;more.disabled=true;grid.setAttribute('aria-busy','true');const shells=loadingShells();localizeElement(status,'siteFeedLoading');
+ if(busy)return;busy=true;pageFailed=false;more.disabled=true;grid.setAttribute('aria-busy','true');const shells=loadingShells();status.replaceChildren();delete status.dataset.i18n;
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
