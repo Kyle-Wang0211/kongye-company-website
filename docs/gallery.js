@@ -1,5 +1,5 @@
 (async () => {
-  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=community-settings-20261103-v11');await localeReady;
+  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=pointcloud-comments-20261103-v12');await localeReady;
   const cards = Array.from(document.querySelectorAll('.scan-card'));
   const render=()=>cards.forEach(card=>{card.querySelector('summary > span').firstChild.nodeValue=t(card.open?'siteGalleryCollapse':'siteGalleryRotate');});
   window.addEventListener(localeEvent,render);render();

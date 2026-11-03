@@ -1,5 +1,5 @@
-import {t} from './site-l10n.mjs?v=community-settings-20261103-v11';
-export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=community-settings-20261103-v11';
+import {t} from './site-l10n.mjs?v=pointcloud-comments-20261103-v12';
+export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=pointcloud-comments-20261103-v12';
 export function translatedError(key){const error=new Error(t(key));error.localeKey=key;return error;}
 export function feedUrl(origin, cursor) {
   const url = new URL('/rest/v1/works', origin);

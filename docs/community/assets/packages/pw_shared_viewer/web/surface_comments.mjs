@@ -38,9 +38,10 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     document.body.appendChild(overlay);
   }
   function emitEvent(type, detail) { emit?.(type, detail); }
+  const supported = () => ['glb','ply'].includes(getFormat());
   function setMode(value) {
     if (typeof value !== 'boolean') throw new Error('Invalid surface comment mode');
-    if (value && getFormat() !== 'glb') throw new Error('Surface comments require a loaded GLB');
+    if (value && !supported()) throw new Error('Surface comments require a loaded GLB or PLY');
     enabled = value; down = null; pointers.clear();
     if (enabled) controls.autoRotate = false;
   }
@@ -133,16 +134,52 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     return true;
   }
   function intersections(root) {
-    return raycaster.intersectObject(root, true).filter(hit => hit.object.isMesh && visible(hit.object, root));
+    // A point cloud is not an opaque mesh surface. Do not scan its entire
+    // vertex buffer for every overlay pin on every frame; only meshes occlude.
+    const hits=[];
+    root.traverse(node => { if (node.isMesh && visible(node,root)) raycaster.intersectObject(node,false,hits); });
+    return hits.sort((a,b)=>a.distance-b.distance);
+  }
+  function pickIntersections(root, rect, event) {
+    const hits=intersections(root);
+    const tolerance=6; // CSS pixels; independent of device pixel ratio/model units.
+    root.traverse(node => {
+      if (!node.isPoints || !visible(node,root) || node.material?.visible === false) return;
+      const geometry=node.geometry;
+      if (!geometry.getAttribute('position')) return;
+      if (!geometry.boundingSphere) geometry.computeBoundingSphere();
+      const sphere=geometry.boundingSphere.clone().applyMatrix4(node.matrixWorld);
+      const depth=sphere.center.clone().sub(camera.position).dot(camera.getWorldDirection(new THREE.Vector3()))+sphere.radius;
+      if (!(depth>0)) return;
+      const height=camera.isPerspectiveCamera ? camera.getViewSize(depth,new THREE.Vector2()).y :
+        (camera.top-camera.bottom)/camera.zoom;
+      const scale=node.getWorldScale(new THREE.Vector3());
+      const minScale=Math.min(Math.abs(scale.x),Math.abs(scale.y),Math.abs(scale.z));
+      if (!(minScale>0)) return;
+      // Points.raycast normalizes by object.scale (not ancestor world scale).
+      // Supply a conservative world-space radius, then screen-filter its hits.
+      raycaster.params.Points.threshold=height/rect.height*tolerance *
+        (Math.abs(node.scale.x)+Math.abs(node.scale.y)+Math.abs(node.scale.z))/3/minScale;
+      const candidates=raycaster.intersectObject(node,false);
+      for (const hit of candidates) {
+        if (!Number.isInteger(hit.index)) continue;
+        const world=new THREE.Vector3().fromBufferAttribute(geometry.getAttribute('position'),hit.index).applyMatrix4(node.matrixWorld);
+        const projected=world.clone().project(camera);
+        const dx=rect.left+(projected.x+1)*rect.width/2-event.clientX;
+        const dy=rect.top+(1-projected.y)*rect.height/2-event.clientY;
+        if (projected.z>=-1 && projected.z<=1 && Math.hypot(dx,dy)<=tolerance) hits.push({...hit,point:world});
+      }
+    });
+    return hits.sort((a,b)=>a.distance-b.distance);
   }
   function pick(event) {
     const root = getModel();
-    if (!enabled || disposed || controls.enabled === false || !root || getFormat() !== 'glb') return;
+    if (!enabled || disposed || controls.enabled === false || !root || !supported()) return;
     const rect = canvas.getBoundingClientRect();
     if (!(rect.width > 0 && rect.height > 0)) return;
     root.updateWorldMatrix(true,true); camera.updateMatrixWorld();
     raycaster.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1, -(event.clientY-rect.top)/rect.height*2+1),camera);
-    const hit = intersections(root)[0];
+    const hit = pickIntersections(root,rect,event)[0];
     if (!hit) return;
     const anchor = {position:root.worldToLocal(hit.point.clone()).toArray(),
       cameraPosition:camera.position.toArray(),cameraTarget:controls.target.toArray()};
@@ -180,7 +217,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     for (const marker of markers) {
       const world = root.localToWorld(new THREE.Vector3(...marker.anchor.position));
       const projected = world.clone().project(camera);
-      const shown = root.visible && getFormat() === 'glb' && projected.z >= -1 && projected.z <= 1 && Math.abs(projected.x) <= 1 && Math.abs(projected.y) <= 1;
+      const shown = root.visible && supported() && projected.z >= -1 && projected.z <= 1 && Math.abs(projected.x) <= 1 && Math.abs(projected.y) <= 1;
       marker.button.style.display = shown ? 'block' : 'none';
       if (!shown) continue;
       marker.button.style.left = `${rect.left+(projected.x+1)*rect.width/2}px`;
@@ -223,7 +260,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     publishLayout(active ? {id:active.id,x:active.x,y:active.y,expanded:active.expanded} : null);
   }
   function focus(input) {
-    if (!getModel() || getFormat() !== 'glb') throw new Error('Surface comments require a loaded GLB');
+    if (!getModel() || !supported()) throw new Error('Surface comments require a loaded GLB or PLY');
     const anchor = validateAnchor(input);
     if (!anchor.cameraPosition) throw new Error('Surface comment has no camera snapshot');
     const position = new THREE.Vector3(...anchor.cameraPosition),target = new THREE.Vector3(...anchor.cameraTarget);

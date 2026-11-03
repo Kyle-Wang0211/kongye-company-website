@@ -1,5 +1,5 @@
 (async () => {
-  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=community-settings-20261103-v11');await localeReady;
+  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=pointcloud-comments-20261103-v12');await localeReady;
   const button = document.getElementById('motion-toggle');
   if(!button)return;
   const label = button.querySelector('.motion-label');

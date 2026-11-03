@@ -7,6 +7,8 @@ import '../../community/feed_models.dart';
 import '../../community/public_work_repository.dart';
 import '../auth/auth_root_view.dart';
 import 'work_detail_page.dart';
+import 'public_work_exit_stub.dart'
+    if (dart.library.js_interop) 'public_work_exit_web.dart';
 
 /// Reuses the production detail, comments and single shared viewer. Logging in
 /// opens only the existing auth form; the work route and its URL remain intact.
@@ -56,11 +58,15 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
           work: snapshot.data!,
           service: service,
           onSignIn: _signIn,
+          onExit: exitPublicWork,
         );
       }
       if (snapshot.hasError) {
         return Scaffold(
-          appBar: AppBar(title: Text(AppL10n.of(context).publicWorkTitle)),
+          appBar: AppBar(
+            title: Text(AppL10n.of(context).publicWorkTitle),
+            leading: BackButton(onPressed: exitPublicWork),
+          ),
           body: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,

@@ -1,4 +1,4 @@
-import { createSurfaceComments } from './surface_comments.mjs?v=production-viewer-parity-20261102-v5';
+import { createSurfaceComments } from './surface_comments.mjs?v=pointcloud-comments-20261103-v12';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
 // Host/lifecycle adapter only. Rendering, loaders, materials and controls are upstream Three.js.
@@ -158,8 +158,10 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     targetCamera.up.set(0, 1, 0);
     targetCamera.zoom = 1;
     targetCamera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, targetCamera.aspect);
+    // Y-up: elevation atan2(sqrt(2), hypot(1,1)) = 45°, azimuth = 45°.
+    // This orbit direction is independent of the lens field of view.
     targetCamera.position.copy(center).add(
-      new THREE.Vector3(1.8, 1.2, 1.8).normalize().multiplyScalar(idealCameraDistance * 1.05));
+      new THREE.Vector3(1, Math.SQRT2, 1).normalize().multiplyScalar(idealCameraDistance * 1.05));
     targetCamera.near = Math.max(radius / 10000, 0.000001);
     targetCamera.far = Math.max(radius * 1000, targetCamera.near * 1000);
     targetCamera.lookAt(center);

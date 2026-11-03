@@ -99,3 +99,27 @@ test('new producer geometry gets its own canonical fit while user orbit stays in
   assert.deepEqual(viewer.getState().camera,user);
   viewer.dispose();
 });
+
+test('every GLB and PLY initial and canonical cover has 45 degree elevation and azimuth',async()=>{
+  const assertAngles=(position,target)=>{
+    const offset=new Vec(...position).sub(target);
+    const elevation=Math.atan2(offset.y,Math.hypot(offset.x,offset.z))*180/Math.PI;
+    const azimuth=Math.atan2(offset.x,offset.z)*180/Math.PI;
+    assert.ok(Math.abs(elevation-45)<1e-10,`elevation must be 45°, received ${elevation}`);
+    assert.ok(Math.abs(azimuth-45)<1e-10,`azimuth must be 45°, received ${azimuth}`);
+  };
+  for(const format of ['glb','ply']) for(const [w,h] of [[320,720],[720,320]]) {
+    const {viewer,pending,renderer,camera,controls}=fixture();
+    viewer.resize(w,h,1);
+    const load=viewer.load({url:`asset.${format}`,format});
+    pending.get(`asset.${format}`).resolve(format==='glb'?glb():new Geometry());await load;
+    const target=controls.target.clone();
+    assertAngles(camera.position.toArray(),target);
+    camera.position.set(-10,2,16);controls.start();controls.update();
+    const userPose=viewer.getState().camera;
+    viewer.capture('image/png',undefined,true);
+    assertAngles(renderer.captured.position,target);
+    assert.deepEqual(viewer.getState().camera,userPose,'canonical cover must preserve the user orbit');
+    viewer.dispose();
+  }
+});

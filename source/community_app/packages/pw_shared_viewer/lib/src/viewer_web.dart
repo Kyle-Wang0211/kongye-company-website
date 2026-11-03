@@ -58,7 +58,7 @@ class _SharedViewerState extends State<SharedViewer>
     _viewType = 'pw-shared-viewer-${_nextView++}';
     final entry = widget.webEntryUri ??
         Uri.parse(web.document.baseURI).resolve(
-            'assets/packages/pw_shared_viewer/web/index.html?v=production-viewer-parity-20261102-v5');
+            'assets/packages/pw_shared_viewer/web/index.html?v=pointcloud-comments-20261103-v12');
     _origin = web.window.location.origin;
     if (entry.origin != _origin) {
       _error = ArgumentError(
@@ -175,6 +175,7 @@ class _SharedViewerState extends State<SharedViewer>
   }
 
   void _fail(Object error) {
+    debugPrint('[SharedViewer] browser initialization failed: $error');
     if (_dead || _error != null) return;
     _readyDeadline?.cancel();
     if (_attached) widget.controller.detachTransport();

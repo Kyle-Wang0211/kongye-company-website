@@ -519,6 +519,7 @@ class _ProductModelViewState extends State<ProductModelView>
   }
 
   void _fail(Object error) {
+    debugPrint('[ProductModelView] shared viewer failed: $error');
     if (_disposed) return;
     _cancelCapture();
     if (_communityLease != null &&

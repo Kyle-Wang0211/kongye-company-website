@@ -31,11 +31,11 @@ function boot(search='',{intersection=false}={}){
  const elements={'#community-grid':grid,'#feed-status':status,'#feed-more':more,'#work-dialog':dialog,'#share-work':new Element(),'#share-status':new Element(),'#work-meta':new Element()};
  const docEvents=new Map(),document={visibilityState:"visible",addEventListener:(name,callback)=>docEvents.set(name,callback),querySelector:s=>elements[s],createElement:()=>new Element()};
  const pending=[],timers=new Map(),observers=[],navigations=[],scrolls=[],events=new Map();let clock=0;
- class Observer{constructor(callback){this.callback=callback;observers.push(this);}observe(target){this.target=target;}disconnect(){this.target=null;}}
+ class Observer{constructor(callback){this.callback=callback;this.observations=0;observers.push(this);}observe(target){this.target=target;this.observations++;}disconnect(){this.target=null;}}
  const fetch=(url,options)=>{const gate=defer();pending.push({url:String(url),options,...gate});return gate.promise;};
  const source=readFileSync(new URL('../docs/community-feed.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
  vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,legacyWorkIds,workCovers,document,fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f,delay)=>{const id=++clock;f.delay=delay;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{scrollBy:(x,y)=>scrolls.push([x,y]),addEventListener:(name,callback)=>events.set(name,callback)}});
- return {grid,status,more,pending,dialog,elements,timers,navigations,scrolls,events,document,docEvents,refresh:()=>{for(const [id,callback] of [...timers])if(callback.delay===100){timers.delete(id);callback();}},intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
+ return {grid,status,more,pending,dialog,elements,timers,navigations,scrolls,events,document,docEvents,observers,refresh:()=>{for(const [id,callback] of [...timers])if(callback.delay===100){timers.delete(id);callback();}},intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
 }
 async function configure(page){page.pending.shift().resolve(response({origin:'https://api.kongye.space',anonKey:'public'}));await settle();}
 async function completeFeed(page,rows=[work]){page.pending.shift().resolve(response(rows));await settle();if(rows.length){page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();}}
@@ -105,6 +105,27 @@ test('scroll pagination is single-flight and a failed page waits for explicit re
  page.pending.shift().resolve(response([]));await retry;assert.equal(page.more.hidden,true);
 });
 
+test('automatic pagination has no manual load button and re-arms a still-visible sentinel after busy completion',async()=>{
+ const page=boot('',{intersection:true});const paging=page.observers[0];
+ assert.equal(page.more.style.visibility,'hidden');assert.equal(page.more.tabIndex,-1);assert.equal(page.more.attributes['aria-hidden'],'true');
+ await configure(page);page.intersect(page.more);assert.equal(page.pending.length,1,'initial busy intersection must not duplicate the request');
+ const observed=paging.observations;
+ await completeFeed(page,Array.from({length:12},(_,i)=>({...work,id:work.id.slice(0,-3)+String(i).padStart(3,'0')})));
+ assert(paging.observations>observed,'completion must request a fresh intersection even if the target never crossed the viewport boundary');
+ page.intersect(page.more);assert.equal(page.pending.length,1);
+ assert(new URL(page.pending[0].url).searchParams.has('or'),'next request uses the older-page cursor');
+ page.pending.shift().resolve(response([]));await settle();
+ assert.equal(page.more.hidden,true);assert.equal(paging.target,null,'exhausted feeds stop observing');
+});
+
+test('automatic pagination exposes a keyboard reachable retry only after a network failure',async()=>{
+ const page=boot('',{intersection:true});await configure(page);page.pending.shift().reject(Error('offline'));await settle();
+ assert.equal(page.more.style.visibility,'');assert.equal(page.more.tabIndex,0);assert.equal(page.more.attributes['aria-hidden'],'false');
+ assert.equal(page.observers[0].target,null,'failure does not cause a request loop');
+ const retry=page.more.listeners.get('click')();page.pending.shift().resolve(response([]));await retry;
+ assert.equal(page.more.style.visibility,'hidden');assert.equal(page.more.hidden,true);
+});
+
 test('browser Back restores automatic pagination after cached page navigation',async()=>{
  const page=boot('',{intersection:true});await configure(page);
  await completeFeed(page,Array.from({length:12},(_,i)=>({...work,id:work.id.slice(0,-3)+String(i).padStart(3,'0')})));
@@ -120,7 +141,7 @@ test('legacy links and new shares resolve to the same real work identity',async(
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  assert.equal(page.pending.length,0);
  assert.equal(page.dialog.open,undefined);assert.equal(new URL(page.navigations.at(-1)).pathname,'/community/');assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'community-settings-20261103-v11');
+ assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'pointcloud-comments-20261103-v12');
 });
 
 for(const failure of ['config','lookup'])test('direct work link recovers after '+failure+' failure',async()=>{

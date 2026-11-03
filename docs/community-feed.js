@@ -1,7 +1,7 @@
-import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=community-settings-20261103-v11';
-import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=community-settings-20261103-v11';
+import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=pointcloud-comments-20261103-v12';
+import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=pointcloud-comments-20261103-v12';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
-let config,cursor,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 const headers=()=>({apikey:config.anonKey,Authorization:'Bearer '+config.anonKey});
 async function read(url){const response=await fetch(url,{headers:headers(),cache:'no-store',signal:AbortSignal.timeout(15000)});if(!response.ok)throw translatedError('siteFeedConnection');const rows=await response.json();if(!Array.isArray(rows))throw translatedError('siteFeedFormat');return rows;}
 function renderAuthor(id,author,avatar){
@@ -22,7 +22,7 @@ function refreshAuthor(id){for(const {author,avatar} of authorNodes.get(id)||[])
 function openWork(work){
  try{
   checkModel(work);
-  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','community-settings-20261103-v11');
+  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','pointcloud-comments-20261103-v12');
   location.assign(url.href);
  }catch(e){localizeElement(status,e.localeKey||'siteFeedRetry');}
 }
@@ -75,7 +75,7 @@ function cardFor(work){
  const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
  if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
  authorNodes.get(work.user_id).add({author,avatar});renderAuthor(work.user_id,author,avatar);
- const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=community-settings-20261103-v11';localizeElement(like,'siteLikeSignIn',{},'aria-label');
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=pointcloud-comments-20261103-v12';localizeElement(like,'siteLikeSignIn',{},'aria-label');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);
@@ -103,7 +103,7 @@ async function load(){
  cursor=rows.at(-1)||cursor;localizeElement(more,'siteLoadMore');localizeElement(status,seen.size?'siteFeedHint':'siteFeedEmpty');more.hidden=rows.length<12;
  await openSharedWork();
  }catch(e){pageFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
- finally{for(const shell of shells)shell.remove();busy=false;more.disabled=false;grid.setAttribute('aria-busy','false');drainRefresh();}
+ finally{for(const shell of shells)shell.remove();busy=false;more.disabled=false;grid.setAttribute('aria-busy','false');drainRefresh();syncPaging();}
 }
 // Refresh the loaded window atomically, not just the next (older) page.
 // Foreground events and backend notifications share this single-flight entry.
@@ -146,7 +146,7 @@ async function refreshLoaded(){
   for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));
   await openSharedWork();
  }catch(e){pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
- finally{busy=false;more.disabled=false;drainRefresh();}
+ finally{busy=false;more.disabled=false;drainRefresh();syncPaging();}
 }
 window.addEventListener('focus',requestRefresh);
 window.addEventListener('pageshow',requestRefresh);
@@ -154,7 +154,21 @@ document.addEventListener?.('visibilitychange',()=>{if(document.visibilityState=
 // Pure invalidation hook; does not claim a backend subscription is connected.
 window.addEventListener('pw-community-feed-invalidated',requestRefresh);
 more.addEventListener('click',()=>refreshFailed?requestRefresh():load());
-if(typeof IntersectionObserver==='function'){const paging=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&!busy&&!pageFailed&&!more.hidden&&!more.disabled)void load();},{rootMargin:'400px'});paging.observe(more);window.addEventListener('pagehide',()=>paging.disconnect());window.addEventListener('pageshow',()=>paging.observe(more));}
+function syncPaging(){
+ if(!paging)return; // The button remains an accessible fallback on older browsers.
+ const automatic=!pageFailed;
+ more.tabIndex=automatic?-1:0;
+ more.setAttribute('aria-hidden',String(automatic));
+ Object.assign(more.style,automatic?{visibility:'hidden',height:'1px',minHeight:'1px',padding:'0',border:'0',overflow:'hidden'}:{visibility:'',height:'',minHeight:'',padding:'',border:'',overflow:''});
+ // An intersection can arrive while the previous page is busy. Re-arm after
+ // settling so a still-visible sentinel fills a short viewport automatically.
+ paging.disconnect();
+ if(!busy&&!pageFailed&&!more.hidden&&document.visibilityState!=='hidden')paging.observe(more);
+}
+if(typeof IntersectionObserver==='function'){
+ paging=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&!busy&&!pageFailed&&!more.hidden&&!more.disabled)void load();},{rootMargin:'400px'});
+ syncPaging();window.addEventListener('pagehide',()=>paging.disconnect());window.addEventListener('pageshow',syncPaging);
+}
 async function openSharedWork(){
  if(shareResolved)return;
  const params=new URL(location.href).searchParams;

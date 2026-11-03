@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from '../web/vendor/three/build/three.module.js';
 import {createSurfaceComments, validateAnchor} from '../web/surface_comments.mjs';
 import {createHostBridge, installHostBridge} from '../web/host_bridge.mjs';
-function fixture(withDom = false) {
+function fixture(withDom = false, format = 'glb') {
  const elements=[];
  function element(tag) {
    const node={tag,style:{},attributes:{},children:[],listeners:new Map(),textContent:'',
@@ -19,7 +19,7 @@ function fixture(withDom = false) {
  const mesh = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), new THREE.MeshBasicMaterial()); root.add(mesh);
  const camera = new THREE.PerspectiveCamera(45,1,0.01,100); camera.position.set(2,0,5);camera.lookAt(2,0,0);camera.updateMatrixWorld();
  const controls={target:new THREE.Vector3(2,0,0),autoRotate:true,update(){camera.lookAt(this.target);camera.updateMatrixWorld();}};
- const surface=createSurfaceComments({THREE,canvas,camera,controls,getModel:()=>root,getFormat:()=> 'glb',getOverviewDistance:()=>5,emit:(type,detail)=>emitted.push({type,...detail})});
+ const surface=createSurfaceComments({THREE,canvas,camera,controls,getModel:()=>root,getFormat:()=> format,getOverviewDistance:()=>5,emit:(type,detail)=>emitted.push({type,...detail})});
  const pointer=(type,x=100,y=100,id=1)=>events.get(type)?.({clientX:x,clientY:y,pointerId:id,button:0,isPrimary:id===1});
  return {surface,pointer,emitted,root,camera,controls,events,elements,document,canvas};
 }
@@ -167,4 +167,47 @@ test('occluded pins cannot select or expose a spatial card through a direct clic
  assert.equal(button.attributes['aria-pressed'],'false');
  assert.equal(f.elements.find(e=>e.attributes['data-comment-content']==='back').style.display,'none');
  assert.equal(f.emitted.some(e=>e.type==='pw-viewer-surface-marker-selected'),false);f.surface.dispose();
+});
+
+function pointFixture() {
+ const f=fixture(true,'ply');f.root.clear();
+ const geometry=new THREE.BufferGeometry();
+ geometry.setAttribute('position',new THREE.Float32BufferAttribute([.025,0,0, .025,0,-1],3));
+ const points=new THREE.Points(geometry,new THREE.PointsMaterial({size:.005}));
+ points.position.set(0,.01,0);f.root.add(points);return {...f,points};
+}
+test('PLY tap stores actual indexed vertex in root coordinates, not closest ray position',()=>{
+ const f=pointFixture();f.surface.setMode(true);f.pointer('pointerdown');f.pointer('pointerup');
+ const picked=f.emitted.find(e=>e.type==='pw-viewer-surface-picked');assert.ok(picked);
+ assert.ok(Math.abs(picked.anchor.position[0]-.025)<1e-7);assert.ok(Math.abs(picked.anchor.position[1]-.01)<1e-7);
+ assert.equal(picked.anchor.position[2],0);assert.equal(picked.anchor.normal,undefined);
+ assert.deepEqual(picked.anchor.cameraPosition,[2,0,5]);
+ f.surface.setMarkers([{id:'ply',number:1,selected:true,anchor:picked.anchor}]);
+ const button=f.document.body.children[0].children[0];assert.equal(button.style.display,'block');
+ f.camera.position.set(5,3,4);f.controls.update();f.surface.focus(picked.anchor);
+ assert.deepEqual(f.camera.position.toArray(),[2,0,5]);assert.equal(button.disabled,false);f.surface.dispose();
+});
+test('PLY selection follows CSS pixel tolerance across zoom and cannot attach in empty space',()=>{
+ const f=pointFixture();f.surface.setMode(true);
+ f.pointer('pointerdown',130);f.pointer('pointerup',130);assert.equal(f.emitted.filter(e=>e.type==='pw-viewer-surface-picked').length,0);
+ f.camera.position.z=1;f.controls.update();
+ f.pointer('pointerdown');f.pointer('pointerup');assert.equal(f.emitted.filter(e=>e.type==='pw-viewer-surface-picked').length,0);
+ f.points.geometry.attributes.position.setXYZ(0,.001,0,0);
+ f.pointer('pointerdown');f.pointer('pointerup');assert.equal(f.emitted.filter(e=>e.type==='pw-viewer-surface-picked').length,1);f.surface.dispose();
+});
+test('PLY marker animation projects pins without scanning every point each frame',()=>{
+ const f=pointFixture();let raycasts=0;f.points.raycast=()=>raycasts++;
+ f.surface.setMarkers([{id:'ply',number:1,selected:true,anchor:{position:[.025,.01,0]}}]);
+ for(let n=0;n<20;n++){f.camera.position.x+=.01;f.controls.update();f.surface.update();}
+ assert.equal(raycasts,0);assert.equal(f.document.body.children[0].children[0].style.display,'block');f.surface.dispose();
+});
+
+test('indexed PLY point buffers anchor the original vertex index and ignore invisible clouds',()=>{
+ const f=pointFixture();f.points.geometry.setIndex([1,0]);f.surface.setMode(true);
+ f.points.visible=false;f.pointer('pointerdown');f.pointer('pointerup');
+ assert.equal(f.emitted.filter(e=>e.type==='pw-viewer-surface-picked').length,0);
+ f.points.visible=true;f.pointer('pointerdown');f.pointer('pointerup');
+ const anchor=f.emitted.find(e=>e.type==='pw-viewer-surface-picked').anchor;
+ assert.equal(anchor.position[2],0);
+ assert.deepEqual(validateAnchor(JSON.parse(JSON.stringify(anchor))),anchor);f.surface.dispose();
 });

@@ -2,38 +2,15 @@
 //
 // Pushed when the user taps a card in the community feed.
 //
-// ── 2026-08-16 rewrite: point cloud, not GLB ─────────────────────────
-//
-// This page used to render through AetherCppCardDemo → SceneBridge →
-// the aether_cpp scene renderer, because community works were GLB. The
-// official capture route ships a sparse point cloud
-// (official_sfm_sparse.ply), and the app already has a mature, shipped
-// renderer for exactly that: SparseCloudView — the same widget behind
-// the capture-time preview overlay and the drafts "查看点云" page. Using
-// it here means a work looks identical whether you are looking at your
-// own draft or someone else's published scan, and it inherits the point
-// size / AgX / exposure controls and octree LOD that were tuned against
-// our own clouds.
-//
-// We embed the VIEW, not SparseCloudViewerPage: that page carries the
-// selection-box editing tools and persists a box to disk beside the PLY,
-// which is meaningless (and wrong) for a visitor looking at someone
-// else's work.
-//
-// Load path: modelStoragePath → public URL → GlbCache.fetchPath (two-tier
-// URL→disk cache, already PLY-aware) → loadSparsePly in a `compute`
-// isolate so parsing 100K+ points never blocks the frame.
-//
-// The Phase 6.4f.10 first-viewer ThumbBaker hook is gone: PublishService
-// now uploads the local `official_sparse_thumb.png` at publish time, so
-// a work has its thumbnail from the moment it appears in the feed.
+// GLB and PLY both use the cross-platform shared viewer. Community details
+// must not dispatch PLY through the native sparse-capture disk parser: browsers
+// have no local file path, and spatial comments need the shared viewer bridge.
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart'
-    show compute, visibleForTesting, kIsWeb;
+import 'package:flutter/foundation.dart' show visibleForTesting, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -46,7 +23,6 @@ import '../../community/comments/comment_repository.dart';
 import '../../community/comments/comment_moderation_repository.dart';
 import '../../config/endpoint_config.dart';
 import '../../community/feed_models.dart';
-import '../../community/glb_cache.dart';
 import '../../community/social_profile_models.dart';
 import '../../community/social_profile_repository.dart';
 import '../../community/thumb_baker.dart';
@@ -61,14 +37,8 @@ import 'user_report_page.dart';
 import 'viewer_impl.dart' show ViewerQuality;
 import '../shared/product_model_view.dart';
 import '../shared/community_viewer_session.dart';
-import '../official_capture/auto_rotating_cloud_view.dart';
-import '../official_capture/community_sparse_cloud_data.dart'
-    show SparseCloudData, loadSparsePly;
 
-/// [mesh] = GLB/mesh,走五月就跑通的 aether_cpp scene renderer(自带自转 +
-/// bounds 驱动取景),它自己从 URL 加载,不经 loadSparsePly。
-/// [ready] = 稀疏点云,走 SparseCloudView。
-enum _CloudStatus { loading, ready, mesh, unsupported, failed }
+enum _CloudStatus { loading, shared, unsupported, failed }
 
 class WorkDetailPage extends StatefulWidget {
   final FeedWork work;
@@ -88,6 +58,7 @@ class WorkDetailPage extends StatefulWidget {
   final Future<String> Function(String)? resolveModelPath;
 
   final VoidCallback? onSignIn;
+  final VoidCallback? onExit;
   @visibleForTesting
   final bool? webCommentLayoutForTesting;
 
@@ -97,6 +68,7 @@ class WorkDetailPage extends StatefulWidget {
     required this.service,
     this.reportRepository,
     this.onSignIn,
+    this.onExit,
     this.webCommentLayoutForTesting,
     this.onWorkUpdated,
     this.commentRepository,
@@ -164,7 +136,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   int _commentIdentityEpoch = 0;
   String? _lastCommentUser;
   bool get _supportsSurfaceComments =>
-      widget.work.format.toLowerCase() == 'glb';
+      {'glb', 'gltf', 'ply'}.contains(widget.work.format.toLowerCase());
   String get _commentPartition =>
       '${widget.work.id}:${widget.work.modelStoragePath}:${widget.service.currentUserId}:'
       '${EndpointConfigResolver.current?.deployment.namespace}:'
@@ -674,7 +646,6 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   late final ThumbBaker _thumbBaker = ThumbBaker(service: widget.service);
 
   _CloudStatus _status = _CloudStatus.loading;
-  SparseCloudData? _cloud;
 
   @override
   void initState() {
@@ -788,41 +759,22 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       if (mounted) setState(() => _status = _CloudStatus.failed);
       return;
     }
-    // ── 格式分派 ────────────────────────────────────────────────────
-    //
-    // [2026-08-17 用户指认] "稀疏点云只是我的管线还没搭建完,最终产物就是
-    // mesh" —— 所以 mesh 不是要淘汰的遗留格式,是**终态**。GLB 走
-    // AetherCppCardDemo(五月写好、Phase 6.4b 已 SHIPPED 的 aether_cpp scene
-    // renderer:isFocused 驱自转、bounds 驱取景、首帧淡入),点云走
-    // SparseCloudView 这条过渡期的路。
-    //
-    // 此前这里对一切非 ply 直接判 unsupported,于是社区里现存的 mesh 作品全
-    // 部只能看到"格式不支持"—— 而它们本来就是这条链天生要渲的东西。
     final format = widget.work.format.toLowerCase();
-    if (format == 'glb' || format == 'gltf') {
-      if (mounted) setState(() => _status = _CloudStatus.mesh);
-      return;
+    if (mounted) {
+      setState(
+        () => _status = {'glb', 'gltf', 'ply'}.contains(format)
+            ? _CloudStatus.shared
+            : _CloudStatus.unsupported,
+      );
     }
-    if (format != 'ply') {
-      if (mounted) setState(() => _status = _CloudStatus.unsupported);
-      return;
-    }
-    try {
-      final url = widget.service.modelUrlFor(storagePath);
-      final localPath = await GlbCache.instance.fetchPath(url);
-      final cloud = await compute(loadSparsePly, localPath);
-      if (!mounted) return;
-      setState(() {
-        if (cloud == null || cloud.count == 0) {
-          _status = _CloudStatus.failed;
-        } else {
-          _cloud = cloud;
-          _status = _CloudStatus.ready;
-        }
-      });
-    } catch (e) {
-      debugPrint('[WorkDetailPage] cloud load failed: $e');
-      if (mounted) setState(() => _status = _CloudStatus.failed);
+  }
+
+  void _leaveWork() {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+    } else {
+      widget.onExit?.call();
     }
   }
 
@@ -877,26 +829,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             ),
           ),
         );
-      case _CloudStatus.ready:
-        final cloud = _cloud!;
-        return AutoRotatingCloudView(
-          xyz: cloud.xyz,
-          rgb: cloud.rgb,
-          // Visitors get the same look/feel controls as the drafts
-          // viewer, but no editing affordances — `editing` stays false
-          // and no selectionBox is threaded in, so nothing is ever
-          // written back beside someone else's PLY.
-          showControls: true,
-          logTag: '社区详情',
-        );
-      case _CloudStatus.mesh:
-        // 详情页 = 自转 + 可手势 + 全质量,三样都要。
-        //
-        // 五月这一页走的是 LiveModelView(thermion),因为当时
-        // AetherCppCardDemo 还没落地 orbit 手势(它头注释里的 G5)。手势现在
-        // 有了(interactive:true = 单指 orbit / 双指 pinch),但它和自转本来
-        // 是被同一个开关绑死的 —— autoRotateUntilTouched 把这层绑定解开:
-        // 打开就转,用户一上手就永久让位给手势。
+      case _CloudStatus.shared:
         return AetherCppCardDemo(
           pointerEventsEnabledNotifier: _commentViewerPointerEvents,
           key: ValueKey('work-mesh-${widget.work.id}'),
@@ -1203,7 +1136,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: _leaveWork,
         ),
         actions: [
           // Guideline 1.2 wants a report mechanism AND a way to block
