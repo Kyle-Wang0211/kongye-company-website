@@ -1,4 +1,4 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=community-settings-20261103-v10';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=community-settings-20261103-v11';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 let client,revision=0;

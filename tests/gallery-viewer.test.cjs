@@ -15,7 +15,7 @@ test('homepage embeds the exact production viewer and existing local models',()=
 test('community account header leads the page and company identity remains at the bottom',()=>{
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const header=html.match(/<header[\s\S]*?<\/header>/)[0];
- assert(header.includes('社区'));assert(header.includes('登录'));assert(header.includes('注册'));assert(header.includes('窗后城'));assert(header.includes('assets/app-icon.png'));assert(header.includes('CHUANG HOU CHENG'));assert(!header.includes('空也'));
+ assert(header.includes('社区'));assert(header.includes('登录'));assert(header.includes('注册'));assert(header.includes('窗后城'));assert(header.includes('assets/app-icon.png'));assert(!header.includes('CHUANG HOU CHENG'));assert(!header.includes('<small>'));assert(!header.includes('空也'));
  assert(!html.includes('class="product-bar wrap"'));assert(!html.includes('进入完整社区'));assert(!html.includes('发现空间'));
  assert(html.indexOf('id="about"')>html.indexOf('id="contact"'));
  assert(html.includes('北京空也科技有限公司'));

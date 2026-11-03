@@ -6,3 +6,5 @@ Acceptance: guest and account UI, expired/revoked session and identity-change ha
 
 ## User correction, 2026-11-03
 Restore original brand Logo/name/roman typography. Keep Community as section label. Both guest and authenticated avatar summaries open an account menu with Settings. Move existing support/legal/company/footer markup intact into native modal Settings, outside the infinite feed. Preserve auth and viewer behavior. Guest retains login/signup menu entries. Accept only after menu/modal/keyboard and live header checks.
+
+Brand correction: display one product name only, 窗后城 in Chinese and WorldsWithin in English; remove the romanized subtitle.

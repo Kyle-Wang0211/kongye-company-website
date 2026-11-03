@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {localeStorageKey,readLocale,persistLocale,localeReady,setLocale,t,applyLocale} from '../docs/site-l10n.mjs?v=community-settings-20261103-v10';
+import {localeStorageKey,readLocale,persistLocale,localeReady,setLocale,t,applyLocale} from '../docs/site-l10n.mjs?v=community-settings-20261103-v11';
 import {publishedLabel} from '../docs/community-data.mjs';
 await localeReady;
 const storage=value=>({value,getItem(key){assert.equal(key,localeStorageKey);return this.value;},setItem(key,value){assert.equal(key,localeStorageKey);this.value=value;}});
@@ -25,7 +25,7 @@ test('language changes update metadata and accessible text without replacing use
  const title=node('siteTitle'),description=node('siteDescription','i18nContent'),aria=node('siteHome','i18nAria');
  const untouched={textContent:'我的真实作品 / Real username'};
  const doc={documentElement:{},querySelectorAll(selector){return selector==='[data-i18n]'?[title]:selector==='[data-i18n-aria]'?[aria]:[description];},getElementById(){return null;}};
- setLocale('en');applyLocale(doc);assert.equal(doc.documentElement.lang,'en');assert.match(title.textContent,/Chuang Hou Cheng/);assert.match(aria.attributes['aria-label'],/home/);assert.match(description.attributes.content,/official website/);assert.equal(untouched.textContent,'我的真实作品 / Real username');
+ setLocale('en');applyLocale(doc);assert.equal(doc.documentElement.lang,'en');assert.match(title.textContent,/WorldsWithin/);assert.match(aria.attributes['aria-label'],/home/);assert.match(description.attributes.content,/official website/);assert.equal(untouched.textContent,'我的真实作品 / Real username');
  assert.equal(t('siteViewWork',{title:'我的作品'}),'View 我的作品');setLocale('zh');applyLocale(doc);assert.equal(doc.documentElement.lang,'zh-CN');assert.match(title.textContent,/窗后城/);
 });
 test('rolling24h and calendar-relative timestamps retain semantics in both languages',()=>{
@@ -35,7 +35,7 @@ test('rolling24h and calendar-relative timestamps retain semantics in both langu
 });
 
 test('nested browser modules and translation catalogs share the release cache identity', async()=>{
- const release='community-settings-20261103-v10';
+ const release='community-settings-20261103-v11';
  for (const [file,dependency] of [['community-feed.js','community-data.mjs'],['community-data.mjs','site-l10n.mjs'],['gallery.js','site-l10n.mjs'],['motion.js','site-l10n.mjs']]) {
   const source=await readFile(new URL('../docs/'+file,import.meta.url),'utf8');
   assert.ok(source.includes(dependency+'?v='+release),file+' must invalidate nested dependency');

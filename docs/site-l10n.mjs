@@ -13,7 +13,7 @@ export function persistLocale(storage, value) {
   if (!['zh', 'en'].includes(value)) throw new TypeError('Invalid locale');
   try { storage?.setItem(localeStorageKey, JSON.stringify(value)); } catch { /* Session choice remains usable. */ }
 }
-const releaseVersion = 'community-settings-20261103-v10';
+const releaseVersion = 'community-settings-20261103-v11';
 let catalogs = {};
 async function loadCatalogs() {
   const entries = await Promise.all(['zh', 'en'].map(async locale => {
