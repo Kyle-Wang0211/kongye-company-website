@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:pw_shared_viewer/src/native_bootstrap.dart' show nativeWebViewBootstrap;
 import '../../l10n/app_localizations.dart';
 
 /// Native OLV executes only bundled assets on a private loopback server.
@@ -111,6 +112,8 @@ class _StreamingPointCloudViewState extends State<StreamingPointCloudView> {
           await response.close();
         }
       });
+      await nativeWebViewBootstrap.ensureRegistered();
+      if (!mounted || epoch != _epoch) return;
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.black)
@@ -229,7 +232,7 @@ class _StreamingPointCloudViewState extends State<StreamingPointCloudView> {
                         ),
                         TextButton(
                           onPressed: _reload,
-                          child: Text(AppL10n.of(context).commentReload),
+                          child: Text(AppL10n.of(context).communityRetry),
                         ),
                       ],
                     )
