@@ -233,7 +233,9 @@ class _ProductModelViewState extends State<ProductModelView>
     WidgetsBinding.instance.addObserver(this);
     _prepareController();
     final state = WidgetsBinding.instance.lifecycleState;
-    _foreground = state == null || state == AppLifecycleState.resumed;
+    _foreground = state == null ||
+        state == AppLifecycleState.resumed ||
+        (kIsWeb && state == AppLifecycleState.inactive);
   }
 
   void _prepareController() {
@@ -416,7 +418,12 @@ class _ProductModelViewState extends State<ProductModelView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() => _foreground = state == AppLifecycleState.resumed);
+    // A focused iframe makes the outer Flutter page inactive while it remains
+    // visible. Keep drawing so OrbitControls can repaint the drag it receives.
+    final foreground = state == AppLifecycleState.resumed ||
+        (kIsWeb && state == AppLifecycleState.inactive);
+    if (_foreground == foreground) return;
+    setState(() => _foreground = foreground);
     _updateActivity();
   }
 

@@ -215,7 +215,9 @@ class _SharedViewerState extends State<SharedViewer>
     if (!_attached || _dead || _error != null) return;
     final shouldRun = widget.active &&
         _tickerEnabled &&
-        _appState == AppLifecycleState.resumed;
+        // Browser focus can move into this iframe without hiding the page.
+        (_appState == AppLifecycleState.resumed ||
+            _appState == AppLifecycleState.inactive);
     unawaited(
         (shouldRun ? widget.controller.resume() : widget.controller.pause())
             .catchError((Object error) {

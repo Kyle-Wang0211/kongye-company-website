@@ -859,6 +859,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           isFocused: true,
           interactive: true,
           autoRotateUntilTouched: true,
+          // Slow the browser preview; preserve the installed mobile policy.
+          autoRotateSpeed: kIsWeb ? 0.2 : 0.6,
           // 契约 kViewerSocialPolicyContract.detailQuality = 'full'。
           // interactive 模式本来就默认 full,这里显式写出来当锚 —— 免得哪天
           // 有人把 interactive 改掉,质量档跟着悄悄掉进 feed 档。
