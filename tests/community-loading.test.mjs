@@ -6,13 +6,14 @@ import * as data from '../docs/community-data.mjs';
 import {legacyWorkIds,workCovers} from '../docs/community-work-links.mjs';
 
 class Element {
+ get isConnected(){return !!this.parent;}
   children=[]; dataset={}; listeners=new Map(); attributes={}; style={}; textContent='';
   classList={add:(name)=>{this.className=((this.className||'')+' '+name).trim();},remove:(name)=>{this.className=(this.className||'').split(' ').filter(x=>x!==name).join(' ');},contains:(name)=>(this.className||'').split(' ').includes(name)};
-  append(...nodes){for(const node of nodes){node.parent=this;this.children.push(node);}}
+  append(...nodes){for(const node of nodes){node.remove();node.parent=this;this.children.push(node);}}
   remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this);}
   decode=async()=>{};
   insertBefore(node,before){const i=this.children.indexOf(before);if(i<0)this.append(node);else this.children.splice(i,0,node);}
-  replaceChildren(...nodes){this.children=[...nodes];}
+  replaceChildren(...nodes){for(const node of this.children)node.parent=null;this.children=[];this.append(...nodes);}
   setAttribute(k,v){this.attributes[k]=v;}
   removeAttribute(k){delete this.attributes[k];}
   addEventListener(name,fn){this.listeners.set(name,fn);}
@@ -28,12 +29,13 @@ const work={id:'12345678-1234-4234-8234-123456789abc',user_id:'12345678-1234-423
 function boot(search='',{intersection=false}={}){
  const grid=new Element(),status=new Element(),more=new Element(),dialog=new Element();dialog.parts={iframe:new Element(),h2:new Element(),button:new Element()};
  const elements={'#community-grid':grid,'#feed-status':status,'#feed-more':more,'#work-dialog':dialog,'#share-work':new Element(),'#share-status':new Element(),'#work-meta':new Element()};
- const pending=[],timers=new Map(),observers=[],navigations=[],events=new Map();let clock=0;
+ const docEvents=new Map(),document={visibilityState:"visible",addEventListener:(name,callback)=>docEvents.set(name,callback),querySelector:s=>elements[s],createElement:()=>new Element()};
+ const pending=[],timers=new Map(),observers=[],navigations=[],scrolls=[],events=new Map();let clock=0;
  class Observer{constructor(callback){this.callback=callback;observers.push(this);}observe(target){this.target=target;}disconnect(){this.target=null;}}
  const fetch=(url,options)=>{const gate=defer();pending.push({url:String(url),options,...gate});return gate.promise;};
  const source=readFileSync(new URL('../docs/community-feed.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
- vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,legacyWorkIds,workCovers,document:{querySelector:s=>elements[s],createElement:()=>new Element()},fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f)=>{const id=++clock;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{addEventListener:(name,callback)=>events.set(name,callback)}});
- return {grid,status,more,pending,dialog,elements,timers,navigations,events,intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
+ vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,legacyWorkIds,workCovers,document,fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f,delay)=>{const id=++clock;f.delay=delay;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{scrollBy:(x,y)=>scrolls.push([x,y]),addEventListener:(name,callback)=>events.set(name,callback)}});
+ return {grid,status,more,pending,dialog,elements,timers,navigations,scrolls,events,document,docEvents,refresh:()=>{for(const [id,callback] of [...timers])if(callback.delay===100){timers.delete(id);callback();}},intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
 }
 async function configure(page){page.pending.shift().resolve(response({origin:'https://api.kongye.space',anonKey:'public'}));await settle();}
 async function completeFeed(page,rows=[work]){page.pending.shift().resolve(response(rows));await settle();if(rows.length){page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();}}
@@ -187,4 +189,73 @@ test('out-of-order author batches hydrate only cards belonging to each returned 
  assert.equal(realCards(page)[1].children[1].children[1].textContent,'第二位真实作者');assert.equal(realCards(page)[0].children[1].children[1].attributes['aria-busy'],'true');
  firstAuthors.resolve(response([{id:work.user_id,display_name:'第一位真实作者'}]));await settle();
  assert.equal(realCards(page)[0].children[1].children[1].textContent,'第一位真实作者');assert.equal(realCards(page)[1].children[1].children[1].textContent,'第二位真实作者');
+});
+
+
+test('foreground refresh reconciles existing cards, adds new works, removes private works and refreshes author identity',async()=>{
+ const page=boot();await configure(page);await completeFeed(page,[work]);const original=realCards(page)[0];
+ page.events.get('focus')();page.events.get('pageshow')();page.docEvents.get('visibilitychange')();page.refresh();
+ assert.equal(page.pending.length,1,'foreground event burst produces one feed request');
+ assert.equal(page.pending[0].options.cache,'no-store');assert.equal(new URL(page.pending[0].url).searchParams.has('or'),false);
+ const newer={...work,id:'22345678-1234-4234-8234-123456789abc',title:'新作品'};
+ page.pending.shift().resolve(response([newer,{...work,title:'已更新',likes_count:19}]));await settle();
+ assert.equal(realCards(page).length,2);assert.equal(realCards(page)[1],original,'same work retains its outer DOM node');
+ assert.equal(original.children[0].children[1].textContent,'已更新');assert.equal(original.children[1].children[2].children[1].textContent,'19');
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'更新后的作者'}]));await settle();
+ assert.equal(original.children[1].children[1].textContent,'更新后的作者');
+ page.events.get('focus')();page.refresh();page.pending.shift().resolve(response([newer]));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'更新后的作者'}]));await settle();
+ assert.equal(realCards(page).length,1);assert.equal(realCards(page)[0].children[0].children[1].textContent,'新作品');
+});
+
+test('refresh refetches both loaded pages atomically and leaves data and pagination intact on later-page failure',async()=>{
+ const page=boot();await configure(page);const first=Array.from({length:12},(_,i)=>({...work,id:work.id.slice(0,-3)+String(i).padStart(3,'0')}));await completeFeed(page,first);
+ const next=page.more.listeners.get('click')();const last=[{...work,id:'32345678-1234-4234-8234-123456789abc'},{...work,id:'42345678-1234-4234-8234-123456789abc'}];
+ page.pending.shift().resolve(response(last));await next;const before=[...realCards(page)];
+ page.events.get('focus')();page.refresh();page.pending.shift().resolve(response(first.map(w=>({...w,title:'changed'}))));await settle();
+ assert.deepEqual(realCards(page),before);const second=page.pending.shift();assert(new URL(second.url).searchParams.has('or'));
+ second.reject(Error('offline'));await settle();assert.deepEqual(realCards(page),before);assert.equal(page.more.disabled,false);
+ page.more.listeners.get('click')();page.refresh();assert.equal(new URL(page.pending[0].url).searchParams.has('or'),false,'retry restarts reconciliation, not pagination');
+ page.pending.shift().resolve(response(first));await settle();page.pending.shift().resolve(response(last));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'refreshed'}]));await settle();
+ assert.equal(realCards(page).length,14);assert.equal(page.more.hidden,true);
+});
+
+test('hidden notifications wait for foreground and late old author responses cannot overwrite refreshed profiles',async()=>{
+ const page=boot();await configure(page);page.pending.shift().resolve(response([work]));await settle();const oldAuthor=page.pending.shift();
+ page.document.visibilityState='hidden';page.events.get('pw-community-feed-invalidated')();page.refresh();assert.equal(page.pending.length,0);
+ page.document.visibilityState='visible';page.docEvents.get('visibilitychange')();page.refresh();page.pending.shift().resolve(response([work]));await settle();
+ const newAuthor=page.pending.shift();newAuthor.resolve(response([{id:work.user_id,display_name:'新作者'}]));await settle();
+ oldAuthor.resolve(response([{id:work.user_id,display_name:'旧作者'}]));await settle();assert.equal(realCards(page)[0].children[1].children[1].textContent,'新作者');
+});
+
+test('foreground refresh waits for an in-flight pagination request and requests first page afterwards',async()=>{
+ const page=boot();await configure(page);await completeFeed(page,[work]);
+ const next=page.more.listeners.get('click')();const pending=page.pending.shift();page.events.get('focus')();page.refresh();assert.equal(page.pending.length,0);
+ pending.resolve(response([]));await next;assert.equal(page.pending.length,1);assert.equal(new URL(page.pending[0].url).searchParams.has('or'),false);
+ page.pending.shift().resolve(response([]));await settle();assert.equal(realCards(page).length,0);assert.equal(page.more.hidden,true);
+});
+
+
+test('inserting a newly published work preserves the visible existing card and compensates its viewport offset',async()=>{
+ const page=boot();await configure(page);const second={...work,id:'22345678-1234-4234-8234-123456789abc'};await completeFeed(page,[work,second]);
+ const cards=realCards(page);for(const card of cards)card.getBoundingClientRect=()=>({top:page.grid.children.indexOf(card)*100-100,bottom:page.grid.children.indexOf(card)*100});
+ const anchor=cards[1];page.events.get('focus')();page.refresh();
+ page.pending.shift().resolve(response([{...work,id:'32345678-1234-4234-8234-123456789abc'},work,second]));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'author'}]));await settle();
+ assert.equal(realCards(page)[2],anchor);assert.deepEqual(page.scrolls,[[0,100]]);
+});
+
+
+for(const kind of ['work','example'])test('focus refresh retries interrupted '+kind+' share lookup and completes navigation',async()=>{
+ const slug=Object.keys(legacyWorkIds)[0],id=kind==='work'?work.id:legacyWorkIds[slug];
+ const page=boot(kind==='work'?'?work='+id:'?example='+slug);await configure(page);await completeFeed(page,[]);
+ const interrupted=page.pending.shift();assert.equal(new URL(interrupted.url).searchParams.get('id'),'eq.'+id);
+ interrupted.reject(Error('share lookup offline'));await settle();assert.equal(page.more.hidden,false);assert.equal(page.navigations.length,0);
+ page.events.get('focus')();page.refresh();const feed=page.pending.shift();assert.equal(new URL(feed.url).searchParams.has('id'),false);
+ feed.resolve(response([]));await settle();
+ const retried=page.pending.shift();assert.ok(retried,'successful foreground feed refresh must retry the unresolved direct link');
+ assert.equal(new URL(retried.url).searchParams.get('id'),'eq.'+id);
+ retried.resolve(response([{...work,id}]));await settle();
+ assert.equal(page.navigations.length,1);assert.equal(new URL(page.navigations[0]).pathname,'/community/');assert.equal(new URL(page.navigations[0]).searchParams.get('work'),id);
 });

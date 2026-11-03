@@ -1,9 +1,9 @@
 import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=shared-bilingual-comments-20261103-v8';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=shared-bilingual-comments-20261103-v8';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
-let config,cursor,busy=false,shareResolved=false,pageFailed=false;const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let config,cursor,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 const headers=()=>({apikey:config.anonKey,Authorization:'Bearer '+config.anonKey});
-async function read(url){const response=await fetch(url,{headers:headers(),signal:AbortSignal.timeout(15000)});if(!response.ok)throw translatedError('siteFeedConnection');const rows=await response.json();if(!Array.isArray(rows))throw translatedError('siteFeedFormat');return rows;}
+async function read(url){const response=await fetch(url,{headers:headers(),cache:'no-store',signal:AbortSignal.timeout(15000)});if(!response.ok)throw translatedError('siteFeedConnection');const rows=await response.json();if(!Array.isArray(rows))throw translatedError('siteFeedFormat');return rows;}
 function renderAuthor(id,author,avatar){
  const profile=authors.get(id);
  author.classList.remove('is-loading');avatar.classList.remove('is-loading');
@@ -30,15 +30,17 @@ async function readAuthors(rows){
  const ids=[...new Set(rows.map(w=>w.user_id).filter(Boolean))].filter(id=>!authors.has(id)&&!authorRequests.has(id));
  if(!ids.length)return;
  for(const id of ids){authorFailures.delete(id);refreshAuthor(id);}
+ const epoch=authorEpoch;
  const request=Promise.resolve().then(()=>read(authorUrl(config.origin,ids)));
  for(const id of ids)authorRequests.set(id,request);
  try{
-  for(const profile of await request){
+  const profiles=await request;if(epoch!==authorEpoch)return;
+  for(const profile of profiles){
    if(ids.includes(profile?.id)&&typeof profile.display_name==='string'&&profile.display_name.trim())authors.set(profile.id,profile);
   }
  }catch{/* Author lookup cannot invalidate already loaded works or pagination. */}
  finally{
-  for(const id of ids){
+  for(const id of epoch===authorEpoch?ids:[]){
    if(authorRequests.get(id)===request)authorRequests.delete(id);
    if(!authors.has(id))authorFailures.add(id);
    refreshAuthor(id);
@@ -78,7 +80,7 @@ function cardFor(work){
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);
  const date=publishedLabel(work.published_at);const time=document.createElement('time');time.dataset.publishedAt=work.published_at||'';if(date){time.dateTime=work.published_at;time.textContent=date;}else time.setAttribute('aria-hidden','true');card.append(time);
- return card;
+ cards.set(work.id,{card,work,author,avatar});return card;
 }
 function loadingShells(){
  const shells=[];
@@ -101,9 +103,57 @@ async function load(){
  cursor=rows.at(-1)||cursor;localizeElement(more,'siteLoadMore');localizeElement(status,seen.size?'siteFeedHint':'siteFeedEmpty');more.hidden=rows.length<12;
  await openSharedWork();
  }catch(e){pageFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
- finally{for(const shell of shells)shell.remove();busy=false;more.disabled=false;grid.setAttribute('aria-busy','false');}
+ finally{for(const shell of shells)shell.remove();busy=false;more.disabled=false;grid.setAttribute('aria-busy','false');drainRefresh();}
 }
-more.addEventListener('click',load);
+// Refresh the loaded window atomically, not just the next (older) page.
+// Foreground events and backend notifications share this single-flight entry.
+function requestRefresh(){
+ if(document.visibilityState==='hidden')return;
+ refreshPending=true;
+ if(refreshTimer!==undefined)return;
+ refreshTimer=setTimeout(()=>{refreshTimer=undefined;drainRefresh();},100);
+}
+function drainRefresh(){if(document.visibilityState!=='hidden'&&refreshPending&&!busy&&refreshTimer===undefined){refreshPending=false;void refreshLoaded();}}
+async function refreshLoaded(){
+ if(!config){void load();return;}
+ busy=true;more.disabled=true;
+ try{
+  const target=Math.max(12,seen.size),rows=[];let nextCursor,hasMore=true;
+  while(rows.length<target&&hasMore){
+   const page=await read(feedUrl(config.origin,nextCursor));
+   rows.push(...page);nextCursor=page.at(-1)||nextCursor;hasMore=page.length===12;
+  }
+  // Retain the visible card's screen position when new works precede it.
+  const keep=new Set(rows.map(work=>work.id));
+  const anchor=[...cards.entries()].filter(([id])=>keep.has(id)).map(([,entry])=>entry.card).find(card=>card.getBoundingClientRect?.().bottom>0);
+  const before=anchor?.getBoundingClientRect?.().top;
+  for(const [id,entry] of cards)if(!keep.has(id)){entry.card.remove();cards.delete(id);}
+  authorEpoch++;authors.clear();authorRequests.clear();authorFailures.clear();authorNodes.clear();seen.clear();
+  for(const work of rows){
+   if(seen.has(work.id))continue;
+   let entry=cards.get(work.id);
+   if(!entry||JSON.stringify(entry.work)!==JSON.stringify(work)){
+    const old=entry?.card;const card=cardFor(work);
+    if(old){old.replaceChildren(...card.children);entry=cards.get(work.id);entry.card=old;}else entry=cards.get(work.id);
+   }
+   if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
+   const nodes=authorNodes.get(work.user_id);if(![...nodes].some(node=>node.author===entry.author))nodes.add({author:entry.author,avatar:entry.avatar});
+   renderAuthor(work.user_id,entry.author,entry.avatar);grid.append(entry.card);seen.add(work.id);
+  }
+  cursor=nextCursor;more.hidden=!hasMore;pageFailed=false;refreshFailed=false;localizeElement(more,'siteLoadMore');localizeElement(status,rows.length?'siteFeedHint':'siteFeedEmpty');
+  if(anchor?.isConnected&&Number.isFinite(before))window.scrollBy?.(0,anchor.getBoundingClientRect().top-before);
+  // Author endpoint accepts at most twelve IDs; each batch is independent.
+  for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));
+  await openSharedWork();
+ }catch(e){pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
+ finally{busy=false;more.disabled=false;drainRefresh();}
+}
+window.addEventListener('focus',requestRefresh);
+window.addEventListener('pageshow',requestRefresh);
+document.addEventListener?.('visibilitychange',()=>{if(document.visibilityState==='visible')requestRefresh();});
+// Pure invalidation hook; does not claim a backend subscription is connected.
+window.addEventListener('pw-community-feed-invalidated',requestRefresh);
+more.addEventListener('click',()=>refreshFailed?requestRefresh():load());
 if(typeof IntersectionObserver==='function'){const paging=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&!busy&&!pageFailed&&!more.hidden&&!more.disabled)void load();},{rootMargin:'400px'});paging.observe(more);window.addEventListener('pagehide',()=>paging.disconnect());window.addEventListener('pageshow',()=>paging.observe(more));}
 async function openSharedWork(){
  if(shareResolved)return;
