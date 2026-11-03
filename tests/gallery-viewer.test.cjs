@@ -15,7 +15,7 @@ test('homepage embeds the exact production viewer and existing local models',()=
 test('community account header leads the page and company identity remains at the bottom',()=>{
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const header=html.match(/<header[\s\S]*?<\/header>/)[0];
- assert(header.includes('社区'));assert(header.includes('登录'));assert(header.includes('注册'));assert(!header.includes('窗后城'));assert(!header.includes('空也'));
+ assert(header.includes('社区'));assert(header.includes('登录'));assert(header.includes('注册'));assert(header.includes('窗后城'));assert(header.includes('assets/app-icon.png'));assert(header.includes('CHUANG HOU CHENG'));assert(!header.includes('空也'));
  assert(!html.includes('class="product-bar wrap"'));assert(!html.includes('进入完整社区'));assert(!html.includes('发现空间'));
  assert(html.indexOf('id="about"')>html.indexOf('id="contact"'));
  assert(html.includes('北京空也科技有限公司'));
@@ -25,7 +25,9 @@ test('public community leads the page without marketing hero or eager renderers'
  assert(!html.includes('class="hero wrap"'));
  assert(!html.includes('id="showcase"'));
  assert.equal((html.match(/<iframe/g)||[]).length,0);
- assert(!html.includes('<dialog'));
+ assert(html.includes('<dialog id="site-settings"'));
+ const main=html.match(/<main[\s\S]*?<\/main>/)[0];assert(!main.includes('id="contact"'));assert(!main.includes('id="about"'));
+ const settings=html.match(/<dialog[\s\S]*?<\/dialog>/)[0];for(const text of ['用户协议','隐私政策','平台公约','北京空也科技有限公司','支持与联系'])assert(settings.includes(text));
  assert(fs.readFileSync(path.join(root,'community-feed.js'),'utf8').includes('location.assign(url.href)'));
  assert(!/<iframe[^>]+src="community\//.test(html));
  assert(html.includes('community-feed.js'));

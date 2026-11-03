@@ -1,16 +1,16 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=community-account-20261103-v9';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=community-settings-20261103-v10';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
-const nav=document.querySelector('#account-nav');
+const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 let client,revision=0;
 function guest(){
- nav.replaceChildren();
+ summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,'siteGuest');summary.append(avatar,label);actions.replaceChildren();
  for(const [mode,key] of [['signin','siteLogin'],['signup','siteRegister']]){
-  const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);nav.append(a);
+  const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);actions.append(a);
  }
  nav.setAttribute('aria-busy','false');
 }
 function retry(){
- nav.replaceChildren();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));nav.append(a);nav.setAttribute('aria-busy','false');
+ guest();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);nav.setAttribute('aria-busy','false');
 }
 async function refresh(){
  const current=++revision;
@@ -18,11 +18,11 @@ async function refresh(){
   const account=await readAccount(client);
   if(current!==revision)return;
   if(!account){guest();return;}
-  const link=document.createElement('a');link.href='community/';link.className='community-account';
+  const link=summary;actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/';localizeElement(profileLink,'siteAccount');actions.append(profileLink);link.replaceChildren();
   const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');
   const name=document.createElement('span');name.className='community-account-name';name.textContent=account.name||'';
   if(!account.name)localizeElement(name,'siteAccount');
-  link.append(avatar,name);nav.replaceChildren(link);nav.setAttribute('aria-busy','false');
+  link.append(avatar,name);nav.setAttribute('aria-busy','false');
   // Avatar errors must not turn a verified signed-in account into a guest.
   const {data,error}=await client.functions.invoke('ensure-generated-avatar',{body:{}});
   if(error)return;

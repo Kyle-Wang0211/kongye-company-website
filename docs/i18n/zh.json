@@ -1075,5 +1075,9 @@
   "siteLogin": "登录",
   "siteRegister": "注册",
   "siteAccount": "个人中心",
-  "siteAccountRetry": "重试账号信息"
+  "siteAccountRetry": "重试账号信息",
+  "siteSettings": "设置",
+  "siteClose": "关闭",
+  "siteGuest": "游客",
+  "siteAccountMenu": "账号菜单"
 }

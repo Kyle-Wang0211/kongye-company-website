@@ -1075,5 +1075,9 @@
   "siteLogin": "Log in",
   "siteRegister": "Sign up",
   "siteAccount": "My account",
-  "siteAccountRetry": "Retry account"
+  "siteAccountRetry": "Retry account",
+  "siteSettings": "Settings",
+  "siteClose": "Close",
+  "siteGuest": "Guest",
+  "siteAccountMenu": "Account menu"
 }
