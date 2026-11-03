@@ -34,7 +34,34 @@ abstract interface class GeneratedAvatarBackend {
   });
 }
 
-class SupabaseGeneratedAvatarBackend implements GeneratedAvatarBackend {
+/// Public reads return only existing official PNGs for publicly visible authors.
+/// This separate capability does not widen private/profile/blocked reads.
+abstract interface class GeneratedAvatarPublicBackend {
+  Future<GeneratedAvatarImage?> loadPublicAccount(String targetUserId);
+}
+
+class SupabaseGeneratedAvatarBackend
+    implements GeneratedAvatarBackend, GeneratedAvatarPublicBackend {
+  @override
+  Future<GeneratedAvatarImage?> loadPublicAccount(String targetUserId) async {
+    final client = Supabase.instance.client;
+    final viewer = client.auth.currentUser?.id;
+    final response = await client.functions.invoke(
+      'read-generated-avatar',
+      body: <String, Object>{
+        'profile_user_id': targetUserId,
+        'context': 'public',
+      },
+    );
+    if (!identical(Supabase.instance.client, client) ||
+        client.auth.currentUser?.id != viewer ||
+        response.status != 200 ||
+        response.data is! Map) {
+      return null;
+    }
+    return GeneratedAvatarImage.tryParse(response.data['avatar']);
+  }
+
   @override
   Future<GeneratedAvatarImage?> loadAccount(
     String targetUserId, {
@@ -84,7 +111,7 @@ class GeneratedAvatarRepository {
   final GeneratedAvatarBackend backend;
   final GeneratedAvatarSession? Function() currentSession;
   final _pending = <String, Future<GeneratedAvatarImage?>>{};
-  bool _current(GeneratedAvatarSession expected) {
+  bool _current(GeneratedAvatarSession? expected) {
     try {
       return currentSession() == expected;
     } catch (_) {
@@ -97,6 +124,7 @@ class GeneratedAvatarRepository {
     required String userId,
     GeneratedAvatarImage? supplied,
     bool fromBlockedList = false,
+    bool readPublic = false,
   }) {
     GeneratedAvatarSession? session;
     try {
@@ -104,11 +132,12 @@ class GeneratedAvatarRepository {
     } catch (_) {
       return Future.value(null);
     }
-    if (session == null ||
-        session.viewerUserId.trim().isEmpty ||
-        deploymentId.trim().isEmpty ||
+    if (deploymentId.trim().isEmpty ||
         userId.trim().isEmpty ||
-        session.deploymentId != deploymentId) {
+        (session != null && session.deploymentId != deploymentId) ||
+        (readPublic && fromBlockedList) ||
+        (!readPublic &&
+            (session == null || session.viewerUserId.trim().isEmpty))) {
       return Future.value(null);
     }
     final key = sha256
@@ -117,9 +146,13 @@ class GeneratedAvatarRepository {
             jsonEncode([
               GeneratedAvatarImage.version,
               deploymentId,
-              session.viewerUserId,
+              session?.viewerUserId ?? 'guest',
               userId,
-              fromBlockedList ? 'blocked' : 'profile',
+              readPublic
+                  ? 'public'
+                  : fromBlockedList
+                  ? 'blocked'
+                  : 'profile',
             ]),
           ),
         )
@@ -128,9 +161,10 @@ class GeneratedAvatarRepository {
     final expected = session;
     return _pending.putIfAbsent(
       key,
-      () => _load(key, userId, fromBlockedList, expected).whenComplete(() {
-        _pending.remove(key);
-      }),
+      () => _load(key, userId, fromBlockedList, expected, readPublic)
+          .whenComplete(() {
+            _pending.remove(key);
+          }),
     );
   }
 
@@ -138,7 +172,8 @@ class GeneratedAvatarRepository {
     String key,
     String userId,
     bool blocked,
-    GeneratedAvatarSession session,
+    GeneratedAvatarSession? session,
+    bool readPublic,
   ) async {
     if (!_current(session)) return null;
     try {
@@ -157,11 +192,19 @@ class GeneratedAvatarRepository {
     }
     if (!_current(session)) return null;
     try {
-      final image = await backend.loadAccount(
-        userId,
-        session: session,
-        fromBlockedList: blocked,
-      );
+      final GeneratedAvatarImage? image;
+      if (readPublic) {
+        final publicBackend = backend;
+        if (publicBackend is! GeneratedAvatarPublicBackend) return null;
+        image = await (publicBackend as GeneratedAvatarPublicBackend)
+            .loadPublicAccount(userId);
+      } else {
+        image = await backend.loadAccount(
+          userId,
+          session: session!,
+          fromBlockedList: blocked,
+        );
+      }
       if (!_current(session) || image == null) return null;
       return await _saveAndReturn(key, image, session);
     } catch (_) {
@@ -172,7 +215,7 @@ class GeneratedAvatarRepository {
   Future<GeneratedAvatarImage?> _saveAndReturn(
     String key,
     GeneratedAvatarImage image,
-    GeneratedAvatarSession session,
+    GeneratedAvatarSession? session,
   ) async {
     if (!_current(session)) return null;
     File? temporary;

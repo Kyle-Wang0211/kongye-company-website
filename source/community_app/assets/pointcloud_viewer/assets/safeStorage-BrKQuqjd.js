@@ -1,0 +1,1 @@
+function e(e){try{return typeof localStorage>`u`?null:localStorage.getItem(e)}catch{return null}}function t(e,t){try{if(typeof localStorage>`u`)return;localStorage.setItem(e,t)}catch{}}function n(e){try{if(typeof localStorage>`u`)return;localStorage.removeItem(e)}catch{}}export{n,t as r,e as t};

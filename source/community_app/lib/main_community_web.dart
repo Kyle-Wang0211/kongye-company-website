@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
+import 'ui/community/public_profile_entry.dart';
 import 'auth/current_user.dart';
 import 'auth/unavailable_auth_service.dart';
 import 'auth/supabase_auth_service.dart';
@@ -171,6 +172,13 @@ class _CommunityWeb extends StatelessWidget {
           animation: user,
           builder: (context, _) {
             final state = user.state;
+            // Public profiles use the existing mobile page for guests and
+            // members, once the shared backend initialization has completed.
+            if ((state is CurrentUserSignedIn ||
+                    state is CurrentUserSignedOut) &&
+                Uri.base.queryParameters.containsKey('profile')) {
+              return PublicProfileEntry(user: user);
+            }
             return switch (state) {
               CurrentUserSignedIn() =>
                 Uri.base.queryParameters.containsKey('work')

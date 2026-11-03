@@ -7,6 +7,7 @@ import '../../community/feed_models.dart';
 import '../../community/public_work_repository.dart';
 import '../auth/auth_root_view.dart';
 import 'work_detail_page.dart';
+import 'public_profile_entry.dart';
 import 'public_work_exit_stub.dart'
     if (dart.library.js_interop) 'public_work_exit_web.dart';
 
@@ -59,6 +60,21 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
           service: service,
           onSignIn: _signIn,
           onExit: exitPublicWork,
+          onAuthorTap: () => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              settings: RouteSettings(
+                name: publicProfileUri(
+                  Uri(path: '/'),
+                  snapshot.data!.userId,
+                ).toString(),
+              ),
+              builder: (_) => PublicProfileEntry(
+                user: widget.user,
+                userId: snapshot.data!.userId,
+                seedWork: snapshot.data!,
+              ),
+            ),
+          ),
         );
       }
       if (snapshot.hasError) {

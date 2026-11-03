@@ -1,0 +1,1 @@
+function e(e){if(!e?.ok)return null;let t=e.decision;return{status:t.status,label:t.badge,watermark:t.status===`exploratory`?t.watermark:null,caveats:t.caveats}}export{e as t};

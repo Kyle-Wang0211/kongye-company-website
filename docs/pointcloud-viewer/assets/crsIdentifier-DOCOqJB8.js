@@ -1,0 +1,1 @@
+function e(e){if(!e)return null;let t=e.trim(),n=/^(\d{3,6})$/.exec(t)??/(?:^|\()\s*EPSG\s*:\s*(\d+)\s*\)?\s*$/i.exec(t);if(!n)return null;let r=Number(n[1]);return Number.isInteger(r)&&r>0?r:null}function t(t){let n=e(t);return n===null?null:`urn:ogc:def:crs:EPSG::${n}`}export{e as n,t};

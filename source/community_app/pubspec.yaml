@@ -247,6 +247,9 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/pointcloud_viewer/
+    - assets/pointcloud_viewer/assets/
+    - assets/pointcloud_viewer/source/
     - vendor/generated_avatar/licenses/
     - vendor/cloud_library/licenses/
     - assets/models/DamagedHelmet.glb

@@ -6,7 +6,7 @@ export const legacyWorkIds = Object.freeze({
 });
 // Existing capture posters, bound to exact immutable model identities only.
 export const workCovers = Object.freeze({
- '76db4d238fba298028a8be1157601e1c39159b1ebd4d73917ec3e66a549088b2/source.glb':'assets/models/cma-vase-1963-514-38e83db0f123.png',
- 'f80acfbf8e1c88a096187a59c41dcb98e9a78c263044d5d8bc7a0187ab0e4ccc/source.glb':'assets/models/cma-dragon-jar-1986-85-e6f6a2b31d13.png',
- '3e4fce6fe2014ec83de31dd47930f7946b458ae615bf4b9526a2d65a0a944d2a/source.glb':'assets/models/cma-nataraja-1930-331-265e9d8b8bcc.png',
+ '76db4d238fba298028a8be1157601e1c39159b1ebd4d73917ec3e66a549088b2/source.glb':'assets/models/cma-vase-1963-514-1346d3e18404.png',
+ 'f80acfbf8e1c88a096187a59c41dcb98e9a78c263044d5d8bc7a0187ab0e4ccc/source.glb':'assets/models/cma-dragon-jar-1986-85-9abcec526827.png',
+ '3e4fce6fe2014ec83de31dd47930f7946b458ae615bf4b9526a2d65a0a944d2a/source.glb':'assets/models/cma-nataraja-1930-331-7a12fe4c5d6b.png',
 });

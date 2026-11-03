@@ -1,15 +1,46 @@
-import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=pointcloud-comments-20261103-v12';
-import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=pointcloud-comments-20261103-v12';
+import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=streaming-profiles-20261103-v14';
+import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=streaming-profiles-20261103-v14';
+import {createPublicAvatarReader} from './community-public-avatar.mjs';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
 let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 const headers=()=>({apikey:config.anonKey,Authorization:'Bearer '+config.anonKey});
 async function read(url){const response=await fetch(url,{headers:headers(),cache:'no-store',signal:AbortSignal.timeout(15000)});if(!response.ok)throw translatedError('siteFeedConnection');const rows=await response.json();if(!Array.isArray(rows))throw translatedError('siteFeedFormat');return rows;}
+let avatarReader;const avatarTokens=new WeakMap(),avatarObservers=new Map();
+function renderAvatar(avatar,id,profile){
+ avatarObservers.get(avatar)?.disconnect();avatarObservers.delete(avatar);
+ avatar.replaceChildren();avatar.style.color='';
+ const token={};avatarTokens.set(avatar,token);if(!profile)return;
+ const epoch=authorEpoch;const current=()=>epoch===authorEpoch&&avatarTokens.get(avatar)===token;
+ const load=async()=>{
+  avatarReader??=createPublicAvatarReader({...config,fetcher:fetch});
+  const src=await avatarReader.read(id);if(!src||!current())return;
+  const img=document.createElement('img');img.alt='';img.width=16;img.height=16;img.decoding='async';
+  img.style.cssText='position:relative;z-index:1;display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;visibility:hidden';
+  img.addEventListener('load',()=>{if(!current()||avatar.children[0]!==img)return;avatar.style.color='transparent';img.style.visibility='visible';});
+  img.addEventListener('error',()=>{if(!current()||avatar.children[0]!==img)return;img.remove();avatar.style.color='';});
+  avatar.append(img);img.src=src;
+ };
+ if(typeof IntersectionObserver==='function'){
+  const observer=new IntersectionObserver(entries=>{if(!current()){observer.disconnect();avatarObservers.delete(avatar);return;}if(entries.some(e=>e.isIntersecting)){observer.disconnect();avatarObservers.delete(avatar);void load();}},{rootMargin:'200px'});avatarObservers.set(avatar,observer);observer.observe(avatar);
+ }else void load();
+}
 function renderAuthor(id,author,avatar){
  const profile=authors.get(id);
  author.classList.remove('is-loading');avatar.classList.remove('is-loading');
  delete author.dataset.i18nAria;author.removeAttribute('aria-label');author.setAttribute('aria-busy','false');
  author.replaceChildren();author.style.display='';
- if(profile){author.textContent=profile.display_name;return;}
+ renderAvatar(avatar,id,profile);
+ if(profile){
+  author.textContent=profile.display_name;
+  const href='/community/?profile='+encodeURIComponent(id);
+  const visit=event=>{event.stopPropagation();window.location.assign(href);};
+  for(const node of [author,avatar]){
+   node.setAttribute('role','link');node.setAttribute('tabindex','0');node.style.cursor='pointer';
+   node.removeAttribute('aria-hidden');node.setAttribute('aria-label',profile.display_name);
+   node.onclick=visit;node.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();visit(event);}};
+  }
+  return;
+ }
  if(!id||authorFailures.has(id)){
   author.style.display='flex';const label=document.createElement('span');label.style.cssText='overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1';localizeElement(label,'siteAuthorUnavailable');author.append(label);
   if(id){const retry=document.createElement('button');retry.type='button';retry.style.cssText='background:none;border:0;padding:0 0 0 5px;font:inherit;cursor:pointer;flex:none';localizeElement(retry,'siteAuthorRetry');retry.addEventListener('click',()=>void readAuthors([{user_id:id}]));author.append(retry);}
@@ -22,7 +53,7 @@ function refreshAuthor(id){for(const {author,avatar} of authorNodes.get(id)||[])
 function openWork(work){
  try{
   checkModel(work);
-  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','pointcloud-comments-20261103-v12');
+  const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','streaming-profiles-20261103-v14');
   location.assign(url.href);
  }catch(e){localizeElement(status,e.localeKey||'siteFeedRetry');}
 }
@@ -75,7 +106,7 @@ function cardFor(work){
  const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
  if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
  authorNodes.get(work.user_id).add({author,avatar});renderAuthor(work.user_id,author,avatar);
- const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=pointcloud-comments-20261103-v12';localizeElement(like,'siteLikeSignIn',{},'aria-label');
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=streaming-profiles-20261103-v14';localizeElement(like,'siteLikeSignIn',{},'aria-label');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
  row.append(avatar,author,like);card.append(open,row);
@@ -128,7 +159,7 @@ async function refreshLoaded(){
   const anchor=[...cards.entries()].filter(([id])=>keep.has(id)).map(([,entry])=>entry.card).find(card=>card.getBoundingClientRect?.().bottom>0);
   const before=anchor?.getBoundingClientRect?.().top;
   for(const [id,entry] of cards)if(!keep.has(id)){entry.card.remove();cards.delete(id);}
-  authorEpoch++;authors.clear();authorRequests.clear();authorFailures.clear();authorNodes.clear();seen.clear();
+  authorEpoch++;avatarReader?.clear();for(const observer of avatarObservers.values())observer.disconnect();avatarObservers.clear();authors.clear();authorRequests.clear();authorFailures.clear();authorNodes.clear();seen.clear();
   for(const work of rows){
    if(seen.has(work.id))continue;
    let entry=cards.get(work.id);

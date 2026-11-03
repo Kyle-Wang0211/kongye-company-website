@@ -23,6 +23,7 @@ import '../../community/comments/comment_repository.dart';
 import '../../community/comments/comment_moderation_repository.dart';
 import '../../config/endpoint_config.dart';
 import '../../community/feed_models.dart';
+import '../../community/point_cloud_streaming_sources.dart';
 import '../../community/social_profile_models.dart';
 import '../../community/social_profile_repository.dart';
 import '../../community/thumb_baker.dart';
@@ -31,14 +32,16 @@ import '../../auth/auth_scope.dart';
 import 'public_work_entry.dart' show PublicWorkSignIn;
 import '../design_system.dart';
 import 'aether_cpp_card_demo.dart';
+import 'generated_account_avatar.dart';
 import 'comments/community_comments_panel.dart';
 import 'comment_moderation_routes.dart';
 import 'user_report_page.dart';
 import 'viewer_impl.dart' show ViewerQuality;
 import '../shared/product_model_view.dart';
 import '../shared/community_viewer_session.dart';
+import '../shared/streaming_point_cloud_view.dart';
 
-enum _CloudStatus { loading, shared, unsupported, failed }
+enum _CloudStatus { loading, shared, streaming, unsupported, failed }
 
 class WorkDetailPage extends StatefulWidget {
   final FeedWork work;
@@ -59,6 +62,7 @@ class WorkDetailPage extends StatefulWidget {
 
   final VoidCallback? onSignIn;
   final VoidCallback? onExit;
+  final VoidCallback? onAuthorTap;
   @visibleForTesting
   final bool? webCommentLayoutForTesting;
 
@@ -69,6 +73,7 @@ class WorkDetailPage extends StatefulWidget {
     this.reportRepository,
     this.onSignIn,
     this.onExit,
+    this.onAuthorTap,
     this.webCommentLayoutForTesting,
     this.onWorkUpdated,
     this.commentRepository,
@@ -135,7 +140,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   StreamSubscription<AuthState>? _commentAuth;
   int _commentIdentityEpoch = 0;
   String? _lastCommentUser;
-  bool get _supportsSurfaceComments =>
+  bool get _supportsSurfaceComments => pointCloudStreamingSourceFor(widget.work.id) == null &&
       {'glb', 'gltf', 'ply'}.contains(widget.work.format.toLowerCase());
   String get _commentPartition =>
       '${widget.work.id}:${widget.work.modelStoragePath}:${widget.service.currentUserId}:'
@@ -760,6 +765,11 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       return;
     }
     final format = widget.work.format.toLowerCase();
+    if (format == 'ply' &&
+        pointCloudStreamingSourceFor(widget.work.id) != null) {
+      if (mounted) setState(() => _status = _CloudStatus.streaming);
+      return;
+    }
     if (mounted) {
       setState(
         () => _status = {'glb', 'gltf', 'ply'}.contains(format)
@@ -828,6 +838,11 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
               color: Colors.white54,
             ),
           ),
+        );
+      case _CloudStatus.streaming:
+        return StreamingPointCloudView(
+          key: ValueKey('work-streaming-${widget.work.id}'),
+          source: pointCloudStreamingSourceFor(widget.work.id)!,
         );
       case _CloudStatus.shared:
         return AetherCppCardDemo(
@@ -1187,6 +1202,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                   likeBusy: _likeInFlight || pending.contains(widget.work.id),
                   onLike: _beginToggleLike,
                   author: widget.work.authorDisplayName,
+                  authorUserId: widget.work.userId,
+                  onAuthorTap: widget.onAuthorTap,
                   description: widget.work.description,
                   onComments: _supportsSurfaceComments ? _showComments : null,
                 ),
@@ -1206,6 +1223,8 @@ class _MetaRow extends StatelessWidget {
   final bool likeBusy;
   final bool Function() onLike;
   final String author;
+  final String authorUserId;
+  final VoidCallback? onAuthorTap;
   final String? description;
   final VoidCallback? onComments;
 
@@ -1216,6 +1235,8 @@ class _MetaRow extends StatelessWidget {
     required this.likeBusy,
     required this.onLike,
     required this.author,
+    required this.authorUserId,
+    this.onAuthorTap,
     required this.description,
     this.onComments,
   });
@@ -1236,12 +1257,28 @@ class _MetaRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  author,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onAuthorTap,
+                  child: Row(
+                    children: [
+                      GeneratedAccountAvatar(
+                        userId: authorUserId,
+                        readPublic: true,
+                        radius: 14,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          author,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

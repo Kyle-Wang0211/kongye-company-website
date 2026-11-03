@@ -18,6 +18,7 @@ class GeneratedAccountAvatar extends StatefulWidget {
     this.image,
     this.repository,
     this.fromBlockedList = false,
+    this.readPublic = false,
     this.radius = 24,
   }) : assert(radius > 0 && radius < double.infinity);
   final String userId;
@@ -26,6 +27,7 @@ class GeneratedAccountAvatar extends StatefulWidget {
   final GeneratedAvatarRepository? repository;
   final double radius;
   final bool fromBlockedList;
+  final bool readPublic;
   @override
   State<GeneratedAccountAvatar> createState() => _GeneratedAccountAvatarState();
 }
@@ -89,13 +91,13 @@ class _GeneratedAccountAvatarState extends State<GeneratedAccountAvatar> {
         _authUser?.deployment.id ??
         BackendDeployment.fromBuild().id;
     final key =
-        '$deployment\u0000${session?.viewerUserId ?? ''}\u0000${widget.userId}\u0000${widget.image?.pngSha256 ?? ''}\u0000${widget.fromBlockedList}\u0000${identityHashCode(repository)}';
+        '$deployment\u0000${session?.viewerUserId ?? ''}\u0000${widget.userId}\u0000${widget.image?.pngSha256 ?? ''}\u0000${widget.fromBlockedList}\u0000${widget.readPublic}\u0000${identityHashCode(repository)}';
     if (key == _requestKey) return;
     _requestKey = key;
     final request = ++_request;
     _image =
-        session == null ||
-            session.deploymentId != deployment ||
+        (!widget.readPublic && session == null) ||
+            (session != null && session.deploymentId != deployment) ||
             widget.userId.trim().isEmpty
         ? null
         : widget.image;
@@ -105,6 +107,7 @@ class _GeneratedAccountAvatarState extends State<GeneratedAccountAvatar> {
           userId: widget.userId,
           supplied: _image,
           fromBlockedList: widget.fromBlockedList,
+          readPublic: widget.readPublic,
         )
         .then((image) {
           if (mounted &&

@@ -1,0 +1,1 @@
+var e=new Map,t=new Set;function n(){for(let e of[...t])try{e()}catch{}}function r(e,t=()=>null){e.subscribe(n),n()}function i(t,r){(e.get(t)??null)!==r&&(r?e.set(t,r):e.delete(t),n())}function a(t){return e.get(t)??null}var o=new Set;function s(e){if(!o.delete(e))return!1;for(let t of c)t(e);return!0}var c=new Set;export{s as i,a as n,i as r,r as t};

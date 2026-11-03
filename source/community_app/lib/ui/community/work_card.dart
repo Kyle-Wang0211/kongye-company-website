@@ -405,6 +405,7 @@ class _WorkCardState extends State<WorkCard> {
                       : () => widget.onAuthorTap!(_work),
                   child: GeneratedAccountAvatar(
                     userId: _work.userId,
+                    readPublic: true,
                     radius: 8,
                   ),
                 ),

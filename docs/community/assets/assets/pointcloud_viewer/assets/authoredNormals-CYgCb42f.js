@@ -1,0 +1,1 @@
+function e(e,t,n=3){if(!e||n<3||e.length<t*n)return;let r=new Float32Array(t*3);for(let i=0;i<t;i++){let t=e[i*n],a=e[i*n+1],o=e[i*n+2],s=Math.hypot(t,a,o);if(!Number.isFinite(s)||Math.abs(s-1)>.02)return;r[i*3]=t,r[i*3+1]=a,r[i*3+2]=o}return r}export{e as t};

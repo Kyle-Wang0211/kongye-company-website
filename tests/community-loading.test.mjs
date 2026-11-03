@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import * as data from '../docs/community-data.mjs';
+import {createPublicAvatarReader} from '../docs/community-public-avatar.mjs';
 import {legacyWorkIds,workCovers} from '../docs/community-work-links.mjs';
 
 class Element {
@@ -26,7 +27,7 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
 const defer=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const response=value=>({ok:true,json:async()=>value});
 const work={id:'12345678-1234-4234-8234-123456789abc',user_id:'12345678-1234-4234-8234-123456789abd',title:'真实社区作品',format:'glb',file_size_bytes:100,model_storage_path:'owner/model.glb',published_at:'2026-11-02T04:00:00Z'};
-function boot(search='',{intersection=false}={}){
+function boot(search='',{intersection=false,avatars=false}={}){
  const grid=new Element(),status=new Element(),more=new Element(),dialog=new Element();dialog.parts={iframe:new Element(),h2:new Element(),button:new Element()};
  const elements={'#community-grid':grid,'#feed-status':status,'#feed-more':more,'#work-dialog':dialog,'#share-work':new Element(),'#share-status':new Element(),'#work-meta':new Element()};
  const docEvents=new Map(),document={visibilityState:"visible",addEventListener:(name,callback)=>docEvents.set(name,callback),querySelector:s=>elements[s],createElement:()=>new Element()};
@@ -34,7 +35,7 @@ function boot(search='',{intersection=false}={}){
  class Observer{constructor(callback){this.callback=callback;this.observations=0;observers.push(this);}observe(target){this.target=target;this.observations++;}disconnect(){this.target=null;}}
  const fetch=(url,options)=>{const gate=defer();pending.push({url:String(url),options,...gate});return gate.promise;};
  const source=readFileSync(new URL('../docs/community-feed.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
- vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,legacyWorkIds,workCovers,document,fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f,delay)=>{const id=++clock;f.delay=delay;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{scrollBy:(x,y)=>scrolls.push([x,y]),addEventListener:(name,callback)=>events.set(name,callback)}});
+ vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,createPublicAvatarReader:options=>avatars?createPublicAvatarReader(options):{read:async()=>null,clear:()=>{}},legacyWorkIds,workCovers,document,fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f,delay)=>{const id=++clock;f.delay=delay;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{scrollBy:(x,y)=>scrolls.push([x,y]),addEventListener:(name,callback)=>events.set(name,callback)}});
  return {grid,status,more,pending,dialog,elements,timers,navigations,scrolls,events,document,docEvents,observers,refresh:()=>{for(const [id,callback] of [...timers])if(callback.delay===100){timers.delete(id);callback();}},intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
 }
 async function configure(page){page.pending.shift().resolve(response({origin:'https://api.kongye.space',anonKey:'public'}));await settle();}
@@ -141,7 +142,7 @@ test('legacy links and new shares resolve to the same real work identity',async(
  lookup.resolve(response([{...work,id:legacyWorkIds[slug]}]));await settle();
  assert.equal(page.pending.length,0);
  assert.equal(page.dialog.open,undefined);assert.equal(new URL(page.navigations.at(-1)).pathname,'/community/');assert.equal(new URL(page.navigations.at(-1)).searchParams.get('work'),legacyWorkIds[slug]);
- assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'pointcloud-comments-20261103-v12');
+ assert.equal(new URL(page.navigations.at(-1)).searchParams.get('release'),'streaming-profiles-20261103-v14');
 });
 
 for(const failure of ['config','lookup'])test('direct work link recovers after '+failure+' failure',async()=>{
@@ -171,6 +172,46 @@ test('slow author lookup leaves real cards and cover requests usable before hydr
  const request=page.pending.shift();assert.match(request.url,/community_author_profiles/);
  request.resolve(response([{id:work.user_id,display_name:'真实作者'}]));await settle();
  assert.equal(realCards(page)[0],card);assert.equal(card.children[1].children[1],author);assert.equal(author.textContent,'真实作者');assert.equal(author.attributes['aria-busy'],'false');assert(!author.classList.contains('is-loading'));
+});
+
+async function avatarFixture(){
+ const png=new Uint8Array(100);png.set([137,80,78,71,13,10,26,10]);const view=new DataView(png.buffer);view.setUint32(16,128);view.setUint32(20,128);
+ return {version:'jdenticon-3.3.0-pw-v2',png_base64:Buffer.from(png).toString('base64'),png_sha256:Buffer.from(await crypto.subtle.digest('SHA-256',png)).toString('hex'),pixel_sha256:'a'.repeat(64)};
+}
+
+test('public author avatar fills existing circle without blocking feed and image failure preserves name',async()=>{
+ const page=boot('',{avatars:true});await configure(page);page.pending.shift().resolve(response([work]));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'实际账号昵称',avatar_url:null}]));await settle();
+ const card=realCards(page)[0],avatar=card.children[1].children[0],author=card.children[1].children[1];
+ assert.equal(page.grid.attributes['aria-busy'],'false');assert.equal(author.textContent,'实际账号昵称');assert.equal(avatar.children.length,0);
+ const request=page.pending.shift();assert.match(request.url,/functions\/v1\/read-generated-avatar$/);
+ assert.deepEqual(JSON.parse(request.options.body),{profile_user_id:work.user_id,context:'public'});
+ assert.deepEqual(request.options.headers,{apikey:'public',Authorization:'Bearer public','Content-Type':'application/json'});
+ const value=await avatarFixture();request.resolve(response({avatar:value}));await settle();await settle();
+ const image=avatar.children[0];assert.equal(image.src,'data:image/png;base64,'+value.png_base64);assert.equal(image.width,16);assert.equal(image.height,16);
+ image.listeners.get('load')();assert.equal(image.style.visibility,'visible');assert.equal(avatar.style.color,'transparent');
+ image.listeners.get('error')();assert.equal(avatar.children.length,0);assert.equal(avatar.style.color,'');assert.equal(author.textContent,'实际账号昵称');assert.equal(realCards(page)[0],card);
+});
+
+test('public avatar reader deduplicates users, bounds cache, expires missing avatars and rejects invalid PNG',async()=>{
+ const requests=[],value=await avatarFixture();let time=0;
+ const reader=createPublicAvatarReader({origin:'https://api.kongye.space',anonKey:'public',maxEntries:1,now:()=>time,fetcher:(url,options)=>{const gate=defer();requests.push({url,options,...gate});return gate.promise;}});
+ const first=reader.read(work.user_id),same=reader.read(work.user_id);assert.equal(requests.length,1);
+ requests.shift().resolve(response({avatar:value}));assert.equal(await first,await same);await reader.read(work.user_id);assert.equal(requests.length,0);
+ const other='22345678-1234-4234-8234-123456789abd',missing=reader.read(other);requests.shift().resolve({ok:false,status:404});assert.equal(await missing,null);
+ await reader.read(other);assert.equal(requests.length,0);time=30001;
+ const retried=reader.read(other);requests.shift().resolve(response({avatar:{...value,png_sha256:'b'.repeat(64)}}));assert.equal(await retried,null);
+ const evicted=reader.read(work.user_id);assert.equal(requests.length,1);requests.shift().resolve(response({avatar:value}));await evicted;
+ const invalidOrigin=createPublicAvatarReader({origin:'https://outside.example',anonKey:'public',fetcher:()=>{throw Error('must not fetch');}});assert.equal(await invalidOrigin.read(work.user_id),null);
+});
+
+test('offscreen public avatars wait for visibility and multiple cards share one author request',async()=>{
+ const page=boot('',{avatars:true,intersection:true});await configure(page);
+ await completeFeed(page,[work,{...work,id:'22345678-1234-4234-8234-123456789abc'}]);assert.equal(page.pending.length,0);
+ const avatars=realCards(page).map(card=>card.children[1].children[0]);
+ page.intersect(avatars[0]);page.intersect(avatars[1]);await settle();assert.equal(page.pending.length,1);
+ page.pending.shift().resolve(response({avatar:await avatarFixture()}));await settle();await settle();
+ assert(avatars.every(avatar=>avatar.children.length===1));
 });
 
 test('failed author lookup retains works and exposes a local retry without failing the feed',async()=>{
@@ -248,6 +289,19 @@ test('hidden notifications wait for foreground and late old author responses can
  page.document.visibilityState='visible';page.docEvents.get('visibilitychange')();page.refresh();page.pending.shift().resolve(response([work]));await settle();
  const newAuthor=page.pending.shift();newAuthor.resolve(response([{id:work.user_id,display_name:'新作者'}]));await settle();
  oldAuthor.resolve(response([{id:work.user_id,display_name:'旧作者'}]));await settle();assert.equal(realCards(page)[0].children[1].children[1].textContent,'新作者');
+});
+
+test('public avatar refresh ignores old responses and late old image events',async()=>{
+ const page=boot('',{avatars:true}),value=await avatarFixture();await configure(page);page.pending.shift().resolve(response([work]));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'原昵称'}]));await settle();const oldRequest=page.pending.shift();
+ page.events.get('focus')();page.refresh();page.pending.shift().resolve(response([work]));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'最新昵称'}]));await settle();const latestRequest=page.pending.shift();
+ oldRequest.resolve(response({avatar:value}));await settle();await settle();const avatar=realCards(page)[0].children[1].children[0];assert.equal(avatar.children.length,0);
+ latestRequest.resolve(response({avatar:value}));await settle();await settle();const old=avatar.children[0];assert(old);old.listeners.get('load')();
+ page.events.get('focus')();page.refresh();page.pending.shift().resolve(response([work]));await settle();
+ page.pending.shift().resolve(response([{id:work.user_id,display_name:'最新昵称'}]));await settle();
+ page.pending.shift().resolve(response({avatar:value}));await settle();await settle();const current=avatar.children[0];current.listeners.get('load')();old.listeners.get('error')();old.listeners.get('load')();
+ assert.equal(avatar.children[0],current);assert.equal(avatar.style.color,'transparent');assert.equal(realCards(page)[0].children[1].children[1].textContent,'最新昵称');
 });
 
 test('foreground refresh waits for an in-flight pagination request and requests first page afterwards',async()=>{

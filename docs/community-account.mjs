@@ -1,4 +1,4 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=pointcloud-comments-20261103-v12';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=streaming-profiles-20261103-v14';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 let client,revision=0;

@@ -13,7 +13,7 @@ export function persistLocale(storage, value) {
   if (!['zh', 'en'].includes(value)) throw new TypeError('Invalid locale');
   try { storage?.setItem(localeStorageKey, JSON.stringify(value)); } catch { /* Session choice remains usable. */ }
 }
-const releaseVersion = 'pointcloud-comments-20261103-v12';
+const releaseVersion = 'streaming-profiles-20261103-v14';
 let catalogs = {};
 async function loadCatalogs() {
   const entries = await Promise.all(['zh', 'en'].map(async locale => {
