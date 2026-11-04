@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
+import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
 import 'auth/current_user.dart';
 import 'auth/unavailable_auth_service.dart';
@@ -187,12 +188,19 @@ class _CommunityWeb extends StatelessWidget {
               CurrentUserSignedOut() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
-                    : AuthRootView(currentUser: user, initialSignUp: Uri.base.queryParameters['auth'] == 'signup'),
+                    : AuthRootView(
+                        currentUser: user,
+                        initialSignUp:
+                            Uri.base.queryParameters['auth'] == 'signup',
+                      ),
               CurrentUserServiceUnavailable(:final reason) =>
                 _ServiceUnavailableView(currentUser: user, reason: reason),
-              _ => const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              ),
+              _ =>
+                Uri.base.queryParameters.containsKey('work')
+                    ? PublicWorkOpening()
+                    : const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      ),
             };
           },
         ),

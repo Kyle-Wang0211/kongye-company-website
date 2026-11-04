@@ -13,16 +13,21 @@ function renderAvatar(avatar,id,profile){
  // Keep already decoded pixels while the same public author is revalidated.
  if(profile&&avatar.dataset.authorId===id&&avatar.querySelector('img'))return;
  avatarObservers.get(avatar)?.disconnect();avatarObservers.delete(avatar);
- avatar.replaceChildren();avatar.style.color='';avatar.dataset.authorId=id||'';
+ avatar.replaceChildren();avatar.style.color='';avatar.classList.add('is-loading');avatar.dataset.authorId=id||'';
  const token={};avatarTokens.set(avatar,token);if(!profile)return;
  const epoch=authorEpoch;const current=()=>epoch===authorEpoch&&avatarTokens.get(avatar)===token;
  const load=async()=>{
   avatarReader??=createPublicAvatarReader({...config,fetcher:fetch});
-  const src=await avatarReader.read(id);if(!src||!current())return;
+  const src=await avatarReader.read(id);if(!current())return;
+  if(!src){avatar.classList.remove('is-loading');return;}
   const img=document.createElement('img');img.alt='';img.width=16;img.height=16;img.decoding='async';
   img.style.cssText='position:relative;z-index:1;display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;visibility:hidden';
-  img.addEventListener('load',()=>{if(!current()||avatar.children[0]!==img)return;avatar.style.color='transparent';img.style.visibility='visible';});
-  img.addEventListener('error',()=>{if(!current()||avatar.children[0]!==img)return;img.remove();avatar.style.color='';});
+  img.addEventListener('load',async()=>{
+   try{await img.decode();}catch{if(current()&&avatar.children[0]===img){img.remove();avatar.style.color='';avatar.classList.remove('is-loading');}return;}
+   if(!current()||avatar.children[0]!==img)return;
+   avatar.style.color='transparent';img.style.visibility='visible';avatar.classList.remove('is-loading');
+  });
+  img.addEventListener('error',()=>{if(!current()||avatar.children[0]!==img)return;img.remove();avatar.style.color='';avatar.classList.remove('is-loading');});
   avatar.append(img);img.src=src;
  };
  if(typeof IntersectionObserver==='function'){
@@ -31,7 +36,7 @@ function renderAvatar(avatar,id,profile){
 }
 function renderAuthor(id,author,avatar){
  const profile=authors.get(id);
- author.classList.remove('is-loading');avatar.classList.remove('is-loading');
+ author.classList.remove('is-loading');
  delete author.dataset.i18nAria;author.removeAttribute('aria-label');author.setAttribute('aria-busy','false');
  author.replaceChildren();author.style.display='';
  renderAvatar(avatar,id,profile);
@@ -47,6 +52,7 @@ function renderAuthor(id,author,avatar){
   return;
  }
  if(!id||authorFailures.has(id)){
+  avatar.classList.remove('is-loading');
   author.style.display='flex';const label=document.createElement('span');label.style.cssText='overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1';localizeElement(label,'siteAuthorUnavailable');author.append(label);
   if(id){const retry=document.createElement('button');retry.type='button';retry.style.cssText='background:none;border:0;padding:0 0 0 5px;font:inherit;cursor:pointer;flex:none';localizeElement(retry,'siteAuthorRetry');retry.addEventListener('click',()=>void readAuthors([{user_id:id}]));author.append(retry);}
   return;
@@ -58,6 +64,7 @@ function refreshAuthor(id){for(const {author,avatar} of authorNodes.get(id)||[])
 function openWork(work){
  try{
   checkModel(work);
+  try{sessionStorage.setItem('pw-opening-work-v1',JSON.stringify({savedAt:Date.now(),work,profile:authors.get(work.user_id)||null}));}catch{/* Navigation remains available when browser storage is disabled. */}
   const url=new URL('community/',location.href);url.searchParams.set('work',work.id);url.searchParams.set('release','streaming-profiles-20261103-v14');
   location.assign(url.href);
  }catch(e){localizeElement(status,e.localeKey||'siteFeedRetry');}

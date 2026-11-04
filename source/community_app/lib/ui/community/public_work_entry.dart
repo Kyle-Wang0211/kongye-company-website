@@ -7,6 +7,7 @@ import '../../community/feed_models.dart';
 import '../../community/public_work_repository.dart';
 import '../auth/auth_root_view.dart';
 import 'work_detail_page.dart';
+import 'public_work_opening.dart';
 import 'public_profile_entry.dart';
 import 'public_work_exit_stub.dart'
     if (dart.library.js_interop) 'public_work_exit_web.dart';
@@ -22,6 +23,7 @@ class PublicWorkEntry extends StatefulWidget {
 
 class _PublicWorkEntryState extends State<PublicWorkEntry> {
   late Future<FeedWork> _work;
+  final FeedWork? _openingWork = readOpeningWork();
   bool _signInPending = false;
   late final service = CommunityService();
   @override
@@ -53,6 +55,9 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
   @override
   Widget build(BuildContext context) => FutureBuilder<FeedWork>(
     future: _work,
+    initialData: _openingWork?.authorDisplayName.isNotEmpty == true
+        ? _openingWork
+        : null,
     builder: (context, snapshot) {
       if (snapshot.hasData) {
         return WorkDetailPage(
@@ -97,7 +102,7 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
           ),
         );
       }
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return PublicWorkOpening(work: _openingWork);
     },
   );
 }

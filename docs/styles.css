@@ -72,3 +72,6 @@ html.community-light #feed-more{background:#f6f6f6;color:#161616}
 html.community-light #site-settings footer,html.community-light #site-settings .caption,html.community-light #site-settings .compact-support small{color:#737373}
 html.community-light #work-dialog{color-scheme:dark;--white:#f7f7f5;--muted:#b5b5b5;--line:#363636;background:#000;color:#f7f7f5}
 html.community-light #work-dialog iframe{background:#000}
+
+/* Keep author avatars as a plain pulsing circle until their PNG is decoded. */
+.community-avatar.is-loading{border-radius:50%;overflow:hidden}.community-avatar.is-loading:before{display:none}.community-avatar.is-loading:after{left:0;top:0;bottom:0;width:auto;height:auto;border:0;border-radius:inherit}
