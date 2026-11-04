@@ -1,10 +1,10 @@
 {
   "status": "built locally; not deployed",
-  "release": "rds-web-20261104-264a5df6ec25",
+  "release": "rds-web-20261104-7931926b3d74",
   "origin": "https://api.kongye.space",
   "anon_sha256": "4235540d8190e525f4432486f8db9b39e6f0a68c1ab8fe4674f685da02e525c2",
-  "main_js_sha256": "264a5df6ec253013dee7484423e25146f77b37d391556b9520940733a7eafb1a",
-  "manifest_sha256": "0f575075ef6becbc131fdc22b1c4d8d4cb0dbd4757e31f80dab953d25adb285a",
+  "main_js_sha256": "7931926b3d74205cfe6416dbf04ea6f252f666b5876540da8dfb27641fbb52a6",
+  "manifest_sha256": "284319c44ee9f5d072eaea6621664ddfda8d28a298988cce9cbda7ff5c27053d",
   "privileged_key_scan": "pass",
   "previous_anon_key_scan": "absent",
   "auth_namespace_generation": "rds20261104",
@@ -13,13 +13,14 @@
   "base_revision": "01fa61d3254a9aab1d1a67c5d4c465052a9103bf",
   "scope": "Website only, stable gateway to new RDS; retain current UI, add existing GLB publication route and fresh auth generation",
   "tests": {
-    "publication_service_and_recovery_and_stale_status": 22,
-    "stale_status_red_control": "queued state overwritten by pre-retry delayed uploading before fix",
-    "original_bytes_retry_diagnostic": 2,
-    "analysis": "no issues in changed UI and regression",
-    "unchanged_evidence": "gateway/keys/renderer reuse prior reviewed identity"
+    "publication_service": 17,
+    "unchanged_selection_recovery_evidence": "reused prior unchanged tests and artifacts",
+    "stable_entry": 3,
+    "stable_deployment_identity": 1,
+    "key_gate": 3,
+    "static_analysis": "prior binding checks reused; actual release compiler passed"
   },
   "live_acceptance": "pending root DB_READY and browser validation; no publication claimed",
-  "follow_up_to": "441afaeb3cc588017150c50f57e3d2e5d1dca3af",
-  "follow_up": "Fence publication status responses by operation generation so late uploading polls cannot overwrite successful retry/seal or mask its failure. Keep sameUUID/byte upload protocol."
+  "follow_up_to": "6d0a7d811b5150d9f45858a529f0aa30d8deeb1d",
+  "follow_up": "Require published response to contain valid UUID work_id; pending may be null. Missing/null regression reproductions fail before fix and pass after."
 }

@@ -1,4 +1,4 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=rds-web-20261104-264a5df6ec25';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=rds-web-20261104-7931926b3d74';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 const lifetime=300000,storageKey='pw-current-account-presentation-rds-v1';
