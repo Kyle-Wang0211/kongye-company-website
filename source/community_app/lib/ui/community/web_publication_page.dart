@@ -46,6 +46,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   WebPublicationStatus? _status;
   bool _busy = false, _selected = false, _invalidated = false;
   Timer? _poll;
+  int _statusRevision = 0;
   String get _storageKey => 'pw.web.publication.$_owner';
   bool get _current =>
       mounted && !_invalidated && _owner != null && _liveOwner == _owner;
@@ -145,6 +146,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
 
   Future<void> _newDraft() async {
     if (!_current || _busy || _status?.isTerminal != true) return;
+    _statusRevision++;
     final prefs = await SharedPreferences.getInstance();
     if (!_current) return;
     await prefs.remove(_storageKey);
@@ -226,6 +228,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       setState(() => _message = '请输入 1–100 字标题和最多 30 字描述');
       return;
     }
+    _poll?.cancel();
+    _statusRevision++;
     setState(() {
       _busy = true;
       _message = '正在提交';
@@ -281,6 +285,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       return;
     }
     _poll?.cancel();
+    _statusRevision++;
     setState(() {
       _busy = true;
       _message = '正在确认取消';
@@ -310,17 +315,20 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   }
 
   Future<void> _checkStatus() async {
-    if (!_current || _submission == null) return;
+    if (!_current || _submission == null || _busy) return;
+    final revision = ++_statusRevision;
     try {
       final status = await _service.getStatus(_submission!);
-      if (!_current) return;
+      if (!_current || revision != _statusRevision) return;
       setState(() {
         _status = status;
         _message = null;
       });
       _schedule();
     } catch (_) {
-      if (_current) setState(() => _message = '状态查询暂不可用，请点击刷新状态');
+      if (_current && revision == _statusRevision) {
+        setState(() => _message = '状态查询暂不可用，请点击刷新状态');
+      }
     }
   }
 
