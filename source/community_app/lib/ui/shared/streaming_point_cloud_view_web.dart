@@ -99,7 +99,7 @@ class _StreamingPointCloudViewState extends State<StreamingPointCloudView> {
                         ),
                         TextButton(
                           onPressed: () => setState(_load),
-                          child: Text(AppL10n.of(context).commentReload),
+                          child: Text(AppL10n.of(context).communityRetry),
                         ),
                       ],
                     )

@@ -299,6 +299,38 @@ class SharedViewerController extends ChangeNotifier {
     await _request('focusSurfaceComment', {'anchor': anchor.toJson()});
   }
 
+  /// Original GLTFLoader scene world coordinates; renderer never normalizes geometry.
+  Future<Map<String, Object?>?> getSelectionBounds() async {
+    final result = await _request('getSelectionBounds');
+    return result is Map ? Map<String, Object?>.from(result) : null;
+  }
+
+  Future<void> beginSelectionEditing(double radius) async {
+    await _request('beginSelectionEditing', {'radius': radius});
+  }
+
+  Future<void> endSelectionEditing() async {
+    await _request('endSelectionEditing');
+  }
+
+  Future<void> setSelectionPreview(Map<String, dynamic>? box) async {
+    await _request('setSelectionPreview', {'box': box});
+  }
+
+  Future<void> setSelectionView(
+      List<double> viewRotation, List<double> target) async {
+    await _request(
+        'setSelectionView', {'rotation': viewRotation, 'target': target});
+  }
+
+  Future<List<double>> getSelectionView() async {
+    final result = await _request('getSelectionView');
+    if (result is! List || result.length != 9) {
+      throw const SharedViewerException('Camera unavailable');
+    }
+    return result.map((v) => (v as num).toDouble()).toList();
+  }
+
   Future<void> resetCamera() async {
     await _request('resetCamera');
   }

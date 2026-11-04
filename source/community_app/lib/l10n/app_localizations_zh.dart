@@ -3498,4 +3498,25 @@ class AppL10nZh extends AppL10n {
   String commentPanelWidth(int width) {
     return '$width 像素';
   }
+
+  @override
+  String get siteScreenOne => '屏幕 01';
+
+  @override
+  String get siteScreenTwo => '屏幕 02';
+
+  @override
+  String get siteScreenThree => '屏幕 03';
+
+  @override
+  String get siteScreenPlaceholder => '内容待添加';
+
+  @override
+  String get siteScreenSelection => '切换屏幕';
+
+  @override
+  String get siteScreenBack => '返回社区';
+
+  @override
+  String get siteScreenStage => '精选屏幕';
 }

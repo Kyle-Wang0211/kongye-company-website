@@ -6528,6 +6528,48 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'{width} pixels'**
   String commentPanelWidth(int width);
+
+  /// No description provided for @siteScreenOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 01'**
+  String get siteScreenOne;
+
+  /// No description provided for @siteScreenTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 02'**
+  String get siteScreenTwo;
+
+  /// No description provided for @siteScreenThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen 03'**
+  String get siteScreenThree;
+
+  /// No description provided for @siteScreenPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Content coming soon'**
+  String get siteScreenPlaceholder;
+
+  /// No description provided for @siteScreenSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a screen'**
+  String get siteScreenSelection;
+
+  /// No description provided for @siteScreenBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to community'**
+  String get siteScreenBack;
+
+  /// No description provided for @siteScreenStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured screens'**
+  String get siteScreenStage;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

@@ -1,6 +1,6 @@
 // Embedding/lifecycle messages only. All rendering stays in the unchanged upstream engine.
 const PROTOCOL = 'PW_SHARED_VIEWER_V1';
-const METHODS = new Set(['load', 'resize', 'capture', 'pause', 'resume', 'dispose', 'getState', 'configure', 'resetCamera', 'setSurfaceCommentMode', 'setSurfaceCommentMarkers', 'focusSurfaceComment']);
+const METHODS = new Set(['load', 'resize', 'capture', 'pause', 'resume', 'dispose', 'getState', 'configure', 'resetCamera', 'setSurfaceCommentMode', 'setSurfaceCommentMarkers', 'focusSurfaceComment', 'beginSelectionEditing', 'endSelectionEditing', 'getSelectionView', 'setSelectionView', 'getSelectionBounds', 'setSelectionPreview']);
 
 export function createHostBridge({ ready, send }) {
   async function request(packet) {
@@ -17,6 +17,9 @@ export function createHostBridge({ ready, send }) {
         case 'setSurfaceCommentMode': result = viewer.setSurfaceCommentMode(args.enabled); break;
         case 'setSurfaceCommentMarkers': result = viewer.setSurfaceCommentMarkers(args.markers); break;
         case 'focusSurfaceComment': result = viewer.focusSurfaceComment(args.anchor); break;
+        case 'beginSelectionEditing': result = viewer.beginSelectionEditing(args.radius); break;
+        case 'setSelectionView': result = viewer.setSelectionView(args.rotation, args.target); break;
+        case 'setSelectionPreview': result = viewer.setSelectionPreview(args.box); break;
         case 'load': result = await viewer.load(args); break;
         case 'configure': result = viewer.configure(args); break;
         case 'resize': result = viewer.resize(args.width, args.height, args.pixelRatio); break;

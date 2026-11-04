@@ -78,3 +78,7 @@ Password/SMS login has no fixed country prefix. Legacy mainland SMS input remain
 ## Shared bilingual UI and comments, 2026-11-03
 
 The current archive contains the shared phone signup UI (inline country prefix, 245 localized regions), paired AppL10n resources and static exports, localized comments/notification/legal views, inline web comments and real sign-in routing. Every viewer resource remains hash-checked, with at most four fetch/hash workers. Native installation and international account registration are separate acceptance steps; a console delivery test to a user-owned US number succeeded, but international app OTP remains disabled pending backend integration. Existing versioned legal content is preserved.
+
+## RDS stable-gateway migration, 2026-11-04
+
+The website continues to use `https://api.kongye.space`; the gateway upstream and server credentials are managed separately. Browser builds now additionally require `--dart-define=PW_AUTH_NAMESPACE_GENERATION=rds20261104`, alongside the existing `china` / `cn-primary` and the new project anonymous key. The endpoint cache namespace includes that generation; official Flutter and JS auth use `sb-api-rds20261104-auth-token`, requiring fresh login. Never reuse the previous project key or put server keys in website output. This is website source only. Actual build identities and pending live acceptance are in `../releases/web-rds-migration-20261104.json`.

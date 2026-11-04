@@ -46,6 +46,7 @@ class BackendDeployment {
     final matchesChinaPrimary =
         region == 'china' &&
         deploymentId == 'cn-primary' &&
+        const String.fromEnvironment('PW_AUTH_NAMESPACE_GENERATION') == 'rds20261104' &&
         httpsOrigin(url) == 'https://api.kongye.space';
     return BackendDeployment(
       region: BackendRegion.china,
@@ -139,5 +140,6 @@ class BackendDeployment {
       id == legacyGlobal.id &&
       httpsOrigin(supabaseUrl) == legacyUrl;
   String get namespace =>
-      '${region.name}.$id.${Uri.encodeComponent(Uri.parse(supabaseUrl).origin)}';
+      '${region.name}.$id.${Uri.encodeComponent(Uri.parse(supabaseUrl).origin)}'
+      '.${const String.fromEnvironment('PW_AUTH_NAMESPACE_GENERATION')}';
 }

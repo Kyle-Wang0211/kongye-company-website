@@ -3,6 +3,10 @@
 // Metadata appears in API order; each fixed-size cover resolves independently.
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'community/web_publication_page.dart';
+import '../community/author_feed_priority.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -37,6 +41,10 @@ class _VaultPageState extends State<VaultPage> {
   late final CommunityService _service = widget.service ?? CommunityService();
   final TextEditingController _searchController = TextEditingController();
   late Future<List<FeedWork>> _feed;
+  StreamSubscription<String?>? _viewerSubscription;
+  String? _viewerId;
+  FeedWork? _publicCursor;
+  int _publicRowsLoaded = 0;
   String _query = '';
   bool _viewerAllowed = StartupSplashGate.instance.isDone;
   final Map<String, FeedWork> _workUpdates = {};
@@ -79,7 +87,26 @@ class _VaultPageState extends State<VaultPage> {
   @override
   void initState() {
     super.initState();
+    _viewerId = _service.viewerUserId;
     _feed = _loadFeed();
+    if (kIsWeb && Uri.base.queryParameters['publish'] == '1') {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted || Supabase.instance.client.auth.currentUser == null) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const WebPublicationPage()),
+        );
+        if (mounted) await _refresh();
+      });
+    }
+    _viewerSubscription = _service.viewerUserChanges.listen((id) {
+      if (!mounted || id == _viewerId) return;
+      setState(() {
+        _viewerId = id;
+        _workUpdates.clear();
+        _resetFocus();
+        _feed = _loadFeed();
+      });
+    });
     _governor.addListener(_onGovernorChanged);
     StartupSplashGate.instance.addListener(_onStartupGateChanged);
   }
@@ -95,6 +122,7 @@ class _VaultPageState extends State<VaultPage> {
   void dispose() {
     StartupSplashGate.instance.removeListener(_onStartupGateChanged);
     _governor.removeListener(_onGovernorChanged);
+    _viewerSubscription?.cancel();
     _governor.dispose();
     _searchController.dispose();
     super.dispose();
@@ -172,21 +200,29 @@ class _VaultPageState extends State<VaultPage> {
     _pageLoadFailed = false;
     _retainFeedWhileAppending = false;
     final generation = _feedGeneration;
-    return _service
-        .fetchPublicFeed(
-          limit: _pageSize,
-          // 标签砍掉后定死 recent。原默认 tab 是 discover,本就映射到 recent,
-          // 所以这是**行为不变**的改法,不是换默认值。
-          sortBy: FeedSort.recent,
-          authorUserId: _authorFilterId,
-          query: _query.isEmpty ? null : _query,
-        )
-        .then((works) {
-          if (generation == _feedGeneration && works.length < _pageSize) {
-            _hasMore = false;
-          }
-          return works;
-        });
+    final viewer = _viewerId;
+    _publicCursor = null;
+    _publicRowsLoaded = 0;
+    final page = _service.fetchPublicFeed(
+      limit: _pageSize,
+      sortBy: FeedSort.recent,
+      authorUserId: _authorFilterId,
+      query: _query.isEmpty ? null : _query,
+    );
+    final own =
+        kIsWeb &&
+            viewer != null &&
+            (_authorFilterId == null || _authorFilterId == viewer)
+        ? _service.fetchOwnPublicFeed(query: _query.isEmpty ? null : _query)
+        : Future.value(const <FeedWork>[]);
+    return Future.wait([page, own]).then((results) {
+      if (generation != _feedGeneration || viewer != _viewerId) return [];
+      final works = results[0];
+      _hasMore = works.length >= _pageSize;
+      _publicCursor = works.isEmpty ? null : works.last;
+      _publicRowsLoaded = works.length;
+      return prioritizeAuthorFeed(works, results[1], kIsWeb ? viewer : null);
+    });
   }
 
   /// 快滚到底时补下一页,静默追加(风格同 _kickPrefetch:发完不管)。
@@ -200,6 +236,7 @@ class _VaultPageState extends State<VaultPage> {
     });
     final generationAtStart = _feedGeneration;
     final feedAtStart = _feed;
+    var continuePage = false;
     try {
       // [KEYSET-PAGINATION 2026-08-23] 用上一页最后一条的 (published_at, id)
       // 作游标,不再用 offset。
@@ -210,13 +247,13 @@ class _VaultPageState extends State<VaultPage> {
       //
       // 本仓修过一次同类(此前只拉一次 limit:20 且无加载更多,第 21 个作品
       // 对所有人永久不可见);这是它更隐蔽的变体。
-      final last = current.isEmpty ? null : current.last;
+      final last = _publicCursor;
       final cursorAt = last?.publishedAt;
       final next = await _service.fetchPublicFeed(
         limit: _pageSize,
         // 游标可用就不传 offset;查询里 published_at is not null 已经保证
         // 返回的每一条都有时间戳,这里的 null 兜底只是防御。
-        offset: cursorAt == null ? current.length : 0,
+        offset: cursorAt == null ? _publicRowsLoaded : 0,
         sortBy: FeedSort.recent,
         authorUserId: _authorFilterId,
         query: _query.isEmpty ? null : _query,
@@ -225,13 +262,16 @@ class _VaultPageState extends State<VaultPage> {
       );
       // tab / 搜索 / 下拉刷新已经换了整个列表 → 这批结果作废。
       if (!mounted || !identical(_feed, feedAtStart)) return;
+      _publicRowsLoaded += next.length;
+      if (next.isNotEmpty) _publicCursor = next.last;
       if (next.length < _pageSize) _hasMore = false;
       // 去重保留:keyset 之后重复已不该发生,但它零成本、且能兜住
       // "刷新与加载更多竞态"这类边角。**它挡不住漏项 —— 那是 keyset 修的。**
       final seen = current.map((w) => w.id).toSet();
       final fresh = next.where((w) => seen.add(w.id)).toList();
       if (fresh.isEmpty) {
-        _hasMore = false;
+        _hasMore = next.length >= _pageSize;
+        continuePage = _hasMore;
         // A page of structurally unavailable previews can end on an empty
         // next page. Rebuild so its loading animation becomes the empty state.
         setState(() {});
@@ -239,7 +279,13 @@ class _VaultPageState extends State<VaultPage> {
       }
       setState(() {
         _retainFeedWhileAppending = true;
-        _feed = Future.value(<FeedWork>[...current, ...fresh]);
+        _feed = Future.value(
+          prioritizeAuthorFeed(
+            [...current, ...fresh],
+            const [],
+            kIsWeb ? _viewerId : null,
+          ),
+        );
       });
     } catch (_) {
       // Keep metadata usable; a failed page gets an explicit retry, not a
@@ -250,6 +296,9 @@ class _VaultPageState extends State<VaultPage> {
     } finally {
       if (mounted && generationAtStart == _feedGeneration) {
         setState(() => _loadingMore = false);
+        if (continuePage && identical(_feed, feedAtStart)) {
+          unawaited(_maybeLoadMore(current));
+        }
       }
     }
   }
@@ -335,6 +384,23 @@ class _VaultPageState extends State<VaultPage> {
               children: [
                 Column(
                   children: [
+                    if (kIsWeb &&
+                        Supabase.instance.client.auth.currentUser != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          tooltip: '发布作品',
+                          icon: const Icon(Icons.add),
+                          onPressed: () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const WebPublicationPage(),
+                              ),
+                            );
+                            if (mounted) await _refresh();
+                          },
+                        ),
+                      ),
                     // [D1/D2/D3 2026-08-23 用户签决] 冷启动期社区首页 = **单信息流**。
                     //
                     // 砍掉的两样:
@@ -410,7 +476,12 @@ class _VaultPageState extends State<VaultPage> {
             onRetry: _refresh,
           );
         }
-        final fetchedWorks = snap.data ?? const <FeedWork>[];
+        final rawWorks = snap.data ?? const <FeedWork>[];
+        final fetchedWorks = prioritizeAuthorFeed(
+          rawWorks,
+          const [],
+          kIsWeb ? _viewerId : null,
+        );
         final works = fetchedWorks.map((work) {
           final update = _workUpdates[work.id];
           // Only a newer fetch can acknowledge a local mutation. Rebuilding

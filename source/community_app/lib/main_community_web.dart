@@ -51,6 +51,11 @@ Future<void> _startSupabase(EndpointConfig endpoint) {
         url: endpoint.supabaseUrl,
         anonKey: endpoint.supabaseAnonKey,
         debug: false,
+        authOptions: FlutterAuthClientOptions(
+          localStorage: SharedPreferencesLocalStorage(
+            persistSessionKey: 'sb-api-rds20261104-auth-token',
+          ),
+        ),
         // Official Supabase Flutter browser persistence.
       ).then<void>(
         (_) {},

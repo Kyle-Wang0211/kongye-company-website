@@ -1,0 +1,11 @@
+# Website-only RDS tenant connection
+
+Use the new managed project public endpoint `https://api.kongye.space` and its anonymous key for the existing homepage Supabase JS SDK and community Flutter SDK. Require a fresh website login; use a new per-project auth storage namespace. Do not alter APP source or operate any phone.
+
+Preserve current website main revision `01fa61d3254a9aab1d1a67c5d4c465052a9103bf`, latest homepage screens/detail navigation, and all authorized dirty upload-author changes from isolated branch `feat/publication-web-upload-20261104` at `9d3f0c6fb0db026f4d6621079dde0d9f3d4392c2`. Add the logged-in homepage + link into the existing GLB selection/publication page. Keep the existing community +, backend publication gates, signed upload origin checks and private draft recovery.
+
+No API fallback to the previous deployment, service credentials in browser output, backend reimplementation, account mutation, phone action or UI redesign. Build with existing Flutter 3.47.1 and unchanged package lock, offline/no-pub. Root owns target keys, API/Edge/proxy readiness, authorized website deployment and real browser end-to-end acceptance. Compilation with a synthetic public key is diagnostic only and must fail staging authorization.
+
+Acceptance: exact new-tenant config tests; member/guest/signout publication-link tests; existing upload/selection/recovery tests; targeted analysis and release JS build; previous project key absent; privileged JWT/secret absent. Real acceptance additionally requires root browser login, works/covers/model reads, + publication selection, private signed upload, review status and publication visibility with actual new-project sessions. Existing baseline website test failures are retained with a comparison rather than declared passing.
+
+Final binding: existing api.kongye.space gateway routes Auth/REST/Storage to new RDS private origin, keeping existing custom Edge and compute routing with new server-only credentials. Public RDS -pb origin is not used. Deployment remains cn-primary; PW_AUTH_NAMESPACE_GENERATION=rds20261104 appends a new endpoint-config cache namespace. Official Flutter and JS auth clients share sb-api-rds20261104-auth-token, forcing a fresh login without consuming previous JWTs. Website source only; APP migration is owned by a separate agent.

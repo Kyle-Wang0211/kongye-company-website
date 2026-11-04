@@ -1,11 +1,13 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=three-screens-20261104-v21';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=rds-web-20261104-8271d4741e79';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
-const lifetime=300000,storageKey='pw-current-account-presentation-v1';
+const lifetime=300000,storageKey='pw-current-account-presentation-rds-v1';
+let publishLink;
 let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false;
 const cache=new Map();
 function forget(){cache.clear();try{sessionStorage.removeItem(storageKey);}catch{}}
 function guest(){
+ publishLink?.remove();publishLink=null;
  displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,'siteGuest');summary.append(avatar,label);actions.replaceChildren();
  for(const [mode,key] of [['signin','siteLogin'],['signup','siteRegister']]){const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);actions.append(a);}
  nav.setAttribute('aria-busy','false');
@@ -15,6 +17,7 @@ function retry(){
  guest();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);
 }
 function render(account,src){
+ if(!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
  if(displayedId!==account.id){
   summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/';localizeElement(profileLink,'siteAccount');actions.append(profileLink);
   const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');const name=document.createElement('span');name.className='community-account-name';summary.append(avatar,name);displayedId=account.id;
@@ -67,7 +70,7 @@ async function start(){
  const response=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('Configuration unavailable');
  const config=await response.json();if(config.origin!=='https://api.kongye.space')throw Error('Invalid deployment');
  client=globalThis.supabase.createClient(config.origin,config.anonKey,{
-  auth:{storageKey:'sb-api-auth-token',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},
+  auth:{storageKey:'sb-api-rds20261104-auth-token',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},
   global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}
  });
  client.auth.onAuthStateChange((event,session)=>{
@@ -77,7 +80,7 @@ async function start(){
  });
  window.addEventListener('pageshow',schedule);window.addEventListener('focus',schedule);
  window.addEventListener('storage',event=>{
-  if(event.key!=='sb-api-auth-token'&&event.key!==null)return;
+  if(event.key!=='sb-api-rds20261104-auth-token'&&event.key!==null)return;
   revision++;let nextId;try{nextId=event.newValue?JSON.parse(event.newValue)?.user?.id:null;}catch{}
   if(event.key===null||!nextId||nextId!==displayedId){forget();guest();}
   schedule();

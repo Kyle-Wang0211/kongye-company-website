@@ -1,3 +1,4 @@
+import { sourceWorldBounds, createSelectionPreview } from './publication_selection.mjs';
 import { createSurfaceComments } from './surface_comments.mjs?v=pointcloud-comments-20261103-v12';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
@@ -88,9 +89,11 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   renderer.toneMappingExposure = 1;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 1000);
+  let camera = new THREE.PerspectiveCamera(45, 1, 0.001, 1000);
   camera.position.set(0, 0, 3);
-  const controls = new OrbitControls(camera, canvas);
+  let controls = new OrbitControls(camera, canvas);
+  let controlsUp = {x: camera.up.x, y: camera.up.y, z: camera.up.z};
+  let selectionCamera = null, capturePinhole = null;
   // Gesture callbacks apply their entire delta synchronously. No inertial tail.
   controls.enableDamping = false;
   controls.screenSpacePanning = true;
@@ -110,11 +113,13 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   const fieldOfViewAspect = 1;
   let width = 1, height = 1, pixelRatio = 1, status = 'empty', error = null, url = null, format = null;
 
-  const surfaceComments = createSurfaceComments({THREE, canvas, camera, controls,
+  const makeSurfaceComments = () => createSurfaceComments({THREE, canvas, camera, controls,
     getModel: () => current, getFormat: () => format,
     getOverviewDistance: () => framing?.idealCameraDistance * 1.05,
     onMarkerInteraction: () => { stopOnTouch(); controls.autoRotate = false; notify(); },
     emit: (type, detail) => options.onSurfaceEvent?.(type, detail)});
+  let surfaceComments = makeSurfaceComments();
+  const selectionPreview = createSelectionPreview({scene, renderer, getModel: () => current});
   const assertActive = () => { if (disposed) throw new Error('Viewer is disposed'); };
   let lastAnimationTime = null, maxFps = 60;
   const render = time => {
@@ -144,7 +149,8 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     background, pointSize, maxFps, interactionEnabled: controls.enabled !== false,
     autoRotate: controls.autoRotate === true, autoRotateUntilTouched,
     ...statistics(current), camera: { position: coordinates(camera.position), target: coordinates(controls.target),
-      near: camera.near, far: camera.far },
+      near: camera.near, far: camera.far,
+      ...(selectionCamera ? {zoom:camera.zoom, orthographic:true, projection:camera.projectionMatrix.toArray(), view: disposed ? null : getSelectionView()} : {}) },
   });
   const notify = () => {
     try { options.onStateChange?.(getState()); }
@@ -169,6 +175,27 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     targetCamera.updateMatrixWorld();
   }
 
+  // OrbitControls caches the camera-up basis in its constructor. Recreate via
+  // its public lifecycle when that basis changes, then rebind our observers.
+  function rebindCameraUp(force = false) {
+    if (!force && controlsUp.x === camera.up.x && controlsUp.y === camera.up.y && controlsUp.z === camera.up.z) return;
+    const old = controls;
+    const position = camera.position.clone(), target = old.target.clone();
+    const quaternion = camera.quaternion?.clone();
+    const config = {enabled: old.enabled, autoRotate: old.autoRotate,
+      autoRotateSpeed: old.autoRotateSpeed, minDistance: old.minDistance, maxDistance: old.maxDistance};
+    surfaceComments.dispose();
+    old.removeEventListener?.('start', stopOnTouch); old.dispose();
+    controls = new OrbitControls(camera, canvas);
+    Object.assign(controls, config, {enableDamping: false, screenSpacePanning: true});
+    camera.position.copy(position); controls.target.copy(target);
+    if (quaternion) camera.quaternion.copy(quaternion);
+    camera.updateMatrixWorld?.();
+    controls.addEventListener?.('start', stopOnTouch);
+    controlsUp = {x: camera.up.x, y: camera.up.y, z: camera.up.z};
+    surfaceComments = makeSurfaceComments();
+  }
+
   function fit(nextFraming) {
     if (!nextFraming) return;
     const { center, radius, idealCameraDistance } = nextFraming;
@@ -182,6 +209,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
 
   async function load(input) {
     assertActive();
+    endSelectionEditing(); selectionPreview.clear();
     surfaceComments.clear();
     const ticket = ++request;
     importAbort?.abort();
@@ -286,7 +314,14 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     render(); notify(); return getState();
   }
   function resetCamera() {
-    assertActive(); controls.reset?.(); userHasInteracted = false;
+    assertActive();
+    if (selectionCamera) {
+      camera.zoom = 1;
+      const bounds = getSelectionBounds();
+      setSelectionView(getSelectionView(),bounds.min.map((v,i)=>(v+bounds.max[i])/2));
+      camera.updateProjectionMatrix(); render(); notify(); return getState();
+    }
+    controls.reset?.(); userHasInteracted = false;
     if (framing) camera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, camera.aspect);
     camera.updateProjectionMatrix(); render(); notify(); return getState();
   }
@@ -299,6 +334,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
+    if (selectionCamera) updateSelectionProjection();
     // Before interaction, follow Google's viewport framing without moving the
     // center/orbit. Once the user starts controls, preserve their orbit and zoom.
     if (framing && !userHasInteracted) {
@@ -333,6 +369,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     disposed = true; request++; renderer.setAnimationLoop(null);
     importAbort?.abort(); importAbort = null;
     controls.removeEventListener?.('start', stopOnTouch);
+    selectionPreview.clear();
     surfaceComments.dispose();
     controls.dispose();
     if (current) scene.remove(current);
@@ -349,7 +386,67 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     assertActive(); surfaceComments.focus(anchor); autoRotateUntilTouched = false; userHasInteracted = true; render(); notify();
   }
   resize(); resume();
-  return { setSurfaceCommentMode, setSurfaceCommentMarkers, focusSurfaceComment, load, configure, resetCamera, resize, capture, pause, resume, dispose, getState };
+  function updateSelectionProjection() {
+    const scale = Math.min(width,height) * 0.5 * 6.5 / (selectionCamera.radius * 8);
+    camera.left = -width / (2*scale); camera.right = width / (2*scale);
+    camera.top = height / (2*scale); camera.bottom = -height / (2*scale);
+    camera.updateProjectionMatrix();
+  }
+  function beginSelectionEditing(radius) {
+    assertActive();
+    if (!getSelectionBounds() || !Number.isFinite(radius) || radius <= 0) throw new Error('GLB selection framing unavailable');
+    if (selectionCamera) throw new Error('Selection editing already active');
+    selectionCamera = {camera, radius, target:controls.target.clone(), capturePinhole,
+      autoRotate:controls.autoRotate, autoRotateUntilTouched};
+    const original = camera;
+    camera = new THREE.OrthographicCamera(-1,1,1,-1,Math.max(radius/10000,1e-6),radius*1000);
+    camera.position.copy(original.position); camera.up.copy(original.up); camera.quaternion.copy(original.quaternion);
+    capturePinhole = null;
+    rebindCameraUp(true); controls.autoRotate = false; autoRotateUntilTouched = false;
+    updateSelectionProjection(); render(); notify();
+  }
+  function endSelectionEditing() {
+    if (!selectionCamera) return;
+    selectionPreview.clear();
+    const saved = selectionCamera; selectionCamera = null;
+    camera = saved.camera; capturePinhole = saved.capturePinhole;
+    controls.target.copy(saved.target); rebindCameraUp(true);
+    controls.autoRotate = saved.autoRotate; autoRotateUntilTouched = saved.autoRotateUntilTouched;
+    camera.updateMatrixWorld(); render(); notify();
+  }
+  function getSelectionView() {
+    assertActive(); camera.updateMatrixWorld();
+    const e = camera.matrixWorldInverse.elements;
+    return [-e[0],-e[4],-e[8],e[1],e[5],e[9],-e[2],-e[6],-e[10]];
+  }
+  function setSelectionView(rotation, target) {
+    assertActive();
+    if (!getSelectionBounds() || !Array.isArray(rotation) || rotation.length !== 9 ||
+        !rotation.every(Number.isFinite) || !Array.isArray(target) || target.length !== 3 || !target.every(Number.isFinite))
+      throw new Error('Invalid selection camera');
+    // Existing CloudCamera view basis has +Z forward; Three camera has -Z forward.
+    const distance = selectionCamera ? selectionCamera.radius*8 : camera.position.distanceTo(controls.target);
+    controls.target.fromArray(target);
+    camera.position.copy(controls.target).add(new THREE.Vector3(-rotation[6],-rotation[7],-rotation[8]).multiplyScalar(distance));
+    camera.up.set(rotation[3],rotation[4],rotation[5]);
+    camera.lookAt(controls.target); camera.updateMatrixWorld();
+    rebindCameraUp();
+    render(); notify();
+  }
+  let selectionBoundsModel = null, selectionBounds = null;
+  function getSelectionBounds() {
+    assertActive();
+    if (selectionBoundsModel !== current) {
+      selectionBoundsModel = current; selectionBounds = sourceWorldBounds(current);
+    }
+    return format === 'glb' && status === 'ready' ? selectionBounds : null;
+  }
+  function setSelectionPreview(box) {
+    assertActive();
+    if (box != null && !getSelectionBounds()) throw new Error('GLB source bounds unavailable');
+    selectionPreview.set(box); render();
+  }
+  return { beginSelectionEditing, endSelectionEditing, getSelectionView, setSelectionView, getSelectionBounds, setSelectionPreview, setSurfaceCommentMode, setSurfaceCommentMarkers, focusSurfaceComment, load, configure, resetCamera, resize, capture, pause, resume, dispose, getState };
 }
 
 if (typeof window !== 'undefined') window.PWSharedViewer = Object.freeze({ create, engineVersion: ENGINE_VERSION });

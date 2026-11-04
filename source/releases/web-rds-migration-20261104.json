@@ -1,0 +1,23 @@
+{
+  "status": "built locally; not deployed",
+  "release": "rds-web-20261104-8271d4741e79",
+  "origin": "https://api.kongye.space",
+  "anon_sha256": "4235540d8190e525f4432486f8db9b39e6f0a68c1ab8fe4674f685da02e525c2",
+  "main_js_sha256": "8271d4741e7993f4c233a577f57150f5642d0ab145115ecc7bd53b7992f80020",
+  "manifest_sha256": "f34bf4c9f99be534050969ec5849051c7488b7144eccaf0d4bc0d1c9ddbeb8c3",
+  "privileged_key_scan": "pass",
+  "previous_anon_key_scan": "absent",
+  "auth_namespace_generation": "rds20261104",
+  "auth_storage_key": "sb-api-rds20261104-auth-token",
+  "license_notice_preservation": "retained existing superset",
+  "base_revision": "01fa61d3254a9aab1d1a67c5d4c465052a9103bf",
+  "scope": "Website only, stable gateway to new RDS; retain current UI, add existing GLB publication route and fresh auth generation",
+  "tests": {
+    "publication_selection_recovery": 21,
+    "stable_entry": 3,
+    "stable_deployment_identity": 1,
+    "key_gate": 3,
+    "static_analysis": "pass"
+  },
+  "live_acceptance": "pending root DB_READY and browser validation; no publication claimed"
+}

@@ -3656,4 +3656,25 @@ class AppL10nEn extends AppL10n {
   String commentPanelWidth(int width) {
     return '$width pixels';
   }
+
+  @override
+  String get siteScreenOne => 'Screen 01';
+
+  @override
+  String get siteScreenTwo => 'Screen 02';
+
+  @override
+  String get siteScreenThree => 'Screen 03';
+
+  @override
+  String get siteScreenPlaceholder => 'Content coming soon';
+
+  @override
+  String get siteScreenSelection => 'Choose a screen';
+
+  @override
+  String get siteScreenBack => 'Back to community';
+
+  @override
+  String get siteScreenStage => 'Featured screens';
 }

@@ -103,6 +103,41 @@ class CommunityService {
            uploadBroker ??
            SignedUploadBroker(client: client ?? Supabase.instance.client);
 
+  String? get viewerUserId => _client.auth.currentUser?.id;
+
+  Stream<String?> get viewerUserChanges => _client.auth.onAuthStateChange
+      .map((event) => event.session?.user.id)
+      .distinct();
+
+  /// Read the author's public rows independently of the community cursor.
+  /// Owner RLS also permits private/pending rows, so reuse the strict public
+  /// query rather than the account's private work catalogue.
+  Future<List<FeedWork>> fetchOwnPublicFeed({String? query}) async {
+    final owner = viewerUserId;
+    if (owner == null) return const [];
+    const batchSize = 100;
+    final rows = <FeedWork>[];
+    FeedWork? cursor;
+    while (viewerUserId == owner) {
+      final page = await fetchPublicFeed(
+        limit: batchSize,
+        authorUserId: owner,
+        query: query,
+        afterPublishedAt: cursor?.publishedAt,
+        afterId: cursor?.id,
+      );
+      if (viewerUserId != owner) return const [];
+      rows.addAll(page);
+      if (page.length < batchSize) return rows;
+      final next = page.last;
+      if (next.publishedAt == null || next.id == cursor?.id) {
+        throw StateError('Author feed cursor did not advance');
+      }
+      cursor = next;
+    }
+    return const [];
+  }
+
   /// Public works joined with profile (display_name + avatar_url) and the
   /// current user's like state.
   ///
@@ -144,6 +179,8 @@ class CommunityService {
           'publish_region',
         )
         .eq('visibility', 'public')
+        .eq('moderation_status', 'ok')
+        .isFilter('deleted_at', null)
         .not('published_at', 'is', null);
     if (authorUserId != null && authorUserId.isNotEmpty) {
       filter = filter.eq('user_id', authorUserId);
@@ -523,14 +560,15 @@ class CommunityService {
       // public visibility/review and issues a60-second signed redirect.
       // Never route signed/private artifacts through a public CDN.
       final origin = Uri.parse(_client.rest.url);
-      return Uri.parse(origin.origin).replace(
-        path: '/functions/v1/publication-model',
-        queryParameters: {'path': path},
-      ).toString();
+      return Uri.parse(origin.origin)
+          .replace(
+            path: '/functions/v1/publication-model',
+            queryParameters: {'path': path},
+          )
+          .toString();
     }
     return _cdn(_client.storage.from('works').getPublicUrl(path));
   }
-
 
   /// Phase 6.4f.10 — bake-and-publish a thumbnail JPG for a work that
   /// doesn't have one yet. Returns the storage path written on success,

@@ -24,6 +24,7 @@ flutter:
     - web/SURFACE_COMMENTS_NOTICE
     - web/SURFACE_COMMENTS_LICENSE
     - web/viewer.mjs
+    - web/publication_selection.mjs
     - web/model_framing.mjs
     - web/MODEL_FRAMING_UPSTREAM.json
     - web/MODEL_FRAMING_LICENSE
