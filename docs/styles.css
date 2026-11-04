@@ -74,3 +74,15 @@ html.community-light #work-dialog iframe{background:#000}
 
 /* Keep author avatars as a plain pulsing circle until their PNG is decoded. */
 .community-avatar.is-loading{border-radius:50%;overflow:hidden}.community-avatar.is-loading:before{display:none}.community-avatar.is-loading:after{left:0;top:0;bottom:0;width:auto;height:auto;border:0;border-radius:inherit}
+
+/* Compact feed cards: title on the cover, one shared metadata row beneath. */
+.community-card,.community-skeleton{overflow:hidden;border-radius:4px}
+.community-picture .community-card-title{position:absolute;z-index:2;left:10px;right:10px;bottom:10px;margin:0;height:auto;color:#fff;text-align:left;font-size:13px;font-weight:600;line-height:1.35;text-shadow:0 1px 4px #000;pointer-events:none}
+.community-author-row{box-sizing:border-box;height:44px;margin:0;padding:6px 10px;gap:6px;background:#f7f7f7}
+.community-avatar{width:20px;height:20px}
+.community-like{flex:none;font-size:12px;font-weight:400;padding:6px 0 6px 6px;gap:5px}
+.community-heart{font-size:22px;line-height:20px}
+.community-skeleton .skeleton-author{position:relative;overflow:hidden;height:14px;margin:0;width:65%}
+.community-cover-message{padding:12px;text-align:center}
+
+.community-open:focus-visible{outline:0}.community-open:focus-visible .community-picture{outline:2px solid #fff;outline-offset:-4px}
