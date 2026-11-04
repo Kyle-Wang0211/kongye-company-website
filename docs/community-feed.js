@@ -95,12 +95,14 @@ function cardFor(work){
  const card=document.createElement('article');card.className='community-card';
  const open=document.createElement('button');open.type='button';open.className='community-open';localizeElement(open,'siteViewWork',{title:work.title||t('siteUntitled')},'aria-label');
  const picture=document.createElement('div');picture.className='community-picture';
+ const label=document.createElement('span');label.className='community-card-title';work.title?label.textContent=work.title:localizeElement(label,'siteUntitled');
+ const coverMessage=key=>{const message=document.createElement('span');message.className='community-cover-message';localizeElement(message,key);picture.replaceChildren(message,label);};
  if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){
   try{
    const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';img.loading=seen.size<4?'eager':'lazy';if(seen.size<2)img.fetchPriority='high';img.decoding='async';
    picture.classList.add('is-loading');picture.dataset.mediaState='loading';
    let settled=false,deadline,observer;
-   const fail=()=>{if(settled)return;settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='error';img.remove();localizeElement(picture,'siteCoverUnavailable');};
+   const fail=()=>{if(settled)return;settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='error';img.remove();coverMessage('siteCoverUnavailable');};
    const startDeadline=()=>{if(!settled&&!deadline)deadline=setTimeout(fail,30000);};
    if(typeof IntersectionObserver==='function'){observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){startDeadline();observer.disconnect();}},{rootMargin:'600px'});observer.observe(picture);}else startDeadline();
    img.addEventListener('load',async()=>{
@@ -111,9 +113,9 @@ function cardFor(work){
    },{once:true});
    img.addEventListener('error',fail,{once:true});picture.append(img);
    img.src=work.thumbnail_storage_path?assetUrl(config.origin,'thumbnails',work.thumbnail_storage_path):new URL(workCovers[work.model_storage_path],location.href).href;
-  }catch{picture.classList.remove('is-loading');picture.dataset.mediaState='error';localizeElement(picture,'siteCoverUnavailable');}
- }else{picture.dataset.mediaState='empty';localizeElement(picture,'siteNoCover');}
- const label=document.createElement('span');label.className='community-card-title';work.title?label.textContent=work.title:localizeElement(label,'siteUntitled');open.append(picture,label);open.addEventListener('click',()=>openWork(work));
+  }catch{picture.classList.remove('is-loading');picture.dataset.mediaState='error';coverMessage('siteCoverUnavailable');}
+ }else{picture.dataset.mediaState='empty';coverMessage('siteNoCover');}
+ picture.append(label);open.append(picture);open.addEventListener('click',()=>openWork(work));
  const row=document.createElement('div');row.className='community-author-row';
  const avatar=document.createElement('span');avatar.className='community-avatar';avatar.setAttribute('aria-hidden','true');
  const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
@@ -121,16 +123,17 @@ function cardFor(work){
  authorNodes.get(work.user_id).add({author,avatar});renderAuthor(work.user_id,author,avatar);
  const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=streaming-profiles-20261103-v14';localizeElement(like,'siteLikeSignIn',{},'aria-label');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
- if(Number.isSafeInteger(work.likes_count)&&work.likes_count>0){const count=document.createElement('span');count.textContent=formatCount(work.likes_count);like.append(count);}
+ const count=document.createElement('span');count.textContent=formatCount(Number.isSafeInteger(work.likes_count)&&work.likes_count>0?work.likes_count:0);like.append(count);
  row.append(avatar,author,like);card.append(open,row);
- const date=publishedLabel(work.published_at);const time=document.createElement('time');time.dataset.publishedAt=work.published_at||'';if(date){time.dateTime=work.published_at;time.textContent=date;}else time.setAttribute('aria-hidden','true');card.append(time);
  cards.set(work.id,{card,work,author,avatar});return card;
 }
 function loadingShells(){
  const shells=[];
  for(let i=0;i<12;i++){
   const shell=document.createElement('article');shell.className='community-skeleton';shell.setAttribute('aria-hidden','true');
-  for(const name of ['community-picture is-loading','skeleton-title','skeleton-author','skeleton-time']){const part=document.createElement('div');part.className=name;shell.append(part);}
+  const picture=document.createElement('div');picture.className='community-picture is-loading';
+  const row=document.createElement('div');row.className='community-author-row';
+  const author=document.createElement('div');author.className='skeleton-author';row.append(author);shell.append(picture,row);
   grid.append(shell);shells.push(shell);
  }
  return shells;
