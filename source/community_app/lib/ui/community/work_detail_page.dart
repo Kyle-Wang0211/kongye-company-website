@@ -177,26 +177,6 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     unawaited(_syncCommentMarkers());
   }
 
-  void _toggleComments() {
-    _commentViewerPointerEvents.value = true;
-    setState(() {
-      _commentsEnabled = !_commentsEnabled;
-      if (_commentsEnabled) _commentsEverOpened = true;
-      if (!_commentsEnabled) {
-        _selectingCommentPoint = false;
-        _commentsOpen = false;
-        _commentLayout = null;
-        _dismissedLayoutId = null;
-        _selectedCommentId = null;
-      }
-    });
-    if (!_commentsEnabled) {
-      FocusScope.of(context).unfocus();
-      unawaited(_setPicking(false));
-    }
-    unawaited(_syncCommentMarkers());
-  }
-
   void _onSurfaceMarkerSelected(String id) {
     if (!_commentsEnabled) return;
     final comment = _visibleComments
@@ -1089,33 +1069,6 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       Positioned.fill(child: _buildBody()),
       if (!_webCommentLayout && _commentsEverOpened && _supportsSurfaceComments)
         _floatingComments(viewport),
-      if (_supportsSurfaceComments)
-        Positioned(
-          right: 16,
-          bottom: 16,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              IconButton.filledTonal(
-                key: const ValueKey('work-detail-comment-toggle'),
-                tooltip: _commentsEnabled
-                    ? AppL10n.of(context).commentHideOnModel
-                    : AppL10n.of(context).commentShowOnModel,
-                isSelected: _commentsEnabled,
-                onPressed: _toggleComments,
-                icon: const Icon(Icons.chat_bubble_outline_rounded),
-                selectedIcon: const Icon(Icons.chat_bubble_rounded),
-              ),
-              if (_commentsEnabled && !_commentsOpen)
-                TextButton(
-                  onPressed: _showComments,
-                  style: TextButton.styleFrom(foregroundColor: Colors.white),
-                  child: Text(AppL10n.of(context).commentAllWrite),
-                ),
-            ],
-          ),
-        ),
       if (_selectingCommentPoint)
         Positioned(
           left: 20,
