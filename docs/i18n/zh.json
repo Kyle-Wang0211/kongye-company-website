@@ -1079,5 +1079,12 @@
   "siteSettings": "设置",
   "siteClose": "关闭",
   "siteGuest": "游客",
-  "siteAccountMenu": "账号菜单"
+  "siteAccountMenu": "账号菜单",
+  "siteScreenOne": "屏幕 01",
+  "siteScreenTwo": "屏幕 02",
+  "siteScreenThree": "屏幕 03",
+  "siteScreenPlaceholder": "内容待添加",
+  "siteScreenSelection": "切换屏幕",
+  "siteScreenBack": "返回社区",
+  "siteScreenStage": "精选屏幕"
 }

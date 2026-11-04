@@ -1,4 +1,4 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=streaming-profiles-20261103-v14';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=three-screens-20261104-v21';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 const lifetime=300000,storageKey='pw-current-account-presentation-v1';

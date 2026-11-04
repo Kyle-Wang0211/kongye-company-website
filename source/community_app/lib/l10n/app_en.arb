@@ -1469,5 +1469,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "siteScreenOne": "Screen 01",
+  "siteScreenTwo": "Screen 02",
+  "siteScreenThree": "Screen 03",
+  "siteScreenPlaceholder": "Content coming soon",
+  "siteScreenSelection": "Choose a screen",
+  "siteScreenBack": "Back to community",
+  "siteScreenStage": "Featured screens"
 }

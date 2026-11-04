@@ -1,5 +1,5 @@
-import {t} from './site-l10n.mjs?v=streaming-profiles-20261103-v14';
-export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=streaming-profiles-20261103-v14';
+import {t} from './site-l10n.mjs?v=three-screens-20261104-v21';
+export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=three-screens-20261104-v21';
 export function translatedError(key){const error=new Error(t(key));error.localeKey=key;return error;}
 export function feedUrl(origin, cursor) {
   const url = new URL('/rest/v1/works', origin);

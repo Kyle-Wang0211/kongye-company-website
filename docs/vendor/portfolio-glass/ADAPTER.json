@@ -1,0 +1,13 @@
+{
+  "source_repository": "Kyle-Wang0211/portfolio",
+  "revision": "84b1e5ec8d8274ab34f8bfcae1b3941c40938a49",
+  "entry": "components/three/active-theory-pane.ts",
+  "source_sha256": "351421ac147adfb0b556c7a06b25a5f7510544e591dfda7ac7fd3c4726291166",
+  "changes": [
+    "TypeScript types removed; immutable JSON inlined; same-origin asset/import paths",
+    "Reuse existing community Three 0.186.1, not portfolio dependency 0.184.0",
+    "Same uPresentationLock=1 glass material; no orbit, no camera rotation; three front-facing panel placements",
+    "Transparent placeholder captions replace actual project covers"
+  ],
+  "notice": "Upstream notice files are preserved. No blanket open-source or commercial permission is asserted."
+}

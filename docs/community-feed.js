@@ -1,4 +1,4 @@
-import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=streaming-profiles-20261103-v14';
+import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=three-screens-20261104-v21';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=streaming-profiles-20261103-v14';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=homepage-cache-20261104-v15';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
