@@ -176,10 +176,11 @@ class WebPublicationService {
       );
     }
     final workId = value['work_id'];
-    if (workId != null &&
-        (state != 'published' ||
-            workId is! String ||
-            !_uuid.hasMatch(workId))) {
+    if ((state == 'published' && workId == null) ||
+        (workId != null &&
+            (state != 'published' ||
+                workId is! String ||
+                !_uuid.hasMatch(workId)))) {
       throw WebPublicationException('invalid_response', submissionId: id);
     }
     return WebPublicationStatus(

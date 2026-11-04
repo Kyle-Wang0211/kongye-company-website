@@ -126069,9 +126069,13 @@ HH(a,b){var s,r,q="invalid_response",p=a.h(0,"submission_id"),o=a.h(0,"status"),
 if(J.d(a.h(0,"ok"),!0))if(typeof p=="string"){s=$.Em()
 if(s.b.test(p))n=b!=null&&p!==b||typeof o!="string"||!B.apA.p(0,o)}if(n)throw A.c(A.xh(q,!1,b))
 r=a.h(0,"work_id")
-if(r!=null){n=!0
-if(o==="published")if(typeof r=="string"){n=$.Em()
-n=!n.b.test(r)}}else n=!1
+n=o==="published"
+s=!0
+if(!(n&&r==null))if(r!=null)if(n)if(typeof r=="string"){n=$.Em()
+n=!n.b.test(r)}else n=s
+else n=s
+else n=!1
+else n=s
 if(n)throw A.c(A.xh(q,!1,p))
 A.b1(r)
 J.d(a.h(0,"target_exceeded"),!0)

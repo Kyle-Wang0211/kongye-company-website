@@ -1,5 +1,5 @@
-import {t} from './site-l10n.mjs?v=rds-web-20261104-8271d4741e79';
-export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=rds-web-20261104-8271d4741e79';
+import {t} from './site-l10n.mjs?v=rds-web-20261104-7931926b3d74';
+export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=rds-web-20261104-7931926b3d74';
 export function translatedError(key){const error=new Error(t(key));error.localeKey=key;return error;}
 export function feedUrl(origin, cursor) {
   const url = new URL('/rest/v1/works', origin);

@@ -20,6 +20,7 @@ class Ports implements WebPublicationPorts {
       swapOnInitiate = false,
       swapOnSeal = false;
   String state = 'processing';
+  Map<String, dynamic> statusFields = {};
   @override
   Future<Map<String, dynamic>> invoke(Map<String, dynamic> body) async {
     calls.add(body);
@@ -47,6 +48,7 @@ class Ports implements WebPublicationPorts {
       'ok': true,
       'submission_id': sid,
       'status': body['action'] == 'seal' ? 'queued' : state,
+      ...statusFields,
     };
   }
 
@@ -183,6 +185,32 @@ void main() {
       WebPublicationService.forTest(p).getStatus(sid),
       throwsA(isA<WebPublicationException>()),
     );
+  });
+  for (final includeNull in [false, true]) {
+    test('published rejects ${includeNull ? 'null' : 'missing'} work id', () async {
+      final ports = Ports()
+        ..state = 'published'
+        ..statusFields = includeNull ? {'work_id': null} : {};
+      await expectLater(
+        WebPublicationService.forTest(ports).getStatus(sid),
+        throwsA(isA<WebPublicationException>().having(
+          (error) => error.code, 'code', 'invalid_response')),
+      );
+    });
+  }
+  test('published retains validated work id', () async {
+    final ports = Ports()
+      ..state = 'published'
+      ..statusFields = {'work_id': key};
+    final result = await WebPublicationService.forTest(ports).getStatus(sid);
+    expect(result.workId, key);
+    expect(result.isTerminal, isTrue);
+  });
+  test('pending may have a null work id and keeps polling', () async {
+    final ports = Ports()..statusFields = {'work_id': null};
+    final result = await WebPublicationService.forTest(ports).getStatus(sid);
+    expect(result.workId, isNull);
+    expect(result.isTerminal, isFalse);
   });
   test('cancel uses authenticated owner and exact submission id', () async {
     final ports = Ports()..state = 'cancelled';

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {createActiveTheoryPane} from './vendor/portfolio-glass/pane.mjs';
-import {t,localeEvent} from './site-l10n.mjs?v=rds-web-20261104-8271d4741e79';
+import {t,localeEvent} from './site-l10n.mjs?v=rds-web-20261104-7931926b3d74';
 const stage=document.querySelector('.community-screen-stage');
 const links=[...document.querySelectorAll('.community-feature-screen')];
 const choices=[...document.querySelectorAll('.community-screen-choice')];

@@ -1,4 +1,4 @@
-import {initSiteLocale,t,localeEvent} from './site-l10n.mjs?v=rds-web-20261104-8271d4741e79';
+import {initSiteLocale,t,localeEvent} from './site-l10n.mjs?v=rds-web-20261104-7931926b3d74';
 const keys=['siteScreenOne','siteScreenTwo','siteScreenThree'];
 const requested=Number(new URL(location.href).searchParams.get('screen'));
 const index=Number.isInteger(requested)&&requested>=1&&requested<=3?requested-1:0;
