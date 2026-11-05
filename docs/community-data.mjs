@@ -11,13 +11,24 @@ export function feedUrl(origin, cursor) {
   return url;
 }
 const publicationCoverPath=/^\/functions\/v1\/publication-cover[?]work_id=([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})$/;
-export function publicationCoverAspect(work){
- const cover=typeof work.thumbnail_storage_path==='string'?publicationCoverPath.exec(work.thumbnail_storage_path):null;
- const view=work.initial_view;
- return cover&&typeof work.id==='string'&&cover[1].toLowerCase()===work.id.toLowerCase()&&view?.schema==='pw.camera-framing.v1'&&Number.isFinite(view.aspect)&&view.aspect>=.1&&view.aspect<=10?view.aspect:null;
+export function publicationCoverAspect(work) {
+  const path = work.thumbnail_storage_path;
+  const cover = typeof path === 'string' ? publicationCoverPath.exec(path) : null;
+  const view = work.initial_view;
+  if (!cover || typeof work.id !== 'string' ||
+      cover[1].toLowerCase() !== work.id.toLowerCase() ||
+      view?.schema !== 'pw.camera-framing.v1' ||
+      !Number.isFinite(view.aspect) || view.aspect < .1 || view.aspect > 10) {
+    return null;
+  }
+  return view.aspect;
 }
 export function assetUrl(origin,bucket,path) {
-  if(bucket==='thumbnails'&&typeof path==='string'&&publicationCoverPath.test(path)){const api=new URL(origin);if(api.protocol!=='https:')throw translatedError('siteInvalidAsset');return new URL(path,api.origin).href;}
+  if (bucket === 'thumbnails' && typeof path === 'string' && publicationCoverPath.test(path)) {
+    const api = new URL(origin);
+    if (api.protocol !== 'https:') throw translatedError('siteInvalidAsset');
+    return new URL(path, api.origin).href;
+  }
   if(!['works','thumbnails'].includes(bucket)||typeof path!=='string'||!path||path.startsWith('/')||path.split('/').some(p=>!p||p==='.'||p==='..')||/[\\?#:]/.test(path))throw translatedError('siteInvalidAsset');
   return new URL('/storage/v1/object/public/'+bucket+'/'+path.split('/').map(encodeURIComponent).join('/'),origin).href;
 }

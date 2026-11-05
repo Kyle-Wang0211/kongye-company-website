@@ -95,7 +95,8 @@ function cardFor(work){
  const card=document.createElement('article');card.className='community-card';
  const open=document.createElement('button');open.type='button';open.className='community-open';localizeElement(open,'siteViewWork',{title:work.title||t('siteUntitled')},'aria-label');
  const picture=document.createElement('div');picture.className='community-picture';
- const coverAspect=publicationCoverAspect(work);if(coverAspect!==null)picture.style.aspectRatio=String(coverAspect);
+ const coverAspect=publicationCoverAspect(work);
+ if(coverAspect!==null)picture.style.aspectRatio=String(coverAspect);
  const label=document.createElement('span');label.className='community-card-title';work.title?label.textContent=work.title:localizeElement(label,'siteUntitled');
  const coverMessage=key=>{const message=document.createElement('span');message.className='community-cover-message';localizeElement(message,key);picture.replaceChildren(message,label);};
  if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){
