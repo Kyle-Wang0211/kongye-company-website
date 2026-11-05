@@ -7,6 +7,10 @@
   "bootstrap_sha256": "c599421e3ff17aec830e78af63e991177da3d3b3f9db3deaeee34fb6b27366e1",
   "build": "Flutter3.47.1 cached locked release --no-pub; lib/main_community_web.dart; /community/; existing china/cn-primary RDS public key and rds20261104 namespace",
   "validation": "Reused completed marker20Node+1Chrome and prior hotfix tests; release compiler exit0; public-only configuration and new private-string checks pass",
-  "license_notice": "Existing published notice superset retained; dependencies/assets unchanged",
-  "scope": "Add selected comment white points and pulsing halos to the completed viewer hotfix"
+  "license_notice": "Existing published notice superset retained; locked dependencies unchanged; approved surface-marker assets updated.",
+  "scope": "Add selected comment white points and pulsing halos to the completed viewer hotfix",
+  "marker_assets_sha256": {
+    "docs/community/assets/packages/pw_shared_viewer/web/surface_comments.mjs": "8fb4733ef8e9d4bbc396f0161895612561dfa9d9515ee05eda75e71e5ded31b4",
+    "docs/community/assets/packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json": "ba29693c46db02dfceb4cf4f6d1f2b879b82139450832b1eb264045f4a1e1a1a"
+  }
 }
