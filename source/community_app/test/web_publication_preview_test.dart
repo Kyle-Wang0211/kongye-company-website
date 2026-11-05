@@ -135,12 +135,20 @@ void main() {
         find.byKey(const ValueKey('fake-publication-preview')),
         findsOneWidget,
       );
-      await tester.scrollUntilVisible(find.byType(FilledButton), 200);
+      await tester.scrollUntilVisible(
+        find.byType(FilledButton),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(
         tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
         isNull,
       );
-      await tester.scrollUntilVisible(find.text('确认当前画面为封面和初始视角'), -200);
+      await tester.scrollUntilVisible(
+        find.text('确认当前画面为封面和初始视角'),
+        -200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('确认当前画面为封面和初始视角'));
       await flush(tester);
       await flush(tester);
@@ -152,9 +160,17 @@ void main() {
         ...harness.camera,
         'position': [9, 9, 9],
       };
-      await tester.scrollUntilVisible(find.byType(TextField).first, 200);
+      await tester.scrollUntilVisible(
+        find.byType(TextField).first,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.enterText(find.byType(TextField).first, '作品');
-      await tester.scrollUntilVisible(find.text('提交发布'), 200);
+      await tester.scrollUntilVisible(
+        find.text('提交发布'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('提交发布'));
       await flush(tester);
       await flush(tester);
@@ -169,7 +185,11 @@ void main() {
     final ports = Ports(), harness = Harness();
     final changes = StreamController<String?>.broadcast();
     await open(tester, ports, harness, changes.stream);
-    await tester.scrollUntilVisible(find.text('确认当前画面为封面和初始视角'), 200);
+    await tester.scrollUntilVisible(
+      find.text('确认当前画面为封面和初始视角'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('确认当前画面为封面和初始视角'));
     await flush(tester);
     await flush(tester);
@@ -177,7 +197,11 @@ void main() {
       find.byKey(const ValueKey('publication-confirmed-cover')),
       findsOneWidget,
     );
-    await tester.scrollUntilVisible(find.text('重新选择 GLB / 调整选区'), -200);
+    await tester.scrollUntilVisible(
+      find.text('重新选择 GLB / 调整选区'),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('重新选择 GLB / 调整选区'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('保留模型'));
@@ -187,7 +211,11 @@ void main() {
       find.byKey(const ValueKey('publication-confirmed-cover')),
       findsNothing,
     );
-    await tester.scrollUntilVisible(find.byType(FilledButton), 200);
+    await tester.scrollUntilVisible(
+      find.byType(FilledButton),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
       tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
       isNull,
@@ -202,7 +230,11 @@ void main() {
         harness = Harness()..pendingCamera = Completer<void>();
     final changes = StreamController<String?>.broadcast();
     await open(tester, ports, harness, changes.stream);
-    await tester.scrollUntilVisible(find.text('确认当前画面为封面和初始视角'), 200);
+    await tester.scrollUntilVisible(
+      find.text('确认当前画面为封面和初始视角'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('确认当前画面为封面和初始视角'));
     await flush(tester);
     ports.active = null;
