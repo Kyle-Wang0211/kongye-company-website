@@ -107,6 +107,14 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   String _previousText = '';
   String? _error;
   String? _loadError;
+  bool _snapshotInvalidated = false;
+
+  void _acceptFreshSnapshot() {
+    if (!_snapshotInvalidated) return;
+    _snapshotInvalidated = false;
+    _error = null;
+  }
+
   bool _loading = true;
   bool _refreshing = false;
   bool _sending = false;
@@ -289,6 +297,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _emojiOpen = false;
       _error = message;
       _loadError = message;
+      _snapshotInvalidated = true;
     });
     final generation = _generation;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -379,6 +388,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             )
             .toList();
         _publicCount = page.publicCount;
+        _acceptFreshSnapshot();
         if (_reply != null &&
             !_comments.any((c) => c.id == _reply!.id && c.published)) {
           _reply = null;
@@ -480,6 +490,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
               orElse: () => pages.last.value,
             );
         _publicCount = _page!.publicCount;
+        _acceptFreshSnapshot();
         _loading = false;
         if (_reply != null &&
             !rows.values.any((c) => c.id == _reply!.id && c.published)) {
@@ -569,6 +580,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
           }
         }
         _publicCount = page.publicCount;
+        _acceptFreshSnapshot();
         final ids = _sectionIds.putIfAbsent(section, () => []);
         for (final comment in page.comments) {
           if (comment.workId != widget.workId ||
