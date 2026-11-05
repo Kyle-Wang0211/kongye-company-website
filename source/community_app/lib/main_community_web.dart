@@ -6,6 +6,8 @@ import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/community/work_detail_page.dart';
 import 'ui/social/web_favorites_page.dart';
+import 'ui/social/web_messaging_entry.dart';
+import 'community/web_messaging_repository.dart';
 import 'community/web_social_api.dart';
 import 'community/public_work_repository.dart';
 import 'community/community_service.dart';
@@ -195,7 +197,9 @@ class _CommunityWeb extends StatelessWidget {
         supportedLocales: AppL10n.supportedLocales,
         builder: (context, child) =>
             AuthScope(currentUser: user, child: child!),
-        onGenerateRoute: (settings) => communityFavoritesRoute(settings, user),
+        onGenerateRoute: (settings) =>
+            communityFavoritesRoute(settings, user) ??
+            communityMessagingRoute(settings, user),
         home: AnimatedBuilder(
           animation: user,
           builder: (context, _) {
@@ -263,6 +267,48 @@ Route<void>? communityFavoritesRoute(RouteSettings settings, CurrentUser user) {
           key: ValueKey('${user.deployment.namespace}:$owner:favorites'),
           user: user,
           ownerId: owner,
+        );
+      },
+    ),
+  );
+}
+
+/// Reuses the account startup gate for inbox and profile-originated messages.
+Route<void>? communityMessagingRoute(
+  RouteSettings settings,
+  CurrentUser user, {
+  WebMessagingRepository? repository,
+}) {
+  if (settings.name != '/messages') return null;
+  final peer = settings.arguments is WebMessagingPeer
+      ? settings.arguments as WebMessagingPeer
+      : null;
+  return MaterialPageRoute<void>(
+    settings: settings,
+    builder: (_) => AnimatedBuilder(
+      animation: user,
+      builder: (context, _) {
+        final state = user.state;
+        if (state case CurrentUserServiceUnavailable(:final reason)) {
+          return _ServiceUnavailableView(currentUser: user, reason: reason);
+        }
+        final owner = user.signedInUser?.id.rawValue;
+        if (owner == null) {
+          return state is CurrentUserSignedOut
+              ? AuthRootView(currentUser: user)
+              : const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+        }
+        return WebMessagingEntry(
+          key: ValueKey(
+            '${user.deployment.namespace}:$owner:messages:${peer?.id ?? ''}',
+          ),
+          user: user,
+          ownerId: owner,
+          peerId: peer?.id,
+          peerName: peer?.displayName,
+          repository: repository,
         );
       },
     ),

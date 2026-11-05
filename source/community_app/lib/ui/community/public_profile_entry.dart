@@ -7,6 +7,7 @@ import 'public_work_entry.dart' show PublicWorkSignIn;
 import 'public_work_exit_stub.dart'
     if (dart.library.js_interop) 'public_work_exit_web.dart';
 import 'user_profile_page.dart';
+import '../social/web_messaging_entry.dart';
 import 'work_detail_page.dart';
 
 /// Canonical link shared by the website author links and detail-page routes.
@@ -93,6 +94,14 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
     onOpenFavorites: const bool.fromEnvironment('PW_WEB_FAVORITES_ENABLED')
         ? () => Navigator.of(context).pushNamed('/favorites')
         : null,
+    onOpenMessages: () => Navigator.of(context).pushNamed('/messages'),
+    onMessage: (profile) => Navigator.of(context).pushNamed(
+      '/messages',
+      arguments: WebMessagingPeer(
+        id: profile.id,
+        displayName: profile.displayName,
+      ),
+    ),
     onWorkTap: _openWork,
   );
 }

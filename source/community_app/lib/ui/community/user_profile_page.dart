@@ -26,6 +26,8 @@ class UserProfilePage extends StatefulWidget {
   final VoidCallback? onExit;
   final ValueChanged<FeedWork>? onWorkTap;
   final VoidCallback? onOpenFavorites;
+  final VoidCallback? onOpenMessages;
+  final ValueChanged<SocialProfile>? onMessage;
 
   const UserProfilePage({
     super.key,
@@ -39,6 +41,8 @@ class UserProfilePage extends StatefulWidget {
     this.onExit,
     this.onWorkTap,
     this.onOpenFavorites,
+    this.onOpenMessages,
+    this.onMessage,
   });
 
   @override
@@ -100,6 +104,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (!mounted || _repository.currentUserId == null) return false;
     await _load();
     return mounted;
+  }
+
+  Future<void> _messageProfile() async {
+    if (!await _requireSignIn()) return;
+    final profile = _profile;
+    if (profile != null && !_isMine) widget.onMessage?.call(profile);
   }
 
   Future<void> _toggleFollow() async {
@@ -314,6 +324,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     label: Text(Localizations.localeOf(context).languageCode == 'zh'
                         ? '我的收藏'
                         : 'Favorites'),
+                  ),
+                ],
+                if (_isMine && widget.onOpenMessages != null) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    key: const ValueKey('profile-messages-button'),
+                    onPressed: widget.onOpenMessages,
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'zh'
+                          ? '我的私信'
+                          : 'Messages',
+                    ),
+                  ),
+                ],
+                if (!_isMine && widget.onMessage != null) ...[
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    key: const ValueKey('profile-message-peer-button'),
+                    onPressed: _messageProfile,
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'zh'
+                          ? '私信'
+                          : 'Message',
+                    ),
                   ),
                 ],
                 if (!_isMine) ...[

@@ -10,6 +10,12 @@ import '../design_system.dart';
 import 'web_conversation_page.dart';
 import 'web_messages_page.dart';
 
+@immutable
+class WebMessagingPeer {
+  const WebMessagingPeer({required this.id, required this.displayName});
+  final String id, displayName;
+}
+
 /// Account-owned inbox or profile-originated direct conversation entry.
 /// Enable after the matching regional R4 backend has passed live verification.
 class WebMessagingEntry extends StatefulWidget {

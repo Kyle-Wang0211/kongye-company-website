@@ -2,7 +2,7 @@
 
 The authenticated community web needs an inbox and profile-originated conversation route connected to the existing R4 messaging service. The baseline is 02dafd143f598844339800e61f6a5f1972b982cb. The existing R4 PostgreSQL seven-case acceptance is reused as backend evidence. Its production activation is owned by the backend operator.
 
-The messaging module owns `web_messaging_repository.dart`, `web_messaging_entry.dart`, `web_messages_page.dart`, `web_conversation_page.dart` and their focused tests. The main entry, public profiles, work details, shared social API and other features remain separate integration ownership domains.
+The messaging module owns `web_messaging_repository.dart`, `web_messaging_entry.dart`, `web_messages_page.dart`, `web_conversation_page.dart` and their focused tests. Root extended this owner to the minimal main route and public-profile messaging callbacks. Existing favorites, work details, the shared social API and other features retain their original behavior and ownership.
 
 The module uses the existing `WebSocialApi` R4 caller RPC and authenticated send endpoint. Supabase's pinned official Flutter SDK supplies paged inbox SELECTs and private Realtime Postgres Changes subscriptions. Both channels and data access use the current account's JWT and server membership RLS. Reconnects and change events invalidate history. The client reads authoritative history before showing delivered content.
 
