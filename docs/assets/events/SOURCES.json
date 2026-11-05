@@ -12,5 +12,15 @@
     "changes": "None; original file. Responsive sizing in page.",
     "role": "Artist reference only, not a confirmed guest or endorsement",
     "accessed": "2026-11-05"
+  },
+  "landscape-ink.png": {
+    "source": "User supplied Desktop image 2026-11-05",
+    "use": "Screen 2 homepage cover",
+    "sha256": "9611baf86f93cd95fd17f9185f92d867807adf112842ecf52ef6205111d43de0"
+  },
+  "courtyard-ink.png": {
+    "source": "User supplied Desktop image 2026-11-05",
+    "use": "Screen 3 homepage cover",
+    "sha256": "d775cd8917b38884bbd393e1fa87d9a25b17e5d483b71996ee65ab70c7bf2560"
   }
 }
