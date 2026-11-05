@@ -3,7 +3,7 @@
   "engine": "three",
   "engine_version": "0.186.1",
   "upstream_commit": "9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
-  "bundle_sha256": "c511a3b3be4de3cfca86338dbf4c10953d88d2db482cb57b002e75511d0d3f4a",
+  "bundle_sha256": "5fe20f5321808c1b56ec2bc11235d42f5dcd7c22f1007ce3b9b931acb40757f8",
   "identity_rule": "SHA-256 of canonical UTF-8 JSON files object, keys sorted and separators comma/colon; manifest excludes itself",
   "files": {
     "MODEL_FRAMING_LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
@@ -12,10 +12,11 @@
     "SURFACE_COMMENTS_LICENSE": "1a4db66ba930fc7c09ea430225111b500e23537fdb52404a2d994468192226dc",
     "SURFACE_COMMENTS_NOTICE": "6d8219f7a0c690e4857c6bf345d842c7f7fe90c8d553a2ecf70c9bdd0cdbcfbf",
     "bundle_identity.mjs": "07cb9352c34f7e6340c8b6805d1fb897c7d0d2b4cb571c715578586ba656c239",
-    "host_bridge.mjs": "2fcc22c4e25b15fe136ed4c4b5d9ab530f633e4f42090229e0d88b7c3540d354",
+    "host_bridge.mjs": "ff718520ce70f397619f5b39d46caf97d4b7de6b7f01588a7d41e58d0afc63c2",
     "image_loader_lifecycle.mjs": "97a6149a09667d515e496304ed03b1b8137530828fc1602bc74f9fe89de7fcff",
     "index.html": "b38e2880819eba147f176be58a5c535acc5be7e51535c32d397bf78b2a71edfc",
     "model_framing.mjs": "22bc2551b22d52cd0fef089ec5c644028c5ef4866e0da000357a8f04a855b41f",
+    "publication_selection.mjs": "aaba2da1eb537a2bd8b4e84cd1d17056b133f6f93c522d84a0e8ddd0a824b055",
     "skp_import.mjs": "fe32bcdc1880b14aef2bb2a7ce6e8040888bcef12fca585d1a3a233db90ece05",
     "skp_import_worker.mjs": "b1192094c5a366351415c6637fccc8ab1e861f6f98d2e4d0323aede20ef72286",
     "skp_policy.mjs": "654cd68309f8b12c920cc6b207b72ea9bcbe2fc5d7b2b286bf5e6ae5c3c458f3",
@@ -32,6 +33,6 @@
     "vendor/three/examples/jsm/utils/BufferGeometryUtils.js": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797",
     "vendor/three/examples/jsm/utils/SkeletonUtils.js": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f",
     "vendor/three/package.json": "f9c474a27c920b9435353a6235968f4453436bee0444fac7e5fd289c8fa463de",
-    "viewer.mjs": "c0c7be273d049d025bd456f9ce6656a770b1f7f593db91c91086f2e8808e57ad"
+    "viewer.mjs": "966aec64f21dfab55b43c8ece96cecae34fdb4403d890a18fb620dace5b8fc57"
   }
 }

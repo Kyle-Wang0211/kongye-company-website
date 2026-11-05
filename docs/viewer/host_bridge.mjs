@@ -1,6 +1,6 @@
 // Embedding/lifecycle messages only. All rendering stays in the unchanged upstream engine.
 const PROTOCOL = 'PW_SHARED_VIEWER_V1';
-const METHODS = new Set(['setDownloadProgress', 'load', 'resize', 'capture', 'pause', 'resume', 'dispose', 'getState', 'configure', 'resetCamera', 'setSurfaceCommentMode', 'setSurfaceCommentMarkers', 'focusSurfaceComment']);
+const METHODS = new Set(['setDownloadProgress', 'load', 'resize', 'capture', 'pause', 'resume', 'dispose', 'getState', 'configure', 'resetCamera', 'setSurfaceCommentMode', 'setSurfaceCommentMarkers', 'focusSurfaceComment', 'beginSelectionEditing', 'endSelectionEditing', 'getSelectionView', 'setSelectionView', 'getSelectionBounds', 'setSelectionPreview']);
 
 export function createHostBridge({ ready, send, onDownloadProgress }) {
   async function request(packet) {
@@ -28,6 +28,9 @@ export function createHostBridge({ ready, send, onDownloadProgress }) {
         case 'setSurfaceCommentMode': result = viewer.setSurfaceCommentMode(args.enabled); break;
         case 'setSurfaceCommentMarkers': result = viewer.setSurfaceCommentMarkers(args.markers); break;
         case 'focusSurfaceComment': result = viewer.focusSurfaceComment(args.anchor); break;
+        case 'beginSelectionEditing': result = viewer.beginSelectionEditing(args.radius); break;
+        case 'setSelectionView': result = viewer.setSelectionView(args.rotation, args.target); break;
+        case 'setSelectionPreview': result = viewer.setSelectionPreview(args.box); break;
         case 'load': result = await viewer.load(args, progress => send({
           protocol: PROTOCOL, type: 'pw-viewer-download-progress', id, ...progress,
         })); break;
