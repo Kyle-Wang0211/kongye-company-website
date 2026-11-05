@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_internal_member
 import 'dart:async';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -27,11 +28,15 @@ class _Host extends StatefulWidget {
 }
 
 class _HostState extends State<_Host> {
+  String? loadId;
   @override
   void initState() {
     super.initState();
     widget.controller.attachTransport((request) async {
-      if (request['method'] == 'load') await widget.decode;
+      if (request['method'] == 'load') {
+        loadId = request['id'] as String;
+        await widget.decode;
+      }
       widget.controller.receive({
         'protocol': sharedViewerProtocol,
         'id': request['id'],
@@ -54,6 +59,7 @@ Widget _view(
   ValueChanged<Object>? onError,
   GlobalKey<NavigatorState>? navigatorKey,
   bool trackedDownload = true,
+  ValueChanged<ProductViewerCapture>? onViewerReady,
 }) => MaterialApp(
   navigatorKey: navigatorKey,
   home: ProductModelView(
@@ -62,6 +68,7 @@ Widget _view(
     browserModelClient: client,
     onSurfacePicked: trackedDownload ? (_) {} : null,
     onFirstFrameReady: onFirstFrame,
+    onViewerReady: onViewerReady,
     onError: onError,
     hostBuilder: (_, controller, ready, _) =>
         _Host(controller, ready, decode.future),
@@ -241,7 +248,7 @@ void main() {
   });
 
   testWidgets(
-    'direct URL preserves host URL transport and honest unknown progress',
+    'direct URL preserves URL transport and uses correlated byte progress',
     (tester) async {
       final client = _Client();
       final decode = Completer<void>();
@@ -258,4 +265,29 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+  testWidgets('viewer-ready exposes the exact downloaded model identity', (
+    tester,
+  ) async {
+    final client = _Client();
+    final decode = Completer<void>();
+    String? identity;
+    await tester.pumpWidget(
+      _view(
+        client,
+        decode,
+        onViewerReady: (viewer) async {
+          identity = await viewer.modelContentSha256();
+        },
+      ),
+    );
+    await _flush(tester);
+    final bytes = [1, 2, 3, 4, 5, 6, 7, 8];
+    client.streams.single.add(bytes);
+    unawaited(client.streams.single.close());
+    decode.complete();
+    await _flush(tester);
+    await _flush(tester);
+    expect(identity, sha256.convert(bytes).toString());
+    await tester.pumpWidget(const SizedBox());
+  });
 }
