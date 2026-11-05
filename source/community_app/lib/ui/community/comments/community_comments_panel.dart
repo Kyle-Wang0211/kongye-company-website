@@ -159,21 +159,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         }
       });
       _notifyVisible();
-      if (hidden) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_chinese ? '已隐藏此评论，仅对你生效' : 'Comment hidden for you'),
-            action: SnackBarAction(
-              label: _chinese ? '撤销' : 'Undo',
-              onPressed: () {
-                if (_current(generation) && scope == _visibilityScope) {
-                  _setCommentHidden(comment, false);
-                }
-              },
-            ),
-          ),
-        );
-      }
     } catch (_) {
       if (!_current(generation) || scope != _visibilityScope) return;
       setState(
@@ -1064,19 +1049,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                         ),
                       ),
                       const Divider(height: 1, color: AetherColors.border),
-                      if (_hiddenCommentIds.isNotEmpty)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            key: const ValueKey('comment-restore-hidden'),
-                            onPressed: _showHiddenComments,
-                            child: Text(
-                              _chinese
-                                  ? '已隐藏评论 · 恢复'
-                                  : 'Hidden comments · Restore',
-                            ),
-                          ),
-                        ),
                       Expanded(child: _list()),
                       const Divider(height: 1, color: AetherColors.border),
                       ConstrainedBox(
@@ -1157,7 +1129,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         child: _section(CommunityCommentSection.hot),
       );
     }
-    if (_visibleComments.isEmpty) {
+    if (_comments.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(16),
@@ -1169,7 +1141,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         ),
       );
     }
-    final rows = _ranked(_visibleComments);
+    final rows = _ranked(_comments);
     return ListView.separated(
       controller: _scroll,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -1184,8 +1156,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     final rows = _ranked(
       ids
           .map((id) => _comments.where((c) => c.id == id).firstOrNull)
-          .whereType<CommunityComment>()
-          .where((comment) => !_hiddenCommentIds.contains(comment.id)),
+          .whereType<CommunityComment>(),
     );
     final busy = _sectionBusy.containsKey(section);
     final error = _sectionErrors[section];
@@ -1231,6 +1202,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   Widget _comment(CommunityComment comment) {
     final mine = comment.userId == widget.currentUserId;
     final hidden = comment.status == CommunityCommentStatus.hidden;
+    final personalHidden = _hiddenCommentIds.contains(comment.id);
     final parent =
         _comments.where((c) => c.id == comment.parentId).firstOrNull ??
         _parentComments[comment.parentId];
@@ -1290,12 +1262,22 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(3),
                         ),
-                        child: Text(
-                          _l.localeName.startsWith('zh') ? '作者' : 'Author',
-                          style: AetherTextStyles.caption.copyWith(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
+                        child: Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: Text(
+                            _l.localeName.startsWith('zh') ? '作者' : 'Author',
+                            textAlign: TextAlign.center,
+                            textHeightBehavior: const TextHeightBehavior(
+                              applyHeightToFirstAscent: false,
+                              applyHeightToLastDescent: false,
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              height: 1,
+                            ),
                           ),
                         ),
                       ),
@@ -1309,7 +1291,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       ),
                   ],
                 ),
-                if (!hidden && comment.parentId != null)
+                if (!hidden && !personalHidden && comment.parentId != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 3),
                     child: Text(
@@ -1343,12 +1325,24 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       child: Text(_l.commentViewReasonAppeal),
                     ),
                 ],
-                if (!hidden && comment.body.isNotEmpty)
+                if (!hidden && personalHidden)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      _chinese ? '该评论已隐藏' : 'This comment is hidden',
+                      style: AetherTextStyles.body.copyWith(
+                        color: AetherColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                if (!hidden && !personalHidden && comment.body.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(comment.body, style: AetherTextStyles.body),
                   ),
-                if (!hidden && comment.attachments.isNotEmpty)
+                if (!hidden &&
+                    !personalHidden &&
+                    comment.attachments.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Wrap(
@@ -1360,7 +1354,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       ],
                     ),
                   ),
-                if (!hidden && comment.anchor != null)
+                if (!hidden && !personalHidden && comment.anchor != null)
                   TextButton.icon(
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
@@ -1398,12 +1392,13 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       _date(comment.createdAt),
                       style: AetherTextStyles.caption,
                     ),
-                    if (comment.published && _canComment)
+                    if (comment.published && !personalHidden && _canComment)
                       _textAction(_l.commentReply, () {
                         _changed(() => _reply = comment);
                         _focus.requestFocus();
                       }),
                     if (comment.published &&
+                        !personalHidden &&
                         !mine &&
                         widget.currentUserId != null &&
                         widget.repository is CommunityCommentReportRepository)
@@ -1463,18 +1458,25 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                     if (comment.published)
                       IconButton(
                         key: ValueKey('comment-dislike-${comment.id}'),
-                        tooltip: _chinese
-                            ? '不喜欢，仅对你隐藏'
-                            : 'Dislike, hide for you',
+                        tooltip: personalHidden
+                            ? (_chinese ? '恢复此评论' : 'Show this comment')
+                            : (_chinese
+                                  ? '不喜欢，仅对你隐藏'
+                                  : 'Dislike, hide for you'),
                         onPressed: _busyComments.contains(comment.id)
                             ? null
-                            : () => _setCommentHidden(comment, true),
+                            : () => _setCommentHidden(comment, !personalHidden),
                         padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(
                           minWidth: 32,
                           minHeight: 36,
                         ),
-                        icon: const Icon(Icons.thumb_down_outlined, size: 15),
+                        icon: Icon(
+                          personalHidden
+                              ? Icons.heart_broken
+                              : Icons.heart_broken_outlined,
+                          size: 15,
+                        ),
                         color: AetherColors.textSecondary,
                       ),
                     if (mine &&
@@ -1496,71 +1498,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         ],
       ),
     );
-  }
-
-  Future<void> _showHiddenComments() async {
-    final generation = _generation;
-    final scope = _visibilityScope;
-    final chinese = _chinese;
-    final selected = await showModalBottomSheet<CommunityComment>(
-      context: context,
-      useSafeArea: true,
-      builder: (context) => ValueListenableBuilder<int>(
-        valueListenable: _reportRevision,
-        builder: (context, revision, child) {
-          if (!_current(generation) || scope != _visibilityScope) {
-            return const SizedBox.shrink();
-          }
-          final rows = _comments
-              .where((c) => c.published && _hiddenCommentIds.contains(c.id))
-              .toList();
-          return ListView(
-            shrinkWrap: true,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  chinese ? '已隐藏评论' : 'Hidden comments',
-                  style: AetherTextStyles.h3,
-                ),
-              ),
-              for (final comment in rows)
-                ListTile(
-                  title: Text(
-                    comment.authorName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    comment.body,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: TextButton(
-                    onPressed: () => Navigator.pop(context, comment),
-                    child: Text(chinese ? '恢复' : 'Restore'),
-                  ),
-                ),
-              if (rows.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    chinese
-                        ? '继续加载评论后可恢复相应条目'
-                        : 'Load more comments to restore hidden entries',
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
-    if (!_current(generation) ||
-        scope != _visibilityScope ||
-        selected == null) {
-      return;
-    }
-    await _setCommentHidden(selected, false);
   }
 
   Future<void> _reportComment(CommunityComment comment) async {
