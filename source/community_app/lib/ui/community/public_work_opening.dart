@@ -1,6 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
 import '../../community/feed_models.dart';
+import '../../community/publication_cover_url.dart';
 import '../splash_solving_orb.dart';
 import 'public_work_handoff_stub.dart'
     if (dart.library.js_interop) 'public_work_handoff_web.dart';
@@ -28,7 +31,9 @@ FeedWork? readOpeningWork() {
       description: row['description'] as String?,
       format: row['format'] as String? ?? 'glb',
       modelStoragePath: row['model_storage_path'] as String?,
-      initialView: row['initial_view'] is Map ? Map<String, dynamic>.from(row['initial_view'] as Map) : null,
+      initialView: row['initial_view'] is Map
+          ? Map<String, dynamic>.from(row['initial_view'] as Map)
+          : null,
       thumbnailStoragePath: row['thumbnail_storage_path'] as String?,
       fileSizeBytes: (row['file_size_bytes'] as num?)?.toInt(),
       likedByMe: false,
@@ -59,10 +64,11 @@ class PublicWorkOpening extends StatelessWidget {
     final path = work?.thumbnailStoragePath;
     final cover = path == null || path.isEmpty
         ? null
-        : Uri.https(
-            'api.kongye.space',
-            '/storage/v1/object/public/thumbnails/$path',
-          ).toString();
+        : publicationCoverUrl(Uri.https('api.kongye.space'), path) ??
+              Uri.https(
+                'api.kongye.space',
+                '/storage/v1/object/public/thumbnails/$path',
+              ).toString();
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

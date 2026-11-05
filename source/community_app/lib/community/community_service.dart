@@ -19,6 +19,7 @@ import '../config/endpoint_config.dart';
 import '../storage/signed_upload_broker.dart';
 import 'community_cover_processor.dart';
 import 'feed_models.dart';
+import 'publication_cover_url.dart';
 
 /// How the community feed is ordered.
 ///   • recent  → published_at desc (the "发现 / Discover" tab).
@@ -535,6 +536,8 @@ class CommunityService {
   /// Routed through [_cdn] so the bytes can be served from an edge cache
   /// instead of hitting Supabase egress on every feed scroll.
   String thumbnailUrlFor(String path) {
+    final publication = publicationCoverUrl(Uri.parse(_client.rest.url), path);
+    if (publication != null) return publication;
     return _cdn(_client.storage.from('thumbnails').getPublicUrl(path));
   }
 
