@@ -1,0 +1,14 @@
+{
+  "release": "viewer-ui-hotfix-20261105-v31",
+  "source_commit": "cde5edbba75320031d84a15931e28e6458b2204d",
+  "feature_commit": "02dafd143f598844339800e61f6a5f1972b982cb",
+  "scope": "Authenticated favorites from work bookmark and own-profile list, with R2 refresh/session isolation",
+  "main_js_sha256": "7b16b64c4af94ec30bd48882a159c9892051032623a383582efa8d7ba6190888",
+  "favorites_enabled": true,
+  "build": "Existing locked Flutter3.47.1 release --no-pub CN/RDS recipe; only added --dart-define=PW_WEB_FAVORITES_ENABLED=true; exit0 in28.1s",
+  "validation": "Reused26R2 tests and3Chrome wiring tests; public-only config/new private-string checks pass; both viewer entry resource identities preserved",
+  "shared_bundle": "5fe20f5321808c1b56ec2bc11235d42f5dcd7c22f1007ce3b9b931acb40757f8",
+  "viewer_resources": 28,
+  "theme": "Original theme bytes retained by approved feature commit",
+  "notice": "Published notice superset retained; locked dependencies unchanged; generated MaterialIcons subset updated for bookmarks"
+}
