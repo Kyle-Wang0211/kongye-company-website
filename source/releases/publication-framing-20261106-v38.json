@@ -1,0 +1,20 @@
+{
+  "release": "publication-framing-20261106-v38",
+  "source_commit": "095899bd112c6e4ded46fd38acb9ef66f68ba4e5",
+  "dart_build_source_commit": "095899bd112c6e4ded46fd38acb9ef66f68ba4e5",
+  "main_js_sha256": "fc50fcc9ea86b832ededd4b77d0592d8ef07889cf40b399ec5bf72b1c405521a",
+  "shared_bundle": "d276a4f8cd8a19bd1d139ce4400bbc56b5777fc834e05a0c7efbbe698c265484",
+  "shared_resources": 28,
+  "scope": "Interactive publication preview, explicitly confirmed cover and initial camera framing, saved FOV across viewport changes, reviewed cover delivery and matching homepage aspect. Current bilingual notices distinguish30 review images and a separately reviewed user-selected cover.",
+  "preserved_features": "Integrated actual remote1936673 sidebar/following controls, five-second featured-screen rotation and reversible inline broken-heart comment controls. Existing account/profile/favorites/messages/root design retained.",
+  "build": "Locked Flutter3.47.1 CN/RDS release --no-pub exit0 in30.7s; necessary final rebuild follows actual newer comment Dart source. Shared viewer and review evidence unchanged.",
+  "feature_flags": {
+    "PW_WEB_FAVORITES_ENABLED": true,
+    "PW_WEB_MESSAGING_READY": true,
+    "PW_WEB_PROFILES_ENABLED": true
+  },
+  "validation": "Reused39 applicable Flutter cases and accepted FOV evidence. Current merged cover data11, DOM1 and account/publication entry6 Node checks passed. Six bilingual notice clauses and matching HTML fallbacks verified. Runtime full suite21pass/1existing baseline surface-test failure; historical loading-fixture failures retained.",
+  "backend_readiness": "Actual standard30 production worker, source/config/policy/budget125 and restored timer readbacks confirmed. Schema and cover endpoint routing qualified.30audit renders plus1extra cover render completed successfully. New framed end-to-end user submission remains a separate acceptance flow.",
+  "privacy_scan": "Source delta scan and built asset private-value delta checks passed. Embedded public anon token matches prior production and has anon role.",
+  "notice": "Existing locked dependencies and published notice superset retained. Both viewer entrances use the same sealed28-resource package."
+}

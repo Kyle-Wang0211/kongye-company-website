@@ -16,5 +16,8 @@
   "validation": "39 applicable Flutter cases passed across unchanged-suite reuse and corrected preview fixtures.12 targeted homepage cover checks passed. Explicit-FOV/resize Node cases passed and root-assigned independent review accepted. Runtime Node full suite21pass/1existing baseline surface-test failure. Existing homepage loading suite12stale baseline failures retained.15file targeted analyzer exit0 with style infos.",
   "backend_readiness": "Actual standard30 production worker source/config/policy/budget125 and restored timer readbacks confirmed. Schema and new cover routing qualified. Standard30 audit renders and the extra cover render completed successfully. Legacy publication remains readable. This does not claim an end-to-end new framed user submission.",
   "privacy_scan": "New source history scanned. Built asset private-value delta clean. Embedded public anon token is identical to prior production and retains anon role.",
-  "notes": "Source-only native symbols remain outside the browser target. Existing notice superset and locked dependencies retained. Both viewer entrances deploy the same sealed28-resource package."
+  "notes": "Source-only native symbols remain outside the browser target. Existing notice superset and locked dependencies retained. Both viewer entrances deploy the same sealed28-resource package.",
+  "status": "superseded_before_production",
+  "superseded_by": "publication-framing-20261106-v38",
+  "superseded_reason": "Preparation preceded newer independently published sidebar, carousel and reversible comment controls. This artifact was not deployed."
 }
