@@ -90,6 +90,9 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
     communityService: _service,
     onSignIn: _signIn,
     onExit: _exit,
+    onOpenFavorites: const bool.fromEnvironment('PW_WEB_FAVORITES_ENABLED')
+        ? () => Navigator.of(context).pushNamed('/favorites')
+        : null,
     onWorkTap: _openWork,
   );
 }

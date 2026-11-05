@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
+import 'ui/community/work_detail_page.dart';
+import 'ui/social/web_favorites_page.dart';
+import 'community/web_social_api.dart';
+import 'community/public_work_repository.dart';
+import 'community/community_service.dart';
 import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
 import 'ui/community/web_publication_page.dart';
@@ -190,6 +195,7 @@ class _CommunityWeb extends StatelessWidget {
         supportedLocales: AppL10n.supportedLocales,
         builder: (context, child) =>
             AuthScope(currentUser: user, child: child!),
+        onGenerateRoute: (settings) => communityFavoritesRoute(settings, user),
         home: AnimatedBuilder(
           animation: user,
           builder: (context, _) {
@@ -228,6 +234,37 @@ class _CommunityWeb extends StatelessWidget {
           },
         ),
       ),
+    ),
+  );
+}
+
+/// Private account destination remains behind the current Auth startup state.
+Route<void>? communityFavoritesRoute(RouteSettings settings, CurrentUser user) {
+  if (settings.name != '/favorites' ||
+      !const bool.fromEnvironment('PW_WEB_FAVORITES_ENABLED')) {
+    return null;
+  }
+  return MaterialPageRoute<void>(
+    settings: settings,
+    builder: (_) => AnimatedBuilder(
+      animation: user,
+      builder: (context, _) {
+        final state = user.state;
+        if (state case CurrentUserServiceUnavailable(:final reason)) {
+          return _ServiceUnavailableView(currentUser: user, reason: reason);
+        }
+        final owner = user.signedInUser?.id.rawValue;
+        if (owner == null) {
+          return state is CurrentUserSignedOut
+              ? AuthRootView(currentUser: user)
+              : const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        return WebFavoritesAccountEntry(
+          key: ValueKey('${user.deployment.namespace}:$owner:favorites'),
+          user: user,
+          ownerId: owner,
+        );
+      },
     ),
   );
 }
@@ -316,4 +353,143 @@ class _WebPublicationEntryState extends State<_WebPublicationEntry> {
 
   @override
   Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
+}
+
+
+/// Current account binding for the existing favorites API and public work viewer.
+class WebFavoritesAccountEntry extends StatefulWidget {
+  const WebFavoritesAccountEntry({
+    super.key,
+    required this.user,
+    required this.ownerId,
+    this.api,
+  });
+  final CurrentUser user;
+  final String ownerId;
+  final WebSocialApi? api;
+
+  @override
+  State<WebFavoritesAccountEntry> createState() =>
+      _WebFavoritesAccountEntryState();
+}
+
+class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
+  late final WebSocialApi _api;
+  bool get _current =>
+      mounted && widget.user.signedInUser?.id.rawValue == widget.ownerId;
+
+  @override
+  void initState() {
+    super.initState();
+    final deployment = widget.user.deployment;
+    final endpoint = EndpointConfigResolver.current;
+    final origin = Uri.parse(endpoint?.supabaseUrl ?? deployment.supabaseUrl);
+    _api =
+        widget.api ??
+        WebSocialApi(
+          apiOrigin: origin,
+          supabaseOrigin: origin,
+          publishableKey: endpoint?.supabaseAnonKey ?? deployment.anonKey,
+          region: deployment.region.name,
+          authNamespace: deployment.namespace,
+          favoritesEnabled: true,
+          accessToken: () {
+            if (!_current) return null;
+            final auth = Supabase.instance.client.auth;
+            return auth.currentUser?.id == widget.ownerId
+                ? auth.currentSession?.accessToken
+                : null;
+          },
+          currentUserId: () => _current ? widget.ownerId : null,
+        );
+  }
+
+  Future<T> _guard<T>(Future<T> Function() operation) async {
+    if (!_current) throw const WebSocialUnavailableException('session_changed');
+    final result = await operation();
+    if (!_current) throw const WebSocialUnavailableException('session_changed');
+    return result;
+  }
+
+  Future<List<WebFavoriteItem>> _load() => _guard(() async {
+    final author = Localizations.localeOf(context).languageCode == 'zh'
+        ? '创作者'
+        : 'Creator';
+    final items = <WebFavoriteItem>[];
+    final cursors = <String>{};
+    WebFavoriteCursor? cursor;
+    do {
+      final page = await _guard(
+        () => _api.listFavorites(limit: 100, before: cursor),
+      );
+      items.addAll(
+        page.items.map(
+          (item) => WebFavoriteItem(
+            id: item.workId,
+            title: item.title,
+            author: author,
+          ),
+        ),
+      );
+      cursor = page.next;
+      if (cursor != null &&
+          !cursors.add('${cursor.savedAt}:${cursor.workId}')) {
+        throw const WebSocialUnavailableException('invalid_cursor');
+      }
+    } while (cursor != null);
+    return items;
+  });
+
+  Future<void> _open(String id) async {
+    try {
+      final work = await _guard(
+        () => PublicWorkRepository(Supabase.instance.client).fetch(id),
+      );
+      if (!_current) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => WorkDetailPage(
+            work: work,
+            service: CommunityService(),
+            onAuthorTap: () => Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                builder: (_) => PublicProfileEntry(
+                  user: widget.user,
+                  userId: work.userId,
+                  seedWork: work,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!_current) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            Localizations.localeOf(context).languageCode == 'zh'
+                ? '作品暂不可访问'
+                : 'This work is unavailable',
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.api == null) _api.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => WebFavoritesPage(
+    accountId: widget.ownerId,
+    loadFavorites: _load,
+    onOpen: _open,
+    onSetFavorite: (id, saved) => _guard(() async {
+      await _api.setFavorite(id, saved);
+    }),
+  );
 }

@@ -25,6 +25,7 @@ class UserProfilePage extends StatefulWidget {
   final Future<void> Function()? onSignIn;
   final VoidCallback? onExit;
   final ValueChanged<FeedWork>? onWorkTap;
+  final VoidCallback? onOpenFavorites;
 
   const UserProfilePage({
     super.key,
@@ -37,6 +38,7 @@ class UserProfilePage extends StatefulWidget {
     this.onSignIn,
     this.onExit,
     this.onWorkTap,
+    this.onOpenFavorites,
   });
 
   @override
@@ -302,6 +304,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 if (profile.bio != null) ...[
                   const SizedBox(height: 24),
                   Text(profile.bio!, style: AetherTextStyles.body),
+                ],
+                if (_isMine && widget.onOpenFavorites != null) ...[
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    key: const ValueKey('profile-favorites-button'),
+                    onPressed: widget.onOpenFavorites,
+                    icon: const Icon(Icons.bookmark_border),
+                    label: Text(Localizations.localeOf(context).languageCode == 'zh'
+                        ? '我的收藏'
+                        : 'Favorites'),
+                  ),
                 ],
                 if (!_isMine) ...[
                   const SizedBox(height: 24),
