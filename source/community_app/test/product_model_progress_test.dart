@@ -349,4 +349,32 @@ void main() {
     expect(find.byKey(const ValueKey('product-model-download')), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
+  testWidgets(
+    'late server framing respects a camera already adjusted by the user',
+    (tester) async {
+      final client = _Client();
+      final decode = Completer<void>();
+      await tester.pumpWidget(_view(client, decode));
+      await _flush(tester);
+      final host = tester.state<_HostState>(find.byType(_Host));
+      client.streams.single.add([1, 2, 3, 4, 5, 6, 7, 8]);
+      unawaited(client.streams.single.close());
+      decode.complete();
+      await _flush(tester);
+      await _flush(tester);
+      host.widget.controller.receive({
+        'protocol': sharedViewerProtocol,
+        'type': 'pw-viewer-state',
+        'state': {'status': 'ready', 'userHasInteracted': true},
+      });
+      final initial = <String, dynamic>{
+        'schema': 'pw.camera-framing.v1',
+        'asset_sha256': sha256.convert([1, 2, 3, 4, 5, 6, 7, 8]).toString(),
+      };
+      await tester.pumpWidget(_view(client, decode, initialView: initial));
+      await _flush(tester);
+      expect(host.methods.where((m) => m == 'setCameraFraming'), isEmpty);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 }

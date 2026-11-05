@@ -162,6 +162,37 @@ void main() {
       await changes.close();
     },
   );
+  testWidgets('reselecting the asset discards its confirmed cover', (
+    tester,
+  ) async {
+    final ports = Ports(), harness = Harness();
+    final changes = StreamController<String?>.broadcast();
+    await open(tester, ports, harness, changes.stream);
+    await tester.ensureVisible(find.text('确认当前画面为封面和初始视角'));
+    await tester.tap(find.text('确认当前画面为封面和初始视角'));
+    await flush(tester);
+    await flush(tester);
+    expect(
+      find.byKey(const ValueKey('publication-confirmed-cover')),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(find.text('重新选择 GLB / 调整选区'));
+    await tester.tap(find.text('重新选择 GLB / 调整选区'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('保留模型'));
+    await tester.pumpAndSettle();
+    await flush(tester);
+    expect(
+      find.byKey(const ValueKey('publication-confirmed-cover')),
+      findsNothing,
+    );
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
+    await tester.pumpWidget(const SizedBox());
+    await changes.close();
+  });
   testWidgets('account switch discards pending camera confirmation', (
     tester,
   ) async {
