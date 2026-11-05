@@ -1086,5 +1086,13 @@
   "siteScreenPlaceholder": "Content coming soon",
   "siteScreenSelection": "Choose a screen",
   "siteScreenBack": "Back to community",
-  "siteScreenStage": "Featured screens"
+  "siteScreenStage": "Featured screens",
+  "navCommunity": "Community navigation",
+  "navFollowing": "Following",
+  "navMyProfile": "My profile",
+  "navMessages": "Messages",
+  "navUpload": "Upload work",
+  "navFollowingMore": "Load more",
+  "navFollowingLoading": "Loading following",
+  "navFollowingRetry": "Retry"
 }

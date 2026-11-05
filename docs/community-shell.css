@@ -1,0 +1,32 @@
+/* Desktop community navigation and its narrow-screen rail share the existing feed. */
+.community-shell{--sidebar-width:204px;padding-left:var(--sidebar-width)}
+.community-shell>.community-header,.community-shell>main .wrap{width:calc(100% - 56px);max-width:1600px;margin-inline:auto}
+.community-sidebar{position:fixed;inset:0 auto 0 0;z-index:30;width:var(--sidebar-width);padding:26px 18px 20px;background:#fff;border-right:1px solid #eee;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain}
+.community-sidebar .brand{font-size:21px;letter-spacing:.06em;gap:11px;padding:0 8px;white-space:nowrap}
+.sidebar-primary{display:grid;gap:10px;margin-top:40px}
+.sidebar-item{display:flex;align-items:center;gap:16px;min-height:48px;padding:10px 16px;color:#737373;text-decoration:none;border:0;border-radius:8px;background:transparent;text-align:left;font:15px/1.5 var(--sans);cursor:pointer;width:100%}
+.sidebar-item svg,.header-action svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sidebar-item:hover,.sidebar-item.is-current{background:#f3f3f3;color:#161616}.sidebar-item.is-current{font-weight:600}
+.sidebar-footer{margin-top:auto;padding-top:50px}.sidebar-settings{padding-left:14px;min-height:42px;margin-bottom:12px}
+.sidebar-legal{display:flex;flex-wrap:wrap;gap:5px 12px;padding-inline:12px;font-size:11px;color:#888}.sidebar-legal a{text-decoration:none}.sidebar-legal a:hover{text-decoration:underline}
+.sidebar-footer p,.sidebar-filing{display:block;font-size:10px;line-height:1.7;color:#999;padding-inline:12px;margin:14px 0 0}
+.sidebar-filing{margin-top:3px}
+.community-shell .community-header{position:sticky;top:0;background:#fffffff5;z-index:20;min-height:80px;gap:24px;justify-content:flex-end;padding-block:14px}
+.community-shell .community-section-label{margin:0 auto 0 0;font-size:18px;color:#161616}
+.community-shell .header-action{display:flex;align-items:center;gap:8px;color:#555;text-decoration:none;font-size:14px;white-space:nowrap}
+.community-shell .header-action:hover{color:#161616}.community-shell .community-header #account-nav{margin-left:0;flex:none}.community-shell .community-account-name{font-size:14px;max-width:130px}
+.community-shell .community-screen-overflow{overflow-x:clip}.community-shell #account-summary{gap:8px}
+.community-shell .community-header~main .community-section{padding-top:18px}
+#following-dialog{width:min(460px,calc(100vw - 32px));max-height:80svh;padding:0;border:1px solid #e5e5e5;border-radius:10px;background:#fff;color:#161616;overflow:auto}
+#following-dialog::backdrop{background:#0005}#following-status{margin:16px 24px;font-size:13px;color:#737373}#following-status:empty{display:none}
+#following-list{padding:8px 16px}.following-person{display:flex;align-items:center;gap:12px;padding:12px 8px;text-decoration:none;font-size:14px;border-radius:6px}.following-person:hover{background:#f6f6f6}.following-avatar{display:block;width:32px;height:32px;flex:none;border-radius:50%;background:#eee;overflow:hidden}.following-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+#following-more{display:block;margin:12px auto 20px;padding:7px 20px;background:#f4f4f4;border:0;border-radius:5px;cursor:pointer}#following-more[hidden]{display:none}
+@media(min-width:1450px){.community-shell .community-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(min-width:1180px) and (max-width:1449px){.community-shell .community-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:900px) and (max-width:1179px){.community-shell .community-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:560px) and (max-width:899px){.community-shell .community-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1000px){.community-shell{--sidebar-width:80px}.community-sidebar{padding-inline:10px}.community-sidebar .brand{justify-content:center;padding:0}.community-sidebar .brand>span,.sidebar-item>span,.sidebar-footer p,.sidebar-filing,.sidebar-legal{display:none}.sidebar-item{justify-content:center;padding-inline:0}.sidebar-primary{margin-top:32px}.sidebar-footer{padding-top:30px}.sidebar-settings{margin-bottom:0}}
+@media(max-width:600px){.community-shell{--sidebar-width:56px}.community-sidebar{padding:18px 6px}.community-sidebar .brand-icon{width:30px;height:30px}.sidebar-primary{gap:8px;margin-top:28px}.sidebar-item{min-height:44px}.community-shell>.community-header,.community-shell>main .wrap{width:calc(100% - 24px)}.community-shell .community-header{min-height:64px;gap:15px}.community-shell .community-section-label{font-size:14px}.community-shell .header-action>span{display:none}.community-shell .header-action svg{width:20px;height:20px}.community-shell .community-account-name{max-width:56px}.community-shell .community-account img,.community-shell .account-avatar-pending{width:28px;height:28px}.community-shell #account-summary{gap:5px}.community-shell .community-header #account-nav{gap:0}}
+@media(max-width:559px){.community-shell .community-grid{grid-template-columns:minmax(0,1fr)}}
+html[lang="en"] .community-sidebar .brand{font-size:15px;letter-spacing:0;gap:9px}
+.following-person small{display:block;color:#888;font-size:11px}

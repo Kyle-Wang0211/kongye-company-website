@@ -8,7 +8,8 @@ const cache=new Map();
 function forget(){cache.clear();try{sessionStorage.removeItem(storageKey);}catch{}}
 function guest(){
  publishLink?.remove();publishLink=null;
- displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,'siteGuest');summary.append(avatar,label);actions.replaceChildren();
+ const profile=document.querySelector('#my-profile-link');if(profile)profile.href='community/?auth=signin';
+ displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,document.querySelector('#upload-work')?'siteLogin':'siteGuest');summary.append(avatar,label);actions.replaceChildren();
  for(const [mode,key] of [['signin','siteLogin'],['signup','siteRegister']]){const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);actions.append(a);}
  nav.setAttribute('aria-busy','false');
 }
@@ -30,7 +31,8 @@ async function signOutAccount(owner,button){
  }finally{signingOut=false;if(displayedId===owner)button.disabled=false;}
 }
 function render(account,src){
- if(!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
+ const profile=document.querySelector('#my-profile-link');if(profile)profile.href='community/?profile='+encodeURIComponent(account.id);
+ if(!document.querySelector('#upload-work')&&!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
  if(displayedId!==account.id){
   summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/?profile='+encodeURIComponent(account.id);localizeElement(profileLink,'siteAccount');actions.append(profileLink);
   const logout=document.createElement('button');logout.type='button';logout.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(logout,'meSignOut');logout.addEventListener('click',()=>signOutAccount(account.id,logout));actions.append(logout);
@@ -100,5 +102,9 @@ async function start(){
   schedule();
  });
  await refresh();
+ return client;
 }
-void start().catch(retry);
+// Following can recover through the same account startup path after a network failure.
+export function getAccountClient(){return client?Promise.resolve(client):start();}
+export const accountClientReady=start();
+void accountClientReady.catch(retry);

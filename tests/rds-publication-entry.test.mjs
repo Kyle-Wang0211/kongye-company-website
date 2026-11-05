@@ -14,7 +14,7 @@ class Element {
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 async function boot(id='11111111-1111-4111-8111-111111111111',origin='https://api.kongye.space'){
  const nav=new Element(),summary=new Element(),actions=new Element();let callback,clientOptions,calls=0;
- const source=readFileSync(new URL('../docs/community-account.mjs',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
+ const source=readFileSync(new URL('../docs/community-account.mjs',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/^export /gm,'');
  const client={auth:{getSession:async()=>({data:{session:id?{user:{id}}:null}}),onAuthStateChange:fn=>callback=fn},functions:{invoke:async()=>({error:Error('avatar unavailable')})}};
  vm.runInNewContext(source,{Map,JSON,Date,Promise,AbortSignal,setTimeout:fn=>{queueMicrotask(fn);return 1;},localeReady:Promise.resolve(),localizeElement:(node,key)=>node.textContent=key,readAccount:async()=>id?{id,name:'member'}:null,avatarDataUrl:async()=>null,fetch:async()=>({ok:true,json:async()=>({origin,anonKey:'public-test'})}),document:{querySelector:s=>({'#account-nav':nav,'#account-summary':summary,'#account-actions':actions})[s],createElement:()=>new Element()},sessionStorage:{getItem:()=>null,setItem(){},removeItem(){}},window:{addEventListener(){}},globalThis:{supabase:{createClient:(url,key,options)=>{calls++;clientOptions={url,key,...options};return client;}}}});
  await settle();await settle();return {nav,summary,actions,clientOptions,calls,signOut:async()=>{id=null;callback('SIGNED_OUT',null);await settle();}};

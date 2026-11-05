@@ -18,7 +18,7 @@ function boot(action){
  const elements={'#account-nav':nav,'#account-summary':summary,'#account-actions':actions};
  const storage=new Map();
  const source=readFileSync(new URL('../docs/community-account.mjs',import.meta.url),'utf8')
-  .replace(/^import .*;\n/gm,'').replace('void start().catch(retry);','')+
+  .replace(/^import .*;\n/gm,'').replace(/^export /gm,'').replace('const accountClientReady=start();\nvoid accountClientReady.catch(retry);','')+
   '\nglobalThis.hooks={render,owner:()=>displayedId,setClient:value=>client=value};';
  const context={document:{querySelector:s=>elements[s],createElement:tag=>Object.assign(new Element(),{tag})},
   localizeElement:(node,key)=>{node.dataset.i18n=key;node.textContent=key;},localeReady:Promise.resolve(),
