@@ -57,7 +57,11 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   Map<String, dynamic>? _confirmedView;
   Uint8List? _coverPreview;
   int _previewEpoch = 0;
-  bool _previewReady = false, _confirming = false;
+  bool _previewReady = false, _confirming = false, _coverEditing = false;
+  final _previewAnchor = GlobalKey();
+  int _draftEpoch = 0;
+  bool get _canReturnToEditing =>
+      const {'failed', 'not_qualified'}.contains(_status?.status);
 
   void _resetPreview({bool keepConfirmed = false}) {
     _previewEpoch++;
@@ -66,7 +70,10 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     _previewReady = false;
     _confirming = false;
     _coverPreview = null;
-    if (!keepConfirmed) _confirmedView = null;
+    if (!keepConfirmed) {
+      _confirmedView = null;
+      _coverEditing = false;
+    }
   }
 
   Future<void> _previewLoaded(
@@ -112,7 +119,10 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _confirming ||
         _key != null)
       return;
-    setState(() => _confirming = true);
+    setState(() {
+      _confirming = true;
+      _coverEditing = true;
+    });
     try {
       await controller.configure(interactive: false);
       if (!current()) return;
@@ -140,6 +150,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       setState(() {
         _confirmedView = confirmed;
         _coverPreview = png;
+        _coverEditing = false;
         _message = '已确认封面和初始视角';
       });
     } catch (_) {
@@ -151,6 +162,63 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         } catch (_) {}
         if (current()) setState(() => _confirming = false);
       }
+    }
+  }
+
+  void _showPreview() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _previewAnchor.currentContext;
+      if (!_current || target == null) return;
+      unawaited(
+        Scrollable.ensureVisible(
+          target,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 200),
+        ),
+      );
+    });
+  }
+
+  Future<void> _changeCover() async {
+    if (!_current || _busy || _confirming) return;
+    if (_key != null) {
+      await _returnToEditing();
+      return;
+    }
+    setState(() {
+      _coverEditing = true;
+      _message = '请调整 3D 取景并重新确认封面。';
+    });
+    _showPreview();
+  }
+
+  Future<void> _returnToEditing() async {
+    if (!_current || _busy || _confirming || !_canReturnToEditing) return;
+    final epoch = ++_draftEpoch;
+    _poll?.cancel();
+    setState(() => _busy = true);
+    try {
+      // The old sealed submission stays server-owned. Only its local recovery
+      // pointer becomes a fresh editable draft, with a new nonce on submission.
+      await _persist(editable: true);
+      if (!_current || epoch != _draftEpoch) return;
+      setState(() {
+        _key = null;
+        _submission = null;
+        _status = null;
+        _selected = _bytes != null;
+        _coverEditing = true;
+        _message = _bytes == null
+            ? '标题、描述和选区已保留。请选择同一 GLB 后重新确认封面。'
+            : '请调整 3D 取景并重新确认封面。';
+      });
+      _showPreview();
+    } catch (_) {
+      if (_current && epoch == _draftEpoch) {
+        setState(() => _message = '暂时无法返回编辑，请重试。');
+      }
+    } finally {
+      if (_current && epoch == _draftEpoch) setState(() => _busy = false);
     }
   }
 
@@ -170,6 +238,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AspectRatio(
+          key: _previewAnchor,
           aspectRatio: 1.5,
           child: ColoredBox(
             color: Colors.black,
@@ -190,6 +259,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
           ),
         ),
         const Text('拖动旋转、缩放或平移模型，再确认当前画面。'),
+        if (_coverEditing)
+          const Text('封面待重新确认', key: ValueKey('publication-cover-pending')),
         OutlinedButton(
           onPressed: _previewReady && !_busy && !_confirming && _key == null
               ? _confirmView
@@ -207,11 +278,19 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
           child: const Text('恢复默认视角'),
         ),
         if (_coverPreview != null) ...[
-          const Text('已确认的封面预览'),
+          Text(_coverEditing ? '上次确认的封面（待重新确认）' : '已确认的封面预览'),
           Image.memory(
             _coverPreview!,
             key: const ValueKey('publication-confirmed-cover'),
             errorBuilder: (_, _, _) => const Text('已保存当前视角'),
+          ),
+          OutlinedButton(
+            key: const ValueKey('publication-change-cover'),
+            onPressed:
+                !_busy && !_confirming && (_key == null || _canReturnToEditing)
+                ? _changeCover
+                : null,
+            child: const Text('更换封面'),
           ),
         ],
       ],
@@ -286,17 +365,23 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     try {
       final draft = jsonDecode(saved) as Map<String, dynamic>;
       setState(() {
-        _key = draft['key'] as String;
-        _submission = draft['submission'] as String?;
+        final editable = draft['editable'] == true;
+        _key = editable ? null : draft['key'] as String;
+        _submission = editable ? null : draft['submission'] as String?;
+        _coverEditing = editable;
         _sourceHash = draft['sha256'] as String?;
         _selection = (draft['selection'] as Map?)?.cast<String, dynamic>();
         _confirmedView = (draft['initial_view'] as Map?)
             ?.cast<String, dynamic>();
         _title.text = draft['title'] as String? ?? '';
         _description.text = draft['description'] as String? ?? '';
-        _message = _submission == null
-            ? '上次提交结果未确认。重新选择同一 GLB 可安全重试。'
-            : '正在查询上次提交';
+        if (editable) {
+          _message = '标题、描述和选区已保留。请选择同一 GLB 后重新确认封面。';
+        } else {
+          _message = _submission == null
+              ? '上次提交结果未确认。重新选择同一 GLB 可安全重试。'
+              : '正在查询上次提交';
+        }
       });
     } catch (_) {
       setState(() => _message = '上次草稿无法读取，请刷新页面重试');
@@ -305,7 +390,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     if (_submission != null) await _checkStatus();
   }
 
-  Future<void> _persist() async {
+  Future<void> _persist({bool editable = false}) async {
     final prefs = await SharedPreferences.getInstance();
     if (!_current) {
       throw const WebPublicationException('signed_out_or_account_changed');
@@ -313,8 +398,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     await prefs.setString(
       _storageKey,
       jsonEncode({
-        'key': _key,
-        'submission': _submission,
+        'editable': editable || _key == null,
+        'key': editable ? null : _key,
+        'submission': editable ? null : _submission,
         'sha256': _sourceHash,
         'selection': _selection,
         'initial_view': _confirmedView,
@@ -326,6 +412,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
 
   Future<void> _newDraft() async {
     if (!_current || _busy || _status?.isTerminal != true) return;
+    _draftEpoch++;
     final prefs = await SharedPreferences.getInstance();
     if (!_current) return;
     await prefs.remove(_storageKey);
@@ -368,7 +455,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         throw const WebPublicationException('请选择不超过 50 MB 的 GLB');
       }
       final bytes = file.bytes!;
-      if (_key != null) {
+      if (_key != null || (_bytes == null && _sourceHash != null)) {
         if (sha256.convert(bytes).toString() != _sourceHash) {
           throw const WebPublicationException('source_changed');
         }
@@ -409,7 +496,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         !_selected ||
         _busy ||
         _confirming ||
-        (_key == null && _confirmedView == null))
+        (_key == null && (_confirmedView == null || _coverEditing)))
       return;
     if (_title.text.trim().isEmpty ||
         _title.text.runes.length > 100 ||
@@ -504,16 +591,21 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
 
   Future<void> _checkStatus() async {
     if (!_current || _submission == null) return;
+    final epoch = _draftEpoch;
+    final submission = _submission!;
     try {
-      final status = await _service.getStatus(_submission!);
-      if (!_current) return;
+      final status = await _service.getStatus(submission);
+      if (!_current || epoch != _draftEpoch || submission != _submission)
+        return;
       setState(() {
         _status = status;
         _message = null;
       });
       _schedule();
     } catch (_) {
-      if (_current) setState(() => _message = '状态查询暂不可用，请点击刷新状态');
+      if (_current && epoch == _draftEpoch && submission == _submission) {
+        setState(() => _message = '状态查询暂不可用，请点击刷新状态');
+      }
     }
   }
 
@@ -534,7 +626,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     'rendering' || 'processing' => '正在处理',
     'awaiting_review' => '等待审核',
     'rejected' => '审核未通过',
-    'not_qualified' => '未达到发布要求',
+    'not_qualified' => '处理未完成',
     'failed' => '处理失败',
     'cancelled' => '已取消',
     'unpublished' => '已下架',
@@ -580,7 +672,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                         !_busy &&
                             _selected &&
                             !_confirming &&
-                            (_key != null || _confirmedView != null) &&
+                            (_key != null ||
+                                (_confirmedView != null && !_coverEditing)) &&
                             (_submission == null ||
                                 _status?.status == 'uploading' ||
                                 _status == null)
@@ -601,6 +694,12 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                     TextButton(
                       onPressed: _current && !_busy ? _cancelSubmission : null,
                       child: const Text('取消本次提交'),
+                    ),
+                  if (_canReturnToEditing)
+                    OutlinedButton(
+                      key: const ValueKey('publication-return-editing'),
+                      onPressed: _busy || _confirming ? null : _returnToEditing,
+                      child: const Text('返回编辑 / 更换封面'),
                     ),
                   if (_status?.isTerminal == true)
                     TextButton(
