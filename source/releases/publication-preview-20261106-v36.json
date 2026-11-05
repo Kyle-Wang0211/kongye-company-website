@@ -1,0 +1,20 @@
+{
+  "release": "publication-preview-20261106-v36",
+  "source_commit": "4870d8b1d20a9cef342d77e732015605f44c1ff3",
+  "dart_build_source_commit": "579bede3a0e9aa69daad350777370f5dd3194195",
+  "main_js_sha256": "69bdafe53de6c4f89c15abcdaed9f05d5ad0a043520178a3d7e2491ed39eb07c",
+  "shared_bundle": "d276a4f8cd8a19bd1d139ce4400bbc56b5777fc834e05a0c7efbbe698c265484",
+  "shared_resources": 28,
+  "scope": "Interactive publication preview, explicitly confirmed cover and initial camera framing, saved framing across viewport changes, reviewed publication cover delivery and matching homepage aspect. Current publication notices distinguish30 review views and separate user-selected cover review.",
+  "preserved_features": "Includes published comment-thread-v35 author badges, compact replies and personal dislike hiding, plus existing account, profile, favorites, messages and root layout.",
+  "build": "Locked Flutter3.47.1 CN/RDS release --no-pub; exit0 in30.7s for complete merged source. Static notice update reuses identical Dart artifact.",
+  "feature_flags": {
+    "PW_WEB_FAVORITES_ENABLED": true,
+    "PW_WEB_MESSAGING_READY": true,
+    "PW_WEB_PROFILES_ENABLED": true
+  },
+  "validation": "39 applicable Flutter cases passed across unchanged-suite reuse and corrected preview fixtures.12 targeted homepage cover checks passed. Explicit-FOV/resize Node cases passed and root-assigned independent review accepted. Runtime Node full suite21pass/1existing baseline surface-test failure. Existing homepage loading suite12stale baseline failures retained.15file targeted analyzer exit0 with style infos.",
+  "backend_readiness": "Actual standard30 production worker source/config/policy/budget125 and restored timer readbacks confirmed. Schema and new cover routing qualified. Standard30 audit renders and the extra cover render completed successfully. Legacy publication remains readable. This does not claim an end-to-end new framed user submission.",
+  "privacy_scan": "New source history scanned. Built asset private-value delta clean. Embedded public anon token is identical to prior production and retains anon role.",
+  "notes": "Source-only native symbols remain outside the browser target. Existing notice superset and locked dependencies retained. Both viewer entrances deploy the same sealed28-resource package."
+}
