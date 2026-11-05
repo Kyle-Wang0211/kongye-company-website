@@ -1,5 +1,6 @@
 /* Flat front-facing rectangles with floor shadows attached to each pane. */
-.community-screen-section{padding-block:6px 0;overflow:hidden}
+.community-screen-overflow{overflow-x:clip;overflow-y:visible}
+.community-screen-section{padding-block:6px 0;overflow:visible}
 .community-screen-stage{position:relative;height:auto;aspect-ratio:100/29.00725;padding-bottom:70px;box-sizing:content-box;overflow:visible;margin-bottom:0;touch-action:pan-y;--screen-spread:32.8277111%}
 .community-feature-screen{position:absolute;left:50%;top:calc(50% - 29px);width:46.4115916%;aspect-ratio:16/10;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;border:1px solid #e3e3e3;box-sizing:border-box;border-radius:0;background:#f1f1f1;color:#222;text-decoration:none;transform:translate(-50%,-50%);transition:transform .5s cubic-bezier(.2,.7,.2,1),left .5s cubic-bezier(.2,.7,.2,1);transform-origin:center;isolation:isolate}
 .community-feature-screen::after{content:"";position:absolute;left:-25%;top:calc(100% + 30px);width:150%;height:20px;border-radius:50%;background:#0002;filter:blur(18px);pointer-events:none}
