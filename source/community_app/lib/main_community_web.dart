@@ -154,6 +154,24 @@ Future<void> _initialize(
   }
 }
 
+ThemeData communityWebTheme() => ThemeData(
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: AetherColors.primary,
+    dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+    primary: AetherColors.primary,
+    secondary: AetherColors.primarySoft,
+    error: AetherColors.danger,
+  ),
+  textSelectionTheme: const TextSelectionThemeData(
+    cursorColor: AetherColors.primary,
+    selectionColor: Color(0x33111111),
+    selectionHandleColor: AetherColors.primary,
+  ),
+  scaffoldBackgroundColor: AetherColors.bg,
+  canvasColor: AetherColors.bg,
+  useMaterial3: true,
+);
+
 class _CommunityWeb extends StatelessWidget {
   const _CommunityWeb({required this.user, required this.locale});
   final CurrentUser user;
@@ -166,12 +184,7 @@ class _CommunityWeb extends StatelessWidget {
       builder: (context, _) => MaterialApp(
         title: 'PocketWorld',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: AetherColors.primary),
-          scaffoldBackgroundColor: AetherColors.bg,
-          canvasColor: AetherColors.bg,
-          useMaterial3: true,
-        ),
+        theme: communityWebTheme(),
         locale: locale.locale,
         localizationsDelegates: AppL10n.localizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
