@@ -1,7 +1,6 @@
 // Fake host verifies flow and identity guards. Real rendering is tested by root IAB.
 // ignore_for_file: invalid_use_of_internal_member
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,7 @@ import 'package:pocketworld_flutter/community/web_publication_service.dart';
 import 'package:pocketworld_flutter/ui/community/web_publication_page.dart';
 import 'package:pocketworld_flutter/ui/community/web_publication_selection_page.dart';
 
-import 'web_publication_service_test.dart' show Ports, glb, uid;
+import 'web_publication_service_test.dart' show Ports, glb;
 
 class Preview extends StatefulWidget {
   const Preview(this.controller, this.ready, this.harness);
@@ -136,11 +135,12 @@ void main() {
         find.byKey(const ValueKey('fake-publication-preview')),
         findsOneWidget,
       );
+      await tester.scrollUntilVisible(find.byType(FilledButton), 200);
       expect(
         tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
         isNull,
       );
-      await tester.ensureVisible(find.text('确认当前画面为封面和初始视角'));
+      await tester.scrollUntilVisible(find.text('确认当前画面为封面和初始视角'), -200);
       await tester.tap(find.text('确认当前画面为封面和初始视角'));
       await flush(tester);
       await flush(tester);
@@ -152,8 +152,9 @@ void main() {
         ...harness.camera,
         'position': [9, 9, 9],
       };
+      await tester.scrollUntilVisible(find.byType(TextField).first, 200);
       await tester.enterText(find.byType(TextField).first, '作品');
-      await tester.ensureVisible(find.text('提交发布'));
+      await tester.scrollUntilVisible(find.text('提交发布'), 200);
       await tester.tap(find.text('提交发布'));
       await flush(tester);
       await flush(tester);
@@ -168,7 +169,7 @@ void main() {
     final ports = Ports(), harness = Harness();
     final changes = StreamController<String?>.broadcast();
     await open(tester, ports, harness, changes.stream);
-    await tester.ensureVisible(find.text('确认当前画面为封面和初始视角'));
+    await tester.scrollUntilVisible(find.text('确认当前画面为封面和初始视角'), 200);
     await tester.tap(find.text('确认当前画面为封面和初始视角'));
     await flush(tester);
     await flush(tester);
@@ -176,7 +177,7 @@ void main() {
       find.byKey(const ValueKey('publication-confirmed-cover')),
       findsOneWidget,
     );
-    await tester.ensureVisible(find.text('重新选择 GLB / 调整选区'));
+    await tester.scrollUntilVisible(find.text('重新选择 GLB / 调整选区'), -200);
     await tester.tap(find.text('重新选择 GLB / 调整选区'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('保留模型'));
@@ -186,6 +187,7 @@ void main() {
       find.byKey(const ValueKey('publication-confirmed-cover')),
       findsNothing,
     );
+    await tester.scrollUntilVisible(find.byType(FilledButton), 200);
     expect(
       tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
       isNull,
@@ -200,7 +202,7 @@ void main() {
         harness = Harness()..pendingCamera = Completer<void>();
     final changes = StreamController<String?>.broadcast();
     await open(tester, ports, harness, changes.stream);
-    await tester.ensureVisible(find.text('确认当前画面为封面和初始视角'));
+    await tester.scrollUntilVisible(find.text('确认当前画面为封面和初始视角'), 200);
     await tester.tap(find.text('确认当前画面为封面和初始视角'));
     await flush(tester);
     ports.active = null;
