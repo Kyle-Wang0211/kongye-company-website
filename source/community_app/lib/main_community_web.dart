@@ -47,7 +47,7 @@ Future<void> main() async {
   user.retryInit = () => _initialize(user, locale);
   // This entry has no native startup animation/archive/capture runtime.
   StartupSplashGate.instance.markDone();
-  runApp(_CommunityWeb(user: user, locale: locale));
+  runApp(CommunityWebApp(user: user, locale: locale));
   unawaited(locale.bootstrap());
   unawaited(_initialize(user, locale));
 }
@@ -179,16 +179,42 @@ ThemeData communityWebTheme() => ThemeData(
   useMaterial3: true,
 );
 
-class _CommunityWeb extends StatelessWidget {
-  const _CommunityWeb({required this.user, required this.locale});
+class CommunityWebApp extends StatefulWidget {
+  const CommunityWebApp({super.key, required this.user, required this.locale});
   final CurrentUser user;
   final LocaleNotifier locale;
+
+  @override
+  State<CommunityWebApp> createState() => _CommunityWebAppState();
+}
+
+class _CommunityWebAppState extends State<CommunityWebApp> {
+  CurrentUser get user => widget.user;
+  LocaleNotifier get locale => widget.locale;
+  String? _previousAccount;
+  int _navigationEpoch = 0;
+
+  Key _navigationIdentity() {
+    final owner = user.signedInUser?.id.rawValue;
+    final account = owner == null
+        ? null
+        : '${user.deployment.namespace}:$owner';
+    // A revoked/replaced account must also discard dialogs on the root
+    // Navigator. First sign-in preserves the public reading route underneath.
+    if (_previousAccount != null && _previousAccount != account) {
+      _navigationEpoch++;
+    }
+    _previousAccount = account;
+    return ValueKey(_navigationEpoch);
+  }
+
   @override
   Widget build(BuildContext context) => LocaleScope(
     notifier: locale,
     child: AnimatedBuilder(
-      animation: locale,
+      animation: Listenable.merge([locale, user]),
       builder: (context, _) => MaterialApp(
+        key: _navigationIdentity(),
         title: 'PocketWorld',
         debugShowCheckedModeBanner: false,
         theme: communityWebTheme(),
@@ -216,8 +242,8 @@ class _CommunityWeb extends StatelessWidget {
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
                     : Uri.base.queryParameters['publish'] == '1'
-                        ? const _WebPublicationEntry()
-                        : const VaultPage(),
+                    ? const _WebPublicationEntry()
+                    : const VaultPage(),
               CurrentUserSignedOut() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
@@ -261,7 +287,9 @@ Route<void>? communityFavoritesRoute(RouteSettings settings, CurrentUser user) {
         if (owner == null) {
           return state is CurrentUserSignedOut
               ? AuthRootView(currentUser: user)
-              : const Scaffold(body: Center(child: CircularProgressIndicator()));
+              : const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
         }
         return WebFavoritesAccountEntry(
           key: ValueKey('${user.deployment.namespace}:$owner:favorites'),
@@ -374,7 +402,6 @@ class _ServiceUnavailableView extends StatelessWidget {
   }
 }
 
-
 /// Website publication returns to the website feed, not the native vault feed.
 class _WebPublicationEntry extends StatefulWidget {
   const _WebPublicationEntry();
@@ -391,16 +418,15 @@ class _WebPublicationEntryState extends State<_WebPublicationEntry> {
 
   Future<void> _open() async {
     if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => const WebPublicationPage()),
-    );
+    await Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const WebPublicationPage()));
     if (mounted) exitPublicWork();
   }
 
   @override
   Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
 }
-
 
 /// Current account binding for the existing favorites API and public work viewer.
 class WebFavoritesAccountEntry extends StatefulWidget {
@@ -491,7 +517,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
       final work = await _guard(
         () => PublicWorkRepository(Supabase.instance.client).fetch(id),
       );
-      if (!_current) return;
+      if (!mounted || !_current) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => WorkDetailPage(
@@ -510,7 +536,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
         ),
       );
     } catch (_) {
-      if (!_current) return;
+      if (!mounted || !_current) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

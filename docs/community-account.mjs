@@ -19,7 +19,7 @@ function retry(){
 function render(account,src){
  if(!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
  if(displayedId!==account.id){
-  summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/';localizeElement(profileLink,'siteAccount');actions.append(profileLink);
+  summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/?profile='+encodeURIComponent(account.id);localizeElement(profileLink,'siteAccount');actions.append(profileLink);
   const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');const name=document.createElement('span');name.className='community-account-name';summary.append(avatar,name);displayedId=account.id;
  }
  const name=summary.querySelector('.community-account-name');
