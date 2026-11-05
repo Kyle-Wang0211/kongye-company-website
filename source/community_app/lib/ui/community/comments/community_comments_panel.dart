@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../community/comments/comment_models.dart';
+import '../../../community/comments/comment_visibility_store.dart';
+import '../../../config/endpoint_config.dart';
 import '../../../community/comments/comment_time.dart';
 import '../../../community/comments/comment_repository.dart';
 import '../../../l10n/app_localizations.dart';
@@ -78,6 +81,113 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   final _busyComments = <String>{};
   final _reportRevision = ValueNotifier(0);
   List<CommunityComment> _comments = [];
+  final _visibilityStore = const CommentVisibilityStore();
+  Set<String> _hiddenCommentIds = {};
+  bool _visibilityLoaded = false;
+  int _visibilityReadToken = 0;
+  String? _visibilityError;
+  String get _visibilityScope {
+    final config = EndpointConfigResolver.current;
+    return jsonEncode([
+      config?.deployment.namespace ?? 'local',
+      config?.supabaseUrl ?? 'local',
+      widget.currentUserId ?? 'anonymous',
+      widget.workId,
+    ]);
+  }
+
+  List<CommunityComment> get _visibleComments => _visibilityLoaded
+      ? _comments.where((c) => !_hiddenCommentIds.contains(c.id)).toList()
+      : [];
+
+  bool get _chinese => Localizations.localeOf(context).languageCode == 'zh';
+
+  Future<void> _loadVisibility() async {
+    final generation = _generation;
+    final token = ++_visibilityReadToken;
+    final scope = _visibilityScope;
+    try {
+      final hidden = await _visibilityStore
+          .read(scope)
+          .timeout(const Duration(seconds: 5));
+      if (!_current(generation) ||
+          token != _visibilityReadToken ||
+          scope != _visibilityScope) {
+        return;
+      }
+      setState(() {
+        _hiddenCommentIds = hidden;
+        _visibilityLoaded = true;
+        _visibilityError = null;
+      });
+      _notifyVisible();
+    } catch (_) {
+      if (!_current(generation) ||
+          token != _visibilityReadToken ||
+          scope != _visibilityScope) {
+        return;
+      }
+      setState(() {
+        _visibilityLoaded = false;
+        _visibilityError = _chinese
+            ? '隐藏偏好读取失败，请重试'
+            : 'Could not load hidden comments. Retry.';
+      });
+    }
+  }
+
+  Future<void> _setCommentHidden(CommunityComment comment, bool hidden) async {
+    if (_busyComments.contains(comment.id) || !_visibilityLoaded) return;
+    final generation = _generation;
+    final scope = _visibilityScope;
+    setState(() => _busyComments.add(comment.id));
+    try {
+      await _visibilityStore.setHidden(scope, comment.id, hidden);
+      if (!mounted || !_current(generation) || scope != _visibilityScope) {
+        return;
+      }
+      setState(() {
+        if (hidden) {
+          _hiddenCommentIds.add(comment.id);
+          if (_reply?.id == comment.id) _reply = null;
+          if (_previewCommentId == comment.id) {
+            _previewCommentId = null;
+            _previewAttachment = null;
+          }
+        } else {
+          _hiddenCommentIds.remove(comment.id);
+        }
+      });
+      _notifyVisible();
+      if (hidden) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_chinese ? '已隐藏此评论，仅对你生效' : 'Comment hidden for you'),
+            action: SnackBarAction(
+              label: _chinese ? '撤销' : 'Undo',
+              onPressed: () {
+                if (_current(generation) && scope == _visibilityScope) {
+                  _setCommentHidden(comment, false);
+                }
+              },
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (!_current(generation) || scope != _visibilityScope) return;
+      setState(
+        () => _error = _chinese
+            ? '隐藏偏好保存失败，请重试'
+            : 'Could not save your preference. Retry.',
+      );
+    } finally {
+      if (_current(generation) && scope == _visibilityScope) {
+        setState(() => _busyComments.remove(comment.id));
+      }
+    }
+  }
+
   final _parentComments = <String, CommunityComment>{};
   final _sectionIds = <CommunityCommentSection, List<String>>{};
   final _sectionCursors = <CommunityCommentSection, String?>{};
@@ -138,6 +248,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     WidgetsBinding.instance.addObserver(this);
     _anchor = widget.selectedAnchor;
     _text.addListener(_textChanged);
+    _loadVisibility();
     _load();
   }
 
@@ -231,6 +342,10 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _text.clear();
       _images.clear();
       _comments = [];
+      _hiddenCommentIds = {};
+      _visibilityLoaded = false;
+      _visibilityError = null;
+      _loadVisibility();
       _resetSections();
       _busyComments.clear();
       _page = null;
@@ -300,6 +415,10 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _emojiOpen = false;
       _error = message;
       _loadError = message;
+      _hiddenCommentIds = {};
+      _visibilityReadToken++;
+      _visibilityLoaded = true;
+      _visibilityError = null;
       _snapshotInvalidated = true;
     });
     final generation = _generation;
@@ -307,6 +426,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       if (_current(generation)) widget.onClearAnchor?.call();
     });
     _notifyVisible();
+    _loadVisibility();
   }
 
   void _changed(VoidCallback change) {
@@ -321,7 +441,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     _reportRevision.value++;
     final generation = _generation;
     final token = _loadToken;
-    final rows = List<CommunityComment>.unmodifiable(_comments);
+    final rows = List<CommunityComment>.unmodifiable(_visibleComments);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_current(generation) && token == _loadToken) {
         widget.onVisibleCommentsChanged?.call(rows);
@@ -944,6 +1064,19 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                         ),
                       ),
                       const Divider(height: 1, color: AetherColors.border),
+                      if (_hiddenCommentIds.isNotEmpty)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            key: const ValueKey('comment-restore-hidden'),
+                            onPressed: _showHiddenComments,
+                            child: Text(
+                              _chinese
+                                  ? '已隐藏评论 · 恢复'
+                                  : 'Hidden comments · Restore',
+                            ),
+                          ),
+                        ),
                       Expanded(child: _list()),
                       const Divider(height: 1, color: AetherColors.border),
                       ConstrainedBox(
@@ -976,6 +1109,17 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       });
 
   Widget _list() {
+    if (_visibilityError != null) {
+      return Center(
+        child: TextButton(
+          onPressed: _loadVisibility,
+          child: Text(_visibilityError!),
+        ),
+      );
+    }
+    if (!_visibilityLoaded) {
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+    }
     if (_loading && _comments.isEmpty) {
       return const Center(
         child: SizedBox(
@@ -1013,7 +1157,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         child: _section(CommunityCommentSection.hot),
       );
     }
-    if (_comments.isEmpty) {
+    if (_visibleComments.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(16),
@@ -1025,7 +1169,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         ),
       );
     }
-    final rows = _ranked(_comments);
+    final rows = _ranked(_visibleComments);
     return ListView.separated(
       controller: _scroll,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -1040,7 +1184,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     final rows = _ranked(
       ids
           .map((id) => _comments.where((c) => c.id == id).firstOrNull)
-          .whereType<CommunityComment>(),
+          .whereType<CommunityComment>()
+          .where((comment) => !_hiddenCommentIds.contains(comment.id)),
     );
     final busy = _sectionBusy.containsKey(section);
     final error = _sectionErrors[section];
@@ -1096,221 +1241,326 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       CommunityCommentStatus.error => _l.commentPrivateError,
       _ => null,
     };
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: AetherColors.bgElevated,
-          foregroundColor: AetherColors.textSecondary,
-          foregroundImage: comment.authorAvatarUrl == null
-              ? null
-              : NetworkImage(comment.authorAvatarUrl!),
-          onForegroundImageError: comment.authorAvatarUrl == null
-              ? null
-              : (_, _) {},
-          child: const Icon(Icons.person_outline_rounded, size: 19),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      comment.authorName,
-                      style: AetherTextStyles.bodySm.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (!hidden &&
-                      widget.workAuthorId != null &&
-                      widget.workAuthorId!.trim().isNotEmpty &&
-                      comment.userId == widget.workAuthorId)
-                    Container(
-                      key: ValueKey('author-reply-${comment.id}'),
-                      margin: const EdgeInsets.only(left: 6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AetherColors.primary.withValues(alpha: .12),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+    final isReply = comment.parentId != null;
+    return Padding(
+      padding: EdgeInsets.only(left: isReply ? 42 : 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: isReply ? 12 : 16,
+            backgroundColor: AetherColors.bgElevated,
+            foregroundColor: AetherColors.textSecondary,
+            foregroundImage: comment.authorAvatarUrl == null
+                ? null
+                : NetworkImage(comment.authorAvatarUrl!),
+            onForegroundImageError: comment.authorAvatarUrl == null
+                ? null
+                : (_, _) {},
+            child: Icon(Icons.person_outline_rounded, size: isReply ? 15 : 19),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
                       child: Text(
-                        _l.localeName.startsWith('zh') ? '作者' : 'Author',
-                        style: AetherTextStyles.caption.copyWith(
-                          color: AetherColors.primary,
+                        comment.authorName,
+                        style: AetherTextStyles.bodySm.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  if (mine)
-                    Padding(
-                      padding: EdgeInsets.only(left: 6),
-                      child: Text(
-                        _l.commentMe,
-                        style: AetherTextStyles.caption,
-                      ),
-                    ),
-                ],
-              ),
-              if (!hidden && comment.parentId != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Text(
-                    _l.commentReplyTo(
-                      parent?.authorName ?? _l.commentReplyFallback,
-                    ),
-                    style: AetherTextStyles.caption,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              if (hidden) ...[
-                Padding(
-                  padding: EdgeInsets.only(top: 4),
-                  child: Text(_l.commentHidden, style: AetherTextStyles.body),
-                ),
-                if (comment.moderationReason != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      comment.moderationReason!,
-                      style: AetherTextStyles.caption,
-                    ),
-                  ),
-                if (comment.moderationCaseId != null &&
-                    widget.onModerationCaseSelected != null)
-                  TextButton(
-                    onPressed: () => widget.onModerationCaseSelected!(
-                      comment.moderationCaseId!,
-                    ),
-                    child: Text(_l.commentViewReasonAppeal),
-                  ),
-              ],
-              if (!hidden && comment.body.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(comment.body, style: AetherTextStyles.body),
-                ),
-              if (!hidden && comment.attachments.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      for (var i = 0; i < comment.attachments.length; i++)
-                        _attachment(comment, comment.attachments[i], i),
-                    ],
-                  ),
-                ),
-              if (!hidden && comment.anchor != null)
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 36),
-                    foregroundColor: AetherColors.primary,
-                  ),
-                  onPressed: () => widget.onCommentSelected?.call(comment),
-                  icon: const Icon(Icons.location_on_outlined, size: 15),
-                  label: Text(
-                    _l.commentViewPoint,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-              if (privateLabel != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      privateLabel,
-                      style: AetherTextStyles.caption.copyWith(
-                        color: comment.status == CommunityCommentStatus.rejected
-                            ? AetherColors.danger
-                            : AetherColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-              Wrap(
-                spacing: 12,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    _date(comment.createdAt),
-                    style: AetherTextStyles.caption,
-                  ),
-                  if (comment.published && _canComment)
-                    _textAction(_l.commentReply, () {
-                      _changed(() => _reply = comment);
-                      _focus.requestFocus();
-                    }),
-                  if (comment.published &&
-                      !mine &&
-                      widget.currentUserId != null &&
-                      widget.repository is CommunityCommentReportRepository)
-                    _textAction(_l.reportAction, () => _reportComment(comment)),
-                  if (comment.published)
-                    InkWell(
-                      onTap:
-                          _busyComments.contains(comment.id) ||
-                              widget.currentUserId == null
-                          ? null
-                          : () => _like(comment),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Semantics(
-                        label: comment.likedByMe
-                            ? _l.commentUnlikeCount(comment.likesCount)
-                            : _l.commentLikeCount(comment.likesCount),
-                        button: true,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                comment.likedByMe
-                                    ? Icons.favorite_rounded
-                                    : Icons.favorite_border_rounded,
-                                size: 15,
-                                color: AetherColors.textSecondary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${comment.likesCount}',
-                                style: AetherTextStyles.caption,
-                              ),
-                            ],
+                    if (!hidden &&
+                        widget.workAuthorId != null &&
+                        widget.workAuthorId!.trim().isNotEmpty &&
+                        comment.userId == widget.workAuthorId)
+                      Container(
+                        key: ValueKey('author-reply-${comment.id}'),
+                        margin: const EdgeInsets.only(left: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Text(
+                          _l.localeName.startsWith('zh') ? '作者' : 'Author',
+                          style: AetherTextStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
+                    if (mine)
+                      Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Text(
+                          _l.commentMe,
+                          style: AetherTextStyles.caption,
+                        ),
+                      ),
+                  ],
+                ),
+                if (!hidden && comment.parentId != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Text(
+                      _l.commentReplyTo(
+                        parent?.authorName ?? _l.commentReplyFallback,
+                      ),
+                      style: AetherTextStyles.caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  if (mine &&
-                      (comment.status == CommunityCommentStatus.rejected ||
-                          comment.status == CommunityCommentStatus.error))
-                    _textAction(_l.commentEditResend, () => _edit(comment)),
-                  if (mine)
-                    _textAction(
-                      _l.meActionDelete,
-                      _busyComments.contains(comment.id)
-                          ? null
-                          : () => _remove(comment),
+                  ),
+                if (hidden) ...[
+                  Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Text(_l.commentHidden, style: AetherTextStyles.body),
+                  ),
+                  if (comment.moderationReason != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        comment.moderationReason!,
+                        style: AetherTextStyles.caption,
+                      ),
+                    ),
+                  if (comment.moderationCaseId != null &&
+                      widget.onModerationCaseSelected != null)
+                    TextButton(
+                      onPressed: () => widget.onModerationCaseSelected!(
+                        comment.moderationCaseId!,
+                      ),
+                      child: Text(_l.commentViewReasonAppeal),
                     ),
                 ],
-              ),
-            ],
+                if (!hidden && comment.body.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(comment.body, style: AetherTextStyles.body),
+                  ),
+                if (!hidden && comment.attachments.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        for (var i = 0; i < comment.attachments.length; i++)
+                          _attachment(comment, comment.attachments[i], i),
+                      ],
+                    ),
+                  ),
+                if (!hidden && comment.anchor != null)
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 36),
+                      foregroundColor: AetherColors.primary,
+                    ),
+                    onPressed: () => widget.onCommentSelected?.call(comment),
+                    icon: const Icon(Icons.location_on_outlined, size: 15),
+                    label: Text(
+                      _l.commentViewPoint,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                if (privateLabel != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        privateLabel,
+                        style: AetherTextStyles.caption.copyWith(
+                          color:
+                              comment.status == CommunityCommentStatus.rejected
+                              ? AetherColors.danger
+                              : AetherColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                Wrap(
+                  spacing: 10,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      _date(comment.createdAt),
+                      style: AetherTextStyles.caption,
+                    ),
+                    if (comment.published && _canComment)
+                      _textAction(_l.commentReply, () {
+                        _changed(() => _reply = comment);
+                        _focus.requestFocus();
+                      }),
+                    if (comment.published &&
+                        !mine &&
+                        widget.currentUserId != null &&
+                        widget.repository is CommunityCommentReportRepository)
+                      _textAction(
+                        _l.reportAction,
+                        () => _reportComment(comment),
+                      ),
+                    if (comment.published)
+                      InkWell(
+                        onTap:
+                            _busyComments.contains(comment.id) ||
+                                widget.currentUserId == null
+                            ? null
+                            : () => _like(comment),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Semantics(
+                          label: comment.likedByMe
+                              ? _l.commentUnlikeCount(comment.likesCount)
+                              : _l.commentLikeCount(comment.likesCount),
+                          button: true,
+                          enabled:
+                              !_busyComments.contains(comment.id) &&
+                              widget.currentUserId != null,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 3,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  comment.likedByMe
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  size: 16,
+                                  color:
+                                      _busyComments.contains(comment.id) ||
+                                          widget.currentUserId == null
+                                      ? AetherColors.textSecondary.withValues(
+                                          alpha: .4,
+                                        )
+                                      : comment.likedByMe
+                                      ? AetherColors.danger
+                                      : AetherColors.textSecondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${comment.likesCount}',
+                                  style: AetherTextStyles.caption,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (comment.published)
+                      IconButton(
+                        key: ValueKey('comment-dislike-${comment.id}'),
+                        tooltip: _chinese
+                            ? '不喜欢，仅对你隐藏'
+                            : 'Dislike, hide for you',
+                        onPressed: _busyComments.contains(comment.id)
+                            ? null
+                            : () => _setCommentHidden(comment, true),
+                        padding: const EdgeInsets.all(8),
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 36,
+                        ),
+                        icon: const Icon(Icons.thumb_down_outlined, size: 15),
+                        color: AetherColors.textSecondary,
+                      ),
+                    if (mine &&
+                        (comment.status == CommunityCommentStatus.rejected ||
+                            comment.status == CommunityCommentStatus.error))
+                      _textAction(_l.commentEditResend, () => _edit(comment)),
+                    if (mine)
+                      _textAction(
+                        _l.meActionDelete,
+                        _busyComments.contains(comment.id)
+                            ? null
+                            : () => _remove(comment),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  Future<void> _showHiddenComments() async {
+    final generation = _generation;
+    final scope = _visibilityScope;
+    final chinese = _chinese;
+    final selected = await showModalBottomSheet<CommunityComment>(
+      context: context,
+      useSafeArea: true,
+      builder: (context) => ValueListenableBuilder<int>(
+        valueListenable: _reportRevision,
+        builder: (context, revision, child) {
+          if (!_current(generation) || scope != _visibilityScope) {
+            return const SizedBox.shrink();
+          }
+          final rows = _comments
+              .where((c) => c.published && _hiddenCommentIds.contains(c.id))
+              .toList();
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  chinese ? '已隐藏评论' : 'Hidden comments',
+                  style: AetherTextStyles.h3,
+                ),
+              ),
+              for (final comment in rows)
+                ListTile(
+                  title: Text(
+                    comment.authorName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    comment.body,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: TextButton(
+                    onPressed: () => Navigator.pop(context, comment),
+                    child: Text(chinese ? '恢复' : 'Restore'),
+                  ),
+                ),
+              if (rows.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    chinese
+                        ? '继续加载评论后可恢复相应条目'
+                        : 'Load more comments to restore hidden entries',
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+    if (!_current(generation) ||
+        scope != _visibilityScope ||
+        selected == null) {
+      return;
+    }
+    await _setCommentHidden(selected, false);
   }
 
   Future<void> _reportComment(CommunityComment comment) async {

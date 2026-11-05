@@ -1,0 +1,8 @@
+{
+  "release": "comment-thread-20261105-v35",
+  "scope": "Website comment thread author badge/reply layout/like and local personal hiding",
+  "main_js_sha256": "cd70d4f60ba43bd727643dbd8906f9e3a1511594da67792ff3369982ab30c0e0",
+  "build": "Locked Flutter 3.47.1 --no-pub release; CN/RDS and current favorites/messaging/profiles flags preserved; exit0",
+  "verification": "38 existing comment tests pass; panel analyzer no issues; fresh read-only reviewer no blockers",
+  "limitation": "Dislike preferences persist only on current device/browser, partitioned by account/region/work. No cloud cross-device hidden-comment API was introduced. Phone app not installed."
+}

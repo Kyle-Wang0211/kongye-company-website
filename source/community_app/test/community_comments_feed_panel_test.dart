@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,6 +51,7 @@ CommunityComment ranked(String id, int likes, int day) => CommunityComment(
 );
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   for (final language in ['zh', 'en']) {
     testWidgets('ranked feed has no old tabs in $language', (tester) async {
       final repo = PagedComments();

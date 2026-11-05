@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -134,6 +135,7 @@ Future<void> mount(
 }
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets(
     'report action appears only for published other-author logged-in comments',
     (tester) async {
