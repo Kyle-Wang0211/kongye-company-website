@@ -12,6 +12,10 @@ import 'package:pocketworld_flutter/auth/current_user.dart';
 import 'package:pocketworld_flutter/auth/unavailable_auth_service.dart';
 import 'package:pocketworld_flutter/i18n/locale_notifier.dart';
 import 'package:pocketworld_flutter/main_community_web.dart';
+import 'package:pocketworld_flutter/l10n/app_localizations.dart';
+import 'package:pocketworld_flutter/ui/auth/auth_root_view.dart';
+import 'package:pocketworld_flutter/ui/community/user_profile_page.dart';
+import 'web_messaging_navigation_test.dart' show Profiles;
 
 class _User extends CurrentUser {
   _User() : super(service: const UnavailableAuthService());
@@ -111,4 +115,90 @@ void main() {
     );
     await tester.pumpWidget(const SizedBox.shrink());
   });
+  testWidgets(
+    'every account route waits for startup and isolates replacement owners',
+    (tester) async {
+      for (final route in [
+        '/profile-edit',
+        '/publications',
+        '/reports',
+        '/privacy',
+        '/report-review',
+      ]) {
+        final user = _User()..current = const CurrentUserBootstrapping();
+        final locale = LocaleNotifier();
+        final opened = <String>[];
+        await tester.pumpWidget(
+          LocaleScope(
+            notifier: locale,
+            child: MaterialApp(
+              localizationsDelegates: AppL10n.localizationsDelegates,
+              supportedLocales: AppL10n.supportedLocales,
+              home: const SizedBox.shrink(),
+              initialRoute: route,
+              onGenerateRoute: (settings) => communityAccountRoute(
+                settings,
+                user,
+                pageBuilder: (_, owner) {
+                  opened.add(owner);
+                  return Scaffold(body: TextFormField(initialValue: owner));
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(opened, isEmpty);
+        user.current = const CurrentUserSignedOut();
+        user.notifyListeners();
+        await tester.pumpAndSettle();
+        expect(find.byType(AuthRootView), findsOneWidget);
+        expect(opened, isEmpty);
+        user.enter('actor-a');
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextFormField), 'A private draft');
+        user.enter('actor-b');
+        await tester.pumpAndSettle();
+        expect(find.text('A private draft'), findsNothing);
+        expect(find.text('actor-b'), findsOneWidget);
+        expect(opened, containsAllInOrder(['actor-a', 'actor-b']));
+        await tester.pumpWidget(const SizedBox.shrink());
+        user.dispose();
+        locale.dispose();
+      }
+    },
+  );
+
+  testWidgets(
+    'profile account actions are owner-only and invoke supplied routes',
+    (tester) async {
+      var opens = 0;
+      Future<void> show(String? owner) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppL10n.localizationsDelegates,
+            supportedLocales: AppL10n.supportedLocales,
+            home: UserProfilePage(
+              userId: 'peer',
+              repository: Profiles(owner),
+              worksLoader: (_) async => [],
+              accountActions: {'Edit profile': () => opens++},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await show('peer');
+      await tester.tap(find.text('Edit profile'));
+      expect(opens, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await show('visitor');
+      expect(find.text('Edit profile'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await show(null);
+      expect(find.text('Edit profile'), findsNothing);
+    },
+  );
 }

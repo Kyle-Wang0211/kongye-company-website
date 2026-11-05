@@ -12,10 +12,8 @@ import 'work_detail_page.dart';
 
 /// Canonical link shared by the website author links and detail-page routes.
 /// Public profile links never retain a previous work or auth query.
-Uri publicProfileUri(Uri communityUri, String userId) => communityUri.replace(
-  queryParameters: {'profile': userId},
-  fragment: '',
-);
+Uri publicProfileUri(Uri communityUri, String userId) =>
+    communityUri.replace(queryParameters: {'profile': userId}, fragment: '');
 
 /// Browser wiring around the existing mobile profile, repository and work grid.
 class PublicProfileEntry extends StatefulWidget {
@@ -37,6 +35,7 @@ class PublicProfileEntry extends StatefulWidget {
 class _PublicProfileEntryState extends State<PublicProfileEntry> {
   final CommunityService _service = CommunityService();
   bool _signInPending = false;
+  int _profileRevision = 0;
 
   Future<void> _signIn() async {
     if (_signInPending || !mounted) return;
@@ -57,6 +56,27 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
       navigator.pop();
     } else {
       exitPublicWork();
+    }
+  }
+
+  Future<void> _openAccount(String route) async {
+    final owner = widget.user.signedInUser?.id.rawValue;
+    if (owner == null) return;
+    await Navigator.of(context).pushNamed(route);
+    if (mounted && widget.user.signedInUser?.id.rawValue == owner) {
+      setState(() => _profileRevision++);
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await widget.user.signOut();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('退出未完成，请重试。')));
+      }
     }
   }
 
@@ -84,8 +104,12 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
     );
   }
 
+  String _label(BuildContext context, String zh, String en) =>
+      Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
+
   @override
   Widget build(BuildContext context) => UserProfilePage(
+    key: ValueKey('${widget.userId}:$_profileRevision'),
     userId: widget.userId ?? Uri.base.queryParameters['profile'] ?? '',
     seedWork: widget.seedWork,
     communityService: _service,
@@ -102,6 +126,19 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
         displayName: profile.displayName,
       ),
     ),
+    accountActions: {
+      if (const bool.fromEnvironment('PW_WEB_PROFILES_ENABLED'))
+        _label(context, '编辑资料', 'Edit profile'): () =>
+            _openAccount('/profile-edit'),
+      _label(context, '发布记录', 'Publications'): () =>
+          _openAccount('/publications'),
+      _label(context, '我的举报', 'My reports'): () => _openAccount('/reports'),
+      _label(context, '账号与隐私', 'Account and privacy'): () =>
+          _openAccount('/privacy'),
+      _label(context, '举报审核', 'Report review'): () =>
+          _openAccount('/report-review'),
+      _label(context, '退出登录', 'Sign out'): _signOut,
+    },
     onWorkTap: _openWork,
   );
 }
