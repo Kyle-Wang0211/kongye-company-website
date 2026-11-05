@@ -334,3 +334,13 @@ for(const kind of ['work','example'])test('focus refresh retries interrupted '+k
  retried.resolve(response([{...work,id}]));await settle();
  assert.equal(page.navigations.length,1);assert.equal(new URL(page.navigations[0]).pathname,'/community/');assert.equal(new URL(page.navigations[0]).searchParams.get('work'),id);
 });
+
+
+test('confirmed publication covers use their stored aspect without cropping and legacy cards stay fixed',async()=>{
+ const page=boot();await configure(page);
+ const current={...work,thumbnail_storage_path:'/functions/v1/publication-cover?work_id='+work.id,initial_view:{schema:'pw.camera-framing.v1',aspect:1.5}};
+ await completeFeed(page,[current]);
+ const picture=realCards(page)[0].children[0].children[0],image=picture.children[0];
+ assert.equal(picture.style.aspectRatio,'1.5');assert.equal(image.style.objectFit,'contain');
+ assert.equal(image.src,'https://api.kongye.space'+current.thumbnail_storage_path);
+});

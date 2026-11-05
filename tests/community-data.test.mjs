@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {feedUrl,workUrl,assetUrl,checkModel,authorUrl,formatCount,publishedLabel,modelUrl} from '../docs/community-data.mjs';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {feedUrl,workUrl,assetUrl,checkModel,authorUrl,formatCount,publishedLabel,modelUrl,publicationCoverAspect} from '../docs/community-data.mjs';
 test('anonymous feed explicitly selects only public, published, moderated work',()=>{const u=feedUrl('https://api.kongye.space');assert.equal(u.searchParams.get('visibility'),'eq.public');assert.equal(u.searchParams.get('moderation_status'),'eq.ok');assert.equal(u.searchParams.get('published_at'),'not.is.null');assert.equal(u.searchParams.get('limit'),'12');});
 test('asset paths cannot redirect to other origins or escape buckets',()=>{for(const p of ['../secret','https://evil/x','/secret','x?token=1','x\\y'])assert.throws(()=>assetUrl('https://api.kongye.space','works',p));assert.equal(assetUrl('https://api.kongye.space','works','a/model.glb'),'https://api.kongye.space/storage/v1/object/public/works/a/model.glb');});
 test('large, unknown size and unsupported models do not allocate a viewer',()=>{for(const w of [{format:'glb',file_size_bytes:null},{format:'glb',file_size_bytes:129*1024*1024},{format:'spz',file_size_bytes:100}])assert.throws(()=>checkModel(w));assert.doesNotThrow(()=>checkModel({format:'ply',file_size_bytes:100}));});
@@ -22,4 +22,23 @@ test('publication times follow rolling24h then local calendar yesterday/previous
  assert.equal(publishedLabel(new Date(2026,10,1,18).toISOString(),now),'11月1日');
  assert.equal(publishedLabel('invalid',now),'');
  assert.equal(publishedLabel(new Date(2026,10,5,18).toISOString(),now),'11月5日');
+});
+
+
+test('publication covers accept only the exact same-origin reviewed endpoint and UUID query',()=>{
+ const origin='https://api.kongye.space',id='12345678-1234-4234-8234-123456789abc';
+ const path='/functions/v1/publication-cover?work_id='+id;
+ assert.equal(assetUrl(origin,'thumbnails',path),origin+path);
+ for(const invalid of [path+'&token=x',path+'#fragment',path+'&work_id='+id,path+'/',path.replace(id,'invalid'),'https://other.test'+path,'//other.test'+path,path.replace('publication-cover','publication-model')])assert.throws(()=>assetUrl(origin,'thumbnails',invalid));
+ assert.throws(()=>assetUrl(origin,'works',path));
+ assert.throws(()=>assetUrl('http://api.kongye.space','thumbnails',path));
+});
+
+test('only a new work-bound cover with a valid framing descriptor changes card aspect',()=>{
+ const id='12345678-1234-4234-8234-123456789abc';
+ const work={id,thumbnail_storage_path:'/functions/v1/publication-cover?work_id='+id,initial_view:{schema:'pw.camera-framing.v1',aspect:1.5}};
+ assert.equal(publicationCoverAspect(work),1.5);
+ assert.equal(publicationCoverAspect({...work,initial_view:{...work.initial_view,aspect:.5}}),.5);
+ for(const aspect of [0,-1,Infinity,NaN,'1.5',.09,10.01])assert.equal(publicationCoverAspect({...work,initial_view:{...work.initial_view,aspect}}),null);
+ for(const patch of [{initial_view:null},{initial_view:{schema:'unknown',aspect:1.5}},{thumbnail_storage_path:'owner/legacy.png'},{id:'another-work'}])assert.equal(publicationCoverAspect({...work,...patch}),null);
 });
