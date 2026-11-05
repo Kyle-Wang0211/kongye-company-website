@@ -343,4 +343,10 @@ test('confirmed publication covers use their stored aspect without cropping and 
  const picture=realCards(page)[0].children[0].children[0],image=picture.children[0];
  assert.equal(picture.style.aspectRatio,'1.5');assert.equal(image.style.objectFit,'contain');
  assert.equal(image.src,'https://api.kongye.space'+current.thumbnail_storage_path);
+ const legacy=boot();await configure(legacy);
+ await completeFeed(legacy,[{...work,thumbnail_storage_path:'owner/legacy.png'}]);
+ const oldPicture=realCards(legacy)[0].children[0].children[0];
+ assert.equal(oldPicture.style.aspectRatio,undefined);
+ assert.equal(oldPicture.children[0].style.objectFit,undefined);
+ assert.equal(oldPicture.children[0].src,'https://api.kongye.space/storage/v1/object/public/thumbnails/owner/legacy.png');
 });
