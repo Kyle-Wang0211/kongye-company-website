@@ -1,0 +1,27 @@
+{
+  "release": "viewer-ui-hotfix-20261105-v34",
+  "source_commit": "34c3b656da5aec6505e1fc192a65d037813aab3e",
+  "scope": "Current-owner account routing and local sign-out, moderated profile editing, owner work status and withdrawal, block/privacy/deletion requests, report history and role-checked review, pending-comment point continuity and visible-message read timing",
+  "main_js_sha256": "9e1912c38c15b661f7366b76a842fab0d8a1d65545c803f02928871d3a5ba255",
+  "favorites_enabled": true,
+  "messaging_ready": true,
+  "profiles_enabled": true,
+  "build": "Locked Flutter3.47.1 CN/RDS release --no-pub, exit0 in29.2s; existing recipe with PW_WEB_PROFILES_ENABLED=true",
+  "component_validation": {
+    "host_navigation_chrome": 4,
+    "comment_widgets": 40,
+    "comment_point_bridge_chrome": 1,
+    "messaging_widgets_and_repository": 22,
+    "profile_editor": 18,
+    "account_leaves": 27,
+    "review_followup": 8
+  },
+  "validation_scope": "Component and injected-API tests. Actual synthetic two-actor flow acceptance remains with the separate Goal browser/API runs. Existing successful unchanged evidence reused. Changed host source analyzer clean and pending history secret scan clean.",
+  "shared_bundle": "5fe20f5321808c1b56ec2bc11235d42f5dcd7c22f1007ce3b9b931acb40757f8",
+  "limitations": [
+    "Submission history before a work exists has no verified list interface; the owner status page reads caller-RLS works rows.",
+    "Owner restoration is unavailable. Lead restore callback remains unbound pending actual backend activation.",
+    "Account deletion shows a verified pending request receipt and does not claim completed erasure."
+  ],
+  "notice": "Existing dependency notice superset retained, lock unchanged. Both viewer deployments retain all28 identical shared resources. Existing root homepage and local sign-out module retained."
+}
