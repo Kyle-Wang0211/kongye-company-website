@@ -34,19 +34,22 @@
 //    对外仅匿名化或单独同意,删除后停用新训练、已训模型不受影响。
 //
 // 🔴 上线门槛占位(与隐私政策同一套测试钉住):
-//    【公司名称待注册后填写】【公司注册地待定后填写】【联系邮箱待填写】
+//    运营者已核实为北京空也科技有限公司;公开邮箱已获用户明确授权。
+//    住所所在地仅按备案资料所载营业执照省市区告知;未承诺原件或当前工商登记已核实。
 //    【生效日期待上线前填写】
 
-import '../../l10n/app_localizations.dart';
 import 'legal_doc_model.dart';
 
-const String kUserAgreementVersion = 'V1.0';
+const String kUserAgreementVersion = 'V1.1-draft';
+
+/// 草案修订日期,与公示、生效、真机安装状态分别记录。
+const String kUserAgreementRevisionDate = '2026-11-01';
 const String kUserAgreementEffectiveDate = '【生效日期待上线前填写】';
 
 const List<LegalSection> kUserAgreementZh = [
   LegalSection('一、导言', [
     LegalParagraph(
-        '欢迎使用「方寸间」。本协议是您与【公司名称待注册后填写】(以下称"我们"或"平台")'
+        '欢迎使用「方寸间」。本协议是您与北京空也科技有限公司(以下称"我们"或"平台")'
         '之间关于使用方寸间软件及相关服务的约定。请在注册前完整阅读本协议,'
         '特别是以加粗方式显示的免除或限制责任、权利许可、争议管辖等条款。',
         emphasized: true),
@@ -57,8 +60,10 @@ const List<LegalSection> kUserAgreementZh = [
     LegalParagraph('本协议以中文写就并以中文为准;界面中的任何翻译仅为方便阅读提供。'),
   ]),
   LegalSection('二、服务说明', [
-    LegalParagraph('方寸间是一款三维空间内容工具与社区:您用手机拍摄,在设备本机重建出三维点云作品,'
-        '并可选择将作品发布到社区广场与其他用户分享。'),
+    LegalParagraph(
+      '方寸间是一款三维空间内容工具与社区:您可在设备本机重建三维作品,或使用当前功能支持的最终模型文件。'
+      '最终模型包括 GLB 网格(mesh)、PLY 点云等,具体支持范围以对应功能页面为准。您可分别选择私有云备份或公开发布,两者不是同一操作。',
+    ),
     LegalParagraph(
         '本产品的三维重建功能使用了深度合成类技术(基于人工智能模型的三维重建)。'
         '依照《互联网信息服务深度合成管理规定》,我们在此显著提示:您使用本服务制作、发布信息内容,'
@@ -127,24 +132,42 @@ const List<LegalSection> kUserAgreementZh = [
         '不要在道路、高处边缘等危险环境中拍摄。'),
   ]),
   LegalSection('五、内容发布与审核', [
-    LegalParagraph('1. 先审后发:您发布的作品需经平台审核,审核通过后才会出现在社区广场;'
-        '审核期间作品对其他用户不可见,您可以随时删除。'),
-    LegalParagraph('2. 发布即公开:作品通过审核后,作品内容、您的昵称、账号 ID 及发布时的 IP 属地'
-        '将对所有用户(含未登录访客)公开可见。IP 属地展示是法定要求,无法关闭,详见《方寸间隐私政策》。',
-        emphasized: true),
-    LegalParagraph('3. 本协议所称"内容"包括您在本服务中上传、发布的三维点云模型、三维重建数据、缩略图、'
-        '标题、描述、账号资料以及其他任何信息。'),
+    LegalParagraph(
+      '1. 先审后发:您发布的作品需经平台审核,审核通过后才会出现在社区广场;'
+      '审核期间作品对其他用户不可见,您可以申请撤回或删除。私有云备份不会因上传而自动变成公开作品。',
+    ),
+    LegalParagraph(
+      '审核方式:针对最终 GLB,平台生成 26 张多角度模型渲染图,委托阿里云进行标题、描述的文字审核及审核图的图片审核。'
+      '该流程不要求上传原始拍摄照片或拍摄过程数据。机审风险可转人工复核,明确违规不予发布,服务异常或结果不完整时不予自动公开。'
+      '暂不支持的格式不能通过该流程自动公开;修改已提交的作品内容需要重新审核。',
+    ),
+    LegalParagraph(
+      '2. 发布即公开:作品通过审核后,作品内容、您的昵称、账号 ID 及发布时的 IP 属地'
+      '将对所有用户(含未登录访客)公开可见。公开发布不等于放弃隐私或个人信息权益,也不免除发布者取得他人授权的义务。'
+      'IP 属地展示是法定要求,无法关闭,详见《方寸间隐私政策》。',
+      emphasized: true,
+    ),
+    LegalParagraph(
+      '3. 本协议所称"内容"包括您在本服务中上传、发布的三维模型(如 GLB 网格 mesh、PLY 点云)、三维重建数据、封面和衍生审核图、'
+      '标题、描述、账号资料以及其他任何信息。',
+    ),
     LegalParagraph('4. 您对发布的内容独立承担全部法律责任。您保证对发布的内容享有合法权利或已取得合法授权;'
         '因您发布的内容引发第三方主张权利,导致平台遭受损失的,您应当赔偿。'),
+    LegalParagraph(
+      '删除、撤回与证据留存:停止公开不等于所有副本即时物理擦除。审核材料、投诉申诉证据、法定留存及历史备份的限制处理和清理,'
+      '按《方寸间隐私政策》第四章执行;相关副本不能因备份恢复而重新公开。',
+    ),
     LegalParagraph('5. 第三方就您发布的内容向平台主张权利时,平台有权依法先行下架相关内容并通知您;'
         '您可按第八章的渠道提交不侵权声明与权利证明进行申诉。'),
   ]),
   LegalSection('六、知识产权', [
     LegalParagraph('1. 平台软件及其所含的界面设计、程序代码、商标标识等知识产权归我们或相应权利人所有。'
         '未经许可,您不得复制、修改、传播或用于任何商业目的。'),
-    LegalParagraph('2. 您在本服务中发布的作品(含三维点云模型及其衍生的缩略图)的知识产权归您或依法享有权利的'
-        '权利人所有,不因发布行为而转移。',
-        emphasized: true),
+    LegalParagraph(
+      '2. 您在本服务中上传或发布的作品(含三维点云、网格模型及其衍生的封面与审核图)的知识产权归您或依法享有权利的'
+      '权利人所有,不因发布行为而转移。',
+      emphasized: true,
+    ),
     // [授权条款 2026-08-24 第二稿 —— 逐字对照三家原文后改写]
     // 证据(耐久存放 ~/Developer/legal-refs-20260824/):
     //   · 抖音《用户服务协议》2026-02-13 版 10.2-10.4,官方页面内嵌全文,
@@ -191,16 +214,17 @@ const List<LegalSection> kUserAgreementZh = [
     //   更新(当前政策只写已发布作品的研究用途,云储内容要到时补)+ 该功能
     //   的同意流程必须显著提示研究用途。见 supabase/README.md 上线门槛脚注。
     LegalParagraph(
-        '3. 为向您提供服务并改进产品,您授予平台一项全球范围内、免费、非独家的许可,'
-        '包括对内容的复制权、信息网络传播权、改编权、汇编权、展示权及制作衍生内容的权利。'
-        '本款所称内容,指您上传至本服务的内容,包括发布到社区广场的作品,以及未来云端存储功能中'
-        '您存储的内容,含三维点云、网格模型、缩略图、标题、描述。上述权利仅用于:'
-        '(1)运营所必需:存储、备份、传输、分发、公开展示(仅限您选择公开发布的内容)'
-        '及格式适配等技术处理,并可将上述处理委托给受本协议约束的云服务商执行;'
-        '(2)将您已公开发布的作品用于本产品各终端版本及应用商店页面的展示与推介;'
-        '(3)我们内部的科学研究、技术开发与改进,包括但不限于各类人工智能算法与模型的'
-        '训练、评测与优化(如三维重建相关算法与模型),不论采用现在已知或日后开发的技术与形式。',
-        emphasized: true),
+      '3. 为向您提供服务并改进产品,您授予平台一项全球范围内、免费、非独家的许可,'
+      '包括对内容的复制权、信息网络传播权、改编权、汇编权、展示权及制作衍生内容的权利。'
+      '本款所称内容,指您上传至本服务的内容,包括发布到社区广场的作品,以及私有云备份(云端存储)功能中'
+      '您存储的内容,含三维点云、网格模型、封面、衍生审核图、标题、描述。上述权利仅用于:'
+      '(1)运营所必需:存储、备份、传输、分发、公开展示(仅限您选择公开发布的内容)'
+      '及格式适配、生成审核图、文字与图片内容安全检测等技术处理,并可将相应处理委托给受约束的云服务和内容审核服务商执行;'
+      '(2)将您已公开发布的作品用于本产品各终端版本及应用商店页面的展示与推介;'
+      '(3)我们内部的科学研究、技术开发与改进,包括但不限于各类人工智能算法与模型的'
+      '训练、评测与优化(如三维重建相关算法与模型),不论采用现在已知或日后开发的技术与形式。',
+      emphasized: true,
+    ),
     LegalParagraph(
         '4. 对外提供研究数据:我们如需在学术论文、公开数据集或科研合作中对外提供研究数据,'
         '仅使用经匿名化处理、无法识别您的身份且不能复原的数据;'
@@ -303,7 +327,7 @@ const List<LegalSection> kUserAgreementZh = [
     LegalParagraph('1. 本协议的订立、效力、解释与争议解决,适用中华人民共和国(为本协议之目的,'
         '不含港澳台地区)法律。'),
     LegalParagraph('2. 因本协议产生的争议,双方应友好协商;协商不成的,'
-        '任何一方均可向【公司注册地待定后填写】有管辖权的人民法院提起诉讼。',
+        '任何一方均可向公司住所地有管辖权的人民法院提起诉讼。',
         emphasized: true),
     LegalParagraph('3. 本协议任一条款被认定无效或不可执行的,不影响其余条款的效力。'),
     LegalParagraph('4. 本协议标题仅为方便阅读而设,不作为解释条款含义的依据。'),
@@ -311,109 +335,8 @@ const List<LegalSection> kUserAgreementZh = [
     LegalParagraph('6. 本协议及其组成文件构成双方就相关事项的完整约定。'),
   ]),
   LegalSection('十四、联系我们', [
-    LegalParagraph('运营者:【公司名称待注册后填写】'),
-    LegalParagraph('联系邮箱:【联系邮箱待填写 —— 上线前必须替换为真实可达邮箱,与平台公约页、隐私政策同一个】'),
+    LegalParagraph('运营者:北京空也科技有限公司'),
+    LegalParagraph('联系邮箱:wkd20040211@163.com'),
     LegalParagraph('我们在收到您的意见、投诉或申诉后 15 个工作日内处理并反馈。'),
-  ]),
-];
-
-/// Localized display copy. Chinese constants above remain the governing text.
-List<LegalSection> userAgreementSections(AppL10n l) => [
-  LegalSection(l.legalAgreementS0Title, [
-    LegalParagraph(l.legalAgreementS0P0, emphasized: true),
-    LegalParagraph(l.legalAgreementS0P1),
-    LegalParagraph(l.legalAgreementS0P2),
-    LegalParagraph(l.legalAgreementS0P3),
-  ]),
-  LegalSection(l.legalAgreementS1Title, [
-    LegalParagraph(l.legalAgreementS1P0),
-    LegalParagraph(l.legalAgreementS1P1, emphasized: true),
-    LegalParagraph(l.legalAgreementS1P2),
-    LegalParagraph(l.legalAgreementS1P3),
-    LegalParagraph(l.legalAgreementS1P4),
-    LegalParagraph(l.legalAgreementS1P5),
-    LegalParagraph(l.legalAgreementS1P6),
-    LegalParagraph(l.legalAgreementS1P7),
-  ]),
-  LegalSection(l.legalAgreementS2Title, [
-    LegalParagraph(l.legalAgreementS2P0, emphasized: true),
-    LegalParagraph(l.legalAgreementS2P1),
-    LegalParagraph(l.legalAgreementS2P2),
-    LegalParagraph(l.legalAgreementS2P3),
-    LegalParagraph(l.legalAgreementS2P4),
-  ]),
-  LegalSection(l.legalAgreementS3Title, [
-    LegalParagraph(l.legalAgreementS3P0, emphasized: true),
-    LegalParagraph(l.legalAgreementS3P1),
-    LegalParagraph(l.legalAgreementS3P2),
-    LegalParagraph(l.legalAgreementS3P3),
-    LegalParagraph(l.legalAgreementS3P4),
-  ]),
-  LegalSection(l.legalAgreementS4Title, [
-    LegalParagraph(l.legalAgreementS4P0),
-    LegalParagraph(l.legalAgreementS4P1, emphasized: true),
-    LegalParagraph(l.legalAgreementS4P2),
-    LegalParagraph(l.legalAgreementS4P3),
-    LegalParagraph(l.legalAgreementS4P4),
-  ]),
-  LegalSection(l.legalAgreementS5Title, [
-    LegalParagraph(l.legalAgreementS5P0),
-    LegalParagraph(l.legalAgreementS5P1, emphasized: true),
-    LegalParagraph(l.legalAgreementS5P2, emphasized: true),
-    LegalParagraph(l.legalAgreementS5P3, emphasized: true),
-    LegalParagraph(l.legalAgreementS5P4, emphasized: true),
-    LegalParagraph(l.legalAgreementS5P5),
-    LegalParagraph(l.legalAgreementS5P6),
-    LegalParagraph(l.legalAgreementS5P7),
-  ]),
-  LegalSection(l.legalAgreementS6Title, [
-    LegalParagraph(l.legalAgreementS6P0),
-    LegalParagraph(l.legalAgreementS6P1),
-    LegalParagraph(l.legalAgreementS6P2),
-    LegalParagraph(l.legalAgreementS6P3),
-  ]),
-  LegalSection(l.legalAgreementS7Title, [
-    LegalParagraph(l.legalAgreementS7P0),
-    LegalParagraph(l.legalAgreementS7P1),
-  ]),
-  LegalSection(l.legalAgreementS8Title, [
-    LegalParagraph(l.legalAgreementS8P0),
-    LegalParagraph(l.legalAgreementS8P1, emphasized: true),
-    LegalParagraph(l.legalAgreementS8P2),
-    LegalParagraph(l.legalAgreementS8P3),
-    LegalParagraph(l.legalAgreementS8P4),
-  ]),
-  LegalSection(l.legalAgreementS9Title, [
-    LegalParagraph(l.legalAgreementS9P0, emphasized: true),
-    LegalParagraph(l.legalAgreementS9P1, emphasized: true),
-    LegalParagraph(l.legalAgreementS9P2, emphasized: true),
-    LegalParagraph(l.legalAgreementS9P3),
-    LegalParagraph(l.legalAgreementS9P4),
-    LegalParagraph(l.legalAgreementS9P5),
-  ]),
-  LegalSection(l.legalAgreementS10Title, [
-    LegalParagraph(l.legalAgreementS10P0, emphasized: true),
-    LegalParagraph(l.legalAgreementS10P1),
-    LegalParagraph(l.legalAgreementS10P2),
-    LegalParagraph(l.legalAgreementS10P3),
-  ]),
-  LegalSection(l.legalAgreementS11Title, [
-    LegalParagraph(l.legalAgreementS11P0),
-    LegalParagraph(l.legalAgreementS11P1),
-    LegalParagraph(l.legalAgreementS11P2),
-    LegalParagraph(l.legalAgreementS11P3),
-  ]),
-  LegalSection(l.legalAgreementS12Title, [
-    LegalParagraph(l.legalAgreementS12P0),
-    LegalParagraph(l.legalAgreementS12P1, emphasized: true),
-    LegalParagraph(l.legalAgreementS12P2),
-    LegalParagraph(l.legalAgreementS12P3),
-    LegalParagraph(l.legalAgreementS12P4),
-    LegalParagraph(l.legalAgreementS12P5),
-  ]),
-  LegalSection(l.legalAgreementS13Title, [
-    LegalParagraph(l.legalAgreementS13P0),
-    LegalParagraph(l.legalAgreementS13P1),
-    LegalParagraph(l.legalAgreementS13P2),
   ]),
 ];

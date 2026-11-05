@@ -1,5 +1,5 @@
-import { sourceWorldBounds, createSelectionPreview } from './publication_selection.mjs?v=publication-camera-20261105-v1';
-import { createSurfaceComments } from './surface_comments.mjs?v=white-markers-20261105-v29';
+import { sourceWorldBounds, createSelectionPreview } from './publication_selection.mjs?v=unified-viewer-20261106-v1';
+import { createSurfaceComments } from './surface_comments.mjs?v=unified-viewer-20261106-v1';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
 // Host/lifecycle adapter only. Rendering, loaders, materials and controls are upstream Three.js.
@@ -105,7 +105,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   useOfficialTextureLoader(gltfLoader, THREE);
   let current = null, request = 0, disposed = false, paused = false;
   let importAbort = null, importInfo = null;
-  let framing = null, userHasInteracted = false, explicitCameraFraming = false;
+  let framing = null, userHasInteracted = false, explicitCameraFraming = false, interactionSerial = 0;
   const framedFoVDeg = 45;
   // Selected product configuration: Google's documented external FramingInfo
   // fieldOfViewAspect=1 bounds both camera axes by the framing sphere. Keep the
@@ -135,6 +135,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   let background = 0x000000, pointSize = options.pointSize ?? 0.005, autoRotateUntilTouched = false;
   const stopOnTouch = () => {
     userHasInteracted = true;
+    interactionSerial++;
     if (autoRotateUntilTouched) { controls.autoRotate = false; autoRotateUntilTouched = false; }
     notify();
   };
@@ -161,6 +162,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   // second orientation, pivot or zoom in a thumbnail painter.
   function applyInitialCamera(targetCamera, nextFraming) {
     const { center, radius, idealCameraDistance } = nextFraming;
+    targetCamera.clearViewOffset?.();
     targetCamera.up.set(0, 1, 0);
     targetCamera.zoom = 1;
     targetCamera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, targetCamera.aspect);
@@ -196,6 +198,47 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     surfaceComments = makeSurfaceComments();
   }
 
+  // The existing capture rig already supplies world-space eye/target/up.
+  // Three's documented PerspectiveCamera APIs preserve that pinhole without
+  // moving or recentering geometry. Offset sign follows setViewOffset's crop.
+  function applyCapturePinhole(targetCamera, input) {
+    targetCamera.fov = 2 * Math.atan(height / (2 * input.focalPixels)) * 180 / Math.PI;
+    targetCamera.aspect = width / height;
+    targetCamera.setViewOffset(width, height,
+      width / 2 - input.principalX, height / 2 - input.principalY, width, height);
+    targetCamera.updateProjectionMatrix();
+  }
+  function applyCaptureCamera(input, nextFraming) {
+    for (const key of ['position', 'target', 'up']) {
+      if (!Array.isArray(input[key]) || input[key].length !== 3 ||
+          !input[key].every(Number.isFinite)) throw new Error('Invalid capture camera vector');
+    }
+    if (!(input.focalPixels > 0) || !Number.isFinite(input.focalPixels) ||
+        !Number.isFinite(input.principalX) || !Number.isFinite(input.principalY)) {
+      throw new Error('Invalid capture camera pinhole');
+    }
+    // Fit only establishes clip/control distances; capture pose replaces its view.
+    fit(nextFraming);
+    camera.position.fromArray(input.position); camera.up.fromArray(input.up);
+    controls.target.fromArray(input.target);
+    const distance = camera.position.distanceTo(controls.target);
+    if (!(distance > 0)) throw new Error('Invalid capture camera distance');
+    // Canonical framing's radius-only clips cannot bound an arbitrary capture
+    // eye. Include the existing framing sphere measured from this exact eye.
+    const boundsDistance = nextFraming
+      ? camera.position.distanceTo(nextFraming.center) + nextFraming.radius
+      : distance;
+    camera.near = Math.min(camera.near, distance / 2);
+    camera.far = Math.max(camera.far, boundsDistance * 1.05, distance * 1.05);
+    controls.minDistance = camera.near * 2;
+    controls.maxDistance = Math.max(camera.far / 2, distance * 1.05);
+    camera.lookAt(controls.target);
+    rebindCameraUp();
+    applyCapturePinhole(camera, input);
+    camera.updateMatrixWorld();
+    controls.saveState();
+  }
+
   function fit(nextFraming) {
     if (!nextFraming) return;
     const { center, radius, idealCameraDistance } = nextFraming;
@@ -203,11 +246,13 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     applyInitialCamera(camera, nextFraming);
     controls.minDistance = camera.near * 2;
     controls.maxDistance = camera.far / 2;
+    rebindCameraUp();
     controls.update();
     controls.saveState();
   }
 
   async function load(input, onProgress) {
+    const interactionAtRequest = interactionSerial;
     assertActive();
     endSelectionEditing(); selectionPreview.clear();
     surfaceComments.clear();
@@ -261,16 +306,26 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
       previous = current;
       cameraBefore = { position: new THREE.Vector3().copy(camera.position),
         target: new THREE.Vector3().copy(controls.target), quaternion: camera.quaternion?.clone(),
+        up: camera.up.clone(), view: camera.view ? {...camera.view} : null,
         fov: camera.fov, near: camera.near, far: camera.far, minDistance: controls.minDistance, maxDistance: controls.maxDistance };
       replacementStarted = true;
-      const shouldFit = !previous || !input.preserveCamera;
-      if (shouldFit) fit(candidateFraming);
+      // A touch while the asynchronous capture load is pending supersedes
+      // its camera request, just as an already-touched Dart caller preserves it.
+      const keepNewInteraction = input.initialCaptureCamera != null &&
+        interactionSerial !== interactionAtRequest;
+      const shouldFit = (!previous || !input.preserveCamera) && !keepNewInteraction;
+      const nextCapture = !input.preserveCamera && !keepNewInteraction
+        ? input.initialCaptureCamera : null;
+      if (nextCapture) applyCaptureCamera(nextCapture, candidateFraming);
+      else if (shouldFit) fit(candidateFraming);
       scene.add(candidate);
       if (previous) scene.remove(previous);
       render();
       current = candidate; url = input.url; format = input.format; status = 'ready'; error = null;
       importInfo = candidateImportInfo;
       framing = candidateFraming;
+      if (nextCapture) capturePinhole = nextCapture;
+      else if (shouldFit) capturePinhole = null;
       if (shouldFit) { userHasInteracted = false; explicitCameraFraming = false; }
       replacementStarted = false;
       disposeObject(previous);
@@ -283,6 +338,8 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
         camera.position.copy(cameraBefore.position);
         controls.target.copy(cameraBefore.target);
         if (cameraBefore.quaternion) camera.quaternion.copy(cameraBefore.quaternion);
+        camera.up.copy(cameraBefore.up); camera.view = cameraBefore.view;
+        rebindCameraUp();
         camera.fov = cameraBefore.fov;
         camera.near = cameraBefore.near; camera.far = cameraBefore.far;
         controls.minDistance = cameraBefore.minDistance; controls.maxDistance = cameraBefore.maxDistance;
@@ -328,7 +385,12 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
       setSelectionView(getSelectionView(),bounds.min.map((v,i)=>(v+bounds.max[i])/2));
       camera.updateProjectionMatrix(); render(); notify(); return getState();
     }
-    controls.reset?.(); userHasInteracted = false; explicitCameraFraming = false;
+    const resetCapture = capturePinhole != null;
+    capturePinhole = null;
+    if (resetCapture && framing) fit(framing);
+    else controls.reset?.();
+    camera.clearViewOffset?.();
+    userHasInteracted = false; explicitCameraFraming = false;
     if (framing) camera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, camera.aspect);
     camera.updateProjectionMatrix(); render(); notify(); return getState();
   }
@@ -344,7 +406,9 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     if (selectionCamera) updateSelectionProjection();
     // Only automatic framing follows Google's viewport adjustment. Explicit
     // camera metadata and genuine user interaction preserve their chosen FOV.
-    if (framing && !userHasInteracted && !explicitCameraFraming) {
+    if (capturePinhole) {
+      applyCapturePinhole(camera, capturePinhole);
+    } else if (framing && !userHasInteracted && !explicitCameraFraming) {
       camera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, camera.aspect);
     }
     camera.updateProjectionMatrix(); render(); notify();
@@ -440,6 +504,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
       throw new Error('Invalid camera direction');
     }
     camera.position.copy(position); controls.target.copy(target); camera.up.copy(up);
+    capturePinhole = null; camera.clearViewOffset?.();
     camera.fov = value.fov_y_degrees; explicitCameraFraming = true;
     // Keep the displayed viewport undistorted. Cover rendering uses the saved aspect.
     camera.aspect = width / height;

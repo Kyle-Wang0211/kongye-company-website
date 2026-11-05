@@ -1,3 +1,4 @@
+import 'community_capabilities.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pocketworld_flutter/auth/auth_scope.dart';
@@ -63,7 +64,7 @@ class _WorkFavoriteEntryState extends State<WorkFavoriteEntry> {
 
   @override
   Widget build(BuildContext context) {
-    if (!const bool.fromEnvironment('PW_WEB_FAVORITES_ENABLED')) {
+    if (!CommunityCapabilities.favorites) {
       return const SizedBox.shrink();
     }
     final user = context
@@ -178,8 +179,9 @@ class _WorkFavoriteButtonState extends State<WorkFavoriteButton> {
     });
     try {
       final confirmed = await widget.write(desired);
-      if (confirmed != desired)
+      if (confirmed != desired) {
         throw const WebSocialUnavailableException('invalid_response');
+      }
       if (!mounted || generation != _generation) return;
       setState(() {
         _saved = confirmed;

@@ -1,22 +1,35 @@
 // Native account/local-file retention is unavailable in a browser.
 // Remote/community viewers never construct a local binding and retain their existing path.
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
-Never _unsupported() => throw UnsupportedError('Native local-work retention is unavailable on Web');
+
+Never _unsupported() =>
+    throw UnsupportedError('Native local-work retention is unavailable on Web');
+
 abstract interface class UnavailableLocalStore {
   bool get isActive;
   void Function() addRevocationListener(void Function() listener);
 }
+
 abstract class LocalWorkViewerBinding {
   UnavailableLocalStore get store => _unsupported();
   bool get canRetain => false;
   bool matchesLocalReference(String? value) => _unsupported();
   bool sameSource(LocalWorkViewerBinding? other) => _unsupported();
 }
+
 class LocalWorkViewerSessions {
   static final instance = LocalWorkViewerSessions();
+  Future<LocalWorkViewerLease?> adoptLoaded({
+    required LocalWorkViewerBinding binding,
+    required LocalWorkLoadedSource source,
+    required bool Function() isCurrent,
+  }) async => null;
   Future<LocalWorkViewerLease?> acquire(LocalWorkViewerBinding binding) =>
-      Future.error(UnsupportedError('Native local-work retention is unavailable on Web'));
+      Future.error(
+        UnsupportedError('Native local-work retention is unavailable on Web'),
+      );
 }
+
 abstract class LocalWorkViewerLease {
   bool get isValid => false;
   SharedViewerController get controller => _unsupported();
@@ -37,6 +50,7 @@ abstract class LocalWorkLoadedSource {
   bool get isCurrent => false;
   bool get matchesCurrentFile => false;
 }
+
 abstract class LocalWorkPendingSource {
   static LocalWorkPendingSource? capture({
     required String reference,

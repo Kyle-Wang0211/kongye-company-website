@@ -5,7 +5,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:pw_shared_viewer/src/native_bootstrap.dart' show nativeWebViewBootstrap;
+import 'package:pw_shared_viewer/src/native_bootstrap.dart'
+    show nativeWebViewBootstrap;
 import '../../l10n/app_localizations.dart';
 
 /// Native OLV executes only bundled assets on a private loopback server.

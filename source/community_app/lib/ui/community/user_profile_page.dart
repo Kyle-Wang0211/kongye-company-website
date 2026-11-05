@@ -147,7 +147,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> _handleAction(_ProfileAction action) async {
-    if (!await _requireSignIn()) return;
+    if (!await _requireSignIn() || !mounted) return;
     switch (action) {
       case _ProfileAction.report:
         final callback = widget.onReportRequested;

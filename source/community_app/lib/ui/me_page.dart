@@ -52,6 +52,7 @@ import 'capture/sparse_cloud_viewer_page.dart';
 import 'community/following_list_page.dart';
 import 'community/comment_moderation_routes.dart';
 import 'design_system.dart';
+import 'social/community_capabilities.dart';
 import 'home_view_model.dart';
 import 'me/my_work_detail_page.dart';
 import 'me_settings_page.dart';
@@ -500,6 +501,54 @@ class _MePageState extends State<MePage> with WidgetsBindingObserver {
                   onRetry: () => _loadSocialProfile(socialUserId),
                   onFollowingTap: () => _openFollowing(socialUserId),
                 ),
+                const SizedBox(height: AetherSpacing.md),
+                Wrap(
+                  spacing: AetherSpacing.sm,
+                  children: [
+                    if (CommunityCapabilities.messaging)
+                      TextButton.icon(
+                        key: const ValueKey('me-messages'),
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed('/messages'),
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: Text(
+                          (Localizations.localeOf(context).languageCode == 'zh'
+                              ? '消息'
+                              : 'Messages'),
+                        ),
+                      ),
+                    if (CommunityCapabilities.favorites)
+                      TextButton.icon(
+                        key: const ValueKey('me-favorites'),
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed('/favorites'),
+                        icon: const Icon(Icons.bookmark_outline),
+                        label: Text(
+                          (Localizations.localeOf(context).languageCode == 'zh'
+                              ? '收藏'
+                              : 'Favorites'),
+                        ),
+                      ),
+                    TextButton.icon(
+                      key: const ValueKey('me-upload-glb'),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/publish'),
+                      icon: const Icon(Icons.upload_file_outlined),
+                      label: Text(l.publishAction),
+                    ),
+                    TextButton.icon(
+                      key: const ValueKey('me-publications'),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/publications'),
+                      icon: const Icon(Icons.public),
+                      label: Text(
+                        (Localizations.localeOf(context).languageCode == 'zh'
+                            ? '我的发布'
+                            : 'My publications'),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: AetherSpacing.xl),
                 _MyWorksSection(
                   activeReconstructionCaptureDir:
@@ -770,8 +819,11 @@ class _MyWorksSectionState extends State<_MyWorksSection>
           ScanRecordCell(
             record: r,
             subtitle: _formatAbsTime(r.createdAt),
-            syncLabel: _cloudLabel(library?.stateFor(r.id), l),
-            syncReason: _cloudReason(library?.stateFor(r.id).reason, l),
+            syncLabel: _cloudLabel(
+              library?.stateFor(r.id),
+              l.localeName.startsWith('zh'),
+            ),
+            syncReason: library?.stateFor(r.id).reason,
             minimal: true,
             processingBadge: badges[r.id] ?? ScanProcessingBadge.none,
             onTap: () => _onTap(r),
@@ -800,7 +852,7 @@ class _MyWorksSectionState extends State<_MyWorksSection>
     final library = CloudLibrary.forStore(_store);
     if (record.cloudViewingOnly) {
       if (library == null) {
-        _showCenterToast(AppL10n.of(context).meCloudUnavailable);
+        _showCenterToast('云端暂不可用，稍后重试');
         return;
       }
       final releaseCache = library.pinViewingCopy(record.id);
@@ -899,7 +951,7 @@ class _MyWorksSectionState extends State<_MyWorksSection>
             'MePage',
             'resume not offered for ${record.id}: ${recaptureBlockedReason(captureDir)}',
           );
-          _showCenterToast(AppL10n.of(context).meDenseStageCannotRebuild);
+          _showCenterToast('这个作品已进入稠密阶段，\n不能再重建。');
           break;
         }
         await _offerResume(record, recoverableDir!);
@@ -931,16 +983,15 @@ class _MyWorksSectionState extends State<_MyWorksSection>
       return;
     }
     if (!isResumeInFlight(recoverableDir)) {
-      final l = AppL10n.of(context);
-      final name = record.name.isEmpty
-          ? l.meThisCapture
-          : l.meQuotedCaptureName(record.localizedDisplayName(l));
+      final name = record.name.isEmpty ? '这次拍摄' : '「${record.name}」';
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(regenerate ? l.meRegenerateTitle : l.meResumeTitle),
+          title: Text(regenerate ? '重新重建？' : '继续重建？'),
           content: Text(
-            regenerate ? l.meRegenerateBody(name) : l.meResumeBody(name),
+            regenerate
+                ? '将用$name已保存的重建数据重新生成点云，完成后覆盖现有点云，无需重拍。'
+                : '$name的点云还没有生成。拍摄数据已完整保存，可以从中断处继续重建，无需重拍。',
           ),
           actions: [
             TextButton(
@@ -949,7 +1000,7 @@ class _MyWorksSectionState extends State<_MyWorksSection>
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(regenerate ? l.meRegenerateAction : l.meResumeAction),
+              child: Text(regenerate ? '重新重建' : '继续重建'),
             ),
           ],
         ),
@@ -1104,7 +1155,7 @@ class _MyWorksSectionState extends State<_MyWorksSection>
                         : AetherColors.textTertiary,
                   ),
                   title: Text(
-                    l.meStartTraining,
+                    '开始训练',
                     style: TextStyle(
                       color: trainEnabled
                           ? AetherColors.textPrimary
@@ -1117,7 +1168,7 @@ class _MyWorksSectionState extends State<_MyWorksSection>
                 ),
                 ListTile(
                   leading: const Icon(Icons.add_a_photo_outlined),
-                  title: Text(l.meCaptureMorePhotos),
+                  title: const Text('拍摄更多照片'),
                   onTap: () => Navigator.of(ctx).pop('capture_more'),
                 ),
               ],
@@ -1151,16 +1202,16 @@ class _MyWorksSectionState extends State<_MyWorksSection>
             // 每个不可用分支都要说清原因 —— 不做成点了没反应的死按钮。
             final route = widget.officialRebuildFromPhotosRoute;
             if (record.pipelineKind != CapturePipelineKind.official) {
-              _showCenterToast(AppL10n.of(context).mePhotosRebuildUnsupported);
+              _showCenterToast('这个项目不是官方管线拍的，\n无法从照片重建。');
             } else if (route == null) {
-              _showCenterToast(AppL10n.of(context).mePhotosRebuildUnavailable);
+              _showCenterToast('从照片重建的入口没有接上。');
             } else {
               await route(context, record, rebuildDir, photoCount: photoCount);
               _refreshAfterResumeReturn();
             }
         }
       } else if (action == 'train_blocked') {
-        _showCenterToast(_trainBlockedReason(l, trainGate, photoCount));
+        _showCenterToast(_trainBlockedReason(trainGate, photoCount));
       } else if (action == 'capture_more') {
         // [2026-09-08 追加拍摄] 复刻 RealityScan:新照片丢进同一个项目,坐标系
         // 由 SfM 按图像重新对齐,不碰任何厂商 AR SDK。补完之后点「开始训练」
@@ -1170,13 +1221,13 @@ class _MyWorksSectionState extends State<_MyWorksSection>
         // 每个不可用分支都必须说清原因,不做成点了没反应的死按钮。
         final extendRoute = widget.officialExtendRoute;
         if (record.pipelineKind != CapturePipelineKind.official) {
-          _showCenterToast(AppL10n.of(context).meMorePhotosUnsupported);
+          _showCenterToast('这个项目不是官方管线拍的，\n暂不支持补拍。');
         } else if (extendRoute == null) {
-          _showCenterToast(AppL10n.of(context).meMorePhotosUnavailable);
+          _showCenterToast('补拍入口没有接上。');
         } else if (widget.activeReconstructionCaptureDir != null) {
-          _showCenterToast(AppL10n.of(context).meMorePhotosWait);
+          _showCenterToast('另一个项目正在重建中。\n等它完成后再补拍。');
         } else if (rebuildDir == null) {
-          _showCenterToast(AppL10n.of(context).meMorePhotosMissingData);
+          _showCenterToast('找不到这次拍摄的重建数据，\n无法补拍。');
         } else {
           final added = await extendRoute(context, record, rebuildDir);
           if (added && mounted) {
@@ -1219,20 +1270,18 @@ class _MyWorksSectionState extends State<_MyWorksSection>
 
   /// 「开始训练」为什么点不动 —— 每个 blocked 各说各的。
   /// 绝不合并成一句笼统的"暂时不可用":用户下一步该做什么完全取决于是哪一个。
-  static String _trainBlockedReason(
-    AppL10n l,
-    TrainGate gate,
-    int photoCount,
-  ) => switch (gate) {
-    TrainGate.ready => '',
-    TrainGate.blockedNeedMorePhotos => l.meTrainingNeedsPhotos(
-      kOfficialMinimumCaptureFrames,
-      photoCount,
-      photosStillNeededToTrain(photoCount),
-    ),
-    TrainGate.blockedAnotherReconstruction => l.meTrainingWait,
-    TrainGate.blockedNoResumableData => l.meTrainingMissingData,
-  };
+  static String _trainBlockedReason(TrainGate gate, int photoCount) =>
+      switch (gate) {
+        TrainGate.ready => '',
+        TrainGate.blockedNeedMorePhotos =>
+          '要开始训练，必须至少拍摄 $kOfficialMinimumCaptureFrames 张照片。\n'
+              '这次拍摄只有 $photoCount 张，还需要 '
+              '${photosStillNeededToTrain(photoCount)} 张。\n'
+              '请继续拍摄补足。',
+        TrainGate.blockedAnotherReconstruction =>
+          '另一个项目正在重建中。\n同时只能跑一个，等它完成后再来。',
+        TrainGate.blockedNoResumableData => '这次拍摄的重建数据已损坏，照片也不在了，\n无法重建。',
+      };
 
   /// 屏幕正中的 3 秒提示。
   ///
@@ -1260,9 +1309,7 @@ class _MyWorksSectionState extends State<_MyWorksSection>
         MaterialPageRoute<void>(
           builder: (_) => SparseCloudViewerPage(
             plyPath: plyPath,
-            title: record.name.isEmpty
-                ? AppL10n.of(context).viewerSparseCloudTitle
-                : record.name,
+            title: record.name.isEmpty ? '稀疏点云' : record.name,
           ),
         ),
       ),
@@ -1387,18 +1434,9 @@ String _formatAbsTime(DateTime t) {
   return '$yy-$m-$d $hh:$mm';
 }
 
-String _cloudLabel(CloudLibraryState? state, AppL10n l) =>
+String _cloudLabel(CloudLibraryState? state, bool zh) =>
     switch (state?.status ?? CloudLibraryStatus.pending) {
-      CloudLibraryStatus.pending => l.meCloudPending,
-      CloudLibraryStatus.syncing => l.meCloudSyncing,
-      CloudLibraryStatus.saved => l.meCloudSaved,
+      CloudLibraryStatus.pending => zh ? '待同步' : 'Pending sync',
+      CloudLibraryStatus.syncing => zh ? '同步中' : 'Syncing',
+      CloudLibraryStatus.saved => zh ? '已保存到云端' : 'Saved to cloud',
     };
-
-// Localize stable persisted sync notices without exposing arbitrary service detail.
-String? _cloudReason(String? reason, AppL10n l) => switch (reason) {
-  null => null,
-  '作品编号冲突，本地作品已保留' => l.meCloudIdConflict,
-  '云端已有新版本，本地版本已保留' => l.meCloudNewerVersion,
-  '存在同名作品，作品已保留，请重命名' => l.meCloudNameConflict,
-  _ => l.meCloudRetryKept,
-};

@@ -228,7 +228,7 @@ test('surface mode preserves loaded model and controls, focus camera and lifecyc
  f.viewer.focusSurfaceComment({position:[0,0,0],cameraPosition:[9,8,7],cameraTarget:[2,3,4]});
  assert.deepEqual(f.viewer.getState().camera.position,{x:9,y:8,z:7});assert.deepEqual(f.viewer.getState().camera.target,{x:2,y:3,z:4});
  const cloud=f.viewer.load({url:'cloud.ply',format:'ply'});f.pending.get('cloud.ply').resolve(new Geometry());await cloud;
- assert.equal(f.viewer.getState().surfaceCommentMode,false);assert.throws(()=>f.viewer.setSurfaceCommentMode(true),/GLB/);
+ assert.equal(f.viewer.getState().surfaceCommentMode,false);f.viewer.setSurfaceCommentMode(true);assert.equal(f.viewer.getState().surfaceCommentMode,true);
  f.viewer.dispose();assert.equal(f.pointerEvents.size,0);
 });
 

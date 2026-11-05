@@ -1,3 +1,5 @@
+import '../../dense/pw38_generated_consumer_leases.dart';
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -24,6 +26,9 @@ class ProductPointView extends StatefulWidget {
     required this.xyz,
     required this.rgb,
     this.sourcePath,
+    this.initialCaptureCamera,
+    this.sourceIdentity,
+    this.onSourceFrameReady,
     this.finalModelUrl,
     this.waitingForSource = false,
     this.autoRotate = false,
@@ -47,6 +52,15 @@ class ProductPointView extends StatefulWidget {
   final Float32List xyz;
   final Uint8List rgb;
   final String? sourcePath;
+
+  /// Applied on the first capture sparse load; subsequent same-take sparse
+  /// snapshots keep that camera, matching the original capture rig semantics.
+  final SharedCaptureCamera? initialCaptureCamera;
+
+  /// Run + stage + immutable artifact identity. A path may be rewritten in place.
+  final String? sourceIdentity;
+  final void Function(SharedViewerController controller, String? identity)?
+  onSourceFrameReady;
 
   /// A completed model replaces points atomically on this same renderer/camera.
   final String? finalModelUrl;
@@ -73,10 +87,12 @@ class _ProductPointViewState extends State<ProductPointView> {
   VoidCallback? _removeOwnerRevocation;
   bool _ready = false, _loading = false, _loaded = false;
   bool _userTouched = false;
+  bool _captureCameraApplied = false;
   int _revision = 0, _completedRevision = -1, _loadRun = 0;
   Object? _error;
   Object _sourceEpoch = Object();
   LocalWorkLoadedSource? _lastLocalSource;
+  Pw38GeneratedReadLease? _generatedSelected;
 
   @override
   void initState() {
@@ -189,6 +205,7 @@ class _ProductPointViewState extends State<ProductPointView> {
     }
     if (reloadBinding ||
         oldWidget.finalModelUrl != widget.finalModelUrl ||
+        oldWidget.sourceIdentity != widget.sourceIdentity ||
         oldWidget.waitingForSource != widget.waitingForSource ||
         (widget.finalModelUrl == null &&
             (!identical(oldWidget.xyz, widget.xyz) ||
@@ -273,8 +290,12 @@ class _ProductPointViewState extends State<ProductPointView> {
       while (current() && _ready && _completedRevision != _revision) {
         final revision = _revision;
         final frameCallback = widget.onFirstFrameReady;
+        final sourceFrameCallback = widget.onSourceFrameReady;
+        final sourceIdentity = widget.sourceIdentity;
         attemptedRevision = revision;
         final xyz = widget.xyz, rgb = widget.rgb;
+        final captureCamera = widget.initialCaptureCamera;
+        var appliedCaptureCameraThisLoad = false;
         final path = widget.sourcePath;
         final finalModel = widget.finalModelUrl;
         final waiting = widget.waitingForSource;
@@ -294,70 +315,119 @@ class _ProductPointViewState extends State<ProductPointView> {
                 retainedSession: externalHost,
                 isCurrent: () => identical(_sourceEpoch, sourceEpoch),
               );
-        await _configure(controller);
-        if (!current() || revision != _revision) return;
-        if (waiting && finalModel == null) {
-          // Preserve the last real scene while its replacement is unavailable.
-          // Do not upload the sparse stand-in as if it were new dense output.
-          _completedRevision = revision;
-          continue;
-        } else if (lease != null) {
-          final format = finalModel == null
-              ? SharedModelFormat.ply
-              : SharedModelFormat.glb;
-          final warm =
-              lease.hasLoadedScene && await lease.verifyLoadedScene(format);
+        final generatedRead = finalModel != null
+            ? null
+            : (Pw38GeneratedConsumerLeases.instance.acquire(
+                    path,
+                    'renderer-load:$sourceIdentity',
+                  ) ??
+                  Pw38GeneratedConsumerLeases.instance.acquireIdentity(
+                    sourceIdentity ?? '',
+                    'renderer-load:$sourceIdentity',
+                  ));
+        var selected = false;
+        try {
+          await _configure(controller);
           if (!current() || revision != _revision) return;
-          if (!warm) {
-            await lease.ensureLoaded(
-              () =>
-                  controller.loadLocalFile(lease.canonicalPath, format: format),
-            );
-          }
-        } else if (finalModel != null) {
-          final uri = Uri.parse(finalModel);
-          if (uri.scheme == 'file' || uri.scheme.isEmpty) {
+          if (waiting && finalModel == null) {
+            // Preserve the last real scene while its replacement is unavailable.
+            // Do not upload the sparse stand-in as if it were new dense output.
+            _completedRevision = revision;
+            continue;
+          } else if (lease != null) {
+            final format = finalModel == null
+                ? SharedModelFormat.ply
+                : SharedModelFormat.glb;
+            final warm =
+                lease.hasLoadedScene && await lease.verifyLoadedScene(format);
+            if (!current() || revision != _revision) return;
+            if (!warm) {
+              await lease.ensureLoaded(
+                () => controller.loadLocalFile(
+                  lease.canonicalPath,
+                  format: format,
+                ),
+              );
+            }
+          } else if (finalModel != null) {
+            final uri = Uri.parse(finalModel);
+            if (uri.scheme == 'file' || uri.scheme.isEmpty) {
+              await controller.loadLocalFile(
+                uri.scheme == 'file' ? uri.toFilePath() : finalModel,
+                format: SharedModelFormat.glb,
+                preserveCamera:
+                    _loaded &&
+                    (_userTouched ||
+                        _preserveRetainedRotation ||
+                        controller.state['userHasInteracted'] == true),
+              );
+            } else {
+              await controller.load(
+                url: uri,
+                format: SharedModelFormat.glb,
+                preserveCamera:
+                    _loaded &&
+                    (_userTouched ||
+                        _preserveRetainedRotation ||
+                        controller.state['userHasInteracted'] == true),
+              );
+            }
+          } else if (path != null) {
             await controller.loadLocalFile(
-              uri.scheme == 'file' ? uri.toFilePath() : finalModel,
-              format: SharedModelFormat.glb,
-              preserveCamera: _loaded,
+              path,
+              format: SharedModelFormat.ply,
+              preserveCamera:
+                  _loaded &&
+                  (_userTouched ||
+                      _preserveRetainedRotation ||
+                      controller.state['userHasInteracted'] == true),
+            );
+          } else if (xyz.isNotEmpty) {
+            final preserveUserCamera =
+                _userTouched ||
+                _preserveRetainedRotation ||
+                controller.state['userHasInteracted'] == true;
+            final initialCamera = !_loaded && !preserveUserCamera
+                ? captureCamera
+                : null;
+            appliedCaptureCameraThisLoad = initialCamera != null;
+            await controller.loadPointCloud(
+              xyz: xyz,
+              rgb: rgb,
+              initialCaptureCamera: initialCamera,
+              preserveCamera:
+                  (_captureCameraApplied && captureCamera != null) ||
+                  preserveUserCamera,
             );
           } else {
-            await controller.load(
-              url: uri,
-              format: SharedModelFormat.glb,
-              preserveCamera: _loaded,
-            );
+            // No substitute sparse data is uploaded for a dense-only source.
+            _completedRevision = revision;
+            continue;
           }
-        } else if (path != null) {
-          await controller.loadLocalFile(
-            path,
-            format: SharedModelFormat.ply,
-            preserveCamera: _loaded,
-          );
-        } else if (xyz.isNotEmpty) {
-          await controller.loadPointCloud(
-            xyz: xyz,
-            rgb: rgb,
-            preserveCamera: _loaded,
-          );
-        } else {
-          // No substitute sparse data is uploaded for a dense-only source.
+          if (!current()) return;
+          // loadLocalFile completes on the real renderer load reply. Keep the
+          // selected source pinned for retries until a real replacement succeeds.
+          _generatedSelected?.release();
+          _generatedSelected = generatedRead;
+          selected = true;
+          _captureCameraApplied =
+              captureCamera != null &&
+              (_captureCameraApplied || appliedCaptureCameraThisLoad);
+          _loaded = true;
           _completedRevision = revision;
-          continue;
+          // A newer snapshot may have arrived during this load. Do not consume
+          // that result's unseen badge until its own model is actually displayed.
+          if (revision == _revision) {
+            final source = pendingSource?.complete();
+            _lastLocalSource = source;
+            if (source != null) sourceCallback?.call(source);
+            frameCallback?.call();
+            sourceFrameCallback?.call(controller, sourceIdentity);
+          }
+          if (_error != null) setState(() => _error = null);
+        } finally {
+          if (!selected) generatedRead?.release();
         }
-        if (!current()) return;
-        _loaded = true;
-        _completedRevision = revision;
-        // A newer snapshot may have arrived during this load. Do not consume
-        // that result's unseen badge until its own model is actually displayed.
-        if (revision == _revision) {
-          final source = pendingSource?.complete();
-          _lastLocalSource = source;
-          if (source != null) sourceCallback?.call(source);
-          frameCallback?.call();
-        }
-        if (_error != null) setState(() => _error = null);
       }
     } catch (error) {
       if (current()) {
@@ -380,6 +450,8 @@ class _ProductPointViewState extends State<ProductPointView> {
     _loadRun++;
     _removeOwnerRevocation?.call();
     _releaseController();
+    _generatedSelected?.release();
+    _generatedSelected = null;
     super.dispose();
   }
 
@@ -404,16 +476,16 @@ class _ProductPointViewState extends State<ProductPointView> {
           color: widget.background,
           child: _error == null
               ? const SizedBox.expand()
-              : Center(
+              : const Center(
                   child: Text(
-                    AppL10n.of(context).viewerModelUnavailableDataKept,
-                    style: const TextStyle(color: Colors.white70),
+                    '暂时无法显示模型，本地数据已保留',
+                    style: TextStyle(color: Colors.white70),
                   ),
                 ),
         )
       : Listener(
           onPointerDown: (_) {
-            if (_userTouched || !widget.autoRotate) return;
+            if (_userTouched) return;
             _userTouched = true;
             if (_ready) _configureCurrent();
           },
@@ -433,13 +505,13 @@ class _ProductPointViewState extends State<ProductPointView> {
                       onError: _onError,
                     ),
                 if (_error != null)
-                  Align(
-                    alignment: Alignment.bottomCenter,
+                  const Align(
+                    alignment: Alignment.center,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       child: Text(
-                        AppL10n.of(context).viewerModelUnavailableDataKept,
-                        style: const TextStyle(color: Colors.white70),
+                        '暂时无法显示模型，本地数据已保留',
+                        style: TextStyle(color: Colors.white70),
                       ),
                     ),
                   ),

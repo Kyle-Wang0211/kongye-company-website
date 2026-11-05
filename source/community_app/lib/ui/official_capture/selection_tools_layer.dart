@@ -25,7 +25,7 @@ import 'cloud_camera.dart'
         mulTransposed,
         rotationFromAxisAngle;
 import 'ruler_scrubber.dart';
-import 'web_publication_camera_controls.dart' show CloudViewCamera, CloudViewController;
+import 'cloud_view_controls.dart' show CloudViewCamera, CloudViewController;
 import 'view_cube.dart';
 
 /// 左上"取消"按钮 —— 页面据此把"放弃更改"浮层锚定到它**下方**(苹果相册版式,

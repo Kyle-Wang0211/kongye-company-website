@@ -75,8 +75,9 @@ class SharedViewerRetainedSession {
 
   @internal
   void setUiStrings(Object owner, Map<String, String> strings) {
-    if (!ownsPresentation(owner) || _disposed || mapEquals(_uiStrings, strings))
+    if (!ownsPresentation(owner) || _disposed || mapEquals(_uiStrings, strings)) {
       return;
+    }
     _uiStrings = Map<String, String>.unmodifiable(strings);
     unawaited(_sendUiStrings());
   }

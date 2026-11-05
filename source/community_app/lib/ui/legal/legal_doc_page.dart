@@ -7,11 +7,12 @@
 //   2. 头部展示版本号与生效日期 —— PIPL 第十四条"哪个版本被同意过"的
 //      证明链一环;历史版本承诺也写进了两份文本的正文里。
 //
-// 显示语言由 AppL10n 统一提供;英文仅供阅读参考,中文为准。
+// 语言:正文仅中文(拍板决定)。英文界面下同样显示中文正文,
+// 页面顶部给一句英文说明"本文件以中文为准"。
 import 'package:flutter/material.dart';
 
 import '../design_system.dart';
-import '../../l10n/app_localizations.dart';
+import '../../i18n/locale_notifier.dart';
 import 'legal_doc_model.dart';
 import 'privacy_policy_content.dart';
 import 'user_agreement_content.dart';
@@ -32,7 +33,7 @@ class LegalDocPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l = AppL10n.of(context);
+    final isZh = LocaleScope.of(context).isChinese;
     return Scaffold(
       backgroundColor: AetherColors.bgCanvas,
       appBar: AppBar(
@@ -50,24 +51,26 @@ class LegalDocPage extends StatelessWidget {
           ),
           children: [
             Text(
-              '${l.legalVersionLabel} $version · ${l.legalEffectiveDateLabel} $effectiveDate',
+              '版本 $version · 生效日期 $effectiveDate',
               style: const TextStyle(
                 fontSize: 12,
                 color: AetherColors.textTertiary,
                 height: 1.6,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: AetherSpacing.xs),
-              child: Text(
-                l.legalTranslationNotice,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AetherColors.textTertiary,
-                  height: 1.6,
+            if (!isZh)
+              const Padding(
+                padding: EdgeInsets.only(top: AetherSpacing.xs),
+                child: Text(
+                  'This document is written in Chinese and the Chinese '
+                  'version prevails.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AetherColors.textTertiary,
+                    height: 1.6,
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: AetherSpacing.lg),
             for (final section in sections) ...[
               Padding(
@@ -95,9 +98,8 @@ class LegalDocPage extends StatelessWidget {
                       height: 1.8,
                       color: AetherColors.textPrimary,
                       // 民法典 496 条的显著提示义务落在这一行。
-                      fontWeight: p.emphasized
-                          ? FontWeight.w700
-                          : FontWeight.w400,
+                      fontWeight:
+                          p.emphasized ? FontWeight.w700 : FontWeight.w400,
                     ),
                   ),
                 ),
@@ -113,36 +115,32 @@ class LegalDocPage extends StatelessWidget {
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
-  static Future<void> open(BuildContext context) => Navigator.of(
-    context,
-  ).push(MaterialPageRoute<void>(builder: (_) => const PrivacyPolicyPage()));
+  static Future<void> open(BuildContext context) => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const PrivacyPolicyPage()),
+      );
 
   @override
-  Widget build(BuildContext context) => LegalDocPage(
-    title: AppL10n.of(context).legalPrivacyTitle,
-    version: kPrivacyPolicyVersion,
-    effectiveDate: kPrivacyPolicyEffectiveDate == '【生效日期待上线前填写】'
-        ? AppL10n.of(context).legalEffectiveDatePending
-        : kPrivacyPolicyEffectiveDate,
-    sections: privacyPolicySections(AppL10n.of(context)),
-  );
+  Widget build(BuildContext context) => const LegalDocPage(
+        title: '方寸间隐私政策',
+        version: kPrivacyPolicyVersion,
+        effectiveDate: kPrivacyPolicyEffectiveDate,
+        sections: kPrivacyPolicyZh,
+      );
 }
 
 /// 用户协议页。入口同上。
 class UserAgreementPage extends StatelessWidget {
   const UserAgreementPage({super.key});
 
-  static Future<void> open(BuildContext context) => Navigator.of(
-    context,
-  ).push(MaterialPageRoute<void>(builder: (_) => const UserAgreementPage()));
+  static Future<void> open(BuildContext context) => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const UserAgreementPage()),
+      );
 
   @override
-  Widget build(BuildContext context) => LegalDocPage(
-    title: AppL10n.of(context).legalAgreementTitle,
-    version: kUserAgreementVersion,
-    effectiveDate: kUserAgreementEffectiveDate == '【生效日期待上线前填写】'
-        ? AppL10n.of(context).legalEffectiveDatePending
-        : kUserAgreementEffectiveDate,
-    sections: userAgreementSections(AppL10n.of(context)),
-  );
+  Widget build(BuildContext context) => const LegalDocPage(
+        title: '方寸间用户协议',
+        version: kUserAgreementVersion,
+        effectiveDate: kUserAgreementEffectiveDate,
+        sections: kUserAgreementZh,
+      );
 }

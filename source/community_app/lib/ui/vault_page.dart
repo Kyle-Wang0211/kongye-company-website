@@ -26,9 +26,15 @@ import 'startup_splash_gate.dart';
 import 'shared/product_model_view.dart';
 
 class VaultPage extends StatefulWidget {
-  const VaultPage({super.key, this.service, this.viewerHostBuilderForTesting});
+  const VaultPage({
+    super.key,
+    this.service,
+    this.isVisible = true,
+    this.viewerHostBuilderForTesting,
+  });
 
   final CommunityService? service;
+  final bool isVisible;
   // Forward the shared renderer's existing test seam.
   // ignore: invalid_use_of_visible_for_testing_member
   final ProductModelHostBuilder? viewerHostBuilderForTesting;
@@ -37,8 +43,8 @@ class VaultPage extends StatefulWidget {
   State<VaultPage> createState() => _VaultPageState();
 }
 
-class _VaultPageState extends State<VaultPage> {
-  late final CommunityService _service = widget.service ?? CommunityService();
+class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
+  late CommunityService _service = widget.service ?? CommunityService();
   final TextEditingController _searchController = TextEditingController();
   late Future<List<FeedWork>> _feed;
   StreamSubscription<String?>? _viewerSubscription;
@@ -46,6 +52,104 @@ class _VaultPageState extends State<VaultPage> {
   FeedWork? _publicCursor;
   int _publicRowsLoaded = 0;
   String _query = '';
+  bool _foreground = true;
+  bool _detailOpen = false;
+  bool _refreshRequested = false;
+  bool _automaticRefreshInFlight = false;
+  bool _automaticRefreshScheduled = false;
+  @override
+  void didUpdateWidget(covariant VaultPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.service, widget.service)) {
+      _service = widget.service ?? CommunityService();
+      _bindViewer();
+      _workUpdates.clear();
+      _workUpdateGenerations.clear();
+      _feed = _loadFeed();
+    }
+    if (!oldWidget.isVisible && widget.isVisible) _requestFeedRefresh();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final wasForeground = _foreground;
+    _foreground = state == AppLifecycleState.resumed;
+    if (_foreground && !wasForeground) _requestFeedRefresh();
+  }
+
+  // Coalesce activation/return events, preserve hidden tabs, and never overlap
+  // an automatic refresh with the initial/current feed request.
+  void _requestFeedRefresh() {
+    _refreshRequested = true;
+    if (_automaticRefreshScheduled || _automaticRefreshInFlight) return;
+    _automaticRefreshScheduled = true;
+    scheduleMicrotask(() {
+      _automaticRefreshScheduled = false;
+      if (mounted) unawaited(_flushFeedRefresh());
+    });
+  }
+
+  Future<void> _flushFeedRefresh() async {
+    if (!_refreshRequested ||
+        _automaticRefreshInFlight ||
+        !widget.isVisible ||
+        !_foreground ||
+        _detailOpen) {
+      return;
+    }
+    _automaticRefreshInFlight = true;
+    final serviceAtStart = _service;
+    _refreshRequested = false;
+    try {
+      try {
+        await _feed;
+      } catch (_) {
+        // A return to the feed also retries a failed initial request.
+      }
+      if (!mounted ||
+          !widget.isVisible ||
+          !_foreground ||
+          _detailOpen ||
+          !identical(_service, serviceAtStart)) {
+        _refreshRequested = true;
+        return;
+      }
+      _refreshRequested = false;
+      await _refresh();
+    } catch (_) {
+      // _feed retains the error so the existing retry UI can display it.
+    } finally {
+      _automaticRefreshInFlight = false;
+      if (mounted &&
+          _refreshRequested &&
+          widget.isVisible &&
+          _foreground &&
+          !_detailOpen) {
+        _requestFeedRefresh();
+      }
+    }
+  }
+
+  Future<void> _openWork(FeedWork work) async {
+    _detailOpen = true;
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => WorkDetailPage(
+            work: work,
+            service: _service,
+            onWorkUpdated: (updated) => _onWorkUpdated(work.id, updated),
+          ),
+        ),
+      );
+    } finally {
+      _detailOpen = false;
+      if (mounted) {
+        _requestFeedRefresh();
+      }
+    }
+  }
+
   bool _viewerAllowed = StartupSplashGate.instance.isDone;
   final Map<String, FeedWork> _workUpdates = {};
   final Map<String, int> _workUpdateGenerations = {};
@@ -87,17 +191,30 @@ class _VaultPageState extends State<VaultPage> {
   @override
   void initState() {
     super.initState();
-    _viewerId = _service.viewerUserId;
+    WidgetsBinding.instance.addObserver(this);
+    _foreground =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    _bindViewer();
     _feed = _loadFeed();
     if (kIsWeb && Uri.base.queryParameters['publish'] == '1') {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted || Supabase.instance.client.auth.currentUser == null) return;
-        await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const WebPublicationPage()),
-        );
+        if (!mounted || Supabase.instance.client.auth.currentUser == null) {
+          return;
+        }
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const WebPublicationPage()));
         if (mounted) await _refresh();
       });
     }
+    _governor.addListener(_onGovernorChanged);
+    StartupSplashGate.instance.addListener(_onStartupGateChanged);
+  }
+
+  void _bindViewer() {
+    _viewerSubscription?.cancel();
+    _viewerId = _service.viewerUserId;
     _viewerSubscription = _service.viewerUserChanges.listen((id) {
       if (!mounted || id == _viewerId) return;
       setState(() {
@@ -107,8 +224,6 @@ class _VaultPageState extends State<VaultPage> {
         _feed = _loadFeed();
       });
     });
-    _governor.addListener(_onGovernorChanged);
-    StartupSplashGate.instance.addListener(_onStartupGateChanged);
   }
 
   void _onStartupGateChanged() {
@@ -120,6 +235,7 @@ class _VaultPageState extends State<VaultPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     StartupSplashGate.instance.removeListener(_onStartupGateChanged);
     _governor.removeListener(_onGovernorChanged);
     _viewerSubscription?.cancel();
@@ -210,9 +326,7 @@ class _VaultPageState extends State<VaultPage> {
       query: _query.isEmpty ? null : _query,
     );
     final own =
-        kIsWeb &&
-            viewer != null &&
-            (_authorFilterId == null || _authorFilterId == viewer)
+        viewer != null && (_authorFilterId == null || _authorFilterId == viewer)
         ? _service.fetchOwnPublicFeed(query: _query.isEmpty ? null : _query)
         : Future.value(const <FeedWork>[]);
     return Future.wait([page, own]).then((results) {
@@ -221,7 +335,7 @@ class _VaultPageState extends State<VaultPage> {
       _hasMore = works.length >= _pageSize;
       _publicCursor = works.isEmpty ? null : works.last;
       _publicRowsLoaded = works.length;
-      return prioritizeAuthorFeed(works, results[1], kIsWeb ? viewer : null);
+      return prioritizeAuthorFeed(works, results[1], viewer);
     });
   }
 
@@ -388,17 +502,36 @@ class _VaultPageState extends State<VaultPage> {
                         Supabase.instance.client.auth.currentUser != null)
                       Align(
                         alignment: Alignment.centerRight,
-                        child: IconButton(
-                          tooltip: '发布作品',
-                          icon: const Icon(Icons.add),
-                          onPressed: () async {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const WebPublicationPage(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip:
+                                  Localizations.localeOf(
+                                        context,
+                                      ).languageCode ==
+                                      'zh'
+                                  ? '消息'
+                                  : 'Messages',
+                              icon: const Icon(
+                                Icons.chat_bubble_outline_rounded,
                               ),
-                            );
-                            if (mounted) await _refresh();
-                          },
+                              onPressed: () =>
+                                  Navigator.of(context).pushNamed('/messages'),
+                            ),
+                            IconButton(
+                              tooltip: '发布作品',
+                              icon: const Icon(Icons.add),
+                              onPressed: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const WebPublicationPage(),
+                                  ),
+                                );
+                                if (mounted) await _refresh();
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     // [D1/D2/D3 2026-08-23 用户签决] 冷启动期社区首页 = **单信息流**。
@@ -500,6 +633,7 @@ class _VaultPageState extends State<VaultPage> {
                   likedByMe: update.likedByMe,
                   likesCount: update.likesCount,
                   viewsCount: update.viewsCount,
+                  commentCount: update.commentCount,
                 );
         }).toList();
         _visibleFeedIds
@@ -581,21 +715,14 @@ class _VaultPageState extends State<VaultPage> {
       service: _service,
       isFocused: _liveWorkId == work.id,
       rotationAllowed: _governor.liveAllowed,
-      viewerAllowed: _viewerAllowed,
+      viewerAllowed:
+          _viewerAllowed && widget.isVisible && _foreground && !_detailOpen,
       onWorkUpdated: (updated) => _onWorkUpdated(work.id, updated),
       onAuthorTap: _onAuthorTap,
       onVisibilityChanged: (fraction) {
         _onCardVisibilityChanged(work.id, fraction);
       },
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => WorkDetailPage(
-            work: work,
-            service: _service,
-            onWorkUpdated: (updated) => _onWorkUpdated(work.id, updated),
-          ),
-        ),
-      ),
+      onTap: () => _openWork(work),
     );
   }
 }

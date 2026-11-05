@@ -334,7 +334,16 @@ class CommunityComment {
   };
 }
 
-enum CommunityCommentSection { hot, latest }
+// Ranked is a legacy client spelling. The gateway maps it to the supported
+// hot section, whose cursor orders likes, newest creation time, then ID.
+enum CommunityCommentSection { hot, latest, ranked }
+
+int compareCommunityComments(CommunityComment a, CommunityComment b) {
+  final likes = b.likesCount.compareTo(a.likesCount);
+  if (likes != 0) return likes;
+  final created = b.createdAt.compareTo(a.createdAt);
+  return created != 0 ? created : b.id.compareTo(a.id);
+}
 
 /// Product default; keep the gateway and SQL page-size constants in sync.
 const communityCommentPageSize = 20;

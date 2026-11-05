@@ -21,6 +21,10 @@ class FeedWork {
   final int? fileSizeBytes;
   final String? thumbnailStoragePath;
   final int likesCount;
+
+  /// Server-maintained total of published comments, not the loaded page size.
+  final int commentCount;
+
   /// Server-maintained view counter (works.views_count). Bumped by the
   /// `bump_work_views_count` trigger on every new public.work_views row;
   /// the dedup key is (work_id, viewer_id, hour-bucket) so the same
@@ -75,10 +79,11 @@ class FeedWork {
     required this.authorDisplayName,
     required this.authorAvatarUrl,
     required this.likedByMe,
+    this.commentCount = 0,
+    this.initialView,
     this.fileSizeBytes,
     this.authorHandle,
     this.publishRegion,
-    this.initialView,
   });
 
   /// Point count implied by [fileSizeBytes], or null when it cannot be
@@ -106,6 +111,7 @@ class FeedWork {
   /// swap a stale FeedWork for a fresh one without rebuilding the list.
   FeedWork copyWith({
     int? likesCount,
+    int? commentCount,
     int? viewsCount,
     bool? likedByMe,
   }) {
@@ -119,6 +125,7 @@ class FeedWork {
       initialView: initialView,
       thumbnailStoragePath: thumbnailStoragePath,
       likesCount: likesCount ?? this.likesCount,
+      commentCount: commentCount ?? this.commentCount,
       viewsCount: viewsCount ?? this.viewsCount,
       publishedAt: publishedAt,
       authorDisplayName: authorDisplayName,

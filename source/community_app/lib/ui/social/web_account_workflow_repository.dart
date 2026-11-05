@@ -94,7 +94,9 @@ class WebAccountWorkflowRepository {
         .map(
           (row) => WebReportSummary(
             id: row.id,
-            targetTitle: row.sourceWorkTitle ?? '用户举报',
+            targetTitle: row.sourceWorkTitle ?? '',
+            kind: row.kind,
+            sourceWorkTitle: row.sourceWorkTitle,
             reason: row.reason.code,
             status: row.status.code,
             createdAt: row.createdAt,

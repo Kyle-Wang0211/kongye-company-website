@@ -489,7 +489,7 @@ class _WebConversationPageState extends State<WebConversationPage>
                             textInputAction: TextInputAction.newline,
                             decoration: InputDecoration(
                               labelText: '消息',
-                              hintText: '写下你的消息',
+                              hintText: '写下您的消息',
                               border: OutlineInputBorder(),
                               counterText: '',
                               errorText: _draft.text.trim().length > 600

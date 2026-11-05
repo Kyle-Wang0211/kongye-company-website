@@ -59,4 +59,3 @@ int _indexOfAscii(Uint8List bytes, String needle) {
   }
   return -1;
 }
-

@@ -19,8 +19,8 @@ import '../../auth/auth_models.dart';
 import '../../auth/current_user.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
-import '../legal/legal_doc_links_row.dart';
 import 'auth_minimal_widgets.dart';
+import 'auth_policy_consent.dart';
 import 'otp_verification_view.dart';
 import 'phone_sign_in_view.dart';
 
@@ -37,10 +37,25 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
+  bool _policyAccepted = false;
+  String? _consentOwner;
+
   @override
   void initState() {
     super.initState();
+    _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
     widget.currentUser.addListener(_onUserChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant EmailSignUpPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentUser != widget.currentUser) {
+      oldWidget.currentUser.removeListener(_onUserChanged);
+      widget.currentUser.addListener(_onUserChanged);
+      _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
+      _policyAccepted = false;
+    }
   }
 
   @override
@@ -52,6 +67,11 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
   }
 
   void _onUserChanged() {
+    final owner = widget.currentUser.signedInUser?.id.rawValue;
+    if (owner != _consentOwner) {
+      _consentOwner = owner;
+      _policyAccepted = false;
+    }
     final err = widget.currentUser.lastError;
     if (err != null && mounted) {
       _showErrorDialog(err);
@@ -91,9 +111,16 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
 
   String get _normalizedEmail => _email.text.trim().toLowerCase();
   bool get _canSubmit =>
-      _normalizedEmail.isNotEmpty && _password.text.length >= 8;
+      _policyAccepted &&
+      _normalizedEmail.isNotEmpty &&
+      _password.text.length >= 8;
 
   Future<void> _submit() async {
+    if (!_canSubmit ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
     try {
       await widget.currentUser.signUp(
         SignUpRequest.email(email: _normalizedEmail, password: _password.text),
@@ -110,6 +137,11 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
             currentUser: widget.currentUser,
             email: e.email,
             password: e.password,
+            hasPolicyConsent: () =>
+                mounted &&
+                _policyAccepted &&
+                _normalizedEmail == e.email &&
+                _consentOwner == widget.currentUser.signedInUser?.id.rawValue,
           ),
           fullscreenDialog: true,
         ),
@@ -150,7 +182,8 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.username],
-                        onChanged: (_) => setState(() {}),
+                        onChanged: (_) =>
+                            setState(() => _policyAccepted = false),
                       ),
                       const SizedBox(height: AetherSpacing.xl),
                       LabeledField(
@@ -164,7 +197,14 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
                           if (_canSubmit && !working) _submit();
                         },
                       ),
-                      const SizedBox(height: 56),
+                      const SizedBox(height: AetherSpacing.lg),
+                      AuthPolicyConsent(
+                        value: _policyAccepted,
+                        enabled: !working,
+                        onChanged: (value) =>
+                            setState(() => _policyAccepted = value),
+                      ),
+                      const SizedBox(height: AetherSpacing.lg),
                       MinimalCta(
                         title: l.authSignUp,
                         enabled: _canSubmit && !working,
@@ -177,29 +217,19 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
                         emphasis: MinimalLinkEmphasis.medium,
                         onTap: working
                             ? null
-                            : () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => PhoneAuthPage(
-                                    currentUser: widget.currentUser,
-                                    intent: PhoneIntent.signUp,
+                            : () {
+                                setState(() => _policyAccepted = false);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => PhoneAuthPage(
+                                      currentUser: widget.currentUser,
+                                      intent: PhoneIntent.signUp,
+                                    ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                       ),
                       const SizedBox(height: AetherSpacing.xl),
-                      // [RULES-PUBLIC 2026-08-23] 原来这里是纯文本,原注释自陈
-                      // "Plain (not link) for now"。但第六条要求的是"制定**和
-                      // 公开**"管理规则与平台公约 —— 显示一句"你已同意"却让人
-                      // 看不到内容,不构成公开。现在它可点,指向 PlatformRulesPage。
-                      // ⚠️ 服务协议与隐私政策是另外两份文件,需法务准备,
-                      //    见 legal/platform_rules_content.dart 文末 TODO。
-                      // [LEGAL-DOCS 2026-08-24] 原来整句指向平台公约一份文件。
-                      // 现在三件套齐了,三份分别可点 —— "你已同意 X"却看不到 X,
-                      // 不构成公开;只能看到三份中的一份,同样不构成。
-                      // ⚠️ 这仍是"默示同意"文案,不是勾选框。首启弹窗 + 不默认
-                      //    勾选的同意机制在上线门槛清单里(supabase/README.md),
-                      //    属于产品行为改造,不在本次文档交付范围。
-                      LegalDocLinksRow(prefix: l.authTermsAcceptancePrefix),
                       const SizedBox(height: AetherSpacing.xl),
                     ],
                   ),

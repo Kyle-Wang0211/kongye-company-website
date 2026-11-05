@@ -56,9 +56,8 @@ class SupabaseGeneratedAvatarBackend
     if (!identical(Supabase.instance.client, client) ||
         client.auth.currentUser?.id != viewer ||
         response.status != 200 ||
-        response.data is! Map) {
+        response.data is! Map)
       return null;
-    }
     return GeneratedAvatarImage.tryParse(response.data['avatar']);
   }
 

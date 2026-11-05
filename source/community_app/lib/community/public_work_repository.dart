@@ -19,10 +19,11 @@ class PublicWorkRepository {
     if (publicWorkId(Uri(queryParameters: {'work': id})) == null) {
       throw const FormatException('作品链接无效');
     }
+    final viewerId = client.auth.currentUser?.id;
     final row = await client
         .from('works')
         .select(
-          'id,user_id,title,description,format,model_storage_path,thumbnail_storage_path,initial_view,file_size_bytes,likes_count,views_count,published_at,publish_region',
+          'id,user_id,title,description,format,model_storage_path,thumbnail_storage_path,initial_view,file_size_bytes,likes_count,comments_count,views_count,published_at,publish_region',
         )
         .eq('id', id)
         .eq('visibility', 'public')
@@ -38,6 +39,23 @@ class PublicWorkRepository {
         .eq('id', row['user_id'])
         .maybeSingle()
         .timeout(const Duration(seconds: 15));
+    if (client.auth.currentUser?.id != viewerId) {
+      throw StateError('Public work account changed during load');
+    }
+    var likedByMe = false;
+    if (viewerId != null) {
+      final like = await client
+          .from('work_likes')
+          .select('work_id')
+          .eq('user_id', viewerId)
+          .eq('work_id', id)
+          .maybeSingle()
+          .timeout(const Duration(seconds: 15));
+      if (client.auth.currentUser?.id != viewerId) {
+        throw StateError('Public work account changed during load');
+      }
+      likedByMe = like != null;
+    }
     return FeedWork(
       id: row['id'] as String,
       userId: row['user_id'] as String,
@@ -45,11 +63,14 @@ class PublicWorkRepository {
       description: row['description'] as String?,
       format: row['format'] as String? ?? 'glb',
       modelStoragePath: row['model_storage_path'] as String?,
-      initialView: row['initial_view'] is Map ? Map<String, dynamic>.from(row['initial_view'] as Map) : null,
+      initialView: row['initial_view'] is Map
+          ? Map<String, dynamic>.from(row['initial_view'] as Map)
+          : null,
       thumbnailStoragePath: row['thumbnail_storage_path'] as String?,
       fileSizeBytes: (row['file_size_bytes'] as num?)?.toInt(),
-      likedByMe: false,
+      likedByMe: likedByMe,
       likesCount: (row['likes_count'] as num?)?.toInt() ?? 0,
+      commentCount: (row['comments_count'] as num?)?.toInt() ?? 0,
       viewsCount: (row['views_count'] as num?)?.toInt() ?? 0,
       publishedAt: DateTime.parse(row['published_at'] as String),
       authorDisplayName: profile?['display_name'] as String? ?? 'unknown',

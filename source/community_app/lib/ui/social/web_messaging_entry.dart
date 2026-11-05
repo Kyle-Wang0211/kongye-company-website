@@ -1,3 +1,4 @@
+import 'community_capabilities.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,7 +27,7 @@ class WebMessagingEntry extends StatefulWidget {
     this.peerId,
     this.peerName,
     this.repository,
-    this.backendReady = const bool.fromEnvironment('PW_WEB_MESSAGING_READY'),
+    this.backendReady = CommunityCapabilities.messaging,
   });
   final CurrentUser user;
   final String ownerId;

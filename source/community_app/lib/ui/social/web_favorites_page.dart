@@ -202,7 +202,7 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
                                 const SizedBox(height: 8),
                                 Text(
                                   _text(
-                                    '在这里重访你收藏的作品。',
+                                    '在这里重访您收藏的作品。',
                                     'Revisit the works you have saved.',
                                   ),
                                   style: AetherTextStyles.bodySm,
@@ -245,7 +245,7 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
                               'Favorites are unavailable',
                             ),
                             detail: _text(
-                              '请稍后重试，你的收藏不会因此改变。',
+                              '请稍后重试，您的收藏不会因此改变。',
                               'Please try again. Your saved works are unchanged.',
                             ),
                             action: FilledButton.icon(

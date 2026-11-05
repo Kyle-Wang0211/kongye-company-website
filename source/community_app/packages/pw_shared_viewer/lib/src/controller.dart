@@ -15,6 +15,29 @@ typedef SharedViewerBytesRegistrar = Future<Uri> Function(
     Uint8List bytes, SharedModelFormat format);
 typedef SharedViewerResourceReleaser = void Function(Uri uri);
 
+/// Exact pinhole camera in the same world frame as its point cloud.
+/// Pixel values use the WebView's logical viewport coordinates.
+class SharedCaptureCamera {
+  const SharedCaptureCamera({
+    required this.position,
+    required this.target,
+    required this.up,
+    required this.focalPixels,
+    required this.principalX,
+    required this.principalY,
+  });
+  final List<double> position, target, up;
+  final double focalPixels, principalX, principalY;
+  Map<String, Object?> toJson() => {
+        'position': position,
+        'target': target,
+        'up': up,
+        'focalPixels': focalPixels,
+        'principalX': principalX,
+        'principalY': principalY,
+      };
+}
+
 class SharedViewerException implements Exception {
   const SharedViewerException(this.message);
   final String message;
@@ -105,7 +128,9 @@ class SharedViewerController extends ChangeNotifier {
       if (decoded['id'] != _downloadRequestId ||
           received is! int ||
           received < _downloadedBytes ||
-          (total != null && (total is! int || total <= 0))) return;
+          (total != null && (total is! int || total <= 0))) {
+        return;
+      }
       _downloadedBytes = received;
       _downloadTotalBytes = total as int?;
       _downloadProgressRevision++;
@@ -218,7 +243,8 @@ class SharedViewerController extends ChangeNotifier {
   Future<void> load(
       {required Uri url,
       required SharedModelFormat format,
-      bool preserveCamera = false}) async {
+      bool preserveCamera = false,
+      SharedCaptureCamera? initialCaptureCamera}) async {
     if (url.scheme != 'http' && url.scheme != 'https' && url.scheme != 'blob') {
       throw ArgumentError.value(
           url, 'url', 'Expected explicit HTTP(S) or blob URI');
@@ -229,7 +255,9 @@ class SharedViewerController extends ChangeNotifier {
     await _request('load', {
       'url': url.toString(),
       'format': format.name,
-      'preserveCamera': preserveCamera
+      'preserveCamera': preserveCamera,
+      if (initialCaptureCamera != null)
+        'initialCaptureCamera': initialCaptureCamera.toJson(),
     });
   }
 
@@ -276,7 +304,8 @@ class SharedViewerController extends ChangeNotifier {
   Future<void> loadPointCloud(
       {required Float32List xyz,
       required Uint8List rgb,
-      bool preserveCamera = true}) async {
+      bool preserveCamera = true,
+      SharedCaptureCamera? initialCaptureCamera}) async {
     final register = _registerBytes, release = _releaseResource;
     if (register == null) {
       throw UnsupportedError('Point transport requires a binary asset host');
@@ -287,7 +316,8 @@ class SharedViewerController extends ChangeNotifier {
       await load(
           url: uri,
           format: SharedModelFormat.ply,
-          preserveCamera: preserveCamera);
+          preserveCamera: preserveCamera,
+          initialCaptureCamera: initialCaptureCamera);
     } finally {
       release?.call(uri);
     }
@@ -346,8 +376,10 @@ class SharedViewerController extends ChangeNotifier {
     await _request('endSelectionEditing');
   }
 
-  Future<void> setSelectionPreview(Map<String, dynamic>? box, {bool decorations = true}) async {
-    await _request('setSelectionPreview', {'box': box, if (!decorations) 'decorations': false});
+  Future<void> setSelectionPreview(Map<String, dynamic>? box,
+      {bool decorations = true}) async {
+    await _request('setSelectionPreview',
+        {'box': box, if (!decorations) 'decorations': false});
   }
 
   Future<void> setSelectionView(

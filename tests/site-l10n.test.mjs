@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {localeStorageKey,readLocale,persistLocale,localeReady,setLocale,t,applyLocale} from '../docs/site-l10n.mjs?v=community-settings-20261103-v11';
+import {localeStorageKey,readLocale,persistLocale,localeReady,setLocale,t,applyLocale} from '../docs/site-l10n.mjs?v=shared-community-20261106-v40';
 import {publishedLabel} from '../docs/community-data.mjs';
 await localeReady;
 const storage=value=>({value,getItem(key){assert.equal(key,localeStorageKey);return this.value;},setItem(key,value){assert.equal(key,localeStorageKey);this.value=value;}});
@@ -35,7 +35,7 @@ test('rolling24h and calendar-relative timestamps retain semantics in both langu
 });
 
 test('nested browser modules and translation catalogs share the release cache identity', async()=>{
- const release='community-settings-20261103-v11';
+ const release='shared-community-20261106-v40';
  for (const [file,dependency] of [['community-feed.js','community-data.mjs'],['community-data.mjs','site-l10n.mjs'],['gallery.js','site-l10n.mjs'],['motion.js','site-l10n.mjs']]) {
   const source=await readFile(new URL('../docs/'+file,import.meta.url),'utf8');
   assert.ok(source.includes(dependency+'?v='+release),file+' must invalidate nested dependency');

@@ -27,6 +27,7 @@ import '../../config/backend_deployment.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
 import 'auth_minimal_widgets.dart';
+import 'auth_policy_consent.dart';
 import 'email_sign_in_view.dart';
 import 'phone_sign_in_view.dart';
 import 'reset_password_view.dart';
@@ -35,7 +36,11 @@ class AuthRootView extends StatefulWidget {
   final CurrentUser currentUser;
   final bool initialSignUp;
 
-  const AuthRootView({super.key, required this.currentUser, this.initialSignUp = false});
+  const AuthRootView({
+    super.key,
+    required this.currentUser,
+    this.initialSignUp = false,
+  });
 
   @override
   State<AuthRootView> createState() => _AuthRootViewState();
@@ -46,14 +51,29 @@ class _AuthRootViewState extends State<AuthRootView> {
   final _password = TextEditingController();
   bool _passwordVisible = false;
 
+  bool _policyAccepted = false;
+  String? _consentOwner;
+
   @override
   void initState() {
     super.initState();
+    _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
     widget.currentUser.addListener(_onUserChanged);
     if (widget.initialSignUp) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _pushSignUp();
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AuthRootView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentUser != widget.currentUser) {
+      oldWidget.currentUser.removeListener(_onUserChanged);
+      widget.currentUser.addListener(_onUserChanged);
+      _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
+      _policyAccepted = false;
     }
   }
 
@@ -66,6 +86,11 @@ class _AuthRootViewState extends State<AuthRootView> {
   }
 
   void _onUserChanged() {
+    final owner = widget.currentUser.signedInUser?.id.rawValue;
+    if (owner != _consentOwner) {
+      _consentOwner = owner;
+      _policyAccepted = false;
+    }
     final err = widget.currentUser.lastError;
     if (err != null && mounted) {
       _showErrorDialog(err);
@@ -108,16 +133,22 @@ class _AuthRootViewState extends State<AuthRootView> {
     password: _password.text,
     region: widget.currentUser.deployment.region,
   );
-  bool get _canSubmit => _passwordRequest != null;
+  bool get _canSubmit => _policyAccepted && _passwordRequest != null;
 
   Future<void> _submit() async {
     final request = _passwordRequest;
-    if (request == null || widget.currentUser.isPerformingAuthAction) return;
+    if (!_policyAccepted ||
+        request == null ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
     await widget.currentUser.signIn(request);
     if (widget.currentUser.isSignedIn) TextInput.finishAutofillContext();
   }
 
   void _pushSignUp() {
+    setState(() => _policyAccepted = false);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => EmailSignUpPage(currentUser: widget.currentUser),
@@ -126,6 +157,7 @@ class _AuthRootViewState extends State<AuthRootView> {
   }
 
   void _pushReset() {
+    setState(() => _policyAccepted = false);
     // Plain push (no fullscreenDialog) so iOS edge-swipe-back works,
     // matching the sign-up page's behavior. The previous fullscreenDialog
     // presented this as a modal sheet from the bottom which iOS
@@ -175,7 +207,8 @@ class _AuthRootViewState extends State<AuthRootView> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.username],
-                        onChanged: (_) => setState(() {}),
+                        onChanged: (_) =>
+                            setState(() => _policyAccepted = false),
                       ),
                       const SizedBox(height: AetherSpacing.xl),
                       LabeledField(
@@ -204,7 +237,14 @@ class _AuthRootViewState extends State<AuthRootView> {
                           if (_canSubmit && !working) _submit();
                         },
                       ),
-                      const SizedBox(height: 56),
+                      const SizedBox(height: AetherSpacing.lg),
+                      AuthPolicyConsent(
+                        value: _policyAccepted,
+                        enabled: !working,
+                        onChanged: (value) =>
+                            setState(() => _policyAccepted = value),
+                      ),
+                      const SizedBox(height: AetherSpacing.lg),
                       MinimalCta(
                         title: l.authSignIn,
                         enabled: _canSubmit && !working,
@@ -224,14 +264,17 @@ class _AuthRootViewState extends State<AuthRootView> {
                         emphasis: MinimalLinkEmphasis.medium,
                         onTap: working
                             ? null
-                            : () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => PhoneAuthPage(
-                                    currentUser: widget.currentUser,
-                                    intent: PhoneIntent.signIn,
+                            : () {
+                                setState(() => _policyAccepted = false);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => PhoneAuthPage(
+                                      currentUser: widget.currentUser,
+                                      intent: PhoneIntent.signIn,
+                                    ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                       ),
                       const SizedBox(height: AetherSpacing.xl),
                       MinimalLink(

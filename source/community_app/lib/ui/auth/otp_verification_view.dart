@@ -28,6 +28,7 @@ import '../../auth/current_user.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
 import 'auth_shared_widgets.dart';
+import 'auth_policy_consent.dart';
 
 class OtpVerificationView extends StatefulWidget {
   final CurrentUser currentUser;
@@ -36,12 +37,14 @@ class OtpVerificationView extends StatefulWidget {
   // immediately after the Edge Function creates the auth.users row.
   // EmailSignUpView passes this through via EmailVerificationPending.
   final String password;
+  final bool Function()? hasPolicyConsent;
 
   const OtpVerificationView({
     super.key,
     required this.currentUser,
     required this.email,
     required this.password,
+    this.hasPolicyConsent,
   });
 
   @override
@@ -52,6 +55,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
     with SingleTickerProviderStateMixin {
   final TextEditingController _code = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  bool _policyAccepted = false;
+  String? _consentOwner;
+  bool get _hasPolicyConsent =>
+      widget.hasPolicyConsent?.call() ?? _policyAccepted;
   Timer? _cooldownTimer;
   int _resendCooldownSec = 0;
   late final AnimationController _shake;
@@ -62,6 +69,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   @override
   void initState() {
     super.initState();
+    _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
     _shake = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 360),
@@ -69,6 +77,22 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
     _focusNode.addListener(_onExternalChanged);
     _startCooldown();
     widget.currentUser.addListener(_onExternalChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant OtpVerificationView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentUser != widget.currentUser) {
+      oldWidget.currentUser.removeListener(_onExternalChanged);
+      widget.currentUser.addListener(_onExternalChanged);
+    }
+    if (oldWidget.currentUser != widget.currentUser ||
+        oldWidget.email != widget.email ||
+        oldWidget.password != widget.password) {
+      _policyAccepted = false;
+      _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
+      _code.clear();
+    }
   }
 
   @override
@@ -84,6 +108,11 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
 
   void _onExternalChanged() {
     if (!mounted) return;
+    final owner = widget.currentUser.signedInUser?.id.rawValue;
+    if (owner != _consentOwner) {
+      _consentOwner = owner;
+      _policyAccepted = false;
+    }
     setState(() {});
   }
 
@@ -116,6 +145,11 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   }
 
   Future<void> _verify() async {
+    if (!_hasPolicyConsent ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
     if (!_canSubmit || widget.currentUser.isPerformingAuthAction) return;
     final ok = await widget.currentUser.verifySignupOtp(
       email: widget.email,
@@ -144,7 +178,12 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   }
 
   Future<void> _resend() async {
-    if (_resendCooldownSec > 0) return;
+    if (!_hasPolicyConsent ||
+        _resendCooldownSec > 0 ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
     final ok = await widget.currentUser.resendSignupOtp(
       email: widget.email,
       password: widget.password,
@@ -175,8 +214,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
         backgroundColor: AetherColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.chevron_left_rounded,
-              color: AetherColors.textPrimary),
+          icon: const Icon(
+            Icons.chevron_left_rounded,
+            color: AetherColors.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
@@ -205,6 +246,15 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                 shake: _shake,
                 onChanged: _onCodeChanged,
               ),
+              if (widget.hasPolicyConsent == null)
+                AuthPolicyConsent(
+                  value: _policyAccepted,
+                  enabled: !working,
+                  onChanged: (value) {
+                    setState(() => _policyAccepted = value);
+                    if (value && _code.text.length == _otpLength) _verify();
+                  },
+                ),
               if (err != null) ...[
                 const SizedBox(height: AetherSpacing.md),
                 Center(
@@ -234,7 +284,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
               const SizedBox(height: AetherSpacing.lg),
               Center(
                 child: GestureDetector(
-                  onTap: (_resendCooldownSec > 0 || working) ? null : _resend,
+                  onTap:
+                      (_resendCooldownSec > 0 || working || !_hasPolicyConsent)
+                      ? null
+                      : _resend,
                   child: Text(
                     _resendCooldownSec > 0
                         ? l.otpResendCooldown(_resendCooldownSec)
@@ -242,10 +295,16 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: (_resendCooldownSec > 0 || working)
+                      color:
+                          (_resendCooldownSec > 0 ||
+                              working ||
+                              !_hasPolicyConsent)
                           ? AetherColors.textTertiary
                           : AetherColors.textSecondary,
-                      decoration: (_resendCooldownSec > 0 || working)
+                      decoration:
+                          (_resendCooldownSec > 0 ||
+                              working ||
+                              !_hasPolicyConsent)
                           ? TextDecoration.none
                           : TextDecoration.underline,
                       decorationColor: AetherColors.textSecondary,

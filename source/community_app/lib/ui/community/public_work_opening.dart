@@ -38,6 +38,7 @@ FeedWork? readOpeningWork() {
       fileSizeBytes: (row['file_size_bytes'] as num?)?.toInt(),
       likedByMe: false,
       likesCount: (row['likes_count'] as num?)?.toInt() ?? 0,
+      commentCount: (row['comments_count'] as num?)?.toInt() ?? 0,
       viewsCount: (row['views_count'] as num?)?.toInt() ?? 0,
       publishedAt: DateTime.tryParse(row['published_at'] as String? ?? ''),
       authorDisplayName: author?['display_name'] as String? ?? '',
@@ -97,7 +98,7 @@ class PublicWorkOpening extends StatelessWidget {
               : Image.network(
                   cover,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => _orb(),
+                  errorBuilder: (_, _, _) => _orb(),
                 ),
         ),
       ),

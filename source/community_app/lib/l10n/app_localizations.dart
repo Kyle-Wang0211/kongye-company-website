@@ -6570,6 +6570,174 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Featured screens'**
   String get siteScreenStage;
+
+  /// No description provided for @reportHistoryLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading reports'**
+  String get reportHistoryLoading;
+
+  /// No description provided for @reportHistoryNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Only reports you submitted are shown. Platform notifications confirm outcomes.'**
+  String get reportHistoryNotice;
+
+  /// No description provided for @reportRecordId.
+  ///
+  /// In en, this message translates to:
+  /// **'Report ID'**
+  String get reportRecordId;
+
+  /// No description provided for @reportRecordReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reportRecordReason;
+
+  /// No description provided for @reportRecordOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome'**
+  String get reportRecordOutcome;
+
+  /// No description provided for @reportOutcomeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No outcome yet'**
+  String get reportOutcomeUnavailable;
+
+  /// No description provided for @reportAppealAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit appeal'**
+  String get reportAppealAction;
+
+  /// No description provided for @reportAppealUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Online appeals are currently unavailable.'**
+  String get reportAppealUnavailable;
+
+  /// No description provided for @reportAppealSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Appeal submitted. Watch for a platform notification.'**
+  String get reportAppealSubmitted;
+
+  /// No description provided for @reportStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get reportStatusClosed;
+
+  /// No description provided for @reportStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Status unconfirmed'**
+  String get reportStatusUnknown;
+
+  /// No description provided for @reportAppealRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an appeal explanation'**
+  String get reportAppealRequired;
+
+  /// No description provided for @reportAppealFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Appeal submission failed. Try again.'**
+  String get reportAppealFailed;
+
+  /// No description provided for @reportAppealExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Appeal explanation'**
+  String get reportAppealExplanation;
+
+  /// No description provided for @reportAppealPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not include passwords, identity document numbers or other sensitive information.'**
+  String get reportAppealPrivacy;
+
+  /// No description provided for @reportAppealSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get reportAppealSubmitting;
+
+  /// No description provided for @reportAppealSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get reportAppealSubmit;
+
+  /// No description provided for @authPolicyConsentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and agree to'**
+  String get authPolicyConsentLabel;
+
+  /// No description provided for @webSettingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get webSettingsLanguage;
+
+  /// No description provided for @webSettingsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get webSettingsHelp;
+
+  /// No description provided for @webHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & contact'**
+  String get webHelpTitle;
+
+  /// No description provided for @webHelpViewQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I view a 3D work?'**
+  String get webHelpViewQuestion;
+
+  /// No description provided for @webHelpViewAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a work from its cover. Drag to rotate and use the mouse wheel or pinch to zoom.'**
+  String get webHelpViewAnswer;
+
+  /// No description provided for @webHelpPublishQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Why is my published work not visible yet?'**
+  String get webHelpPublishQuestion;
+
+  /// No description provided for @webHelpPublishAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Works appear in the community after review. Check the processing status in your publication history.'**
+  String get webHelpPublishAnswer;
+
+  /// No description provided for @webHelpAccountQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What can I do after signing in?'**
+  String get webHelpAccountQuestion;
+
+  /// No description provided for @webHelpAccountAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to publish, like, save and comment on works, follow creators and send private messages.'**
+  String get webHelpAccountAnswer;
+
+  /// No description provided for @webHelpContactLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get webHelpContactLabel;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

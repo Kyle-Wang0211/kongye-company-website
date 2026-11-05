@@ -189,7 +189,9 @@ class _CommunityCommentGateway {
     } catch (_) {
       throw const CommunityCommentException('unavailable');
     }
-    if (expected == null || expected.regionKey.isEmpty) {
+    if (expected == null ||
+        expected.regionKey.isEmpty ||
+        (expected.userId.isEmpty && body['op'] != 'list')) {
       throw const CommunityCommentException('auth_required');
     }
     try {
@@ -346,12 +348,17 @@ class SupabaseCommunityCommentRepository extends _CommunityCommentGateway
     final request = <String, dynamic>{
       'op': 'list',
       'work_id': workId,
-      'section': section.name,
+      'section': section == CommunityCommentSection.ranked
+          ? 'hot'
+          : section.name,
       'limit': communityCommentPageSize,
     };
     if (cursor != null) request['cursor'] = cursor;
     final data = await _request(request);
-    if (data['section'] != section.name ||
+    if (data['section'] !=
+            (section == CommunityCommentSection.ranked
+                ? 'hot'
+                : section.name) ||
         data['comments'] is! List ||
         (data['comments'] as List).length > communityCommentPageSize) {
       throw const CommunityCommentException('invalid_response');

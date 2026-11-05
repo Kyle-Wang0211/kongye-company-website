@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
+import '../../community/social_profile_models.dart';
 
 /// Only the signed-in owner's report fields belong in this view model.
 /// The loader must enforce ownership before returning records.
@@ -11,6 +13,8 @@ class WebReportSummary {
     required this.status,
     required this.createdAt,
     this.outcome,
+    this.kind,
+    this.sourceWorkTitle,
   });
 
   final String id;
@@ -19,6 +23,8 @@ class WebReportSummary {
   final String status;
   final DateTime createdAt;
   final String? outcome;
+  final ReportKind? kind;
+  final String? sourceWorkTitle;
 }
 
 class WebReportHistoryPage extends StatefulWidget {
@@ -66,6 +72,7 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppL10n.of(context);
     final parent = Theme.of(context);
     final colors = ColorScheme.fromSeed(
       seedColor: Colors.black,
@@ -75,7 +82,7 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
     return Theme(
       data: parent.copyWith(colorScheme: colors),
       child: Scaffold(
-        appBar: AppBar(title: const Text('举报与申诉记录')),
+        appBar: AppBar(title: Text(l.reportHistoryTitle)),
         body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
@@ -86,26 +93,26 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return Center(
                     child: Semantics(
-                      label: '正在加载举报记录',
+                      label: l.reportHistoryLoading,
                       child: const CircularProgressIndicator(),
                     ),
                   );
                 }
                 if (snapshot.hasError) {
-                  return _message('暂时无法加载举报记录', '请稍后重试。', retry: true);
+                  return _message(l.reportHistoryLoadFailed, '', retry: true);
                 }
                 final reports = snapshot.data ?? const <WebReportSummary>[];
                 if (reports.isEmpty) {
-                  return _message('暂无举报记录', '你提交的举报及处理结果会显示在这里。');
+                  return _message(l.reportHistoryEmpty, '');
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: reports.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      return const Padding(
-                        padding: EdgeInsets.only(bottom: 16),
-                        child: Text('仅展示你提交的记录。处理结果以平台通知为准。'),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(l.reportHistoryNotice),
                       );
                     }
                     final report = reports[index - 1];
@@ -113,11 +120,15 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
                       key: ValueKey(report.id),
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ExpansionTile(
-                        title: Text(report.targetTitle),
+                        title: Text(
+                          report.targetTitle.isEmpty
+                              ? _reason(report.reason, l)
+                              : report.targetTitle,
+                        ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            '${_status(report.status)} · ${_date(report.createdAt)}',
+                            '${_status(report.status, l)} · ${_date(report.createdAt)}',
                           ),
                         ),
                         childrenPadding: const EdgeInsets.fromLTRB(
@@ -129,22 +140,42 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
                         expandedCrossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Divider(),
-                          SelectableText('举报编号：${report.id}'),
-                          const SizedBox(height: 12),
-                          SelectableText('举报原因：${report.reason}'),
+                          SelectableText(_field(l.reportRecordId, report.id)),
+                          if (report.kind != null)
+                            Text(
+                              report.kind == ReportKind.rights
+                                  ? l.reportRightsTitle
+                                  : l.reportStandardTitle,
+                            ),
+                          if (report.sourceWorkTitle != null)
+                            Text(
+                              l.reportHistorySource(report.sourceWorkTitle!),
+                            ),
                           const SizedBox(height: 12),
                           SelectableText(
-                            '处理结果：${report.outcome?.trim().isNotEmpty == true ? report.outcome : '暂无处理结果'}',
+                            _field(
+                              l.reportRecordReason,
+                              _reason(report.reason, l),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SelectableText(
+                            _field(
+                              l.reportRecordOutcome,
+                              report.outcome?.trim().isNotEmpty == true
+                                  ? report.outcome!
+                                  : l.reportOutcomeUnavailable,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           if (widget.onAppeal != null)
                             OutlinedButton.icon(
                               onPressed: () => _appeal(report),
                               icon: const Icon(Icons.edit_note),
-                              label: const Text('提交申诉'),
+                              label: Text(l.reportAppealAction),
                             )
                           else
-                            const Text('当前暂不支持在线申诉。'),
+                            Text(l.reportAppealUnavailable),
                         ],
                       ),
                     );
@@ -158,6 +189,11 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
     );
   }
 
+  String _field(String label, String value) =>
+      Localizations.localeOf(context).languageCode == 'zh'
+      ? '$label：$value'
+      : '$label: $value';
+
   Widget _message(String title, String body, {bool retry = false}) {
     return Center(
       child: SingleChildScrollView(
@@ -166,13 +202,15 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(title, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Text(body, textAlign: TextAlign.center),
+            if (body.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(body, textAlign: TextAlign.center),
+            ],
             if (retry) ...[
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () => setState(_load),
-                child: const Text('重试'),
+                child: Text(AppL10n.of(context).communityRetry),
               ),
             ],
           ],
@@ -206,8 +244,9 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
       ),
     );
     if (!mounted || generation != _ownerGeneration || submitted != true) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('申诉已提交，处理结果请留意平台通知。')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppL10n.of(context).reportAppealSubmitted)),
+    );
     setState(_load);
   }
 
@@ -217,17 +256,29 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
     return '${local.year}-${pad(local.month)}-${pad(local.day)} ${pad(local.hour)}:${pad(local.minute)}';
   }
 
-  static String _status(String value) => switch (value) {
-    'pending' => '待处理',
-    'reviewing' || 'in_review' => '处理中',
-    'needs_info' => '待补充说明',
-    'actioned' => '已采取措施',
-    'dismissed' => '未采纳',
-    'resolved' => '已处理',
-    'rejected' => '未采纳',
-    'closed' => '已结束',
-    _ => '状态待确认',
+  static String _status(String value, AppL10n l) => switch (value) {
+    'pending' => l.reportStatusPending,
+    'reviewing' || 'in_review' => l.reportStatusInReview,
+    'needs_info' => l.reportStatusNeedsInfo,
+    'actioned' || 'resolved' => l.reportStatusActioned,
+    'dismissed' || 'rejected' => l.reportStatusDismissed,
+    'closed' => l.reportStatusClosed,
+    _ => l.reportStatusUnknown,
   };
+
+  static String _reason(String value, AppL10n l) =>
+      switch (UserReportReason.fromCode(value)) {
+        UserReportReason.impersonation => l.reportReasonImpersonation,
+        UserReportReason.harassmentThreat => l.reportReasonHarassmentThreat,
+        UserReportReason.spamFraud => l.reportReasonSpamFraud,
+        UserReportReason.minorSafety => l.reportReasonMinorSafety,
+        UserReportReason.sexualContent => l.reportReasonSexualLowQuality,
+        UserReportReason.violenceIllegal => l.reportReasonViolenceIllegal,
+        UserReportReason.misinformation => l.reportReasonMisleading,
+        UserReportReason.privacyIp => l.reportReasonPrivacyIp,
+        UserReportReason.other => l.reportReasonOtherUncertain,
+        null => value,
+      };
 }
 
 class _AppealDialog extends StatefulWidget {
@@ -253,7 +304,7 @@ class _AppealDialogState extends State<_AppealDialog> {
     if (_busy) return;
     final explanation = _controller.text.trim();
     if (explanation.isEmpty) {
-      setState(() => _error = '请填写申诉说明');
+      setState(() => _error = AppL10n.of(context).reportAppealRequired);
       return;
     }
     setState(() {
@@ -267,7 +318,7 @@ class _AppealDialogState extends State<_AppealDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = '申诉未能提交，请重试。';
+        _error = AppL10n.of(context).reportAppealFailed;
       });
     }
   }
@@ -276,7 +327,7 @@ class _AppealDialogState extends State<_AppealDialog> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: AlertDialog(
-      title: const Text('提交申诉'),
+      title: Text(AppL10n.of(context).reportAppealAction),
       content: SizedBox(
         width: 440,
         child: TextField(
@@ -287,8 +338,8 @@ class _AppealDialogState extends State<_AppealDialog> {
           maxLines: 6,
           maxLength: 2000,
           decoration: InputDecoration(
-            labelText: '申诉说明',
-            helperText: '请勿填写密码、证件号码等敏感信息。',
+            labelText: AppL10n.of(context).reportAppealExplanation,
+            helperText: AppL10n.of(context).reportAppealPrivacy,
             helperMaxLines: 2,
             errorText: _error,
           ),
@@ -297,11 +348,15 @@ class _AppealDialogState extends State<_AppealDialog> {
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(AppL10n.of(context).commonCancel),
         ),
         FilledButton(
           onPressed: _busy ? null : _submit,
-          child: Text(_busy ? '提交中…' : '提交'),
+          child: Text(
+            _busy
+                ? AppL10n.of(context).reportAppealSubmitting
+                : AppL10n.of(context).reportAppealSubmit,
+          ),
         ),
       ],
     ),

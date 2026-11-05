@@ -531,7 +531,7 @@ class SupabaseAuthServiceImpl implements AuthService {
       case 'handle_taken':
         return const AuthException(AuthErrorKind.unknown, '该 ID 已被使用');
       case 'profile_not_found':
-        return const AuthException(AuthErrorKind.unknown, '找不到你的资料');
+        return const AuthException(AuthErrorKind.unknown, '找不到您的资料');
       default:
         return AuthException(
           AuthErrorKind.unknown,

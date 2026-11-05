@@ -100,6 +100,65 @@ test('new producer geometry gets its own canonical fit while user orbit stays in
   viewer.dispose();
 });
 
+// Display bridge parity against the established capture pinhole. No SfM runs.
+test('first capture camera reproduces pinhole pixels without changing points', async()=>{
+  const {viewer,pending,renderer,camera,controls}=fixture();
+  viewer.resize(320,720,1);
+  const geom=new Geometry();
+  const bytes=Array.from(geom.getAttribute('position').array);
+  const input={position:[2,3,20],target:[2,3,4],up:[0,1,0],
+    focalPixels:410,principalX:147,principalY:280};
+  const load=viewer.load({url:'capture.ply',format:'ply',initialCaptureCamera:input});
+  pending.get('capture.ply').resolve(geom);await load;
+  assert.deepEqual(camera.position.toArray(),input.position);
+  assert.deepEqual(controls.target.toArray(),input.target);
+  const projected=new Vec(4,5,4).project(camera);
+  const screen=[(projected.x+1)*160,(1-projected.y)*360];
+  assert.ok(Math.abs(screen[0]-(147+410*2/16))<1e-8);
+  assert.ok(Math.abs(screen[1]-(280-410*2/16))<1e-8);
+  assert.deepEqual(Array.from(geom.getAttribute('position').array),bytes);
+  viewer.capture('image/png',undefined,true);
+  const projectedAfter=new Vec(4,5,4).project(camera);
+  assert.deepEqual(projectedAfter.toArray(),projected.toArray());
+  camera.position.set(1,2,30);controls.start();controls.update();
+  const user=viewer.getState().camera;
+  const second=viewer.load({url:'next.ply',format:'ply',preserveCamera:true,initialCaptureCamera:input});
+  pending.get('next.ply').resolve(new Geometry());await second;
+  assert.deepEqual(viewer.getState().camera,user);
+  viewer.dispose();
+});
+
+test('explicit capture camera replaces an existing scene; preserve mode retains user view',async()=>{
+ const {viewer,pending,camera,controls}=fixture();viewer.resize(320,720,1);
+ const first=viewer.load({url:'existing.ply',format:'ply'});
+ pending.get('existing.ply').resolve(new Geometry());await first;
+ const input={position:[2,3,20],target:[2,3,4],up:[0,1,0],focalPixels:410,principalX:147,principalY:280};
+ const next=viewer.load({url:'capture.ply',format:'ply',preserveCamera:false,initialCaptureCamera:input});
+ pending.get('capture.ply').resolve(new Geometry());await next;
+ assert.deepEqual(camera.position.toArray(),input.position);
+ assert.deepEqual(controls.target.toArray(),input.target);
+ camera.position.set(1,2,30);controls.start();controls.update();
+ const before=viewer.getState().camera;
+ const preserved=viewer.load({url:'preserved.ply',format:'ply',preserveCamera:true,initialCaptureCamera:input});
+ pending.get('preserved.ply').resolve(new Geometry());await preserved;
+ assert.deepEqual(viewer.getState().camera,before);
+ viewer.dispose();
+});
+
+test('a user orbit during pending explicit capture load wins over the earlier camera request',async()=>{
+ const {viewer,pending,camera,controls}=fixture();viewer.resize(320,720,1);
+ const first=viewer.load({url:'old.ply',format:'ply'});
+ pending.get('old.ply').resolve(new Geometry());await first;
+ const input={position:[2,3,20],target:[2,3,4],up:[0,1,0],focalPixels:410,principalX:147,principalY:280};
+ const next=viewer.load({url:'pending.ply',format:'ply',preserveCamera:false,initialCaptureCamera:input});
+ camera.position.set(1,2,30);controls.target.set(2,3,4);controls.start();controls.update();
+ const user=viewer.getState().camera;
+ pending.get('pending.ply').resolve(new Geometry());await next;
+ assert.deepEqual(viewer.getState().camera,user);
+ assert.equal(viewer.getState().userHasInteracted,true);
+ viewer.dispose();
+});
+
 test('every GLB and PLY initial and canonical cover has 45 degree elevation and azimuth',async()=>{
   const assertAngles=(position,target)=>{
     const offset=new Vec(...position).sub(target);

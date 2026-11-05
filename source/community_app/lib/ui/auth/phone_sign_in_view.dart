@@ -14,7 +14,7 @@ import '../../auth/phone_number_input.dart';
 import '../design_system.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/phone_country_names.dart';
-import '../legal/legal_doc_links_row.dart';
+import 'auth_policy_consent.dart';
 import 'auth_shared_widgets.dart';
 import 'auth_minimal_widgets.dart';
 import 'phone_country_picker.dart';
@@ -90,6 +90,47 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   PhoneVerificationChallenge? _challenge;
   bool _operationPending = false;
+  bool _policyAccepted = false;
+  String? _consentOwner;
+  int _formEpoch = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
+    widget.currentUser.addListener(_accountChanged);
+  }
+
+  void _resetConsent() {
+    _policyAccepted = false;
+    _challenge = null;
+    _code.clear();
+    _formEpoch++;
+  }
+
+  void _accountChanged() {
+    if (!mounted) return;
+    final owner = widget.currentUser.signedInUser?.id.rawValue;
+    if (owner != _consentOwner) {
+      _consentOwner = owner;
+      _resetConsent();
+    }
+    setState(() {});
+  }
+
+  @override
+  void didUpdateWidget(covariant PhoneSignInView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentUser != widget.currentUser) {
+      oldWidget.currentUser.removeListener(_accountChanged);
+      widget.currentUser.addListener(_accountChanged);
+    }
+    if (oldWidget.currentUser != widget.currentUser ||
+        oldWidget.intent != widget.intent) {
+      _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
+      _resetConsent();
+    }
+  }
 
   bool get _blocked =>
       _operationPending ||
@@ -97,7 +138,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
       widget.currentUser.isSignedIn;
 
   bool _beginOperation() {
-    if (_blocked) return false;
+    if (!_policyAccepted || _blocked) return false;
     // Capture the intent synchronously, before a provider await or a rebuild.
     setState(() => _operationPending = true);
     return true;
@@ -109,6 +150,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   @override
   void dispose() {
+    widget.currentUser.removeListener(_accountChanged);
     _nationalNumber.dispose();
     _displayName.dispose();
     _code.dispose();
@@ -129,9 +171,10 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   Future<void> _startVerification() async {
     if (!_canStart || !_beginOperation()) return;
+    final epoch = _formEpoch;
     try {
       final result = await widget.currentUser.startPhoneVerification(_e164);
-      if (!mounted) return;
+      if (!mounted || epoch != _formEpoch) return;
       setState(() => _challenge = result);
     } finally {
       _finishOperation();
@@ -140,7 +183,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   Future<void> _submitCode() async {
     final ch = _challenge;
-    if (ch == null || !_beginOperation()) return;
+    if (ch == null || _code.text.length != 6 || !_beginOperation()) return;
     try {
       switch (widget.intent) {
         case PhoneIntent.signIn:
@@ -182,7 +225,10 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
   Future<void> _selectCountry() async {
     final country = await showPhoneCountryPicker(context);
     if (country != null && mounted) {
-      setState(() => _country = country);
+      setState(() {
+        _country = country;
+        _policyAccepted = false;
+      });
     }
   }
 
@@ -254,7 +300,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
           leading: _isSignUp ? _countryPrefix(working) : null,
           inputFormatters: [LengthLimitingTextInputFormatter(64)],
           keyboard: AuthFieldKeyboard.phone,
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => setState(() => _policyAccepted = false),
         ),
         if (_isSignUp) ...[
           const SizedBox(height: AetherSpacing.sm),
@@ -297,13 +343,16 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
         AuthPrimaryButton(
           title: l.authPhoneSendCode,
           isWorking: working,
-          isEnabled: _canStart && !widget.currentUser.isSignedIn,
+          isEnabled:
+              _policyAccepted && _canStart && !widget.currentUser.isSignedIn,
           onTap: _startVerification,
         ),
         const SizedBox(height: AetherSpacing.md),
-        // [LEGAL-DOCS 2026-08-24] 手机号注册与邮箱注册是并列的注册路径,
-        // 法律文件的可达性必须两条路径都有。
-        LegalDocLinksRow(prefix: l.authTermsAcceptancePrefix),
+        AuthPolicyConsent(
+          value: _policyAccepted,
+          enabled: !working,
+          onChanged: (value) => setState(() => _policyAccepted = value),
+        ),
         const SizedBox(height: AetherSpacing.md),
         if (_canStart)
           Text(
@@ -349,18 +398,25 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
               ? l.authPhoneSubmitSignIn
               : l.authPhoneSubmitSignUp,
           isWorking: working,
-          isEnabled: _code.text.length >= 6 && !widget.currentUser.isSignedIn,
+          isEnabled:
+              _policyAccepted &&
+              _code.text.length == 6 &&
+              !widget.currentUser.isSignedIn,
           onTap: _submitCode,
         ),
         const SizedBox(height: AetherSpacing.md),
+        AuthPolicyConsent(
+          value: _policyAccepted,
+          enabled: !working,
+          onChanged: (value) => setState(() => _policyAccepted = value),
+        ),
         GestureDetector(
           onTap: working
               ? null
               : () {
                   if (_blocked) return;
                   setState(() {
-                    _challenge = null;
-                    _code.clear();
+                    _resetConsent();
                   });
                 },
           child: Text(

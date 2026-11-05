@@ -20,12 +20,7 @@ double communityAuthorRowHeight(BuildContext context) =>
 
 double communityInformationHeight(BuildContext context) {
   final scaler = MediaQuery.textScalerOf(context);
-  return 12 +
-      scaler.scale(13) * 2.6 +
-      4 +
-      communityAuthorRowHeight(context) +
-      4 +
-      scaler.scale(10) * 1.2;
+  return 12 + communityAuthorRowHeight(context) + 4 + scaler.scale(10) * 1.2;
 }
 
 /// A decorative loading surface. Reduced motion keeps the same static geometry.

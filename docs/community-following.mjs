@@ -1,5 +1,5 @@
-import {accountClientReady,getAccountClient} from './community-account.mjs?v=publication-framing-20261106-v38';
-import {localizeElement,localeEvent} from './site-l10n.mjs?v=publication-framing-20261106-v38';
+import {accountClientReady,getAccountClient} from './community-account.mjs?v=shared-community-20261106-v40';
+import {localizeElement,localeEvent} from './site-l10n.mjs?v=shared-community-20261106-v40';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 
 const opener=document.querySelector('#following-link');

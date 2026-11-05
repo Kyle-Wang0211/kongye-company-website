@@ -46,7 +46,6 @@ class BackendDeployment {
     final matchesChinaPrimary =
         region == 'china' &&
         deploymentId == 'cn-primary' &&
-        const String.fromEnvironment('PW_AUTH_NAMESPACE_GENERATION') == 'rds20261104' &&
         httpsOrigin(url) == 'https://api.kongye.space';
     return BackendDeployment(
       region: BackendRegion.china,
@@ -139,7 +138,9 @@ class BackendDeployment {
       region == BackendRegion.international &&
       id == legacyGlobal.id &&
       httpsOrigin(supabaseUrl) == legacyUrl;
+  // CN RDS cutover starts fresh auth/config state; local AccountWorkspace
+  // ownership uses its original region/id/origin/UUID tuple independently.
   String get namespace =>
       '${region.name}.$id.${Uri.encodeComponent(Uri.parse(supabaseUrl).origin)}'
-      '.${const String.fromEnvironment('PW_AUTH_NAMESPACE_GENERATION')}';
+      '${region == BackendRegion.china && id == 'cn-primary' ? '.rds20261104' : ''}';
 }

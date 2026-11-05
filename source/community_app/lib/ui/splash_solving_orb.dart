@@ -37,8 +37,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../l10n/app_localizations.dart';
-
 const int _latRings = 9;
 const int _lonDensity = 24;
 const int _moveCount = 14;
@@ -130,7 +128,7 @@ class _SplashSolvingOrbState extends State<SplashSolvingOrb>
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: AppL10n.of(context).splashSolving,
+      label: 'Solving',
       image: true,
       container: true,
       child: SizedBox.square(
@@ -496,7 +494,7 @@ class _SplashDirectLineFieldState extends State<SplashDirectLineField>
   Widget build(BuildContext context) {
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     return Semantics(
-      label: AppL10n.of(context).splashSolving,
+      label: 'Solving',
       image: true,
       container: true,
       child: SizedBox.expand(

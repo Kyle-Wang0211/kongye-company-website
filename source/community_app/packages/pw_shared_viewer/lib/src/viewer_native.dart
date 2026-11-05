@@ -226,9 +226,21 @@ class _SharedViewerState extends State<SharedViewer>
     }
     final controller =
         _leased && _presentationDrained ? session?.webViewController : null;
-    return controller == null
-        ? const ColoredBox(color: Color(0xff000000))
-        : WebViewWidget(controller: controller);
+    if (controller == null) return const ColoredBox(color: Color(0xff000000));
+    final surface = WebViewWidget(controller: controller);
+    final gate = widget.pointerEventsEnabledNotifier;
+    if (gate == null) {
+      return IgnorePointer(
+          ignoring: !widget.pointerEventsEnabled, child: surface);
+    }
+    return ValueListenableBuilder<bool>(
+      valueListenable: gate,
+      child: surface,
+      builder: (context, enabled, child) => IgnorePointer(
+        ignoring: !widget.pointerEventsEnabled || !enabled,
+        child: child,
+      ),
+    );
   }
 
   @override

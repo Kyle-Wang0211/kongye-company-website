@@ -1,5 +1,5 @@
-import {t} from './site-l10n.mjs?v=publication-framing-20261106-v38';
-export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=publication-framing-20261106-v38';
+import {t} from './site-l10n.mjs?v=shared-community-20261106-v40';
+export {t, currentLocale, localizeElement, initSiteLocale, localeReady, localeEvent} from './site-l10n.mjs?v=shared-community-20261106-v40';
 export function translatedError(key){const error=new Error(t(key));error.localeKey=key;return error;}
 export function feedUrl(origin, cursor) {
   const url = new URL('/rest/v1/works', origin);

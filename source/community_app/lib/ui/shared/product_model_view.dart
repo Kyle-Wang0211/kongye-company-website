@@ -15,6 +15,7 @@ import 'browser_model_transport.dart';
 import '../../community/shared_viewer_model_path.dart';
 import '../../util/device_log.dart';
 import '../../l10n/app_localizations.dart';
+import '../../dense/pw38_generated_consumer_leases.dart';
 
 /// Product operations exposed without a platform renderer implementation.
 class ProductViewerCapture {
@@ -81,6 +82,7 @@ class ProductModelView extends StatefulWidget {
     this.communitySessions,
     this.onError,
     this.onViewerReady,
+    this.onControllerFrameReady,
     this.onIdealAspectRatio,
     this.onSurfacePicked,
     this.onSurfaceMarkerSelected,
@@ -118,6 +120,7 @@ class ProductModelView extends StatefulWidget {
   final ValueChanged<Uint8List>? onStillFrame;
   final ValueChanged<Object>? onError;
   final ValueChanged<ProductViewerCapture>? onViewerReady;
+  final ValueChanged<SharedViewerController>? onControllerFrameReady;
   final ValueChanged<double>? onIdealAspectRatio;
   final ValueChanged<SharedSurfaceAnchor>? onSurfacePicked;
   final ValueChanged<String>? onSurfaceMarkerSelected;
@@ -185,6 +188,7 @@ class _ProductModelViewState extends State<ProductModelView>
   VoidCallback? _firstFrameCallbackForLoad;
   ValueChanged<Uint8List>? _stillFrameCallbackForLoad;
   ValueChanged<ProductViewerCapture>? _viewerReadyCallbackForLoad;
+  ValueChanged<SharedViewerController>? _controllerFrameCallbackForLoad;
   ValueChanged<double>? _aspectCallbackForLoad;
   int _notifiedAspectEpoch = -1;
   MemoryImage? _frame;
@@ -242,7 +246,8 @@ class _ProductModelViewState extends State<ProductModelView>
     WidgetsBinding.instance.addObserver(this);
     _prepareController();
     final state = WidgetsBinding.instance.lifecycleState;
-    _foreground = state == null ||
+    _foreground =
+        state == null ||
         state == AppLifecycleState.resumed ||
         (kIsWeb && state == AppLifecycleState.inactive);
   }
@@ -433,7 +438,8 @@ class _ProductModelViewState extends State<ProductModelView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // A focused iframe makes the outer Flutter page inactive while it remains
     // visible. Keep drawing so OrbitControls can repaint the drag it receives.
-    final foreground = state == AppLifecycleState.resumed ||
+    final foreground =
+        state == AppLifecycleState.resumed ||
         (kIsWeb && state == AppLifecycleState.inactive);
     if (_foreground == foreground) return;
     setState(() => _foreground = foreground);
@@ -646,11 +652,19 @@ class _ProductModelViewState extends State<ProductModelView>
     _firstFrameCallbackForLoad = widget.onFirstFrameReady;
     _stillFrameCallbackForLoad = widget.onStillFrame;
     _viewerReadyCallbackForLoad = widget.onViewerReady;
+    _controllerFrameCallbackForLoad = widget.onControllerFrameReady;
     _aspectCallbackForLoad = widget.onIdealAspectRatio;
     final url = widget.modelUrl;
     _modelContentHash = null;
+    Pw38GeneratedReadLease? generatedRead;
     try {
       final uri = Uri.parse(url);
+      if (!kIsWeb && (uri.scheme.isEmpty || uri.scheme == 'file')) {
+        generatedRead = Pw38GeneratedConsumerLeases.instance.acquire(
+          uri.scheme.isEmpty ? url : uri.toFilePath(),
+          'ProductModelView.load',
+        );
+      }
       final format = switch (uri.path.toLowerCase()) {
         final path when path.endsWith('.ply') => SharedModelFormat.ply,
         final path when path.endsWith('.skp') => SharedModelFormat.skp,
@@ -784,19 +798,30 @@ class _ProductModelViewState extends State<ProductModelView>
         _scheduleCapture(immediate: true);
       }
     } finally {
+      // loadLocalFile joins the server's admitted file requests even if the
+      // renderer is detached or times out. Widget disposal alone is not ACK.
+      generatedRead?.release();
       if (_loadingEpoch == epoch) _loadingEpoch = null;
     }
   }
 
   Future<void> _applyInitialView(int epoch) async {
-    if (_disposed || epoch != _epoch || _initialViewAttemptedEpoch == epoch) return;
+    if (_disposed || epoch != _epoch || _initialViewAttemptedEpoch == epoch) {
+      return;
+    }
     final initialView = widget.initialView;
-    if (initialView == null || initialView['schema'] != 'pw.camera-framing.v1' ||
-        _modelContentHash == null || initialView['asset_sha256'] != _modelContentHash) return;
+    if (initialView == null ||
+        initialView['schema'] != 'pw.camera-framing.v1' ||
+        _modelContentHash == null ||
+        initialView['asset_sha256'] != _modelContentHash) {
+      return;
+    }
     _initialViewAttemptedEpoch = epoch;
     // An opening-card seed may precede the server descriptor. Never move a
     // camera the user has already adjusted while that metadata was arriving.
-    if (_controller.state['userHasInteracted'] == true || _userTookControl) return;
+    if (_controller.state['userHasInteracted'] == true || _userTookControl) {
+      return;
+    }
     try {
       await _controller.setCameraFraming(initialView);
     } catch (_) {
@@ -836,6 +861,11 @@ class _ProductModelViewState extends State<ProductModelView>
         _firstFrameCallbackForLoad?.call();
       } catch (error) {
         debugPrint('[ProductModelView] first-frame callback: $error');
+      }
+      try {
+        _controllerFrameCallbackForLoad?.call(_controller);
+      } catch (error) {
+        debugPrint('[ProductModelView] controller-frame callback: $error');
       }
       try {
         _viewerReadyCallbackForLoad?.call(_capture);
@@ -943,6 +973,7 @@ class _ProductModelViewState extends State<ProductModelView>
       final result = await _rendererCapture(
         type: 'image/jpeg',
         quality: quality,
+        canonicalCamera: !kIsWeb,
       );
       if (_disposed ||
           epoch != _epoch ||
@@ -959,6 +990,7 @@ class _ProductModelViewState extends State<ProductModelView>
 
   Future<Object?> _rendererCapture({
     String type = 'image/png',
+    bool canonicalCamera = false,
     double? quality,
   }) {
     // Includes thumbnail requests: there is never more than one bridge capture
@@ -985,7 +1017,11 @@ class _ProductModelViewState extends State<ProductModelView>
         );
         if (stale()) return null;
       }
-      return _controller.capture(type: type, quality: quality);
+      return _controller.capture(
+        type: type,
+        quality: quality,
+        canonicalCamera: canonicalCamera,
+      );
     });
     _captureQueue = result.then<void>((_) {}, onError: (Object _) {});
     return result;

@@ -1,0 +1,294 @@
+// pipeline_eta.dart — the wait countdown for a multi-stage on-device job (sparse finalize today; dense and
+// mesh plug in with their own stages).
+//
+// Source boundary:
+//  - NinjaProgressPrediction is the pinned official Ninja arithmetic port.
+//  - This class adapts product stage/unit events and the per-device last-run log
+//    into that predictor; it is integration code, not an official MVS ETA model.
+//  - countdownAt is a product display adapter: refresh on actual progress, then
+//    subtract elapsed time between observations. It is not a SOTA replication.
+//  - labelAt/committed and the coarse +10% ruler below are retained historical
+//    telemetry from the former 2026-09-15 display policy, superseded by the
+//    user's real-time countdown instruction on 2026-10-19. The old ruler does
+//    not validate this countdown's accuracy or promise a completion deadline.
+// No explicit temperature, foreground/background or image-quality coefficients
+// are present. Their observed runtime effects may change later event estimates.
+//
+// Sequential-stage accounting: units finish in event order; a batch of k units reported at once shares the
+// interval since the previous event evenly (the sum of edge times equals the wall interval, which is what
+// Ninja's cpu_time_millis_ sums).
+import 'eta_prior_log.dart';
+import 'ninja_progress_prediction.dart';
+
+class EtaStage {
+  const EtaStage(this.id, this.units);
+  final String id;
+  final int units;
+}
+
+/// The committed coarse label. [minutes] == 0 means "under a minute".
+class EtaLabel {
+  const EtaLabel(this.minutes) : remainingSeconds = null;
+  EtaLabel.countdown(int seconds)
+    : remainingSeconds = seconds,
+      minutes = (seconds / 60).ceil();
+  final int minutes;
+
+  /// Live seconds, or null for the legacy coarse telemetry bucket.
+  final int? remainingSeconds;
+
+  static EtaLabel bucket(double etaSec) =>
+      etaSec < 60 ? const EtaLabel(0) : EtaLabel((etaSec / 60).ceil());
+
+  double get lowerBoundSec => minutes == 0 ? 0 : (minutes - 1) * 60.0;
+  double get upperBoundSec => minutes == 0 ? 60 : minutes * 60.0;
+
+  @override
+  bool operator ==(Object other) =>
+      other is EtaLabel &&
+      other.minutes == minutes &&
+      other.remainingSeconds == remainingSeconds;
+  @override
+  int get hashCode => Object.hash(minutes, remainingSeconds);
+  @override
+  String toString() =>
+      minutes == 0 ? 'EtaLabel(<1 min)' : 'EtaLabel(~$minutes min)';
+}
+
+enum EtaVerdict { ok, early, late, uncommitted }
+
+class EtaRulerResult {
+  const EtaRulerResult({
+    required this.verdict,
+    required this.label,
+    required this.committedEtaSec,
+    required this.actualSec,
+    required this.totalSec,
+  });
+  final EtaVerdict verdict;
+  final EtaLabel? label;
+  final double? committedEtaSec;
+
+  /// Wall seconds from the commit to the finish (null when never committed).
+  final double? actualSec;
+  final double totalSec;
+  bool get pass => verdict == EtaVerdict.ok;
+
+  Map<String, Object?> toTelemetry() => {
+    'verdict': verdict.name,
+    'label_min': label?.minutes,
+    'committed_eta_s': committedEtaSec,
+    'actual_s': actualSec,
+    'total_s': totalSec,
+  };
+}
+
+/// Komatsu et al. CHI 2024: +10 % is below the perceptual threshold.
+const double kEtaLateToleranceFraction = 0.10;
+
+class PipelineEta {
+  PipelineEta({
+    required List<EtaStage> stages,
+    required EtaPriorLog priors,
+    required this.startMs,
+  }) : _stages = List.of(stages),
+       _priors = priors {
+    for (final s in _stages) {
+      final prior = priors.priorUnitMs(s.id);
+      _priorUnitMs[s.id] = prior;
+      _done[s.id] = 0;
+      for (var i = 0; i < s.units; i++) {
+        _ninja.edgeAddedToPlan(prior);
+      }
+    }
+    _lastEndMs = startMs;
+  }
+
+  final List<EtaStage> _stages;
+  final EtaPriorLog _priors;
+  final int startMs;
+  final _ninja = NinjaProgressPrediction();
+  final Map<String, int> _priorUnitMs = {};
+  final Map<String, int> _done = {};
+  final Map<String, int> _stageStartMs = {};
+  final Map<String, int> _stageEndMs = {};
+  int _lastEndMs = 0;
+
+  EtaLabel? _committed;
+  int? _committedAtMs;
+  double? _committedEtaSec;
+  bool _finished = false;
+  int _revision = 0, _countdownRevision = -1;
+  int? _countdownAtMs;
+  double? _countdownSeconds;
+  int? _lastCountdownReadMs;
+
+  List<EtaStage> get stages => _stages;
+  EtaLabel? get committed => _committed;
+  int? get committedAtMs => _committedAtMs;
+  double? get committedEtaSec => _committedEtaSec;
+  bool get finished => _finished;
+  int unitsDone(String stageId) => _done[stageId] ?? 0;
+
+  EtaStage? _stage(String id) {
+    for (final s in _stages) {
+      if (s.id == id) return s;
+    }
+    return null;
+  }
+
+  /// Corrects a stage's unit count. Before any of its units finished the count
+  /// may go either way; once the stage is in progress it may only GROW (Ninja's
+  /// plan is mutable exactly this way: EdgeAddedToPlan / EdgeRemovedFromPlan,
+  /// status_printer.cc L91-116; finished edges are never removed). Used when a
+  /// phase's real total is only known when it starts, and for the global-BA
+  /// stage whose rounds are discovered one by one. A committed label is never
+  /// revisited.
+  void setUnits(String stageId, int units) {
+    if (_finished || units < 0) return;
+    final idx = _stages.indexWhere((s) => s.id == stageId);
+    if (idx < 0) return;
+    final cur = _stages[idx].units;
+    final done = _done[stageId] ?? 0;
+    if (units == cur || (done > 0 && units < cur)) return;
+    final prior = _priorUnitMs[stageId]!;
+    if (units > cur) {
+      for (var i = cur; i < units; i++) {
+        _ninja.edgeAddedToPlan(prior);
+      }
+    } else {
+      for (var i = units; i < cur; i++) {
+        _ninja.edgeRemovedFromPlan(prior);
+      }
+    }
+    _stages[idx] = EtaStage(stageId, units);
+    _revision++;
+    if (units > 0 && done >= units) _stageEndMs[stageId] ??= _lastEndMs;
+  }
+
+  /// Cumulative units finished for [stageId] as of [nowMs]. Idempotent for repeated counts.
+  void markUnits(String stageId, int doneUnits, int nowMs) {
+    if (_finished) return;
+    final s = _stage(stageId);
+    if (s == null) return;
+    final prev = _done[stageId]!;
+    final target = doneUnits.clamp(0, s.units);
+    final k = target - prev;
+    if (k <= 0) return;
+    if (nowMs < _lastEndMs) nowMs = _lastEndMs;
+    _stageStartMs.putIfAbsent(stageId, () => _lastEndMs);
+    final span = nowMs - _lastEndMs;
+    final prior = _priorUnitMs[stageId]!;
+    for (var i = 0; i < k; i++) {
+      final a = _lastEndMs + (span * i) ~/ k;
+      final b = _lastEndMs + (span * (i + 1)) ~/ k;
+      _ninja.buildEdgeFinished(prior, a - startMs, b - startMs);
+    }
+    _lastEndMs = nowMs;
+    _done[stageId] = target;
+    _revision++;
+    if (target == s.units) _stageEndMs[stageId] = nowMs;
+  }
+
+  void markStageDone(String stageId, int nowMs) {
+    final s = _stage(stageId);
+    if (s == null) return;
+    if (s.units == 0) {
+      _stageStartMs.putIfAbsent(stageId, () => _lastEndMs);
+      _stageEndMs[stageId] = nowMs;
+      return;
+    }
+    markUnits(stageId, s.units, nowMs);
+  }
+
+  /// Ninja's %E at [nowMs] (BuildEdgeStarted sets time_millis_ = now for the running edge). null = "?".
+  double? etaSeconds(int nowMs) {
+    if (_finished) return 0;
+    _ninja.buildEdgeStarted(
+      (nowMs < _lastEndMs ? _lastEndMs : nowMs) - startMs,
+    );
+    final eta = _ninja.etaSeconds();
+    _ninja
+        .runningEdges--; // undo the bookkeeping of the pseudo-start (Ninja counts it per real edge)
+    _ninja.startedEdges--;
+    return eta;
+  }
+
+  /// Live display adapter around the unchanged official Ninja prediction.
+  /// Re-estimate only when actual completed work or the plan changes. Between
+  /// these observations, subtract elapsed time from that estimate: repeatedly
+  /// calling Ninja with the same completed work would increase its wall-time
+  /// extrapolation, which is a progress estimate rather than a countdown.
+  /// An exhausted/unavailable estimate means "estimating", never a false zero.
+  /// Callers should pass a monotonic job clock; backward values are clamped.
+  EtaLabel? countdownAt(int nowMs) {
+    if (_finished) return EtaLabel.countdown(0);
+    if (nowMs < _lastEndMs) nowMs = _lastEndMs;
+    if (_lastCountdownReadMs != null && nowMs < _lastCountdownReadMs!) {
+      nowMs = _lastCountdownReadMs!;
+    }
+    _lastCountdownReadMs = nowMs;
+    if (_countdownRevision != _revision) {
+      _countdownRevision = _revision;
+      _countdownAtMs = _lastEndMs;
+      _countdownSeconds = etaSeconds(_lastEndMs);
+      // Keep the original ruler as historical telemetry, not the UI value.
+      labelAt(nowMs);
+    }
+    final seconds = _countdownSeconds;
+    if (seconds == null || !seconds.isFinite || seconds <= 0) return null;
+    final remaining = seconds - (nowMs - _countdownAtMs!) / 1000;
+    if (remaining <= 0) return null;
+    return EtaLabel.countdown(remaining.ceil());
+  }
+
+  /// Legacy first prediction for historical ruler telemetry; use countdownAt
+  /// for the user-facing live remaining time.
+  EtaLabel? labelAt(int nowMs) {
+    if (_committed != null) return _committed;
+    final eta = etaSeconds(nowMs);
+    if (eta == null) return null;
+    _committed = EtaLabel.bucket(eta);
+    _committedAtMs = nowMs;
+    _committedEtaSec = eta;
+    return _committed;
+  }
+
+  /// Job done: records each stage's actual duration into the prior log (Ninja writes its log after the build)
+  /// and returns the ruler verdict for the committed label.
+  EtaRulerResult finish(int nowMs) {
+    _finished = true;
+    for (final s in _stages) {
+      final a = _stageStartMs[s.id], b = _stageEndMs[s.id];
+      if (a == null || b == null || s.units <= 0) continue;
+      _priors.record(s.id, units: s.units, ms: b - a);
+    }
+    final totalSec = (nowMs - startMs) / 1e3;
+    final label = _committed;
+    if (label == null) {
+      return EtaRulerResult(
+        verdict: EtaVerdict.uncommitted,
+        label: null,
+        committedEtaSec: null,
+        actualSec: null,
+        totalSec: totalSec,
+      );
+    }
+    final actual = (nowMs - _committedAtMs!) / 1e3;
+    final EtaVerdict v;
+    if (actual < label.lowerBoundSec) {
+      v = EtaVerdict.early;
+    } else if (actual > label.upperBoundSec * (1 + kEtaLateToleranceFraction)) {
+      v = EtaVerdict.late;
+    } else {
+      v = EtaVerdict.ok;
+    }
+    return EtaRulerResult(
+      verdict: v,
+      label: label,
+      committedEtaSec: _committedEtaSec,
+      actualSec: actual,
+      totalSec: totalSec,
+    );
+  }
+}

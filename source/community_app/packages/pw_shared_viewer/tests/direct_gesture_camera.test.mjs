@@ -49,7 +49,7 @@ function fixture(){
     getBoundingClientRect:()=>({left:0,top:0,width:320,height:200})};
   const api={THREE,OrbitControls:Controls,GLTFLoader:Loader,PLYLoader:Loader};
   const viewer=createViewerWithDependencies(canvas,{pixelRatio:2},api);
-  return {viewer,pending,canvas,renderer,camera,controls,pointerEvents};
+  return {viewer,pending,canvas,renderer,camera,get controls(){return controls;},pointerEvents};
 }
 function glb(){
   const scene=new Object3D();const texture={isTexture:true,image:{width:8,height:8},disposals:0,dispose(){this.disposals++;}};
@@ -94,4 +94,83 @@ test('wheel zoom stops on its input event and touch stops preview autorotation',
   assert.equal(viewer.getState().autoRotate,false);
   for(let i=1;i<=90;i++){renderer.loop(i*20);assert.deepEqual(viewer.getState().camera,after);assert.equal(camera.zoom,zoom);}
   viewer.dispose();
+});
+
+test('capture pinhole survives real upstream controls and a rolled camera',async()=>{
+ const f=fixture();const {viewer,pending,camera}=f;viewer.resize(320,720,1);
+ const input={position:[2,3,20],target:[2,3,4],up:[-0.6,0.8,0],
+   focalPixels:410,principalX:147,principalY:280};
+ const geom=new Geometry();const original=Array.from(geom.getAttribute('position').array);
+ const load=viewer.load({url:'capture.ply',format:'ply',initialCaptureCamera:input});
+ pending.get('capture.ply').resolve(geom);await load;
+ assert.deepEqual(camera.position.toArray(),input.position);
+ const point=new Vec(4,5,4).project(camera);
+ // right=(.8,.6,0), up=(-.6,.8,0), forward=(0,0,-1).
+ assert.ok(Math.abs((point.x+1)*160-(147+410*2.8/16))<1e-8);
+ assert.ok(Math.abs((1-point.y)*360-(280-410*0.4/16))<1e-8);
+ assert.deepEqual(Array.from(geom.getAttribute('position').array),original);
+ const controls=f.controls;
+ const before=camera.position.clone();
+ const ev=(x,y)=>({pointerId:1,pointerType:'mouse',button:0,
+   clientX:x,clientY:y,pageX:x,pageY:y,ctrlKey:false,metaKey:false,shiftKey:false,preventDefault(){}});
+ controls._onPointerDown(ev(120,80));controls._onPointerMove(ev(121,80));controls._onPointerUp(ev(121,80));
+ const expected=before.clone().sub(controls.target).applyQuaternion(
+   new RealTHREE.Quaternion().setFromAxisAngle(new Vec(...input.up),-2*Math.PI/200)).add(controls.target);
+ assert.ok(camera.position.distanceTo(expected)<1e-8,'first drag must orbit in the capture up basis');
+ const current=camera.position.clone();viewer.resize(393,756,1);
+ assert.ok(camera.position.distanceTo(current)<1e-12,'resize must preserve user orbit');
+ camera.updateMatrixWorld();
+ const origin=new Vec(...input.target).project(camera);
+ assert.ok(Math.abs((origin.x+1)*393/2-input.principalX)<1e-8);
+ assert.ok(Math.abs((1-origin.y)*756/2-input.principalY)<1e-8);
+ viewer.dispose();
+});
+
+test('small-extent distant capture stays in clip/control range through real updates',async()=>{
+ const f=fixture();const {viewer,pending,camera}=f;viewer.resize(393,756,1);
+ const input={position:[0,0,0],target:[0,0,-10],up:[0,1,0],focalPixels:410,principalX:196.5,principalY:378};
+ const geom=new Geometry();geom.setAttribute('position',new RealTHREE.Float32BufferAttribute([0,0,-10,.001,0,-10],3));
+ const original=Array.from(geom.getAttribute('position').array);
+ const load=viewer.load({url:'small-far.ply',format:'ply',initialCaptureCamera:input});
+ pending.get('small-far.ply').resolve(geom);await load;
+ const controls=f.controls;
+ assert.ok(camera.near>0 && camera.near<10 && camera.far>10);
+ assert.ok(controls.minDistance<10 && controls.maxDistance>10);
+ for(let n=0;n<30;n++) {
+   controls.update();camera.updateMatrixWorld();
+   assert.ok(camera.position.distanceTo(new Vec(...input.position))<1e-12);
+   assert.deepEqual(controls.target.toArray(),input.target);
+   for(const point of [[0,0,-10],[.001,0,-10]]) {
+     const projected=new Vec(...point).project(camera);
+     assert.ok(projected.z>=-1 && projected.z<=1,'capture points must remain between clip planes');
+   }
+ }
+ assert.deepEqual(Array.from(geom.getAttribute('position').array),original);
+ viewer.dispose();
+});
+
+test('native capture projection restores after publication selection and clears for saved perspective', async () => {
+  const f = fixture();
+  f.viewer.resize(320, 720, 1);
+  const capture = {position:[2,3,20],target:[2,3,4],up:[-0.6,0.8,0],
+    focalPixels:410,principalX:147,principalY:280};
+  const loading = f.viewer.load({url:'union.glb',format:'glb',initialCaptureCamera:capture});
+  f.pending.get('union.glb').resolve(glb());
+  await loading;
+  const projection = f.camera.projectionMatrix.toArray();
+  f.viewer.beginSelectionEditing(4);
+  assert.equal(f.viewer.getState().camera.orthographic, true);
+  f.viewer.endSelectionEditing();
+  assert.deepEqual(f.camera.projectionMatrix.toArray(), projection);
+  f.viewer.resize(393, 756, 1);
+  const origin = new Vec(...capture.target).project(f.camera);
+  assert.ok(Math.abs((origin.x+1)*393/2-capture.principalX)<1e-8);
+  const saved = {projection:'perspective',position:[12,8,16],target:[1,2,3],
+    up:[0,1,0],fov_y_degrees:55,aspect:1.5};
+  f.viewer.setCameraFraming(saved);
+  assert.equal(f.camera.view?.enabled ?? false, false);
+  f.viewer.resize(600, 400, 1);
+  assert.equal(f.camera.fov, 55);
+  assert.deepEqual(f.viewer.getCameraFraming().position, saved.position);
+  f.viewer.dispose();
 });

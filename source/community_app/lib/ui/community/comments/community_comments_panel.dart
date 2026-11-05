@@ -36,6 +36,7 @@ class CommunityCommentsPanel extends StatefulWidget {
     this.onCommentSelected,
     this.onVisibleCommentsChanged,
     this.onCommentSubmitted,
+    this.onPublicCountChanged,
     this.onModerationCaseSelected,
     this.refreshInterval = const Duration(seconds: 30),
     this.active = true,
@@ -57,6 +58,9 @@ class CommunityCommentsPanel extends StatefulWidget {
   final ValueChanged<List<CommunityComment>>? onVisibleCommentsChanged;
   final void Function(CommunityComment, CommunityCommentAnchor?)?
   onCommentSubmitted;
+
+  /// Server total, independent of loaded pages and personal hiding.
+  final ValueChanged<int>? onPublicCountChanged;
   final CommunityCommentImagePicker? imagePicker;
   final ValueChanged<String>? onModerationCaseSelected;
 
@@ -221,6 +225,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   int _generation = 0;
   int _loadToken = 0;
   int _publicCount = 0;
+  int? _notifiedPublicCount;
+  int _notifiedPublicCountGeneration = -1;
   bool get _canComment =>
       widget.currentUserId != null && _page?.canComment == true;
   bool get _withinTextLimit => CommunityCommentDraft.allowsText(_text.text);
@@ -426,10 +432,18 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     _reportRevision.value++;
     final generation = _generation;
     final token = _loadToken;
-    final rows = List<CommunityComment>.unmodifiable(_visibleComments);
+    final rows = List<CommunityComment>.unmodifiable(_ranked(_visibleComments));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_current(generation) && token == _loadToken) {
         widget.onVisibleCommentsChanged?.call(rows);
+        if (_current(generation) &&
+            _page != null &&
+            (_notifiedPublicCountGeneration != generation ||
+                _notifiedPublicCount != _publicCount)) {
+          _notifiedPublicCountGeneration = generation;
+          _notifiedPublicCount = _publicCount;
+          widget.onPublicCountChanged?.call(_publicCount);
+        }
       }
     });
   }
@@ -1073,12 +1087,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   // The server applies this order to the complete visible set before paging.
   // Keep local mutations in the same order while preserving the server cursor.
   List<CommunityComment> _ranked(Iterable<CommunityComment> comments) =>
-      comments.toList()..sort((a, b) {
-        final likes = b.likesCount.compareTo(a.likesCount);
-        if (likes != 0) return likes;
-        final time = b.createdAt.compareTo(a.createdAt);
-        return time != 0 ? time : b.id.compareTo(a.id);
-      });
+      comments.toList()..sort(compareCommunityComments);
 
   Widget _list() {
     if (_visibilityError != null) {
@@ -1461,7 +1470,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                         tooltip: personalHidden
                             ? (_chinese ? '恢复此评论' : 'Show this comment')
                             : (_chinese
-                                  ? '不喜欢，仅对你隐藏'
+                                  ? '不喜欢，仅对您隐藏'
                                   : 'Dislike, hide for you'),
                         onPressed: _busyComments.contains(comment.id)
                             ? null

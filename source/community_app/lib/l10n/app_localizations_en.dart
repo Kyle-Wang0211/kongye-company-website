@@ -3677,4 +3677,96 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get siteScreenStage => 'Featured screens';
+
+  @override
+  String get reportHistoryLoading => 'Loading reports';
+
+  @override
+  String get reportHistoryNotice =>
+      'Only reports you submitted are shown. Platform notifications confirm outcomes.';
+
+  @override
+  String get reportRecordId => 'Report ID';
+
+  @override
+  String get reportRecordReason => 'Reason';
+
+  @override
+  String get reportRecordOutcome => 'Outcome';
+
+  @override
+  String get reportOutcomeUnavailable => 'No outcome yet';
+
+  @override
+  String get reportAppealAction => 'Submit appeal';
+
+  @override
+  String get reportAppealUnavailable =>
+      'Online appeals are currently unavailable.';
+
+  @override
+  String get reportAppealSubmitted =>
+      'Appeal submitted. Watch for a platform notification.';
+
+  @override
+  String get reportStatusClosed => 'Closed';
+
+  @override
+  String get reportStatusUnknown => 'Status unconfirmed';
+
+  @override
+  String get reportAppealRequired => 'Enter an appeal explanation';
+
+  @override
+  String get reportAppealFailed => 'Appeal submission failed. Try again.';
+
+  @override
+  String get reportAppealExplanation => 'Appeal explanation';
+
+  @override
+  String get reportAppealPrivacy =>
+      'Do not include passwords, identity document numbers or other sensitive information.';
+
+  @override
+  String get reportAppealSubmitting => 'Submitting…';
+
+  @override
+  String get reportAppealSubmit => 'Submit';
+
+  @override
+  String get authPolicyConsentLabel => 'I have read and agree to';
+
+  @override
+  String get webSettingsLanguage => 'Language';
+
+  @override
+  String get webSettingsHelp => 'Help';
+
+  @override
+  String get webHelpTitle => 'Help & contact';
+
+  @override
+  String get webHelpViewQuestion => 'How do I view a 3D work?';
+
+  @override
+  String get webHelpViewAnswer =>
+      'Open a work from its cover. Drag to rotate and use the mouse wheel or pinch to zoom.';
+
+  @override
+  String get webHelpPublishQuestion =>
+      'Why is my published work not visible yet?';
+
+  @override
+  String get webHelpPublishAnswer =>
+      'Works appear in the community after review. Check the processing status in your publication history.';
+
+  @override
+  String get webHelpAccountQuestion => 'What can I do after signing in?';
+
+  @override
+  String get webHelpAccountAnswer =>
+      'Sign in to publish, like, save and comment on works, follow creators and send private messages.';
+
+  @override
+  String get webHelpContactLabel => 'Contact support';
 }

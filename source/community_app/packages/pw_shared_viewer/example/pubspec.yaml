@@ -1,0 +1,18 @@
+name: pw_shared_viewer_host_example
+description: Local shared-viewer host integration fixture; not a production app.
+publish_to: none
+version: 0.1.0
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  pw_shared_viewer:
+    path: ../
+  web: 1.1.1
+  crypto: 3.0.7
+  dio: 5.9.2
+  path_provider: 2.1.5
+  liquid_glass_renderer: 0.2.0-dev.4
+flutter:
+  uses-material-design: true

@@ -20,6 +20,7 @@ import '../storage/signed_upload_broker.dart';
 import 'community_cover_processor.dart';
 import 'feed_models.dart';
 import 'publication_cover_url.dart';
+import 'public_work_repository.dart';
 
 /// How the community feed is ordered.
 ///   • recent  → published_at desc (the "发现 / Discover" tab).
@@ -176,7 +177,7 @@ class CommunityService {
         .select(
           'id, user_id, title, description, format, '
           'model_storage_path, thumbnail_storage_path, initial_view, '
-          'file_size_bytes, likes_count, views_count, published_at, '
+          'file_size_bytes, likes_count, comments_count, views_count, published_at, '
           'publish_region',
         )
         .eq('visibility', 'public')
@@ -292,10 +293,13 @@ class CommunityService {
         description: w['description'] as String?,
         format: (w['format'] as String?) ?? 'glb',
         modelStoragePath: w['model_storage_path'] as String?,
-        initialView: w['initial_view'] is Map ? Map<String, dynamic>.from(w['initial_view'] as Map) : null,
+        initialView: w['initial_view'] is Map
+            ? Map<String, dynamic>.from(w['initial_view'] as Map)
+            : null,
         thumbnailStoragePath: w['thumbnail_storage_path'] as String?,
         fileSizeBytes: (w['file_size_bytes'] as num?)?.toInt(),
         likesCount: (w['likes_count'] as int?) ?? 0,
+        commentCount: (w['comments_count'] as num?)?.toInt() ?? 0,
         viewsCount: (w['views_count'] as int?) ?? 0,
         publishedAt: publishedAtStr == null
             ? null
@@ -378,6 +382,9 @@ class CommunityService {
   /// tell "my own work" from someone else's without reaching for the
   /// Supabase client itself (the feed UI otherwise never touches it).
   String? get currentUserId => _client.auth.currentUser?.id;
+
+  Future<FeedWork> fetchPublicWork(String workId) =>
+      PublicWorkRepository(_client).fetch(workId);
 
   /// Remove one of the caller's own published works from the community,
   /// including its storage objects.
@@ -554,16 +561,17 @@ class CommunityService {
 
   /// Returns a URL the client can use to fetch the model file.
   ///
-  /// works/ is conditionally readable (public when works.visibility='public',
-  /// else owner-only). For public works getPublicUrl is enough; for
-  /// private works we'd need createSignedUrl. Feed only shows public
-  /// works so the public path is correct here.
+  /// GLB publication artifacts use the guarded delivery endpoint. China also
+  /// supports legacy works paths through the same server-side resolver.
   String modelUrlFor(String path) {
-    if (RegExp(r'^[a-f0-9]{64}/source[.]glb$').hasMatch(path)) {
-      // Final publication assets stay private. The server rechecks current
-      // public visibility/review and issues a60-second signed redirect.
-      // Never route signed/private artifacts through a public CDN.
-      final origin = Uri.parse(_client.rest.url);
+    final origin = Uri.parse(_client.rest.url);
+    final modern = RegExp(r'^[a-f0-9]{64}/source[.]glb$').hasMatch(path);
+    final chinaLegacy =
+        origin.origin == 'https://api.kongye.space' &&
+        path.toLowerCase().endsWith('.glb');
+    if (modern || chinaLegacy) {
+      // The server chooses the bucket and verifies current publication access.
+      // Signed objects stay on this deployment's origin.
       return Uri.parse(origin.origin)
           .replace(
             path: '/functions/v1/publication-model',

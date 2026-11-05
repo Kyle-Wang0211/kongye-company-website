@@ -1094,5 +1094,15 @@
   "navUpload": "Upload work",
   "navFollowingMore": "Load more",
   "navFollowingLoading": "Loading following",
-  "navFollowingRetry": "Retry"
+  "navFollowingRetry": "Retry",
+  "webSettingsLanguage": "Language",
+  "webSettingsHelp": "Help",
+  "webHelpTitle": "Help & contact",
+  "webHelpViewQuestion": "How do I view a 3D work?",
+  "webHelpViewAnswer": "Open a work from its cover. Drag to rotate and use the mouse wheel or pinch to zoom.",
+  "webHelpPublishQuestion": "Why is my published work not visible yet?",
+  "webHelpPublishAnswer": "Works appear in the community after review. Check the processing status in your publication history.",
+  "webHelpAccountQuestion": "What can I do after signing in?",
+  "webHelpAccountAnswer": "Sign in to publish, like, save and comment on works, follow creators and send private messages.",
+  "webHelpContactLabel": "Contact support"
 }

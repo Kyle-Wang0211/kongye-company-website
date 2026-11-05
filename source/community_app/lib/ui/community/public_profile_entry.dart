@@ -1,6 +1,9 @@
+import '../social/community_capabilities.dart';
 import 'package:flutter/material.dart';
 
 import '../../auth/current_user.dart';
+import '../../auth/auth_scope.dart';
+import '../../community/social_profile_repository.dart';
 import '../../community/community_service.dart';
 import '../../community/feed_models.dart';
 import 'public_work_entry.dart' show PublicWorkSignIn;
@@ -15,6 +18,32 @@ import 'work_detail_page.dart';
 Uri publicProfileUri(Uri communityUri, String userId) =>
     communityUri.replace(queryParameters: {'profile': userId}, fragment: '');
 
+/// Shared author navigation keeps native injected repositories and services.
+Widget communityProfilePage(
+  BuildContext context, {
+  required String userId,
+  FeedWork? seedWork,
+  CommunityService? communityService,
+  SocialProfileRepository? repository,
+}) {
+  final user = context.getInheritedWidgetOfExactType<AuthScope>()?.notifier;
+  if (user == null) {
+    return UserProfilePage(
+      userId: userId,
+      seedWork: seedWork,
+      communityService: communityService,
+      repository: repository,
+    );
+  }
+  return PublicProfileEntry(
+    user: user,
+    userId: userId,
+    seedWork: seedWork,
+    communityService: communityService,
+    repository: repository,
+  );
+}
+
 /// Browser wiring around the existing mobile profile, repository and work grid.
 class PublicProfileEntry extends StatefulWidget {
   const PublicProfileEntry({
@@ -22,18 +51,23 @@ class PublicProfileEntry extends StatefulWidget {
     required this.user,
     this.userId,
     this.seedWork,
+    this.communityService,
+    this.repository,
   });
 
   final CurrentUser user;
   final String? userId;
   final FeedWork? seedWork;
+  final CommunityService? communityService;
+  final SocialProfileRepository? repository;
 
   @override
   State<PublicProfileEntry> createState() => _PublicProfileEntryState();
 }
 
 class _PublicProfileEntryState extends State<PublicProfileEntry> {
-  final CommunityService _service = CommunityService();
+  late final CommunityService _service =
+      widget.communityService ?? CommunityService();
   bool _signInPending = false;
   int _profileRevision = 0;
 
@@ -96,6 +130,8 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
                 user: widget.user,
                 userId: work.userId,
                 seedWork: work,
+                communityService: _service,
+                repository: widget.repository,
               ),
             ),
           ),
@@ -112,10 +148,11 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
     key: ValueKey('${widget.userId}:$_profileRevision'),
     userId: widget.userId ?? Uri.base.queryParameters['profile'] ?? '',
     seedWork: widget.seedWork,
+    repository: widget.repository,
     communityService: _service,
     onSignIn: _signIn,
     onExit: _exit,
-    onOpenFavorites: const bool.fromEnvironment('PW_WEB_FAVORITES_ENABLED')
+    onOpenFavorites: CommunityCapabilities.favorites
         ? () => Navigator.of(context).pushNamed('/favorites')
         : null,
     onOpenMessages: () => Navigator.of(context).pushNamed('/messages'),
@@ -127,7 +164,7 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
       ),
     ),
     accountActions: {
-      if (const bool.fromEnvironment('PW_WEB_PROFILES_ENABLED'))
+      if (CommunityCapabilities.profiles)
         _label(context, '编辑资料', 'Edit profile'): () =>
             _openAccount('/profile-edit'),
       _label(context, '发布记录', 'Publications'): () =>

@@ -4,6 +4,9 @@
 // 旋转滑轨要"按当前正对的那个面为底开始旋转",正对 Front/Right 时转轴是
 // 世界 Z/X —— 单一 yaw 表示不了。rot 是行主序 3×3,局部→世界。
 // 设计:docs/superpowers/specs/2026-07-27-selection-region-design.md
+import 'selection_box_storage_stub.dart'
+    if (dart.library.io) 'selection_box_storage_io.dart'
+    as storage;
 import 'dart:math' as math;
 
 const String kSelectionBoxFileName = 'official_selection_box.json';
@@ -264,4 +267,14 @@ class SelectionBox {
     );
   }
 
+  static Future<SelectionBox?> loadFrom(String captureDir) async {
+    final json = await storage.loadSelectionBox(
+      captureDir,
+      kSelectionBoxFileName,
+    );
+    return json == null ? null : fromJson(json);
+  }
+
+  Future<void> saveTo(String captureDir) =>
+      storage.saveSelectionBox(captureDir, kSelectionBoxFileName, toJson());
 }

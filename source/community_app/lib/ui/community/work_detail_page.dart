@@ -34,6 +34,7 @@ import 'public_work_entry.dart' show PublicWorkSignIn;
 import '../design_system.dart';
 import 'aether_cpp_card_demo.dart';
 import 'generated_account_avatar.dart';
+import 'public_profile_entry.dart';
 import 'comments/community_comments_panel.dart';
 import 'comment_moderation_routes.dart';
 import 'user_report_page.dart';
@@ -167,7 +168,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       );
     } finally {
       _signInPending = false;
-      if (mounted) setState(() {});
+      if (mounted) await _refreshLikeIdentity();
     }
   }
 
@@ -422,9 +423,40 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   late int _viewsCount = widget.work.viewsCount;
+  late int _commentsCount = widget.work.commentCount;
   late int _likesCount = math.max(0, widget.work.likesCount);
   late bool _liked = widget.work.likedByMe;
   bool _likeInFlight = false;
+  String? _likeUser;
+  bool _likeIdentityLoading = false;
+  int _likeIdentityEpoch = 0;
+
+  Future<void> _refreshLikeIdentity() async {
+    final service = widget.service;
+    final user = service.currentUserId;
+    if (user == _likeUser || _likeIdentityLoading) return;
+    final epoch = ++_likeIdentityEpoch;
+    final workId = widget.work.id;
+    setState(() => _likeIdentityLoading = true);
+    try {
+      final updated = await service.fetchPublicWork(workId);
+      if (!mounted ||
+          epoch != _likeIdentityEpoch ||
+          !identical(service, widget.service) ||
+          service.currentUserId != user ||
+          widget.work.id != workId) {
+        return;
+      }
+      _likeUser = user;
+      _setLikeState(liked: updated.likedByMe, count: updated.likesCount);
+    } catch (error) {
+      debugPrint('[WorkDetailPage] refresh like identity failed: $error');
+    } finally {
+      if (mounted && epoch == _likeIdentityEpoch) {
+        setState(() => _likeIdentityLoading = false);
+      }
+    }
+  }
 
   void _setLikeState({required bool liked, required int count}) {
     void update() {
@@ -444,11 +476,21 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         likedByMe: _liked,
         likesCount: _likesCount,
         viewsCount: _viewsCount,
+        commentCount: _commentsCount,
       ),
     );
   }
 
   bool _beginToggleLike() {
+    if (widget.service.currentUserId == null) {
+      unawaited(_requestSignIn());
+      return false;
+    }
+    if (_likeIdentityLoading) return false;
+    if (widget.service.currentUserId != _likeUser) {
+      unawaited(_refreshLikeIdentity());
+      return false;
+    }
     if (_likeInFlight) return false;
     final release = widget.service.tryAcquireLikeRequest(widget.work.id);
     if (release == null) return false;
@@ -461,6 +503,13 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     final previousCount = _likesCount;
     final service = widget.service;
     final work = widget.work;
+    final owner = service.currentUserId;
+    final identityEpoch = _likeIdentityEpoch;
+    bool currentIdentity() =>
+        service.currentUserId == owner &&
+        identical(service, widget.service) &&
+        widget.work.id == work.id &&
+        identityEpoch == _likeIdentityEpoch;
     try {
       _likeInFlight = true;
       _setLikeState(
@@ -471,7 +520,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         workId: work.id,
         currentlyLiked: wasLiked,
       );
-      if (nowLiked != _liked) {
+      if (currentIdentity() && nowLiked != _liked) {
         _setLikeState(
           liked: nowLiked,
           count:
@@ -480,12 +529,16 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       }
     } catch (error) {
       debugPrint('[WorkDetailPage] toggleLike failed: $error');
-      _setLikeState(liked: wasLiked, count: previousCount);
+      if (currentIdentity()) {
+        _setLikeState(liked: wasLiked, count: previousCount);
+      }
     } finally {
       try {
-        service.reportLikeResult(
-          work.copyWith(likedByMe: _liked, likesCount: _likesCount),
-        );
+        if (currentIdentity()) {
+          service.reportLikeResult(
+            work.copyWith(likedByMe: _liked, likesCount: _likesCount),
+          );
+        }
       } finally {
         release();
         if (mounted) {
@@ -568,6 +621,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   Future<void> _openReport() async {
+    if (widget.service.currentUserId == null) {
+      await _requestSignIn();
+      return;
+    }
     final repository =
         widget.reportRepository ??
         SupabaseSocialProfileRepository(client: Supabase.instance.client);
@@ -646,6 +703,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   Future<void> _confirmBlock() async {
+    if (widget.service.currentUserId == null) {
+      await _requestSignIn();
+      return;
+    }
     final l = AppL10n.of(context);
     final ok = await showDialog<bool>(
       context: context,
@@ -707,6 +768,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   @override
   void initState() {
     super.initState();
+    _likeUser = widget.service.currentUserId;
     _lastCommentUser = widget.service.currentUserId;
     try {
       _commentAuth = Supabase.instance.client.auth.onAuthStateChange.listen((
@@ -718,6 +780,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             event.event != AuthChangeEvent.signedIn) {
           return;
         }
+        unawaited(_refreshLikeIdentity());
         setState(() {
           _lastCommentUser = user;
           _commentIdentityEpoch++;
@@ -750,6 +813,9 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   void _onLikeResult() {
     final result = widget.service.lastLikeResult.value;
     if (!mounted || result == null || result.id != widget.work.id) return;
+    if (_likeIdentityLoading || widget.service.currentUserId != _likeUser) {
+      return;
+    }
     if (result.likedByMe == _liked && result.likesCount == _likesCount) return;
     // Another surface may finish after this route opens. Its outcome concerns
     // likes only: retain this detail's separately recorded view count.
@@ -759,9 +825,22 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   @override
   void didUpdateWidget(covariant WorkDetailPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.work.id != widget.work.id ||
+        oldWidget.work.commentCount != widget.work.commentCount) {
+      _commentsCount = widget.work.commentCount;
+    }
     final sourceChanged =
         oldWidget.work.id != widget.work.id ||
         oldWidget.work.modelStoragePath != widget.work.modelStoragePath;
+    if (sourceChanged || !identical(oldWidget.service, widget.service)) {
+      _likeIdentityEpoch++;
+      _likeIdentityLoading = false;
+      _likeUser = widget.service.currentUserId;
+      _liked = widget.work.likedByMe;
+      _likesCount = math.max(0, widget.work.likesCount);
+    } else if (_likeUser != widget.service.currentUserId) {
+      unawaited(_refreshLikeIdentity());
+    }
     if (sourceChanged ||
         oldWidget.commentRepository != widget.commentRepository ||
         !identical(oldWidget.service, widget.service) ||
@@ -979,55 +1058,74 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     );
   }
 
-  Widget _commentPanel() => Offstage(
-    offstage: !_floatingCommentsVisible,
-    child: TickerMode(
-      enabled: _commentsOpen || _commentsEnabled,
-      child: DecoratedBox(
-        key: const ValueKey('floating-surface-comments'),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white24),
-          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 20)],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: CommunityCommentsPanel(
-            key: ValueKey(_commentPartition),
-            workId: widget.work.id,
-            workAuthorId: widget.work.userId,
-            active: _commentsOpen || _commentsEnabled,
-            presentationVisible: _floatingCommentsVisible,
-            repository: _commentRepository,
-            requireAssetBinding: true,
-            expectedAssetSha256: _surfaceAssetSha256,
-            imagePicker: widget.commentImagePicker,
-            currentUserId: widget.service.currentUserId,
-            onSignIn:
-                widget.onSignIn != null ||
-                    context.getInheritedWidgetOfExactType<AuthScope>() != null
-                ? _requestSignIn
-                : null,
-            selectedAnchor: _commentAnchor,
-            onPickPoint: _surfaceViewer == null || _surfaceAssetSha256 == null
-                ? null
-                : _pickCommentPoint,
-            onClearAnchor: _clearCommentAnchor,
-            onClose: _closeComments,
-            onCommentSelected: _focusComment,
-            onVisibleCommentsChanged: _commentsChanged,
-            onCommentSubmitted: _commentSubmitted,
-            onModerationCaseSelected: (caseId) => openCommentModerationCase(
-              context,
-              caseId: caseId,
-              repository: widget.commentModerationRepository,
-              userIdReader: () => widget.service.currentUserId,
+  Widget _commentPanel() {
+    final commentIdentityEpoch = _commentIdentityEpoch;
+    return Offstage(
+      offstage: !_floatingCommentsVisible,
+      child: TickerMode(
+        enabled: _commentsOpen || _commentsEnabled,
+        child: DecoratedBox(
+          key: const ValueKey('floating-surface-comments'),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white24),
+            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 20)],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: CommunityCommentsPanel(
+              key: ValueKey(_commentPartition),
+              workId: widget.work.id,
+              workAuthorId: widget.work.userId,
+              active: _commentsOpen || _commentsEnabled,
+              presentationVisible: _floatingCommentsVisible,
+              repository: _commentRepository,
+              requireAssetBinding: true,
+              expectedAssetSha256: _surfaceAssetSha256,
+              imagePicker: widget.commentImagePicker,
+              currentUserId: widget.service.currentUserId,
+              onSignIn:
+                  widget.onSignIn != null ||
+                      context.getInheritedWidgetOfExactType<AuthScope>() != null
+                  ? _requestSignIn
+                  : null,
+              selectedAnchor: _commentAnchor,
+              onPickPoint: _surfaceViewer == null || _surfaceAssetSha256 == null
+                  ? null
+                  : _pickCommentPoint,
+              onClearAnchor: _clearCommentAnchor,
+              onClose: _closeComments,
+              onCommentSelected: _focusComment,
+              onVisibleCommentsChanged: _commentsChanged,
+              onPublicCountChanged: (count) {
+                if (!mounted ||
+                    commentIdentityEpoch != _commentIdentityEpoch ||
+                    count == _commentsCount) {
+                  return;
+                }
+                setState(() => _commentsCount = count);
+                widget.onWorkUpdated?.call(
+                  widget.work.copyWith(
+                    commentCount: count,
+                    likedByMe: _liked,
+                    likesCount: _likesCount,
+                    viewsCount: _viewsCount,
+                  ),
+                );
+              },
+              onCommentSubmitted: _commentSubmitted,
+              onModerationCaseSelected: (caseId) => openCommentModerationCase(
+                context,
+                caseId: caseId,
+                repository: widget.commentModerationRepository,
+                userIdReader: () => widget.service.currentUserId,
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _commentResizeHandle(double width, double maxWidth) {
     final l = AppL10n.of(context);
@@ -1101,10 +1199,13 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   Widget _webCommentsBody(BoxConstraints viewport) {
     final wide = viewport.maxWidth >= 760;
     const dividerWidth = 8.0;
-    // The sidebar never covers the model: reserve a usable 320px viewer.
+    // Keep comments readable on large displays and reserve a usable viewer.
     final maxWidth = math.min(
-      viewport.maxWidth * .5,
-      viewport.maxWidth - dividerWidth - 320,
+      480.0,
+      math.min(
+        viewport.maxWidth * .4,
+        viewport.maxWidth - dividerWidth - 320,
+      ),
     );
     final width = wide
         ? _commentSidebarWidth.clamp(280.0, maxWidth)
@@ -1186,10 +1287,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           onPressed: _leaveWork,
         ),
         actions: [
-          WorkFavoriteEntry(
-            workId: widget.work.id,
-            onSignIn: _requestSignIn,
-          ),
+          WorkFavoriteEntry(workId: widget.work.id, onSignIn: _requestSignIn),
           // Guideline 1.2 wants a report mechanism AND a way to block
           // abusive users; Apple's UGC rejection letters additionally ask
           // for a way for authors to immediately remove their own posts
@@ -1233,13 +1331,26 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                 valueListenable: widget.service.pendingLikeWorkIds,
                 builder: (context, pending, _) => _MetaRow(
                   viewsCount: _viewsCount,
+                  commentsCount: _commentsCount,
                   likesCount: _likesCount,
                   liked: _liked,
                   likeBusy: _likeInFlight || pending.contains(widget.work.id),
                   onLike: _beginToggleLike,
                   author: widget.work.authorDisplayName,
                   authorUserId: widget.work.userId,
-                  onAuthorTap: widget.onAuthorTap,
+                  onAuthorTap:
+                      widget.onAuthorTap ??
+                      () => Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) => communityProfilePage(
+                            context,
+                            userId: widget.work.userId,
+                            seedWork: widget.work,
+                            communityService: widget.service,
+                            repository: widget.reportRepository,
+                          ),
+                        ),
+                      ),
                   description: widget.work.description,
                   onComments: _supportsSurfaceComments ? _showComments : null,
                 ),
@@ -1254,6 +1365,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
 
 class _MetaRow extends StatelessWidget {
   final int viewsCount;
+  final int commentsCount;
   final int likesCount;
   final bool liked;
   final bool likeBusy;
@@ -1266,6 +1378,7 @@ class _MetaRow extends StatelessWidget {
 
   const _MetaRow({
     required this.viewsCount,
+    required this.commentsCount,
     required this.likesCount,
     required this.liked,
     required this.likeBusy,
@@ -1334,7 +1447,9 @@ class _MetaRow extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
                   label: Text(
-                    AppL10n.of(context).commentAll,
+                    '$commentsCount',
+                    semanticsLabel:
+                        '${AppL10n.of(context).commentAll} $commentsCount',
                     style: TextStyle(fontSize: 12),
                   ),
                 ),

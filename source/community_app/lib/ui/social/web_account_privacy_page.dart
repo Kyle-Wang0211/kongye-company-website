@@ -297,7 +297,7 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      _text('管理你的账号', 'Your account'),
+                      _text('管理您的账号', 'Your account'),
                       style: AetherTextStyles.h1,
                     ),
                     const SizedBox(height: 8),

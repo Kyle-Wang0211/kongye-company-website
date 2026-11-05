@@ -27,9 +27,12 @@ class RuleSection {
 }
 
 /// 中文版为准。产品主要面向中国大陆用户,且法定义务依据的是中文法条。
+/// 2026-11-01 草案修订,须与发布功能、公示及用户协议同步启用。
+const String kPlatformRulesRevisionDate = '2026-11-01';
+
 const List<RuleSection> kPlatformRulesZh = [
   RuleSection('一、账号与名称', [
-    '昵称可以重复,ID 全站唯一 —— 这与微信、抖音、小红书的结构一致:昵称用来展示,ID 用来让别人找到你。',
+    '昵称可以重复,ID 全站唯一 —— 这与微信、抖音、小红书的结构一致:昵称用来展示,ID 用来让别人找到您。',
     '昵称最多 20 个字,支持中文、英文与 emoji。首尾空格会被自动去除,中间连续空格会合并为一个。',
     'ID 由 2–32 个小写字母、数字、点或下划线组成,不能以点或下划线开头结尾,也不能出现连续的点或下划线。',
     '昵称与 ID 设置后 3 天内不能再次修改。',
@@ -38,28 +41,28 @@ const List<RuleSection> kPlatformRulesZh = [
     '注册需要通过真实身份信息认证。未完成认证的账号无法发布内容。',
   ]),
   RuleSection('二、作品发布与审核', [
-    '作品发布后进入审核状态,审核通过后才会出现在社区广场,在此之前对其他用户不可见。',
+    '私有云备份与公开发布分开:备份不会自动进入社区。主动提交发布后进入审核状态,审核通过并完成发布后才会出现在社区广场,在此之前对其他用户不可见。',
+    'GLB 发布审核从最终模型生成 26 张多角度渲染图,将标题、描述和这些审核图交由阿里云文字、图片审核;审核图不是原始拍摄照片。当前未支持的格式不能经此流程自动公开。',
+    '发现风险可转人工核查,明确违规退回,服务异常或结果不完整时不自动公开;修改作品内容后需要重新审核。公开发布不等于放弃隐私或他人的合法权益。',
     '作品标题不超过 100 字,作品描述不超过 30 字。',
     '不得发布法律法规禁止的内容,包括危害国家安全、淫秽色情、暴力恐怖、虚假信息、侵犯他人权益等。',
     '拍摄涉及他人的场景并公开发布前,应当取得画面中他人的同意。',
-    '作品的三维模型文件中包含生成方式标识 —— 这是《互联网信息服务深度合成管理规定》第十六条要求的技术措施,不影响你正常使用文件。',
+    '作品的三维模型文件中包含生成方式标识 —— 这是《互联网信息服务深度合成管理规定》第十六条要求的技术措施,不影响您正常使用文件。',
   ]),
   RuleSection('三、违规处置', [
     '发现违规内容或行为时,平台可以采取以下措施:警示提醒、限期改正、限制账号功能、暂停使用、关闭账号。',
     '违规作品会被下架,其文件将从公开位置移出,已保存的链接同时失效。',
-    '你可以随时删除自己的作品。正在审核中且从未公开过的作品同样可以删除。',
+    '您可以申请撤回或删除自己的作品,包括正在审核中且从未公开过的作品。停止公开与文件物理清理分开;审核证据、争议材料及历史备份的限制处理与清理见隐私政策。',
     '账号相关的操作会被记录,保存期限不少于 6 个月。',
   ]),
   RuleSection('四、举报与申诉', [
     '每个作品页面都提供举报入口,可选择垃圾信息、骚扰、仇恨言论、色情内容、暴力、侵权、虚假信息等理由。',
-    '你也可以屏蔽某个用户,屏蔽后其作品不再出现在你的信息流中。',
+    '您也可以屏蔽某个用户,屏蔽后其作品不再出现在您的信息流中。',
     '对处置结果有异议的,可通过下方联系方式申诉。',
   ]),
   RuleSection('五、联系我们', [
-    // 🔴 占位:Apple App Store Guideline 1.2 要求 "Published contact information
-    //    so users can easily reach you",且必须在 App 内与商店页面**都**可达。
-    //    只写在商店页面而 App 内没有,是常见的被拒点。上线前必须替换成真实邮箱。
-    '邮箱:[待填写 —— 上线前必须替换为真实可达的联系邮箱]',
+    // 用户于 2026-11-01 明确授权此邮箱用于公开服务与隐私联系。
+    '邮箱:wkd20040211@163.com',
     '我们会在收到举报或申诉后尽快处理并反馈。',
   ]),
 ];
@@ -77,7 +80,9 @@ const List<RuleSection> kPlatformRulesEn = [
     'Registration requires real-identity verification. Unverified accounts cannot publish.',
   ]),
   RuleSection('2. Publishing and Review', [
-    'Published works enter review and only appear in the community feed after approval. Until then they are not visible to others.',
+    'Private cloud backup is separate from publication. Only explicitly submitted works enter review and become public after approval and publication.',
+    'For GLB publication, 26 rendered views of the final model, together with its title and description, are submitted to Aliyun text/image moderation. These views are not original capture photos. Unsupported formats cannot be automatically published through this route.',
+    'Risk may require human review; prohibited content is rejected; errors or incomplete results do not automatically publish. Changed content requires a new review. Publication does not waive privacy or other people\'s rights.',
     'Titles are limited to 100 characters; descriptions to 30.',
     'Content prohibited by law may not be published.',
     'Obtain consent from people appearing in a scene before publishing it publicly.',
@@ -86,7 +91,7 @@ const List<RuleSection> kPlatformRulesEn = [
   RuleSection('3. Enforcement', [
     'Available measures: warning, required correction within a period, feature restriction, suspension, account closure.',
     'Violating works are taken down and their files removed from public storage; previously saved links stop working.',
-    'You may delete your own work at any time, including work still under review that was never public.',
+    'You may request withdrawal or deletion, including pending works. Stopping public access and physical erasure are separate; review evidence, dispute records and historical backups are handled as described in the Privacy Policy.',
     'Account-related actions are logged and retained for at least 6 months.',
   ]),
   RuleSection('4. Reporting and Appeals', [
@@ -95,7 +100,7 @@ const List<RuleSection> kPlatformRulesEn = [
     'To appeal an enforcement decision, use the contact below.',
   ]),
   RuleSection('5. Contact', [
-    'Email: [TO BE FILLED — must be a real, reachable address before launch]',
+    'Email: wkd20040211@163.com',
     'We respond to reports and appeals as promptly as we can.',
   ]),
 ];

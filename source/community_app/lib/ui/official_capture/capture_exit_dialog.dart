@@ -42,8 +42,6 @@
 // **单次**手势都到不了 discardExit:点确定 = saveExit,点取消/点外面 = null。
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-
 /// 弹窗结果。null(点外面/取消)= 回拍摄。
 enum CaptureExitChoice {
   /// 退出并保存照片:照片进草稿(未完成态,可断点续跑),不丢任何数据。
@@ -132,8 +130,8 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              AppL10n.of(context).captureExitTitle,
+            const Text(
+              '退出拍摄？',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.black,
@@ -159,9 +157,9 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
+        const Expanded(
           child: Text(
-            AppL10n.of(context).captureExitSavePrompt,
+            '是否保存照片，方便下次补拍',
             style: TextStyle(
               color: Colors.black,
               fontSize: 15,
@@ -179,7 +177,7 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
   Widget _buildSwitch() {
     return Semantics(
       toggled: _save,
-      label: AppL10n.of(context).captureExitSavePhotos,
+      label: '保存照片',
       child: GestureDetector(
         key: const ValueKey<String>('capture-exit-save-toggle'),
         behavior: HitTestBehavior.opaque,
@@ -188,9 +186,7 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
         child: AnimatedContainer(
           duration: _toggleDuration,
           curve: _toggleCurve,
-          width: AppL10n.of(context).localeName.startsWith('zh')
-              ? _switchW
-              : _switchW + 12,
+          width: _switchW,
           height: _switchH,
           decoration: BoxDecoration(
             // 单色:开 = 黑(本弹窗一路在用的那支黑,标题/取消底/确定描边同源),
@@ -208,9 +204,7 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: _wordPad),
                   child: Text(
-                    _save
-                        ? AppL10n.of(context).meToggleOn
-                        : AppL10n.of(context).meToggleOff,
+                    _save ? '开' : '关',
                     key: const ValueKey<String>('capture-exit-save-word'),
                     maxLines: 1,
                     // 这个字是"要不要保存"唯一的文字答案,不允许被系统字号
@@ -228,7 +222,9 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
               AnimatedAlign(
                 duration: _toggleDuration,
                 curve: _toggleCurve,
-                alignment: _save ? Alignment.centerRight : Alignment.centerLeft,
+                alignment: _save
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
                 child: Padding(
                   padding: const EdgeInsets.all(_knobInset),
                   child: AnimatedContainer(
@@ -272,8 +268,8 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            child: Text(
-              AppL10n.of(context).commonOk,
+            child: const Text(
+              '确定',
               maxLines: 1,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
@@ -292,8 +288,8 @@ class _CaptureExitDialogState extends State<CaptureExitDialog> {
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            child: Text(
-              AppL10n.of(context).commonCancel,
+            child: const Text(
+              '取消',
               maxLines: 1,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),

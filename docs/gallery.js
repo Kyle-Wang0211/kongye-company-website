@@ -1,5 +1,5 @@
 (async () => {
-  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=rds-web-20261104-7931926b3d74');await localeReady;
+  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=shared-community-20261106-v40');await localeReady;
   const cards = Array.from(document.querySelectorAll('.scan-card'));
   const render=()=>cards.forEach(card=>{card.querySelector('summary > span').firstChild.nodeValue=t(card.open?'siteGalleryCollapse':'siteGalleryRotate');});
   window.addEventListener(localeEvent,render);render();

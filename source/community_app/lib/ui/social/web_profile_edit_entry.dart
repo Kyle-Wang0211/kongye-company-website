@@ -1,3 +1,4 @@
+import 'community_capabilities.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class WebProfileEditEntry extends StatefulWidget {
     required this.user,
     required this.ownerId,
     this.api,
-    this.backendReady = const bool.fromEnvironment('PW_WEB_PROFILES_ENABLED'),
+    this.backendReady = CommunityCapabilities.profiles,
   });
   final CurrentUser user;
   final String ownerId;

@@ -14,9 +14,13 @@ class CommentVisibilityStore {
   Future<Set<String>> read(String scope) async {
     final preferences = await SharedPreferences.getInstance();
     final prefix = _prefix(scope);
-    return preferences.getKeys().where((key) {
-      return key.startsWith(prefix) && preferences.getBool(key) == true;
-    }).map((key) => key.substring(prefix.length)).toSet();
+    return preferences
+        .getKeys()
+        .where((key) {
+          return key.startsWith(prefix) && preferences.getBool(key) == true;
+        })
+        .map((key) => key.substring(prefix.length))
+        .toSet();
   }
 
   Future<void> setHidden(String scope, String commentId, bool hidden) async {

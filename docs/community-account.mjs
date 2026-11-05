@@ -1,4 +1,4 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=publication-framing-20261106-v38';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=shared-community-20261106-v40';
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 const lifetime=300000,storageKey='pw-current-account-presentation-rds-v1';

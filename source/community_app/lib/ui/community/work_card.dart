@@ -330,30 +330,66 @@ class _WorkCardState extends State<WorkCard> {
                     aspectRatio: ratio ?? kCommunityLoadingCoverAspectRatio,
                     child: ColoredBox(
                       color: Colors.black,
-                      child: _coverFailed
-                          ? Center(
-                              key: ValueKey('work-cover-error-${_work.id}'),
-                              child: Icon(
-                                Icons.image_not_supported_outlined,
-                                color: Colors.white54,
-                                semanticLabel: AppL10n.of(
-                                  context,
-                                ).communityCoverUnavailable,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _coverFailed
+                              ? Center(
+                                  key: ValueKey('work-cover-error-${_work.id}'),
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                    color: Colors.white54,
+                                    semanticLabel: AppL10n.of(
+                                      context,
+                                    ).communityCoverUnavailable,
+                                  ),
+                                )
+                              : !ready
+                              ? CommunityShimmer(
+                                  key: ValueKey(
+                                    'work-cover-loading-${_work.id}',
+                                  ),
+                                )
+                              : Image(
+                                  image: _thumbnailProvider!,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                  errorBuilder: (_, _, _) => const Icon(
+                                    Icons.image_not_supported_outlined,
+                                    color: Colors.white54,
+                                  ),
+                                ),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [Colors.transparent, Colors.black87],
+                                ),
                               ),
-                            )
-                          : !ready
-                          ? CommunityShimmer(
-                              key: ValueKey('work-cover-loading-${_work.id}'),
-                            )
-                          : Image(
-                              image: _thumbnailProvider!,
-                              fit: BoxFit.contain,
-                              alignment: Alignment.center,
-                              errorBuilder: (_, _, _) => const Icon(
-                                Icons.image_not_supported_outlined,
-                                color: Colors.white54,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
+                                child: Text(
+                                  _work.title,
+                                  key: ValueKey('work-cover-title-${_work.id}'),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    height: 1.3,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   KeyedSubtree(
@@ -379,21 +415,6 @@ class _WorkCardState extends State<WorkCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: MediaQuery.textScalerOf(context).scale(13) * 2.6,
-            child: Text(
-              _work.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                height: 1.3,
-                fontWeight: FontWeight.w600,
-                color: AetherColors.textPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
           SizedBox(
             height: communityAuthorRowHeight(context),
             child: Row(

@@ -65,7 +65,7 @@ class AppL10nZh extends AppL10n {
   String get communityTopicTitle => '本周精选';
 
   @override
-  String get communityTopicBody => '编辑挑出的空间。想上这里，就把你扫的地方发出来。';
+  String get communityTopicBody => '编辑挑出的空间。想上这里，就把您扫的地方发出来。';
 
   @override
   String get communityTopicCaptureTitle => '怎么扫得更好';
@@ -239,7 +239,7 @@ class AppL10nZh extends AppL10n {
   String get authWelcomeBack => '欢迎回来';
 
   @override
-  String get authCreateAccount => '创建你的账号';
+  String get authCreateAccount => '创建您的账号';
 
   @override
   String get authSignIn => '登录';
@@ -272,7 +272,7 @@ class AppL10nZh extends AppL10n {
   String get authForgotPassword => '忘记密码？';
 
   @override
-  String get authTermsAcceptance => '注册即表示你同意方寸间的服务条款与隐私政策。';
+  String get authTermsAcceptance => '注册即表示您同意方寸间的服务条款与隐私政策。';
 
   @override
   String get authErrorDialogTitle => '出错了';
@@ -391,7 +391,7 @@ class AppL10nZh extends AppL10n {
   String get legalPrivacyPolicy => '隐私政策';
 
   @override
-  String get authTermsAcceptancePrefix => '注册即表示你同意:';
+  String get authTermsAcceptancePrefix => '注册即表示您同意:';
 
   @override
   String get mePlatformRules => '平台公约';
@@ -442,7 +442,7 @@ class AppL10nZh extends AppL10n {
   String get authPhoneChangeNumber => '换个手机号';
 
   @override
-  String get authPhoneYourNumber => '你的手机号';
+  String get authPhoneYourNumber => '您的手机号';
 
   @override
   String get meHandle => 'ID';
@@ -457,7 +457,7 @@ class AppL10nZh extends AppL10n {
   String get meHandleDialogHint => '小写字母、数字、点、下划线,2-32 位';
 
   @override
-  String get meHandleDialogNote => 'ID 全站唯一,用来让别人找到你。设置后 3 天内不能再改。';
+  String get meHandleDialogNote => 'ID 全站唯一,用来让别人找到您。设置后 3 天内不能再改。';
 
   @override
   String get meHandleUpdated => 'ID 已更新';
@@ -486,7 +486,7 @@ class AppL10nZh extends AppL10n {
   String get sfmSelectionSaveTitle => '编辑记录是否保存';
 
   @override
-  String get sfmSelectionSaveBody => '你调整过选区范围。保存后预览与交付都只包含框内的点。';
+  String get sfmSelectionSaveBody => '您调整过选区范围。保存后预览与交付都只包含框内的点。';
 
   @override
   String get sfmSelectionSaveKeep => '保存';
@@ -703,7 +703,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get meDeleteAccountDialogBody =>
-      '你的账号、已发布的作品和全部云端数据将被永久删除，此操作无法撤销。本机已拍摄的项目不受影响。';
+      '您的账号、已发布的作品和全部云端数据将被永久删除，此操作无法撤销。本机已拍摄的项目不受影响。';
 
   @override
   String get meDeleteAccountConfirm => '永久删除';
@@ -776,7 +776,7 @@ class AppL10nZh extends AppL10n {
   String get blockDialogTitle => '屏蔽这个用户？';
 
   @override
-  String get blockDialogBody => '屏蔽后你将不再看到该用户的作品，你们之间的关注关系也会取消。';
+  String get blockDialogBody => '屏蔽后您将不再看到该用户的作品，双方之间的关注关系也会取消。';
 
   @override
   String get blockConfirm => '屏蔽';
@@ -862,7 +862,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get profileBlockBody =>
-      '使用当前账号登录 PocketWorld 时，你将不再在社区、搜索、关注列表和个人主页看到对方；双方关注关系会立即解除，也不能再次关注。对方不会收到通知。公开链接、未登录访问或其他账号仍可能看到其公开内容。';
+      '使用当前账号登录 PocketWorld 时，您将不再在社区、搜索、关注列表和个人主页看到对方；双方关注关系会立即解除，也不能再次关注。对方不会收到通知。公开链接、未登录访问或其他账号仍可能看到其公开内容。';
 
   @override
   String get profileBlockConfirm => '确认拉黑';
@@ -2134,7 +2134,7 @@ class AppL10nZh extends AppL10n {
   String get moderationAppealStatement => '申诉说明';
 
   @override
-  String get moderationAppealStatementHint => '补充上下文或说明你认为需要复核的地方';
+  String get moderationAppealStatementHint => '补充上下文或说明您认为需要复核的地方';
 
   @override
   String get moderationAppealStatementTooLong => '申诉说明不能超过 1000 字符';
@@ -3107,7 +3107,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get legalRulesS0P0 =>
-      '昵称可以重复,ID 全站唯一 —— 这与微信、抖音、小红书的结构一致:昵称用来展示,ID 用来让别人找到你。';
+      '昵称可以重复,ID 全站唯一 —— 这与微信、抖音、小红书的结构一致:昵称用来展示,ID 用来让别人找到您。';
 
   @override
   String get legalRulesS0P1 =>
@@ -3148,7 +3148,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get legalRulesS1P4 =>
-      '作品的三维模型文件中包含生成方式标识 —— 这是《互联网信息服务深度合成管理规定》第十六条要求的技术措施,不影响你正常使用文件。';
+      '作品的三维模型文件中包含生成方式标识 —— 这是《互联网信息服务深度合成管理规定》第十六条要求的技术措施,不影响您正常使用文件。';
 
   @override
   String get legalRulesS2Title => '三、违规处置';
@@ -3161,7 +3161,7 @@ class AppL10nZh extends AppL10n {
   String get legalRulesS2P1 => '违规作品会被下架,其文件将从公开位置移出,已保存的链接同时失效。';
 
   @override
-  String get legalRulesS2P2 => '你可以随时删除自己的作品。正在审核中且从未公开过的作品同样可以删除。';
+  String get legalRulesS2P2 => '您可以随时删除自己的作品。正在审核中且从未公开过的作品同样可以删除。';
 
   @override
   String get legalRulesS2P3 => '账号相关的操作会被记录,保存期限不少于 6 个月。';
@@ -3174,7 +3174,7 @@ class AppL10nZh extends AppL10n {
       '每个作品页面都提供举报入口,可选择垃圾信息、骚扰、仇恨言论、色情内容、暴力、侵权、虚假信息等理由。';
 
   @override
-  String get legalRulesS3P1 => '你也可以屏蔽某个用户,屏蔽后其作品不再出现在你的信息流中。';
+  String get legalRulesS3P1 => '您也可以屏蔽某个用户,屏蔽后其作品不再出现在您的信息流中。';
 
   @override
   String get legalRulesS3P2 => '对处置结果有异议的,可通过下方联系方式申诉。';
@@ -3411,7 +3411,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get legalStaticV11Copy55 =>
-      '你可以申请撤回或删除自己的作品,包括正在审核中且从未公开过的作品。停止公开与文件物理清理分开;审核证据、争议材料及历史备份的限制处理与清理见隐私政策。';
+      '您可以申请撤回或删除自己的作品,包括正在审核中且从未公开过的作品。停止公开与文件物理清理分开;审核证据、争议材料及历史备份的限制处理与清理见隐私政策。';
 
   @override
   String get legalStaticV11Copy56 => '邮箱:wkd20040211@163.com';
@@ -3427,7 +3427,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get legalStaticV11Copy60 =>
-      '云端私有备份不会自动成为社区作品。只有你主动提交公开发布，并通过审核，作品才会进入公共社区。';
+      '云端私有备份不会自动成为社区作品。只有您主动提交公开发布，并通过审核，作品才会进入公共社区。';
 
   @override
   String get legalStaticV11Copy61 => '审核会使用什么内容';
@@ -3456,7 +3456,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get legalStaticV11Copy68 =>
-      '你可以撤回公开发布、申请删除或进行举报与申诉。审核证据、争议处置、法定留存和历史备份的处理，依照隐私政策和实际保存机制执行；公开发布不会免除你或他人的个人信息权益。';
+      '您可以撤回公开发布、申请删除或进行举报与申诉。审核证据、争议处置、法定留存和历史备份的处理，依照隐私政策和实际保存机制执行；公开发布不会免除您或他人的个人信息权益。';
 
   @override
   String get legalStaticV11Copy69 => '运营与联系';
@@ -3519,4 +3519,88 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get siteScreenStage => '精选屏幕';
+
+  @override
+  String get reportHistoryLoading => '正在加载举报记录';
+
+  @override
+  String get reportHistoryNotice => '仅展示您提交的记录。处理结果以平台通知为准。';
+
+  @override
+  String get reportRecordId => '举报编号';
+
+  @override
+  String get reportRecordReason => '举报原因';
+
+  @override
+  String get reportRecordOutcome => '处理结果';
+
+  @override
+  String get reportOutcomeUnavailable => '暂无处理结果';
+
+  @override
+  String get reportAppealAction => '提交申诉';
+
+  @override
+  String get reportAppealUnavailable => '当前暂不支持在线申诉。';
+
+  @override
+  String get reportAppealSubmitted => '申诉已提交，处理结果请留意平台通知。';
+
+  @override
+  String get reportStatusClosed => '已结束';
+
+  @override
+  String get reportStatusUnknown => '状态待确认';
+
+  @override
+  String get reportAppealRequired => '请填写申诉说明';
+
+  @override
+  String get reportAppealFailed => '申诉未能提交，请重试。';
+
+  @override
+  String get reportAppealExplanation => '申诉说明';
+
+  @override
+  String get reportAppealPrivacy => '请勿填写密码、证件号码等敏感信息。';
+
+  @override
+  String get reportAppealSubmitting => '提交中…';
+
+  @override
+  String get reportAppealSubmit => '提交';
+
+  @override
+  String get authPolicyConsentLabel => '我已阅读并同意';
+
+  @override
+  String get webSettingsLanguage => '语言';
+
+  @override
+  String get webSettingsHelp => '帮助';
+
+  @override
+  String get webHelpTitle => '帮助与联系';
+
+  @override
+  String get webHelpViewQuestion => '如何查看三维作品？';
+
+  @override
+  String get webHelpViewAnswer => '点击作品封面进入详情，拖动旋转视角，使用滚轮或双指缩放。';
+
+  @override
+  String get webHelpPublishQuestion => '发布后为什么还没有显示？';
+
+  @override
+  String get webHelpPublishAnswer => '作品完成审核后会出现在社区，可在个人页面的发布记录中查看处理状态。';
+
+  @override
+  String get webHelpAccountQuestion => '登录后可以使用哪些功能？';
+
+  @override
+  String get webHelpAccountAnswer => '登录后可以发布作品、点赞、收藏、评论、关注作者和发送私信。';
+
+  @override
+  String get webHelpContactLabel => '联系客服';
 }

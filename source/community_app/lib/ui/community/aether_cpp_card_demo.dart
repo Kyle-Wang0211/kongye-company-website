@@ -31,6 +31,7 @@ class AetherCppCardDemo extends StatelessWidget {
     this.onStillFrame,
     this.onError,
     this.onViewerReady,
+    this.onControllerFrameReady,
     this.onIdealAspectRatio,
     this.onSurfacePicked,
     this.onSurfaceMarkerSelected,
@@ -62,6 +63,7 @@ class AetherCppCardDemo extends StatelessWidget {
   final ValueChanged<Uint8List>? onStillFrame;
   final ValueChanged<Object>? onError;
   final ValueChanged<ProductViewerCapture>? onViewerReady;
+  final ValueChanged<SharedViewerController>? onControllerFrameReady;
   final ValueChanged<double>? onIdealAspectRatio;
   final ValueChanged<SharedSurfaceAnchor>? onSurfacePicked;
   final ValueChanged<String>? onSurfaceMarkerSelected;
@@ -91,6 +93,7 @@ class AetherCppCardDemo extends StatelessWidget {
     onStillFrame: onStillFrame,
     onError: onError,
     onViewerReady: onViewerReady,
+    onControllerFrameReady: onControllerFrameReady,
     onIdealAspectRatio: onIdealAspectRatio,
     onSurfacePicked: onSurfacePicked,
     onSurfaceMarkerSelected: onSurfaceMarkerSelected,

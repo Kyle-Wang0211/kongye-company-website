@@ -55,9 +55,6 @@ class _PublicWorkEntryState extends State<PublicWorkEntry> {
   @override
   Widget build(BuildContext context) => FutureBuilder<FeedWork>(
     future: _work,
-    initialData: _openingWork?.authorDisplayName.isNotEmpty == true
-        ? _openingWork
-        : null,
     builder: (context, snapshot) {
       if (snapshot.hasData) {
         return WorkDetailPage(

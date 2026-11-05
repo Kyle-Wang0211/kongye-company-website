@@ -30,3 +30,20 @@
 @media(max-width:559px){.community-shell .community-grid{grid-template-columns:minmax(0,1fr)}}
 html[lang="en"] .community-sidebar .brand{font-size:15px;letter-spacing:0;gap:9px}
 .following-person small{display:block;color:#888;font-size:11px}
+
+/* Body-mounted menus stay clickable outside the sidebar's scrolling surface. */
+.site-settings-popover{position:fixed;z-index:80;box-sizing:border-box;width:min(176px,calc((100vw - 24px)/2));max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;padding:5px;background:#fff;color:#333;border:1px solid #e6e6e6;border-radius:8px;box-shadow:0 5px 22px #00000014;font:14px/1.5 var(--sans)}
+.site-settings-popover[hidden],#site-settings [hidden]{display:none!important}
+.site-settings-popover button{display:flex;align-items:center;justify-content:space-between;min-height:40px;width:100%;padding:8px 12px;border:0;border-radius:5px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.site-settings-popover button:hover,.site-settings-popover button:focus-visible{background:#f3f3f3;color:#161616;outline:0}
+#settings-language:after{content:'›';color:#888;font-size:20px;line-height:1}
+.site-language-popover{width:min(154px,calc((100vw - 24px)/2))}.site-language-popover [aria-checked="true"]:after{content:'✓';color:#555}
+.community-shell #site-settings{width:min(520px,calc(100vw - 32px));max-height:85dvh;border-color:#e5e5e5;border-radius:10px;background:#fff;color:#161616}
+.community-shell #site-settings::backdrop{background:#0005}
+.community-shell #site-settings .settings-toolbar{padding:18px 22px;background:#fff;border-color:#eee}
+.community-shell #site-settings .settings-toolbar h2{font-size:18px}
+.community-shell #site-settings .settings-toolbar button{border-color:#ddd;border-radius:5px;font:14px var(--sans)}
+.settings-help-content{padding:8px 22px 22px;font:14px/1.7 var(--sans);color:#555}
+.settings-help-content details{border-bottom:1px solid #eee;padding:14px 0}
+.settings-help-content summary{cursor:pointer;color:#222;font-weight:500}
+.settings-help-content details p{margin:10px 0 0}.settings-help-contact{margin:20px 0 0}.settings-help-contact a{color:#333;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
