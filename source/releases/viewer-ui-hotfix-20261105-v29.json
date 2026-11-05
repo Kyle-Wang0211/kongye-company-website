@@ -1,0 +1,11 @@
+{
+  "release": "viewer-ui-hotfix-20261105-v29",
+  "parent_release": "viewer-ui-hotfix-20261105-v28",
+  "scope": "Numberless draft/saved/selected white marker hardening and versioned marker module import in both actual viewer entries",
+  "main_js_sha256": "a3000d55a289ecd81687c21245ccd97178a1de3ab4880226de225e164627b881",
+  "dart_build": "Reused exact v28 main bytes; JS-only update",
+  "packaged_viewer_bundle": "a16d2f0e4add475715836f6ccca36cbca835dd91b79b5273b5d25edfa6084d48",
+  "standalone_viewer_bundle": "dcfe3ca8e050e1cc1d8a11046c1c6b8741e837a22b92302c23934c4c92d5e3a9",
+  "marker_import_tag": "white-markers-20261105-v29",
+  "validation": "Reused completed marker21Node regressions; unchanged resource hashes verified while resealing existing manifest files maps"
+}

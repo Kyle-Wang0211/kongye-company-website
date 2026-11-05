@@ -1,4 +1,4 @@
-import { createSurfaceComments } from './surface_comments.mjs?v=pointcloud-comments-20261103-v12';
+import { createSurfaceComments } from './surface_comments.mjs?v=white-markers-20261105-v29';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
 // Host/lifecycle adapter only. Rendering, loaders, materials and controls are upstream Three.js.
