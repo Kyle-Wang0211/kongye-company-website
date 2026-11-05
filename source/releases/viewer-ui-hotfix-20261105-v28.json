@@ -1,0 +1,12 @@
+{
+  "release": "viewer-ui-hotfix-20261105-v28",
+  "source_commit": "dca158d946581fcee63e9973dea14803b474d2ab",
+  "source_tree": "cba558c0fb71f7c3aff78d443b0c7ddb5f26e1b3",
+  "parent_live_release": "viewer-ui-hotfix-20261105-v27",
+  "main_js_sha256": "a3000d55a289ecd81687c21245ccd97178a1de3ab4880226de225e164627b881",
+  "bootstrap_sha256": "c599421e3ff17aec830e78af63e991177da3d3b3f9db3deaeee34fb6b27366e1",
+  "build": "Flutter3.47.1 cached locked release --no-pub; lib/main_community_web.dart; /community/; existing china/cn-primary RDS public key and rds20261104 namespace",
+  "validation": "Reused completed marker20Node+1Chrome and prior hotfix tests; release compiler exit0; public-only configuration and new private-string checks pass",
+  "license_notice": "Existing published notice superset retained; dependencies/assets unchanged",
+  "scope": "Add selected comment white points and pulsing halos to the completed viewer hotfix"
+}
