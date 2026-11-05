@@ -175,6 +175,7 @@ class _WebMessagingEntryState extends State<WebMessagingEntry> {
           send: (text) => repository.send(id, text),
           changes: changes,
           idempotentRetry: true,
+          onMarkRead: (messageId) => repository.markRead(id, messageId),
           onWithdraw: repository.withdraw,
           onReport: repository.report,
           onBlockPeer: (blocked) => repository.block(peer, blocked),

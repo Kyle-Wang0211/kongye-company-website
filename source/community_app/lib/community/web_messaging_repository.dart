@@ -148,12 +148,6 @@ class WebMessagingRepository {
           ownPending.add(_pendingMessage(entry, receipt));
         }
       }
-      final unseen = messages.where((message) => message.senderId != ownerId);
-      if (unseen.isNotEmpty) {
-        // History is newest first. Only a successfully loaded visible message
-        // advances the monotonic server cursor.
-        await _guard(() => api.markRead(conversationId, unseen.first.id));
-      }
       return [...messages.map(_message), ...ownPending]
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
     },
@@ -218,7 +212,9 @@ class WebMessagingRepository {
     text: row.body,
     isMine: row.senderId == ownerId,
     createdAt: DateTime.parse(row.createdAt),
-    status: WebChatMessageStatus.sent,
+    status: row.editedAt != null && row.body == '[已撤回]'
+        ? WebChatMessageStatus.withdrawn
+        : WebChatMessageStatus.sent,
   );
 
   WebChatMessage _pendingMessage(_Submission entry, WebDmReceipt receipt) =>
@@ -285,6 +281,11 @@ class WebMessagingRepository {
     );
     return changes.stream;
   }
+
+  Future<void> markRead(String conversationId, String messageId) =>
+      _guard(() async {
+        await api.markRead(conversationId, messageId);
+      });
 
   Future<void> block(String peerId, bool blocked) =>
       _guard(() => api.blockUser(peerId, blocked));
