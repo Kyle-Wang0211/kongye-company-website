@@ -403,6 +403,9 @@ class _ProductModelViewState extends State<ProductModelView>
       _error = null;
       _cancelCapture();
     }
+    if (oldWidget.initialView != widget.initialView && _loaded) {
+      unawaited(_applyInitialView(_epoch));
+    }
     // A web parent's size-only rebuild needs ordinary layout, not another
     // configure/resume round trip to the same iframe. Keep native behavior.
     final activityChanged =
@@ -768,18 +771,8 @@ class _ProductModelViewState extends State<ProductModelView>
         }
       }
       if (_disposed || epoch != _epoch) return;
-      final initialView = widget.initialView;
-      if (_initialViewAttemptedEpoch != epoch && initialView != null &&
-          initialView['schema'] == 'pw.camera-framing.v1' &&
-          _modelContentHash != null && initialView['asset_sha256'] == _modelContentHash) {
-        _initialViewAttemptedEpoch = epoch;
-        try {
-          await _controller.setCameraFraming(initialView);
-        } catch (_) {
-          // Invalid server framing retains the official loaded-model camera.
-        }
-        if (_disposed || epoch != _epoch) return;
-      }
+      await _applyInitialView(epoch);
+      if (_disposed || epoch != _epoch) return;
       _loadedEpoch = epoch;
       _notifyIdealAspect();
       _logLoadPhase('decoded');
@@ -792,6 +785,22 @@ class _ProductModelViewState extends State<ProductModelView>
       }
     } finally {
       if (_loadingEpoch == epoch) _loadingEpoch = null;
+    }
+  }
+
+  Future<void> _applyInitialView(int epoch) async {
+    if (_disposed || epoch != _epoch || _initialViewAttemptedEpoch == epoch) return;
+    final initialView = widget.initialView;
+    if (initialView == null || initialView['schema'] != 'pw.camera-framing.v1' ||
+        _modelContentHash == null || initialView['asset_sha256'] != _modelContentHash) return;
+    _initialViewAttemptedEpoch = epoch;
+    // An opening-card seed may precede the server descriptor. Never move a
+    // camera the user has already adjusted while that metadata was arriving.
+    if (_controller.state['userHasInteracted'] == true || _userTookControl) return;
+    try {
+      await _controller.setCameraFraming(initialView);
+    } catch (_) {
+      // Invalid server framing retains the official loaded-model camera.
     }
   }
 
