@@ -911,4 +911,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+  testWidgets(
+    'technical server status preserves the original draft and anchor',
+    (tester) async {
+      final anchor = CommunityCommentAnchor(position: [1, 2, 3]);
+      final repo = FakeComments()
+        ..submitResult = comment(
+          'failed',
+          status: CommunityCommentStatus.error,
+        );
+      await mount(tester, repo, anchor: anchor);
+      await tester.enterText(find.byKey(const Key('comment-input')), '保留草稿');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('comment-send')));
+      await tester.pumpAndSettle();
+      expect(find.text('发送失败，草稿已保留，请重试'), findsOneWidget);
+      expect(find.text('已选择模型点位'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('comment-input')))
+            .controller!
+            .text,
+        '保留草稿',
+      );
+      expect(repo.sent.single.anchor, same(anchor));
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 }

@@ -103,15 +103,15 @@ void main() {
       header.setUint32(16, 0x4e4f534a, Endian.little);
       bytes.fillRange(20, bytes.length, 32);
       bytes.setRange(20, 20 + json.length, json);
-      final pickedAnchor = CommunityCommentAnchor(
-        position: [1.5, 2.5, 3.5],
-        normal: [0, 1, 0],
-        cameraPosition: [4, 5, 6],
-        cameraTarget: [1, 2, 3],
-      );
       final repo = FakeComments()
         ..assetSha256 = sha256.convert(bytes).toString()
-        ..submitResult = comment('saved-point', anchor: pickedAnchor)
+        ..submitResult = CommunityComment.fromJson({
+          ...comment(
+            'saved-point',
+            status: CommunityCommentStatus.review,
+          ).toJson(),
+          'body': '',
+        })
         ..rows = [
           comment('pin', anchor: CommunityCommentAnchor(position: [3, 2, 1])),
         ];
@@ -230,6 +230,13 @@ void main() {
                 lastMarkers().singleWhere((m) => m['id'] == 'saved-point')
                     as Map;
             expect((saved['anchor'] as Map)['position'], [1.5, 2.5, 3.5]);
+            // A rejected server snapshot must revoke the private local point.
+            repo.rows.add(
+              comment('saved-point', status: CommunityCommentStatus.rejected),
+            );
+            await tester.tap(find.byTooltip('刷新评论'));
+            await tester.pumpAndSettle();
+            expect(lastMarkers().any((m) => m['id'] == 'saved-point'), isFalse);
             await tester.tap(find.byTooltip('关闭评论'));
             await tester.pumpAndSettle();
             expect(find.byKey(const Key('comment-input')), findsNothing);

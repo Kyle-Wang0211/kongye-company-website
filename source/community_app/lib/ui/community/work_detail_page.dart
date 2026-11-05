@@ -114,7 +114,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           (c) =>
               c.id == layout.id &&
               c.workId == widget.work.id &&
-              c.anchor != null &&
+              _markerAnchor(c) != null &&
               c.status != CommunityCommentStatus.hidden &&
               c.status != CommunityCommentStatus.removed &&
               c.visibleTo(widget.service.currentUserId),
@@ -137,6 +137,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   ProductViewerCapture? _surfaceViewer;
   String? _surfaceAssetSha256;
   List<CommunityComment> _visibleComments = const [];
+  final _submittedCommentAnchors = <String, CommunityCommentAnchor>{};
   late CommunityCommentRepository _commentRepository =
       widget.commentRepository ?? SupabaseCommunityCommentRepository();
   StreamSubscription<AuthState>? _commentAuth;
@@ -187,7 +188,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           (comment) =>
               comment.id == id &&
               comment.workId == widget.work.id &&
-              comment.anchor != null &&
+              _markerAnchor(comment) != null &&
               comment.status != CommunityCommentStatus.hidden &&
               comment.status != CommunityCommentStatus.removed &&
               comment.visibleTo(widget.service.currentUserId),
@@ -270,8 +271,52 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         cameraPosition: anchor.cameraPosition,
         cameraTarget: anchor.cameraTarget,
       );
+  void _commentSubmitted(
+    CommunityComment comment,
+    CommunityCommentAnchor? anchor,
+  ) {
+    if (!mounted ||
+        anchor == null ||
+        comment.workId != widget.work.id ||
+        comment.userId != widget.service.currentUserId) {
+      return;
+    }
+    final pending = {
+      CommunityCommentStatus.pending,
+      CommunityCommentStatus.review,
+    }.contains(comment.status);
+    if (!pending && !comment.published) return;
+    // Keep only this account's own acknowledged input while moderation withholds
+    // the public anchor. Remote bodies/anchors and publication status stay server-owned.
+    if (pending) {
+      _submittedCommentAnchors[comment.id] = anchor;
+    }
+    _visibleComments = [
+      ..._visibleComments.where((c) => c.id != comment.id),
+      comment,
+    ];
+  }
+
+  CommunityCommentAnchor? _markerAnchor(CommunityComment comment) =>
+      comment.anchor ??
+      (comment.userId == widget.service.currentUserId &&
+              {
+                CommunityCommentStatus.pending,
+                CommunityCommentStatus.review,
+              }.contains(comment.status)
+          ? _submittedCommentAnchors[comment.id]
+          : null);
+
   void _commentsChanged(List<CommunityComment> comments) {
     if (!mounted) return;
+    for (final comment in comments) {
+      if (!{
+        CommunityCommentStatus.pending,
+        CommunityCommentStatus.review,
+      }.contains(comment.status)) {
+        _submittedCommentAnchors.remove(comment.id);
+      }
+    }
     _visibleComments =
         (_surfaceAssetSha256 == null ? <CommunityComment>[] : comments)
             .where(
@@ -296,7 +341,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         !_visibleComments.any(
           (c) =>
               c.id == _selectedCommentId &&
-              c.anchor != null &&
+              _markerAnchor(c) != null &&
               c.status != CommunityCommentStatus.hidden &&
               c.status != CommunityCommentStatus.removed,
         )) {
@@ -326,14 +371,14 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       if (!comment.visibleTo(widget.service.currentUserId) ||
           comment.status == CommunityCommentStatus.removed ||
           comment.status == CommunityCommentStatus.hidden ||
-          comment.anchor == null) {
+          _markerAnchor(comment) == null) {
         continue;
       }
       try {
         markers.add(
           SharedSurfaceMarker(
             id: comment.id,
-            anchor: _sharedAnchor(comment.anchor!),
+            anchor: _sharedAnchor(_markerAnchor(comment)!),
             number: markers.length + 1,
             selected: comment.id == _selectedCommentId,
             previewText: comment.body,
@@ -354,7 +399,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   void _focusComment(CommunityComment comment) {
-    final anchor = comment.anchor;
+    final anchor = _markerAnchor(comment);
     if (_surfaceAssetSha256 == null ||
         anchor == null ||
         comment.workId != widget.work.id ||
@@ -679,6 +724,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           _surfaceAssetSha256 = null;
           _commentAnchor = null;
           _visibleComments = const [];
+          _submittedCommentAnchors.clear();
           _commentLayout = null;
           _dismissedLayoutId = null;
           _selectedCommentId = null;
@@ -725,6 +771,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       _surfaceAssetSha256 = null;
       _commentAnchor = null;
       _visibleComments = const [];
+      _submittedCommentAnchors.clear();
       _commentLayout = null;
       _dismissedLayoutId = null;
       _selectedCommentId = null;
@@ -802,6 +849,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       _surfaceViewer = viewer;
       _surfaceAssetSha256 = null;
       _visibleComments = const [];
+      _submittedCommentAnchors.clear();
     });
     unawaited(_syncCommentMarkers());
     unawaited(_bindSurfaceAsset(viewer));
@@ -967,6 +1015,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             onClose: _closeComments,
             onCommentSelected: _focusComment,
             onVisibleCommentsChanged: _commentsChanged,
+            onCommentSubmitted: _commentSubmitted,
             onModerationCaseSelected: (caseId) => openCommentModerationCase(
               context,
               caseId: caseId,
