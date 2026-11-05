@@ -89,13 +89,15 @@ class WebDmConversation {
 class WebDmMessage {
   final String id, conversationId, senderId, body;
   final String createdAt;
+  final String? editedAt;
   const WebDmMessage(
     this.id,
     this.conversationId,
     this.senderId,
     this.body,
-    this.createdAt,
-  );
+    this.createdAt, {
+    this.editedAt,
+  });
 }
 
 enum WebDmState { pending, retry, review, rejected, sent, withdrawn }
@@ -362,6 +364,7 @@ class WebSocialApi {
             _str(x['sender_id']),
             _str(x['body']),
             _str(x['created_at']),
+            editedAt: _optionalString(x['edited_at']),
           ),
         )
         .toList(growable: false);

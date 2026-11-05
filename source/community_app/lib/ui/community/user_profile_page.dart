@@ -27,6 +27,7 @@ class UserProfilePage extends StatefulWidget {
   final ValueChanged<FeedWork>? onWorkTap;
   final VoidCallback? onOpenFavorites;
   final VoidCallback? onOpenMessages;
+  final Map<String, VoidCallback> accountActions;
   final ValueChanged<SocialProfile>? onMessage;
 
   const UserProfilePage({
@@ -42,6 +43,7 @@ class UserProfilePage extends StatefulWidget {
     this.onWorkTap,
     this.onOpenFavorites,
     this.onOpenMessages,
+    this.accountActions = const {},
     this.onMessage,
   });
 
@@ -321,9 +323,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     key: const ValueKey('profile-favorites-button'),
                     onPressed: widget.onOpenFavorites,
                     icon: const Icon(Icons.bookmark_border),
-                    label: Text(Localizations.localeOf(context).languageCode == 'zh'
-                        ? '我的收藏'
-                        : 'Favorites'),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'zh'
+                          ? '我的收藏'
+                          : 'Favorites',
+                    ),
                   ),
                 ],
                 if (_isMine && widget.onOpenMessages != null) ...[
@@ -339,6 +343,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     ),
                   ),
                 ],
+                if (_isMine)
+                  for (final action in widget.accountActions.entries) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: action.value,
+                      child: Text(action.key),
+                    ),
+                  ],
                 if (!_isMine && widget.onMessage != null) ...[
                   const SizedBox(height: 20),
                   OutlinedButton.icon(

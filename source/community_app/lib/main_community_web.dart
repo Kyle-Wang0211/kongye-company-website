@@ -7,6 +7,12 @@ import 'ui/community/public_work_entry.dart';
 import 'ui/community/work_detail_page.dart';
 import 'ui/social/web_favorites_page.dart';
 import 'ui/social/web_messaging_entry.dart';
+import 'ui/social/web_profile_edit_entry.dart';
+import 'ui/social/web_account_workflow_repository.dart';
+import 'ui/social/web_account_privacy_page.dart';
+import 'ui/social/web_publication_status_page.dart';
+import 'ui/social/web_report_history_page.dart';
+import 'ui/social/web_report_review_page.dart';
 import 'community/web_messaging_repository.dart';
 import 'community/web_social_api.dart';
 import 'community/public_work_repository.dart';
@@ -47,7 +53,7 @@ Future<void> main() async {
   user.retryInit = () => _initialize(user, locale);
   // This entry has no native startup animation/archive/capture runtime.
   StartupSplashGate.instance.markDone();
-  runApp(_CommunityWeb(user: user, locale: locale));
+  runApp(CommunityWebApp(user: user, locale: locale));
   unawaited(locale.bootstrap());
   unawaited(_initialize(user, locale));
 }
@@ -179,16 +185,42 @@ ThemeData communityWebTheme() => ThemeData(
   useMaterial3: true,
 );
 
-class _CommunityWeb extends StatelessWidget {
-  const _CommunityWeb({required this.user, required this.locale});
+class CommunityWebApp extends StatefulWidget {
+  const CommunityWebApp({super.key, required this.user, required this.locale});
   final CurrentUser user;
   final LocaleNotifier locale;
+
+  @override
+  State<CommunityWebApp> createState() => _CommunityWebAppState();
+}
+
+class _CommunityWebAppState extends State<CommunityWebApp> {
+  CurrentUser get user => widget.user;
+  LocaleNotifier get locale => widget.locale;
+  String? _previousAccount;
+  int _navigationEpoch = 0;
+
+  Key _navigationIdentity() {
+    final owner = user.signedInUser?.id.rawValue;
+    final account = owner == null
+        ? null
+        : '${user.deployment.namespace}:$owner';
+    // A revoked/replaced account must also discard dialogs on the root
+    // Navigator. First sign-in preserves the public reading route underneath.
+    if (_previousAccount != null && _previousAccount != account) {
+      _navigationEpoch++;
+    }
+    _previousAccount = account;
+    return ValueKey(_navigationEpoch);
+  }
+
   @override
   Widget build(BuildContext context) => LocaleScope(
     notifier: locale,
     child: AnimatedBuilder(
-      animation: locale,
+      animation: Listenable.merge([locale, user]),
       builder: (context, _) => MaterialApp(
+        key: _navigationIdentity(),
         title: 'PocketWorld',
         debugShowCheckedModeBanner: false,
         theme: communityWebTheme(),
@@ -199,7 +231,8 @@ class _CommunityWeb extends StatelessWidget {
             AuthScope(currentUser: user, child: child!),
         onGenerateRoute: (settings) =>
             communityFavoritesRoute(settings, user) ??
-            communityMessagingRoute(settings, user),
+            communityMessagingRoute(settings, user) ??
+            communityAccountRoute(settings, user),
         home: AnimatedBuilder(
           animation: user,
           builder: (context, _) {
@@ -216,8 +249,8 @@ class _CommunityWeb extends StatelessWidget {
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
                     : Uri.base.queryParameters['publish'] == '1'
-                        ? const _WebPublicationEntry()
-                        : const VaultPage(),
+                    ? const _WebPublicationEntry()
+                    : const VaultPage(),
               CurrentUserSignedOut() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
@@ -261,7 +294,9 @@ Route<void>? communityFavoritesRoute(RouteSettings settings, CurrentUser user) {
         if (owner == null) {
           return state is CurrentUserSignedOut
               ? AuthRootView(currentUser: user)
-              : const Scaffold(body: Center(child: CircularProgressIndicator()));
+              : const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
         }
         return WebFavoritesAccountEntry(
           key: ValueKey('${user.deployment.namespace}:$owner:favorites'),
@@ -313,6 +348,185 @@ Route<void>? communityMessagingRoute(
       },
     ),
   );
+}
+
+/// Account pages remain behind the same live Auth state as inbox and favorites.
+Route<void>? communityAccountRoute(
+  RouteSettings settings,
+  CurrentUser user, {
+  Widget Function(BuildContext context, String ownerId)? pageBuilder,
+}) {
+  if (!const {
+    '/profile-edit',
+    '/publications',
+    '/reports',
+    '/privacy',
+    '/report-review',
+  }.contains(settings.name)) {
+    return null;
+  }
+  return MaterialPageRoute<void>(
+    settings: settings,
+    builder: (_) => AnimatedBuilder(
+      animation: user,
+      builder: (context, _) {
+        final state = user.state;
+        if (state case CurrentUserServiceUnavailable(:final reason)) {
+          return _ServiceUnavailableView(currentUser: user, reason: reason);
+        }
+        final owner = user.signedInUser?.id.rawValue;
+        if (owner == null) {
+          return state is CurrentUserSignedOut
+              ? AuthRootView(currentUser: user)
+              : const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+        }
+        return KeyedSubtree(
+          key: ValueKey('${user.deployment.namespace}:$owner:${settings.name}'),
+          child:
+              pageBuilder?.call(context, owner) ??
+              _WebAccountDestination(
+                user: user,
+                ownerId: owner,
+                destination: settings.name!,
+              ),
+        );
+      },
+    ),
+  );
+}
+
+class _WebAccountDestination extends StatefulWidget {
+  const _WebAccountDestination({
+    required this.user,
+    required this.ownerId,
+    required this.destination,
+  });
+  final CurrentUser user;
+  final String ownerId, destination;
+  @override
+  State<_WebAccountDestination> createState() => _WebAccountDestinationState();
+}
+
+class _WebAccountDestinationState extends State<_WebAccountDestination> {
+  late final WebAccountWorkflowRepository _repository;
+  bool get _current =>
+      mounted && widget.user.signedInUser?.id.rawValue == widget.ownerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = WebAccountWorkflowRepository(
+      client: Supabase.instance.client,
+      accountId: widget.ownerId,
+    );
+  }
+
+  Future<void> _openWork(String id) async {
+    if (!_current) return;
+    try {
+      final work = await PublicWorkRepository(
+        Supabase.instance.client,
+      ).fetch(id);
+      if (!mounted || !_current) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => WorkDetailPage(
+            work: work,
+            service: CommunityService(),
+            onAuthorTap: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => PublicProfileEntry(
+                  user: widget.user,
+                  userId: work.userId,
+                  seedWork: work,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (_) {
+      if (mounted && _current) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('作品暂不可访问，请刷新状态后重试。')));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => switch (widget.destination) {
+    '/profile-edit' => WebProfileEditEntry(
+      user: widget.user,
+      ownerId: widget.ownerId,
+    ),
+    '/privacy' => WebAccountPrivacyPage(
+      accountId: widget.ownerId,
+      accountLabel: widget.user.signedInUser?.displayName,
+      loadBlockedUsers: _repository.blockedUsers,
+      onUnblock: _repository.unblock,
+      onRequestDeletion: _repository.requestDeletion,
+    ),
+    '/reports' => WebReportHistoryPage(
+      accountId: widget.ownerId,
+      loader: _repository.reports,
+    ),
+    '/report-review' => WebReportReviewPage(
+      accountId: widget.ownerId,
+      loader: _repository.reviewQueue,
+      onClaim: _repository.claimReport,
+      onTransition: _repository.transitionReport,
+      onOpenWork: _openWork,
+    ),
+    _ => WebPublicationStatusPage(
+      accountId: widget.ownerId,
+      loader: _loadPublications,
+      onOpen: _openWork,
+      onWithdraw: _repository.withdraw,
+    ),
+  };
+
+  Future<List<WebPublicationSummary>> _loadPublications() async {
+    if (!_current) throw StateError('Account changed');
+    final client = Supabase.instance.client;
+    if (client.auth.currentUser?.id != widget.ownerId) {
+      throw StateError('Account changed');
+    }
+    final rows = await client
+        .from('works')
+        .select(
+          'id,user_id,title,moderation_status,visibility,published_at,deleted_at',
+        )
+        .eq('user_id', widget.ownerId)
+        .order('created_at', ascending: false);
+    if (!_current || client.auth.currentUser?.id != widget.ownerId) {
+      throw StateError('Account changed');
+    }
+    return rows
+        .map((row) {
+          final moderation = row['moderation_status'] as String;
+          final removed = row['deleted_at'] != null || moderation == 'removed';
+          final stage = removed
+              ? 'removed'
+              : moderation == 'withdrawn'
+              ? 'withdrawn'
+              : moderation == 'ok'
+              ? row['visibility'] == 'public' && row['published_at'] != null
+                    ? 'published'
+                    : 'private'
+              : moderation;
+          return WebPublicationSummary(
+            id: row['id'] as String,
+            title: row['title'] as String? ?? '',
+            stage: stage,
+            updatedAt: DateTime.tryParse(row['published_at'] as String? ?? ''),
+            canWithdraw: !removed && moderation != 'withdrawn',
+          );
+        })
+        .toList(growable: false);
+  }
 }
 
 class _ServiceUnavailableView extends StatelessWidget {
@@ -374,7 +588,6 @@ class _ServiceUnavailableView extends StatelessWidget {
   }
 }
 
-
 /// Website publication returns to the website feed, not the native vault feed.
 class _WebPublicationEntry extends StatefulWidget {
   const _WebPublicationEntry();
@@ -391,16 +604,15 @@ class _WebPublicationEntryState extends State<_WebPublicationEntry> {
 
   Future<void> _open() async {
     if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => const WebPublicationPage()),
-    );
+    await Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const WebPublicationPage()));
     if (mounted) exitPublicWork();
   }
 
   @override
   Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
 }
-
 
 /// Current account binding for the existing favorites API and public work viewer.
 class WebFavoritesAccountEntry extends StatefulWidget {
@@ -491,7 +703,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
       final work = await _guard(
         () => PublicWorkRepository(Supabase.instance.client).fetch(id),
       );
-      if (!_current) return;
+      if (!mounted || !_current) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => WorkDetailPage(
@@ -510,7 +722,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
         ),
       );
     } catch (_) {
-      if (!_current) return;
+      if (!mounted || !_current) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

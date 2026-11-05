@@ -149,7 +149,7 @@ void main() {
   });
 
   test(
-    'history marks newest received message, excludes sender-only cursor',
+    'history stays read-only until the visible UI advances its read cursor',
     () async {
       api.messages = [
         serverMessage('9'),
@@ -157,6 +157,8 @@ void main() {
         serverMessage('7', sender: 'peer'),
       ];
       await repo.history('conversation');
+      expect(api.marks, isEmpty);
+      await repo.markRead('conversation', '8');
       expect(api.marks, ['8']);
       api.marks.clear();
       api.messages = [serverMessage('9')];
@@ -181,6 +183,36 @@ void main() {
       expect(api.posts, isEmpty);
     },
   );
+
+  test('withdrawal requires the server edit marker and preserves literal user text', () async {
+    api.messages = [
+      const WebDmMessage(
+        '9',
+        'conversation',
+        'peer',
+        '[已撤回]',
+        '2026-11-05T12:00:00Z',
+        editedAt: '2026-11-05T12:01:00Z',
+      ),
+      const WebDmMessage(
+        '8',
+        'conversation',
+        'peer',
+        '[已撤回]',
+        '2026-11-05T11:00:00Z',
+      ),
+    ];
+    final rows = await repo.history('conversation');
+    expect(
+      rows.singleWhere((row) => row.id == '9').status,
+      WebChatMessageStatus.withdrawn,
+    );
+    expect(
+      rows.singleWhere((row) => row.id == '8').status,
+      WebChatMessageStatus.sent,
+    );
+    expect(api.marks, isEmpty);
+  });
 
   test('over-limit draft is rejected before any transport', () {
     expect(

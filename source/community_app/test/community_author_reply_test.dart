@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pocketworld_flutter/community/comments/comment_models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pocketworld_flutter/l10n/app_localizations.dart';
 import 'package:pocketworld_flutter/ui/community/comments/community_comments_panel.dart';
@@ -6,7 +7,7 @@ import 'community_comments_panel_test.dart' show FakeComments, comment;
 
 void main() {
   testWidgets(
-    'only the real work author replying to another comment gets author reply badge',
+    'real work owner comments and replies get author badge by user ID',
     (tester) async {
       final repo = FakeComments()
         ..rows = [
@@ -14,6 +15,15 @@ void main() {
           comment('author-root', user: 'author'),
           comment('author-reply', user: 'author', parentId: 'parent'),
           comment('reader-reply', user: 'reader', parentId: 'parent'),
+          CommunityComment(
+            id: 'impostor',
+            workId: 'work',
+            userId: 'impostor',
+            body: 'same name',
+            authorName: '用户author-root',
+            createdAt: DateTime.utc(2026),
+            status: CommunityCommentStatus.published,
+          ),
         ];
       tester.view.physicalSize = const Size(800, 1500);
       tester.view.devicePixelRatio = 1;
@@ -36,19 +46,20 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('作者回复'), findsOneWidget);
+      expect(find.text('作者'), findsNWidgets(2));
       expect(
         find.byKey(const ValueKey('author-reply-author-reply')),
         findsOneWidget,
       );
       expect(
         find.byKey(const ValueKey('author-reply-author-root')),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.byKey(const ValueKey('author-reply-reader-reply')),
         findsNothing,
       );
+      expect(find.byKey(const ValueKey('author-reply-impostor')), findsNothing);
       expect(find.text('回复 用户parent'), findsNWidgets(2));
       await tester.pumpWidget(const SizedBox.shrink());
     },

@@ -16,6 +16,102 @@ WebChatMessage message(String id, String text, {bool review = false}) =>
     );
 
 void main() {
+  WebChatMessage incoming() => WebChatMessage(
+    id: 'received',
+    text: 'Actual history',
+    isMine: false,
+    createdAt: DateTime(2026, 11, 5),
+  );
+
+  testWidgets(
+    'closing an unresolved history never marks unseen messages read',
+    (tester) async {
+      final pending = Completer<List<WebChatMessage>>();
+      final reads = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WebConversationPage(
+            peerName: 'Peer',
+            loader: () => pending.future,
+            send: (_) async => message('sent', 'sent'),
+            onMarkRead: (id) async {
+              reads.add(id);
+            },
+          ),
+        ),
+      );
+      expect(reads, isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+      pending.complete([incoming()]);
+      await tester.pumpAndSettle();
+      expect(reads, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'visible received history advances read once and keeps drafts through refresh',
+    (tester) async {
+      final reads = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WebConversationPage(
+            peerName: 'Peer',
+            loader: () async => [incoming()],
+            send: (_) async => message('sent', 'sent'),
+            onMarkRead: (id) async {
+              reads.add(id);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(reads, ['received']);
+      await tester.enterText(find.byType(TextField), 'preserved draft');
+      await tester.tap(find.byTooltip('刷新消息'));
+      await tester.pumpAndSettle();
+      expect(reads, ['received']);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'preserved draft',
+      );
+    },
+  );
+
+  testWidgets(
+    'read-sync error preserves actual history and draft, refresh retries only cursor',
+    (tester) async {
+      var failRead = true;
+      var reads = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WebConversationPage(
+            peerName: 'Peer',
+            loader: () async => [incoming()],
+            send: (_) async => message('sent', 'sent'),
+            onMarkRead: (id) async {
+              reads++;
+              if (failRead) throw StateError('offline');
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Actual history'), findsOneWidget);
+      expect(find.text('已读状态暂未同步，请刷新重试。'), findsOneWidget);
+      expect(find.text('消息暂时无法加载'), findsNothing);
+      await tester.enterText(find.byType(TextField), 'preserved draft');
+      failRead = false;
+      await tester.tap(find.byTooltip('刷新消息'));
+      await tester.pumpAndSettle();
+      expect(reads, 2);
+      expect(find.text('已读状态暂未同步，请刷新重试。'), findsNothing);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'preserved draft',
+      );
+    },
+  );
+
   testWidgets(
     'machine retry receipt stays undelivered and preserves an unrelated draft',
     (tester) async {

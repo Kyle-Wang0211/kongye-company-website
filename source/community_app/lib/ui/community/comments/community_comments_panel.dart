@@ -32,6 +32,7 @@ class CommunityCommentsPanel extends StatefulWidget {
     this.onClose,
     this.onCommentSelected,
     this.onVisibleCommentsChanged,
+    this.onCommentSubmitted,
     this.onModerationCaseSelected,
     this.refreshInterval = const Duration(seconds: 30),
     this.active = true,
@@ -51,6 +52,8 @@ class CommunityCommentsPanel extends StatefulWidget {
   final VoidCallback? onClose;
   final ValueChanged<CommunityComment>? onCommentSelected;
   final ValueChanged<List<CommunityComment>>? onVisibleCommentsChanged;
+  final void Function(CommunityComment, CommunityCommentAnchor?)?
+  onCommentSubmitted;
   final CommunityCommentImagePicker? imagePicker;
   final ValueChanged<String>? onModerationCaseSelected;
 
@@ -663,7 +666,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       if (!_current(generation)) return;
       if (comment.workId != widget.workId ||
           comment.userId != widget.currentUserId ||
-          !comment.visibleTo(widget.currentUserId)) {
+          !comment.visibleTo(widget.currentUserId) ||
+          comment.status == CommunityCommentStatus.error) {
         throw const CommunityCommentException('invalid_response');
       }
       setState(() {
@@ -686,6 +690,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         _requestId = null;
         _sending = false;
       });
+      widget.onCommentSubmitted?.call(comment, draft.anchor);
       widget.onClearAnchor?.call();
       _notifyVisible();
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1124,8 +1129,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   ),
                   if (!hidden &&
                       widget.workAuthorId != null &&
-                      comment.userId == widget.workAuthorId &&
-                      comment.parentId != null)
+                      widget.workAuthorId!.trim().isNotEmpty &&
+                      comment.userId == widget.workAuthorId)
                     Container(
                       key: ValueKey('author-reply-${comment.id}'),
                       margin: const EdgeInsets.only(left: 6),
@@ -1138,7 +1143,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        _l.commentAuthorReply,
+                        _l.localeName.startsWith('zh') ? '作者' : 'Author',
                         style: AetherTextStyles.caption.copyWith(
                           color: AetherColors.primary,
                           fontWeight: FontWeight.w600,

@@ -42,6 +42,7 @@ class WebConversationPage extends StatefulWidget {
     required this.send,
     this.changes,
     this.idempotentRetry = false,
+    this.onMarkRead,
     this.onWithdraw,
     this.onReport,
     this.onBlockPeer,
@@ -54,6 +55,7 @@ class WebConversationPage extends StatefulWidget {
   final Future<WebChatMessage> Function(String text) send;
   final Stream<void>? changes;
   final bool idempotentRetry;
+  final Future<void> Function(String messageId)? onMarkRead;
   final Future<void> Function(String messageId)? onWithdraw;
   final Future<String> Function(String messageId, String reason)? onReport;
   final Future<void> Function(bool blocked)? onBlockPeer;
@@ -62,7 +64,8 @@ class WebConversationPage extends StatefulWidget {
   State<WebConversationPage> createState() => _WebConversationPageState();
 }
 
-class _WebConversationPageState extends State<WebConversationPage> {
+class _WebConversationPageState extends State<WebConversationPage>
+    with WidgetsBindingObserver {
   final _draft = TextEditingController();
   final _focus = FocusNode();
   final _scroll = ScrollController();
@@ -77,10 +80,16 @@ class _WebConversationPageState extends State<WebConversationPage> {
   bool _liveUnavailable = false;
   bool _actionBusy = false;
   bool _refreshQueued = false;
+  bool _markingRead = false;
+  bool _readFailed = false;
+  String? _readCursor;
+  int _readEpoch = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scroll.addListener(_markVisibleRead);
     _load();
     _watch();
   }
@@ -123,6 +132,10 @@ class _WebConversationPageState extends State<WebConversationPage> {
       _actionBusy = false;
       _liveUnavailable = false;
       _refreshQueued = false;
+      _readEpoch++;
+      _readCursor = null;
+      _markingRead = false;
+      _readFailed = false;
       _load();
     }
     if (changed || widget.changes != oldWidget.changes) _watch();
@@ -131,6 +144,8 @@ class _WebConversationPageState extends State<WebConversationPage> {
   @override
   void dispose() {
     _generation++;
+    WidgetsBinding.instance.removeObserver(this);
+    _scroll.removeListener(_markVisibleRead);
     _subscription?.cancel();
     _draft.dispose();
     _focus.dispose();
@@ -144,6 +159,7 @@ class _WebConversationPageState extends State<WebConversationPage> {
     setState(() {
       _loading = true;
       _loadFailed = false;
+      _readFailed = false;
     });
     try {
       final messages = await widget.loader();
@@ -172,8 +188,57 @@ class _WebConversationPageState extends State<WebConversationPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _scroll.hasClients) {
         _scroll.jumpTo(_scroll.position.maxScrollExtent);
+        _markVisibleRead();
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _markVisibleRead());
+    }
+  }
+
+  Future<void> _markVisibleRead() async {
+    final callback = widget.onMarkRead;
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    if (!mounted ||
+        callback == null ||
+        ModalRoute.of(context)?.isCurrent == false ||
+        _loading ||
+        _loadFailed ||
+        _markingRead ||
+        _readFailed ||
+        !_scroll.hasClients ||
+        _scroll.position.extentAfter > 1 ||
+        lifecycle != null && lifecycle != AppLifecycleState.resumed) {
+      return;
+    }
+    final received = _messages.where(
+      (message) =>
+          !message.isMine &&
+          (message.status == WebChatMessageStatus.sent ||
+              message.status == WebChatMessageStatus.withdrawn),
+    );
+    if (received.isEmpty || received.last.id == _readCursor) return;
+    final id = received.last.id;
+    final epoch = _readEpoch;
+    _markingRead = true;
+    try {
+      await callback(id);
+      if (!mounted || epoch != _readEpoch) return;
+      _readCursor = id;
+    } catch (_) {
+      if (!mounted || epoch != _readEpoch) return;
+      setState(() => _readFailed = true);
+    } finally {
+      if (mounted && epoch == _readEpoch) {
+        _markingRead = false;
+        // Reconcile a newer visible message that arrived during the write.
+        if (!_readFailed) unawaited(_markVisibleRead());
+      }
+    }
   }
 
   Future<void> _send() async {
@@ -308,15 +373,13 @@ class _WebConversationPageState extends State<WebConversationPage> {
     try {
       await operation();
       if (!mounted || generation != _generation) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(success)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(success)));
       await _load();
     } catch (_) {
       if (!mounted || generation != _generation) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('操作未完成，请稍后重试。')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('操作未完成，请稍后重试。')));
     } finally {
       if (mounted) setState(() => _actionBusy = false);
     }
@@ -386,6 +449,14 @@ class _WebConversationPageState extends State<WebConversationPage> {
                       padding: EdgeInsets.all(12),
                       child: Text(
                         '实时连接暂不可用，请点击刷新查看新消息。',
+                        style: AetherTextStyles.bodySm,
+                      ),
+                    ),
+                  if (_readFailed)
+                    const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Text(
+                        '已读状态暂未同步，请刷新重试。',
                         style: AetherTextStyles.bodySm,
                       ),
                     ),
