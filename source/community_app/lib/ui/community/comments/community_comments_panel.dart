@@ -76,7 +76,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   final _reportRevision = ValueNotifier(0);
   List<CommunityComment> _comments = [];
   final _parentComments = <String, CommunityComment>{};
-  CommunityCommentSection _selectedSection = CommunityCommentSection.hot;
   final _sectionIds = <CommunityCommentSection, List<String>>{};
   final _sectionCursors = <CommunityCommentSection, String?>{};
   final _sectionErrors = <CommunityCommentSection, String>{};
@@ -221,7 +220,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _text.clear();
       _images.clear();
       _comments = [];
-      _selectedSection = CommunityCommentSection.hot;
       _resetSections();
       _busyComments.clear();
       _page = null;
@@ -341,7 +339,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _notifyVisible();
       try {
         await Future.wait([
-          for (final section in CommunityCommentSection.values)
+          for (final section in const [CommunityCommentSection.hot])
             _loadSection(section, token: token),
         ]);
       } finally {
@@ -417,20 +415,20 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     }
   }
 
-  /// Polling stages both first pages without publishing a transient empty feed.
+  /// Refresh stages the ranked first page without publishing a transient empty feed.
   /// A validated snapshot replaces the old rows once; errors revoke remote
   /// content immediately, and late/stale responses cannot refill it.
   Future<void> _refreshPagedSnapshot(int generation, int token) async {
     setState(() {
       _loadError = null;
       _sectionErrors.clear();
-      for (final section in CommunityCommentSection.values) {
+      for (final section in const [CommunityCommentSection.hot]) {
         _sectionBusy[section] = ++_sectionRequest;
       }
     });
     try {
       final pages = await Future.wait([
-        for (final section in CommunityCommentSection.values)
+        for (final section in const [CommunityCommentSection.hot])
           (widget.repository as CommunityCommentFeedRepository)
               .fetchSection(widget.workId, section: section)
               .timeout(const Duration(seconds: 30))
@@ -661,13 +659,12 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         _comments.removeWhere((c) => c.id == comment.id);
         _comments.add(comment);
         if (_paged) {
-          final latest = _sectionIds.putIfAbsent(
-            CommunityCommentSection.latest,
+          final ranked = _sectionIds.putIfAbsent(
+            CommunityCommentSection.hot,
             () => [],
           );
-          latest.remove(comment.id);
-          latest.insert(0, comment.id);
-          _selectedSection = CommunityCommentSection.latest;
+          ranked.remove(comment.id);
+          ranked.add(comment.id);
         }
         if (comment.published && previous?.published != true) _publicCount++;
         _text.clear();
@@ -929,30 +926,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                           ],
                         ),
                       ),
-                      if (_paged)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                          child: SegmentedButton<CommunityCommentSection>(
-                            showSelectedIcon: false,
-                            segments: [
-                              ButtonSegment(
-                                value: CommunityCommentSection.hot,
-                                label: Text(_l.commentHot),
-                              ),
-                              ButtonSegment(
-                                value: CommunityCommentSection.latest,
-                                label: Text(_l.commentLatest),
-                              ),
-                            ],
-                            selected: {_selectedSection},
-                            onSelectionChanged: (selection) {
-                              setState(
-                                () => _selectedSection = selection.single,
-                              );
-                              if (_scroll.hasClients) _scroll.jumpTo(0);
-                            },
-                          ),
-                        ),
                       const Divider(height: 1, color: AetherColors.border),
                       Expanded(child: _list()),
                       const Divider(height: 1, color: AetherColors.border),
@@ -974,6 +947,16 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             ),
           ),
         );
+
+  // The server applies this order to the complete visible set before paging.
+  // Keep local mutations in the same order while preserving the server cursor.
+  List<CommunityComment> _ranked(Iterable<CommunityComment> comments) =>
+      comments.toList()..sort((a, b) {
+        final likes = b.likesCount.compareTo(a.likesCount);
+        if (likes != 0) return likes;
+        final time = b.createdAt.compareTo(a.createdAt);
+        return time != 0 ? time : b.id.compareTo(a.id);
+      });
 
   Widget _list() {
     if (_loading && _comments.isEmpty) {
@@ -1010,12 +993,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       return SingleChildScrollView(
         controller: _scroll,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: _section(
-          _selectedSection,
-          _selectedSection == CommunityCommentSection.hot
-              ? _l.commentHot
-              : _l.commentLatest,
-        ),
+        child: _section(CommunityCommentSection.hot),
       );
     }
     if (_comments.isEmpty) {
@@ -1030,20 +1008,23 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         ),
       );
     }
+    final rows = _ranked(_comments);
     return ListView.separated(
       controller: _scroll,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      itemCount: _comments.length,
+      itemCount: rows.length,
       separatorBuilder: (_, _) => const SizedBox(height: 20),
-      itemBuilder: (_, index) => _comment(_comments[index]),
+      itemBuilder: (_, index) => _comment(rows[index]),
     );
   }
 
-  Widget _section(CommunityCommentSection section, String title) {
+  Widget _section(CommunityCommentSection section) {
     final ids = _sectionIds[section] ?? const <String>[];
-    final rows = ids
-        .map((id) => _comments.where((c) => c.id == id).firstOrNull)
-        .whereType<CommunityComment>();
+    final rows = _ranked(
+      ids
+          .map((id) => _comments.where((c) => c.id == id).firstOrNull)
+          .whereType<CommunityComment>(),
+    );
     final busy = _sectionBusy.containsKey(section);
     final error = _sectionErrors[section];
     return Column(
@@ -1056,12 +1037,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             child: _comment(row),
           ),
         if (!busy && error == null && rows.isEmpty)
-          Text(
-            section == CommunityCommentSection.hot
-                ? _l.commentHotEmpty
-                : _l.commentLatestEmpty,
-            style: AetherTextStyles.caption,
-          ),
+          Text(_l.commentEmpty, style: AetherTextStyles.caption),
         if (busy)
           const Padding(
             padding: EdgeInsets.all(12),
@@ -1080,8 +1056,10 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             onPressed: busy ? null : () => _loadSection(section),
             child: Text(
               error != null
-                  ? _l.commentRetrySection(title)
-                  : _l.commentMoreSection(title),
+                  ? _l.commentReload
+                  : (_l.localeName.startsWith('zh')
+                        ? '加载更多评论'
+                        : 'Load more comments'),
             ),
           ),
       ],

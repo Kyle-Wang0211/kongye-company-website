@@ -760,12 +760,12 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   void _leaveWork() {
-    final navigator = Navigator.of(context);
-    if (navigator.canPop()) {
-      navigator.pop();
-    } else {
-      widget.onExit?.call();
+    final exit = widget.onExit;
+    if (exit != null) {
+      exit();
+      return;
     }
+    Navigator.of(context).maybePop();
   }
 
   /// Shared renderer 首帧就绪后，交给 ThumbBaker 判断是否需要生成缩略图。

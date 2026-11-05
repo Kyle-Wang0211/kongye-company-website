@@ -38,54 +38,65 @@ class PagedComments extends fixture.FakeComments
   }
 }
 
+CommunityComment ranked(String id, int likes, int day) => CommunityComment(
+  id: id,
+  workId: 'work',
+  userId: 'me',
+  body: 'body-$id',
+  authorName: id,
+  createdAt: DateTime.utc(2026, 11, day),
+  status: CommunityCommentStatus.published,
+  likesCount: likes,
+);
+
 void main() {
+  for (final language in ['zh', 'en']) {
+    testWidgets('ranked feed has no old tabs in $language', (tester) async {
+      final repo = PagedComments();
+      await fixture.mount(tester, repo, locale: Locale(language));
+      expect(
+        find.byType(SegmentedButton<CommunityCommentSection>),
+        findsNothing,
+      );
+      for (final oldLabel in ['热评', '最新', 'Top comments', 'Latest']) {
+        expect(find.text(oldLabel), findsNothing);
+      }
+      expect(repo.calls, [(CommunityCommentSection.hot, null)]);
+    });
+  }
+
   testWidgets(
-    'overlapping sort results render one feed and keep server order',
+    'single list orders likes descending then newest then stable ID',
     (tester) async {
       final repo = PagedComments()
         ..firstPages[CommunityCommentSection.hot] = [
-          fixture.comment('a'),
-          fixture.comment('b'),
-          fixture.comment('c'),
-        ]
-        ..firstPages[CommunityCommentSection.latest] = [
-          fixture.comment('c'),
-          fixture.comment('b'),
-          fixture.comment('a'),
+          ranked('old-popular', 10, 1),
+          ranked('new-zero', 0, 5),
+          ranked('old-tie', 2, 1),
+          ranked('a', 2, 3),
+          ranked('z', 2, 3),
         ];
-      final visible = <List<CommunityComment>>[];
-      await fixture.mount(tester, repo, visible: visible.add);
+      await fixture.mount(tester, repo);
       expect(
         find.byType(SegmentedButton<CommunityCommentSection>),
-        findsOneWidget,
+        findsNothing,
       );
-      expect(find.text('body-a'), findsOneWidget);
-      expect(find.text('body-b'), findsOneWidget);
-      expect(find.text('body-c'), findsOneWidget);
-      expect(
-        tester.getTopLeft(find.text('body-a')).dy,
-        lessThan(tester.getTopLeft(find.text('body-c')).dy),
-      );
-      expect(visible.last.map((c) => c.id).toSet(), {'a', 'b', 'c'});
-      await tester.tap(find.text('最新'));
-      await tester.pumpAndSettle();
-      expect(find.text('body-a'), findsOneWidget);
-      expect(
-        tester.getTopLeft(find.text('body-c')).dy,
-        lessThan(tester.getTopLeft(find.text('body-a')).dy),
-      );
-      await tester.tap(find.text('热评'));
-      await tester.pumpAndSettle();
-      expect(
-        tester.getTopLeft(find.text('body-a')).dy,
-        lessThan(tester.getTopLeft(find.text('body-c')).dy),
-      );
-      expect(repo.calls, hasLength(2));
+      expect(find.text('热评'), findsNothing);
+      expect(find.text('最新'), findsNothing);
+      expect(repo.calls, [(CommunityCommentSection.hot, null)]);
+      final order = ['old-popular', 'z', 'a', 'old-tie', 'new-zero'];
+      for (var i = 1; i < order.length; i++) {
+        expect(
+          tester.getTopLeft(find.text('body-${order[i - 1]}')).dy,
+          lessThan(tester.getTopLeft(find.text('body-${order[i]}')).dy),
+        );
+      }
+      expect(find.text('body-new-zero'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'sort changes retain independent cursors and deduplicate page overlaps',
+    'single ranked list retains cursor and deduplicates overlapping pages',
     (tester) async {
       final repo = PagedComments();
       await fixture.mount(tester, repo);
@@ -94,255 +105,179 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('comment-more-hot')));
       await tester.pumpAndSettle();
-      expect(repo.calls.last, (CommunityCommentSection.hot, 'hot-next'));
+      expect(repo.calls, [
+        (CommunityCommentSection.hot, null),
+        (CommunityCommentSection.hot, 'hot-next'),
+      ]);
       expect(find.text('body-hot-19'), findsOneWidget);
-      await tester.tap(find.text('最新'));
-      await tester.pumpAndSettle();
-      expect(find.text('body-hot-19'), findsNothing);
-      await tester.ensureVisible(
-        find.byKey(const ValueKey('comment-more-latest')),
-      );
-      await tester.tap(find.byKey(const ValueKey('comment-more-latest')));
-      await tester.pumpAndSettle();
-      expect(repo.calls.last, (CommunityCommentSection.latest, 'latest-next'));
-      expect(find.text('body-latest-19'), findsOneWidget);
-      await tester.tap(find.text('热评'));
-      await tester.pumpAndSettle();
       expect(find.text('body-hot-20'), findsOneWidget);
       expect(find.byKey(const ValueKey('comment-more-hot')), findsNothing);
-      expect(repo.calls, hasLength(4));
+      expect(repo.fetches, 0);
     },
   );
 
-  testWidgets(
-    'sort switching preserves reply anchor and deduplicated pin callback',
-    (tester) async {
-      final anchor = CommunityCommentAnchor(position: [1, 2, 3]);
-      final parent = fixture.comment('parent', anchor: anchor);
-      final repo = PagedComments()
-        ..firstPages[CommunityCommentSection.hot] = [parent]
-        ..firstPages[CommunityCommentSection.latest] = [parent];
-      CommunityComment? selected;
-      final visible = <List<CommunityComment>>[];
-      await fixture.mount(
-        tester,
-        repo,
-        anchor: anchor,
-        visible: visible.add,
-        selected: (value) => selected = value,
-      );
-      await tester.tap(find.text('查看模型点位'));
-      expect(selected?.id, 'parent');
-      await tester.tap(find.text('回复'));
-      await tester.pump();
-      await tester.enterText(
-        find.byKey(const Key('comment-input')),
-        'reply draft',
-      );
-      await tester.tap(find.text('最新'));
-      await tester.pumpAndSettle();
-      expect(find.text('回复 用户parent'), findsOneWidget);
-      expect(find.text('reply draft'), findsOneWidget);
-      expect(visible.last.map((c) => c.id), ['parent']);
-      await tester.tap(find.byKey(const Key('comment-send')));
-      await tester.pumpAndSettle();
-      expect(repo.sent.single.parentId, 'parent');
-      expect(repo.sent.single.anchor, same(anchor));
-    },
-  );
-
-  testWidgets(
-    'anonymous sort selection keeps public reads and a real sign-in action',
-    (tester) async {
-      final repo = PagedComments();
-      var signIns = 0;
-      await fixture.mount(
-        tester,
-        repo,
-        user: null,
-        locale: const Locale('en'),
-        signIn: () => signIns++,
-      );
-      await tester.tap(find.text('Latest'));
-      await tester.pumpAndSettle();
-      expect(find.text('body-latest-0'), findsOneWidget);
-      expect(
-        tester
-            .widget<TextField>(find.byKey(const Key('comment-input')))
-            .enabled,
-        isFalse,
-      );
-      await tester.tap(find.widgetWithText(TextButton, 'Sign in to comment'));
-      expect(signIns, 1);
-      expect(repo.sent, isEmpty);
-    },
-  );
-
-  testWidgets('parent context stays available across sort switches', (
+  testWidgets('single feed preserves reply point draft and parent context', (
     tester,
   ) async {
+    final anchor = CommunityCommentAnchor(position: [1, 2, 3]);
     final repo = PagedComments()
-      ..contextRows = [fixture.comment('parent')]
+      ..contextRows = [fixture.comment('context')]
       ..firstPages[CommunityCommentSection.hot] = [
-        fixture.comment('reply', parentId: 'parent'),
-      ]
-      ..firstPages[CommunityCommentSection.latest] = [
-        fixture.comment('reply', parentId: 'parent'),
+        fixture.comment('parent', anchor: anchor),
+        fixture.comment('reply', parentId: 'context'),
       ];
-    await fixture.mount(tester, repo);
-    expect(find.text('回复 用户parent'), findsOneWidget);
-    await tester.tap(find.text('最新'));
+    CommunityComment? selected;
+    await fixture.mount(
+      tester,
+      repo,
+      anchor: anchor,
+      selected: (c) => selected = c,
+    );
+    expect(find.text('回复 用户context'), findsOneWidget);
+    expect(find.text('body-context'), findsNothing);
+    await tester.tap(find.text('查看模型点位'));
+    expect(selected?.id, 'parent');
+    await tester.tap(find.text('回复').last);
+    await tester.pump();
+    await tester.enterText(
+      find.byKey(const Key('comment-input')),
+      'reply draft',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('comment-send')));
     await tester.pumpAndSettle();
-    expect(find.text('回复 用户parent'), findsOneWidget);
-    expect(find.text('body-parent'), findsNothing);
+    expect(repo.sent.single.parentId, 'parent');
+    expect(repo.sent.single.anchor, same(anchor));
   });
 
-  testWidgets(
-    'paged English selector fits 320 pixels with keyboard and reply anchor',
-    (tester) async {
-      tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(320, 640);
-      tester.view.viewInsets = const FakeViewPadding(bottom: 280);
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-        tester.view.resetViewInsets();
-      });
-      final repo = PagedComments();
-      await fixture.mount(
-        tester,
-        repo,
-        locale: const Locale('en'),
-        anchor: CommunityCommentAnchor(position: [0, 0, 0]),
-      );
-      await tester.tap(find.text('Reply').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Latest'));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      expect(
-        find.byType(SegmentedButton<CommunityCommentSection>),
-        findsOneWidget,
-      );
-    },
-  );
+  testWidgets('anonymous ranked reads retain sign-in action', (tester) async {
+    final repo = PagedComments();
+    var signIns = 0;
+    await fixture.mount(
+      tester,
+      repo,
+      user: null,
+      locale: const Locale('en'),
+      signIn: () => signIns++,
+    );
+    expect(find.text('body-hot-0'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('comment-input'))).enabled,
+      isFalse,
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Sign in to comment'));
+    expect(signIns, 1);
+    expect(repo.sent, isEmpty);
+  });
 
-  testWidgets(
-    'hot and latest load independently with explicit more, no legacy 200 fetch',
-    (tester) async {
-      final repo = PagedComments();
-      await fixture.mount(tester, repo);
-      expect(repo.fetches, 0);
-      expect(
-        repo.calls,
-        containsAll([
-          (CommunityCommentSection.hot, null),
-          (CommunityCommentSection.latest, null),
-        ]),
-      );
-      expect(find.text('热评'), findsOneWidget);
-      await tester.tap(find.text('最新'));
-      await tester.pumpAndSettle();
-      expect(find.text('最新'), findsOneWidget);
-      await tester.ensureVisible(
-        find.byKey(const ValueKey('comment-more-latest')),
-      );
-      await tester.tap(find.byKey(const ValueKey('comment-more-latest')));
-      await tester.pumpAndSettle();
-      expect(repo.calls.last, (CommunityCommentSection.latest, 'latest-next'));
-      expect(find.text('body-latest-19'), findsOneWidget);
-      expect(find.text('body-latest-20'), findsOneWidget);
-      expect(
-        repo.calls.where((c) => c.$1 == CommunityCommentSection.hot),
-        hasLength(1),
-      );
-    },
-  );
-
-  testWidgets(
-    'hot failure does not hide latest or require exhausting hot pages',
-    (tester) async {
-      final repo = PagedComments()..failHot = true;
-      await fixture.mount(tester, repo);
-      expect(find.text('重试热评'), findsOneWidget);
-      await tester.tap(find.text('最新'));
-      await tester.pumpAndSettle();
-      expect(find.text('body-latest-0'), findsOneWidget);
-      expect(find.text('最新'), findsOneWidget);
-    },
-  );
-
-  testWidgets('one section can time out and retry without blocking latest', (
+  testWidgets('ranked list fits narrow keyboard layout with point and reply', (
     tester,
   ) async {
-    final hot = Completer<CommunityCommentPage>();
-    final repo = PagedComments()..pending[CommunityCommentSection.hot] = hot;
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.view.resetViewInsets();
+    });
+    await fixture.mount(
+      tester,
+      PagedComments(),
+      locale: const Locale('en'),
+      anchor: CommunityCommentAnchor(position: [0, 0, 0]),
+    );
+    await tester.tap(find.text('Reply').first);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SegmentedButton<CommunityCommentSection>), findsNothing);
+  });
+
+  testWidgets('failed ranked feed retries same endpoint', (tester) async {
+    final repo = PagedComments()..failHot = true;
     await fixture.mount(tester, repo);
-    await tester.tap(find.text('最新'));
-    await tester.pump(const Duration(seconds: 31));
-    await tester.pumpAndSettle();
-    expect(find.text('body-latest-0'), findsOneWidget);
-    expect(find.text('重试热评'), findsNothing);
-    await tester.tap(find.text('热评'));
-    await tester.pumpAndSettle();
-    expect(find.text('重试热评'), findsOneWidget);
-    repo.pending.clear();
-    await tester.ensureVisible(find.text('重试热评'));
-    await tester.tap(find.text('重试热评'));
+    expect(find.byKey(const ValueKey('comment-more-hot')), findsOneWidget);
+    repo.failHot = false;
+    await tester.tap(find.byKey(const ValueKey('comment-more-hot')));
     await tester.pumpAndSettle();
     expect(find.text('body-hot-0'), findsOneWidget);
-    hot.complete(
+    expect(repo.calls, [
+      (CommunityCommentSection.hot, null),
+      (CommunityCommentSection.hot, null),
+    ]);
+  });
+
+  testWidgets('ranked timeout retries and ignores stale response', (
+    tester,
+  ) async {
+    final pending = Completer<CommunityCommentPage>();
+    final repo = PagedComments()
+      ..pending[CommunityCommentSection.hot] = pending;
+    await fixture.mount(tester, repo);
+    await tester.pump(const Duration(seconds: 31));
+    await tester.pumpAndSettle();
+    repo.pending.clear();
+    await tester.tap(find.byKey(const ValueKey('comment-more-hot')));
+    await tester.pumpAndSettle();
+    expect(find.text('body-hot-0'), findsOneWidget);
+    pending.complete(
       CommunityCommentPage(
         assetRevision: 'stale',
         comments: [fixture.comment('stale')],
-        publicCount: 0,
       ),
     );
     await tester.pumpAndSettle();
     expect(find.text('body-stale'), findsNothing);
   });
 
-  testWidgets('new submission is visible immediately in latest section', (
-    tester,
-  ) async {
-    final repo = PagedComments();
-    await fixture.mount(tester, repo);
-    await tester.enterText(find.byKey(const Key('comment-input')), '新评论');
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('comment-send')));
-    await tester.pumpAndSettle();
-    expect(find.text('body-new'), findsOneWidget);
-    expect(find.byKey(const ValueKey('comment-section-hot')), findsNothing);
-    expect(
-      find.byKey(const ValueKey('comment-section-latest')),
-      findsOneWidget,
-    );
-    expect(repo.sent.single.body, '新评论');
-  });
+  testWidgets(
+    'new confirmed comment enters single list at its ranked position',
+    (tester) async {
+      final repo = PagedComments()
+        ..firstPages[CommunityCommentSection.hot] = [ranked('popular', 10, 1)]
+        ..submitResult = ranked('new', 0, 5);
+      await fixture.mount(tester, repo);
+      await tester.enterText(find.byKey(const Key('comment-input')), '新评论');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('comment-send')));
+      await tester.pumpAndSettle();
+      expect(find.text('body-new'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('body-popular')).dy,
+        lessThan(tester.getTopLeft(find.text('body-new')).dy),
+      );
+      expect(find.byKey(const ValueKey('comment-section-hot')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('comment-section-latest')),
+        findsNothing,
+      );
+      expect(repo.sent.single.body, '新评论');
+    },
+  );
 
-  testWidgets('account change rejects old hot and latest pages', (
+  testWidgets('account switch rejects stale ranked private page', (
     tester,
   ) async {
-    final hot = Completer<CommunityCommentPage>();
-    final latest = Completer<CommunityCommentPage>();
+    final pending = Completer<CommunityCommentPage>();
     final repo = PagedComments()
-      ..pending[CommunityCommentSection.hot] = hot
-      ..pending[CommunityCommentSection.latest] = latest;
+      ..pending[CommunityCommentSection.hot] = pending;
     await fixture.mount(tester, repo);
     repo.pending.clear();
     await fixture.mount(tester, repo, user: 'other');
-    final stale = CommunityCommentPage(
-      assetRevision: 'revision',
-      comments: [
-        fixture.comment('private', status: CommunityCommentStatus.pending),
-      ],
-      canComment: true,
-      publicCount: 0,
+    pending.complete(
+      CommunityCommentPage(
+        assetRevision: 'revision',
+        comments: [
+          fixture.comment('private', status: CommunityCommentStatus.pending),
+        ],
+        canComment: true,
+      ),
     );
-    hot.complete(stale);
-    latest.complete(stale);
     await tester.pumpAndSettle();
     expect(find.text('body-private'), findsNothing);
-    expect(find.text('热评'), findsOneWidget);
+    expect(
+      repo.calls.every((c) => c.$1 == CommunityCommentSection.hot),
+      isTrue,
+    );
   });
 }

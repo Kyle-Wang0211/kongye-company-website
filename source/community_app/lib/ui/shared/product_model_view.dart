@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 
 import 'local_work_viewer_session.dart';
@@ -85,6 +86,7 @@ class ProductModelView extends StatefulWidget {
     this.onSurfaceMarkerLayoutChanged,
     @visibleForTesting this.hostBuilder,
     @visibleForTesting this.resolveLocalPath,
+    @visibleForTesting this.browserModelClient,
   });
 
   final LocalWorkViewerBinding? localWork;
@@ -120,6 +122,8 @@ class ProductModelView extends StatefulWidget {
   final ValueChanged<SharedSurfaceMarkerLayout?>? onSurfaceMarkerLayoutChanged;
   final ProductModelHostBuilder? hostBuilder;
   final Future<String> Function(String url)? resolveLocalPath;
+  @visibleForTesting
+  final http.Client? browserModelClient;
 
   @override
   State<ProductModelView> createState() => _ProductModelViewState();
@@ -182,6 +186,7 @@ class _ProductModelViewState extends State<ProductModelView>
   MemoryImage? _frame;
   Future<void> _captureQueue = Future<void>.value();
   Object? _error;
+  double? _downloadProgress = 0;
   Timer? _captureTimer;
 
   bool get _active =>
@@ -387,6 +392,7 @@ class _ProductModelViewState extends State<ProductModelView>
         _prepareController();
       }
       _epoch++;
+      _downloadProgress = 0;
       _loadClock = Stopwatch()..start();
       _rotationArmed = false;
       _userTookControl = false;
@@ -540,6 +546,7 @@ class _ProductModelViewState extends State<ProductModelView>
       // never try to load through the invalidated controller/presentation.
       _communityRecoveryUsed = true;
       _epoch++;
+      _downloadProgress = 0;
       _hostReady = false;
       _loadedEpoch = -1;
       _loadingEpoch = null;
@@ -672,9 +679,10 @@ class _ProductModelViewState extends State<ProductModelView>
           () => _controller.loadLocalFile(lease.canonicalPath, format: format),
         );
         _logLoadPhase('renderer_load', source: 'retained_local');
-      } else if (kIsWeb) {
+      } else if (kIsWeb || widget.browserModelClient != null) {
         _logLoadPhase('renderer_load', source: 'browser');
         if (widget.onSurfacePicked == null) {
+          setState(() => _downloadProgress = null);
           await _controller.load(url: uri, format: format);
         } else {
           final controller = _controller;
@@ -686,6 +694,16 @@ class _ProductModelViewState extends State<ProductModelView>
           final identity = await loadBrowserModelBytes(
             uri: uri,
             isCurrent: current,
+            client: widget.browserModelClient,
+            onProgress: (received, total) {
+              if (!current() || !mounted) return;
+              final progress = total == null
+                  ? null
+                  : (received / total).clamp(0.0, 1.0);
+              if (_downloadProgress != progress) {
+                setState(() => _downloadProgress = progress);
+              }
+            },
             load: (bytes) => controller.loadBytes(bytes, format: format),
           );
           if (!current() || identity == null) return;
@@ -752,7 +770,7 @@ class _ProductModelViewState extends State<ProductModelView>
           (widget.concealRenderSource && !_hasCurrentFrame)) {
         return;
       }
-      _notifiedEpoch = epoch;
+      setState(() => _notifiedEpoch = epoch);
       _logLoadPhase('first_frame');
       // The same current-frame gate guards both callbacks. Deliver the exact
       // decoded PNG before readiness can release this mounted source. Evicting
@@ -935,13 +953,50 @@ class _ProductModelViewState extends State<ProductModelView>
     }
   }
 
+  bool get _showDownloadProgress =>
+      (kIsWeb || widget.browserModelClient != null) &&
+      _error == null &&
+      _notifiedEpoch != _epoch;
+
+  Widget _downloadOverlay() => ColoredBox(
+    key: const ValueKey('product-model-download'),
+    color: widget.background,
+    child: Center(
+      child: SizedBox.square(
+        dimension: 64,
+        child: Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: [
+            CircularProgressIndicator(
+              value: _downloadProgress,
+              color: Colors.white,
+              backgroundColor: Colors.white24,
+              strokeWidth: 3,
+            ),
+            Center(
+              child: Text(
+                _downloadProgress == null
+                    ? '—'
+                    : '${(_downloadProgress! * 100).floor()}%',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     if (!_controllerReady || !(widget.localWork?.store.isActive ?? true)) {
       return ColoredBox(
         color: widget.background,
         child: _error == null
-            ? const SizedBox.expand()
+            ? (_showDownloadProgress
+                  ? _downloadOverlay()
+                  : const SizedBox.expand())
             : const Center(
                 child: Icon(
                   Icons.error_outline_rounded,
@@ -952,17 +1007,19 @@ class _ProductModelViewState extends State<ProductModelView>
       );
     }
     final viewerL10n = Localizations.of<AppL10n>(context, AppL10n);
-    final viewerUiStrings = viewerL10n == null
-        ? const <String, String>{}
-        : {
-            'locale': viewerL10n.localeName,
-            'title': viewerL10n.sharedViewerTitle,
-            'canvasLabel': viewerL10n.sharedViewerCanvasLabel,
-            'initializing': viewerL10n.sharedViewerInitializing,
-            'loading': viewerL10n.sharedViewerLoading,
-            'failure': viewerL10n.sharedViewerFailure,
-            'skpNotice': viewerL10n.sharedViewerSkpNotice,
-          };
+    final viewerUiStrings = <String, String>{
+      if (viewerL10n != null) ...{
+        'locale': viewerL10n.localeName,
+        'title': viewerL10n.sharedViewerTitle,
+        'canvasLabel': viewerL10n.sharedViewerCanvasLabel,
+        'initializing': viewerL10n.sharedViewerInitializing,
+        'loading': viewerL10n.sharedViewerLoading,
+        'failure': viewerL10n.sharedViewerFailure,
+        'skpNotice': viewerL10n.sharedViewerSkpNotice,
+      },
+      // The pinned localization bridge accepts non-empty strings only.
+      if (kIsWeb) ...{'initializing': ' ', 'loading': ' '},
+    };
     final host =
         widget.hostBuilder?.call(context, _controller, _ready, _fail) ??
         SharedViewer(
@@ -1020,6 +1077,7 @@ class _ProductModelViewState extends State<ProductModelView>
                           excludeFromSemantics: true,
                         ),
                 ),
+              if (_showDownloadProgress) _downloadOverlay(),
               if (_error != null)
                 const Center(
                   child: Icon(
