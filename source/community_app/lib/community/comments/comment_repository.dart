@@ -39,10 +39,16 @@ class CommunityCommentIdentity {
     required this.userId,
     required this.regionKey,
     required this.generation,
+    this.readRetryScope,
   });
   final String userId;
   final String regionKey;
   final Object generation;
+
+  /// Opaque client/endpoint-credential scope; only read requests may restart
+  /// once after the session generation changes within this unchanged scope.
+  /// A restarted read discards the old response and rechecks the new snapshot.
+  final Object? readRetryScope;
   @override
   bool operator ==(Object other) =>
       other is CommunityCommentIdentity &&
@@ -124,6 +130,7 @@ class _CommunityCommentGateway {
       userId: session.user.id,
       regionKey: '${config.deployment.namespace}|${config.supabaseUrl}',
       generation: (client, session, config.supabaseAnonKey),
+      readRetryScope: (client, config.supabaseAnonKey),
     );
   }
 
@@ -156,7 +163,26 @@ class _CommunityCommentGateway {
     }
   }
 
-  Future<Map<String, dynamic>> _request(Map<String, dynamic> body) async {
+  bool _canRestartRead(CommunityCommentIdentity expected) {
+    if (expected.userId.isEmpty || expected.readRetryScope == null) {
+      return false;
+    }
+    try {
+      final current = _requestIdentity(allowAnonymous: false);
+      return current != null &&
+          current.userId == expected.userId &&
+          current.regionKey == expected.regionKey &&
+          current.readRetryScope == expected.readRetryScope &&
+          current != expected;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> _request(
+    Map<String, dynamic> body, {
+    bool allowReadRetry = true,
+  }) async {
     CommunityCommentIdentity? expected;
     try {
       expected = _requestIdentity(allowAnonymous: body['op'] == 'list');
@@ -217,6 +243,11 @@ class _CommunityCommentGateway {
       return data;
     } on CommunityCommentException {
       if (!_isCurrent(expected)) {
+        if (allowReadRetry &&
+            body['op'] == 'list' &&
+            _canRestartRead(expected)) {
+          return _request(body, allowReadRetry: false);
+        }
         throw const CommunityCommentException('identity_changed');
       }
       rethrow;
