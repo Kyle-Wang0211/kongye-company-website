@@ -29,6 +29,7 @@ import '../../community/social_profile_repository.dart';
 import '../../community/thumb_baker.dart';
 import '../../l10n/app_localizations.dart';
 import '../../auth/auth_scope.dart';
+import '../social/work_favorite_button.dart';
 import 'public_work_entry.dart' show PublicWorkSignIn;
 import '../design_system.dart';
 import 'aether_cpp_card_demo.dart';
@@ -1135,6 +1136,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           onPressed: _leaveWork,
         ),
         actions: [
+          WorkFavoriteEntry(
+            workId: widget.work.id,
+            onSignIn: _requestSignIn,
+          ),
           // Guideline 1.2 wants a report mechanism AND a way to block
           // abusive users; Apple's UGC rejection letters additionally ask
           // for a way for authors to immediately remove their own posts
