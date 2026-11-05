@@ -7,7 +7,7 @@ function fixture(withDom = false, format = 'glb') {
  const elements=[];
  function element(tag) {
    const node={tag,style:{},attributes:{},children:[],listeners:new Map(),textContent:'',
-    setAttribute(k,v){this.attributes[k]=v;},appendChild(child){this.children.push(child);},
+    animate(keyframes, options){this.animation={keyframes,options,cancel(){this.cancelled=true;}};return this.animation;},setAttribute(k,v){this.attributes[k]=v;},appendChild(child){this.children.push(child);},
     replaceChildren(){this.children=[];},remove(){this.removed=true;},addEventListener(k,v){this.listeners.set(k,v);}};
    elements.push(node);return node;
  }
@@ -113,11 +113,11 @@ test('bridge maps all surface arguments and keeps exact protocol/origin event ro
  assert.equal(listeners.has('pw-viewer-surface-marker-layout'),false);
 });
 
-test('numbered overlay projects actual root-local anchors, selects by id and clears DOM',()=>{
+test('white point overlay projects actual root-local anchors, selects by id and clears DOM',()=>{
  const f=fixture(true);
  f.surface.setMarkers([{id:'comment-7',number:7,selected:true,anchor:{position:[0,0,1]}}]);
  const overlay=f.document.body.children[0],button=overlay.children[0];
- assert.equal(button.textContent,'7');assert.equal(button.attributes['aria-pressed'],'true');
+ assert.equal(button.textContent,'');assert.equal(button.attributes['aria-pressed'],'true');
  assert.equal(button.style.left,'100px');assert.equal(button.style.top,'100px');assert.equal(button.style.opacity,'1');
  button.listeners.get('click')({stopPropagation(){}});
  assert.deepEqual(f.emitted.at(-1),{type:'pw-viewer-surface-marker-selected',id:'comment-7'});
@@ -210,4 +210,28 @@ test('indexed PLY point buffers anchor the original vertex index and ignore invi
  const anchor=f.emitted.find(e=>e.type==='pw-viewer-surface-picked').anchor;
  assert.equal(anchor.position[2],0);
  assert.deepEqual(validateAnchor(JSON.parse(JSON.stringify(anchor))),anchor);f.surface.dispose();
+});
+
+
+test('white solid point and slow soft halo follow projection and selection', () => {
+ const f=fixture(true);
+ f.surface.setMarkers([{id:'draft-point',number:1,selected:true,anchor:{position:[0,0,1]}}]);
+ const button=f.document.body.children[0].children[0];
+ const [halo,dot]=button.children;
+ assert.equal(button.style.background,'transparent');
+ assert.equal(dot.style.background,'#fff');
+ assert.equal(dot.style.width,'12px');
+ assert.equal(halo.style.background,'#fff');
+ assert.equal(halo.style.filter,'blur(4px)');
+ assert.equal(halo.animation.options.duration,2400);
+ assert.equal(halo.animation.options.iterations,Infinity);
+ assert.deepEqual(halo.animation.keyframes.map(frame=>frame.opacity),[.2,.6,.2]);
+ assert.equal(dot.style.opacity,undefined,'solid point stays visible while only halo pulses');
+ assert.equal(button.style.left,'100px');
+ f.camera.position.x+=.5; f.controls.update(); f.surface.update();
+ assert.notEqual(button.style.left,'100px');
+ f.surface.setMarkers([]);
+ assert.equal(halo.animation.cancelled,true);
+ assert.equal(f.document.body.children[0].children.length,0);
+ f.surface.dispose();
 });

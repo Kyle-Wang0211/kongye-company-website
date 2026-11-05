@@ -132,6 +132,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
 
   bool _selectingCommentPoint = false;
   CommunityCommentAnchor? _commentAnchor;
+  static const _draftSurfaceMarkerId = 'pw-draft-comment-point';
   ProductViewerCapture? _surfaceViewer;
   String? _surfaceAssetSha256;
   List<CommunityComment> _visibleComments = const [];
@@ -140,7 +141,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   StreamSubscription<AuthState>? _commentAuth;
   int _commentIdentityEpoch = 0;
   String? _lastCommentUser;
-  bool get _supportsSurfaceComments => pointCloudStreamingSourceFor(widget.work.id) == null &&
+  bool get _supportsSurfaceComments =>
+      pointCloudStreamingSourceFor(widget.work.id) == null &&
       {'glb', 'gltf', 'ply'}.contains(widget.work.format.toLowerCase());
   String get _commentPartition =>
       '${widget.work.id}:${widget.work.modelStoragePath}:${widget.service.currentUserId}:'
@@ -191,7 +193,12 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         )
         .firstOrNull;
     if (!mounted || _surfaceAssetSha256 == null || comment == null) return;
-    setState(() => _selectedCommentId = comment.id);
+    setState(() {
+      _selectedCommentId = comment.id;
+      _commentsOpen = true;
+      _commentsEverOpened = true;
+      _dismissedLayoutId = null;
+    });
     unawaited(_syncCommentMarkers());
   }
 
@@ -225,7 +232,14 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       _selectingCommentPoint = !_selectingCommentPoint;
       if (_selectingCommentPoint) _commentsOpen = true;
     });
+    if (!_selectingCommentPoint) _clearCommentAnchor();
     unawaited(_setPicking(_selectingCommentPoint));
+  }
+
+  void _clearCommentAnchor() {
+    if (!mounted) return;
+    setState(() => _commentAnchor = null);
+    unawaited(_syncCommentMarkers());
   }
 
   void _onSurfacePicked(SharedSurfaceAnchor anchor) {
@@ -245,6 +259,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       _selectingCommentPoint = false;
     });
     unawaited(_setPicking(false));
+    unawaited(_syncCommentMarkers());
   }
 
   SharedSurfaceAnchor _sharedAnchor(CommunityCommentAnchor anchor) =>
@@ -291,6 +306,17 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
 
   Future<void> _syncCommentMarkers() async {
     final markers = <SharedSurfaceMarker>[];
+    final draft = _commentAnchor;
+    if (_commentsEnabled && _surfaceAssetSha256 != null && draft != null) {
+      markers.add(
+        SharedSurfaceMarker(
+          id: _draftSurfaceMarkerId,
+          anchor: _sharedAnchor(draft),
+          number: 1,
+          selected: true,
+        ),
+      );
+    }
     for (final comment
         in !_commentsEnabled || _surfaceAssetSha256 == null
             ? <CommunityComment>[]
@@ -936,7 +962,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             onPickPoint: _surfaceViewer == null || _surfaceAssetSha256 == null
                 ? null
                 : _pickCommentPoint,
-            onClearAnchor: () => setState(() => _commentAnchor = null),
+            onClearAnchor: _clearCommentAnchor,
             onClose: _closeComments,
             onCommentSelected: _focusComment,
             onVisibleCommentsChanged: _commentsChanged,
