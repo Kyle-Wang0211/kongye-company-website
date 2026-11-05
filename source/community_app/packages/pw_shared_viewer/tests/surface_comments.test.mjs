@@ -235,3 +235,35 @@ test('white solid point and slow soft halo follow projection and selection', () 
  assert.equal(f.document.body.children[0].children.length,0);
  f.surface.dispose();
 });
+
+
+test('draft and saved selected or unselected points remain white without rendered numbers', () => {
+ const f=fixture(true),anchor={position:[0,0,1]};
+ let point;
+ for (const value of [
+   {id:'pw-draft-comment-point',number:1,selected:true},
+   {id:'saved-comment-id',number:718,selected:false},
+   {id:'saved-comment-id',number:23,selected:true},
+ ]) {
+   f.surface.setMarkers([{...value,anchor}]);
+   const button=f.document.body.children[0].children[0];
+   const [halo,dot]=button.children;
+   assert.equal(button.textContent,'');
+   assert.equal(button.attributes['aria-label'],'查看评论点位');
+   assert.equal(button.children.every(child=>child.textContent===''),true);
+   assert.equal(dot.style.background,'#fff');
+   assert.equal(halo.style.background,'#fff');
+   assert.equal(button.style.left,'100px');
+   assert.equal(button.style.top,'100px');
+   point=button;
+ }
+ f.surface.setMode(false);
+ assert.equal(f.document.body.children[0].children[0],point,'leaving pick mode keeps the locked point');
+ point.listeners.get('click')({target:point,stopPropagation(){}});
+ assert.deepEqual(f.emitted.findLast(e=>e.type==='pw-viewer-surface-marker-selected'),
+   {type:'pw-viewer-surface-marker-selected',id:'saved-comment-id'});
+ f.camera.position.x+=.5; f.camera.position.z=4; f.controls.update(); f.surface.update();
+ assert.notEqual(point.style.left,'100px');
+ assert.equal(point.textContent,'');
+ f.surface.dispose();
+});

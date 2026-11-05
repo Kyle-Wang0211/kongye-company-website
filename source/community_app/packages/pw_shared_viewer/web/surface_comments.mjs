@@ -71,8 +71,9 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     for (const marker of markers) {
       if (!overlay) continue;
       const button = document.createElement('button'); marker.button = button;
-      button.type = 'button';
-      button.setAttribute('aria-label', `查看评论 ${marker.number}`);
+      // Numbers remain internal ordering metadata in every marker state.
+      button.type = 'button'; button.textContent = '';
+      button.setAttribute('aria-label', '查看评论点位');
       button.setAttribute('aria-pressed', String(marker.selected));
       Object.assign(button.style, {position:'absolute',width:'26px',height:'26px',borderRadius:'50%',
         border:'0',background:'transparent',color:'white',padding:'0',pointerEvents:'auto',
