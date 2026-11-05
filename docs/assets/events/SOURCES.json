@@ -1,0 +1,16 @@
+{
+  "porcelain-ink.png": {
+    "source": "User supplied original image 2026-11-05",
+    "use": "Screen 1 cover and event hero"
+  },
+  "edmund-de-waal.jpg": {
+    "source": "https://commons.wikimedia.org/w/index.php?title=File:Edmund_de_Waal_with_his_installation,_breathturn_(2013),_at_Gagosian,_New_York.jpg&oldid=1200926082",
+    "author": "Rob McKeever",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sha256": "4f90029e6a9a74b393bd1ff731a02e0f2a4014c654661528c956da8aeaa2a44f",
+    "changes": "None; original file. Responsive sizing in page.",
+    "role": "Artist reference only, not a confirmed guest or endorsement",
+    "accessed": "2026-11-05"
+  }
+}
