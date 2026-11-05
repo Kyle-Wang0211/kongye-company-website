@@ -253,6 +253,7 @@ class _WebAccountDestinationState extends State<_WebAccountDestination> {
       loader: _repository.reviewQueue,
       onClaim: _repository.claimReport,
       onTransition: _repository.transitionReport,
+      onRestoreWork: _repository.restoreWork,
       onOpenWork: _openWork,
     ),
     _ => WebPublicationStatusPage(

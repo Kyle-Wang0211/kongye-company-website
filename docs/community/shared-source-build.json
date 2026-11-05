@@ -7,8 +7,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "3451ed5a7953df1d4f57ce787a0bf15994be030896de9c04b2a00e88ee568821",
+  "main_js_sha256": "0dca0e45071f62a71bf36335a3a11f1733888ec34a51cb20d006e3f06705e7ca",
   "status": "built-local-not-deployed",
-  "source_revision": "d77bcd0f07f43c0d508fbfde300a291923ee9af2",
-  "source_manifest_sha256": "70e95f9131855732d21d6a8eb198876c0e0a24c71827d89c680ed4c7bf06069d"
+  "source_revision": "b7c27a0760eea7155bb84108f39bff51400b6e90",
+  "source_manifest_sha256": "a1e83801de672b38aca7bf19ac97d09d7e7d7623dc1a47ac75dd3c3ed7f9e6d0"
 }

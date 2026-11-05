@@ -3542,8 +3542,8 @@
     },
     {
       "path": "lib/ui/social/community_account_routes.dart",
-      "sha256": "84e6d190718447adb5d3c296dcf9f9e12fedf0f519df2d2a4680eaa7c4da0d84",
-      "size": 15922
+      "sha256": "3f7595db76a8b3347ba218f32383919511d3757176de8b1054a326c6519fae80",
+      "size": 15968
     },
     {
       "path": "lib/ui/social/community_capabilities.dart",
@@ -5000,5 +5000,5 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "d77bcd0f07f43c0d508fbfde300a291923ee9af2"
+  "source_revision": "b7c27a0760eea7155bb84108f39bff51400b6e90"
 }
