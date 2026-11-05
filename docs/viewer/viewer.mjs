@@ -180,7 +180,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     controls.saveState();
   }
 
-  async function load(input) {
+  async function load(input, onProgress) {
     assertActive();
     surfaceComments.clear();
     const ticket = ++request;
@@ -188,6 +188,13 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     const abort = new AbortController();
     importAbort = abort;
     status = 'loading'; error = null; notify();
+    const downloadProgress = event => {
+      if (disposed || ticket !== request) return;
+      const progress = { receivedBytes: event.loaded,
+        totalBytes: event.lengthComputable && event.total > 0 ? event.total : null };
+      options.onDownloadProgress?.(progress);
+      onProgress?.(progress);
+    };
     let candidate = null, replacementStarted = false, previous = null, cameraBefore = null;
     let candidateImportInfo = null;
     try {
@@ -199,12 +206,12 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
           const converted = await converter(input.url, { signal: abort.signal });
           candidateImportInfo = { ...converted.info, fidelity: 'surface-preview-not-lossless-certified' };
           gltf = await gltfLoader.parseAsync(converted.bytes, '');
-        } else gltf = await gltfLoader.loadAsync(input.url);
+        } else gltf = await gltfLoader.loadAsync(input.url, downloadProgress);
         candidate = gltf.scene;
         if (!candidate) throw new Error('GLB has no default scene');
         ownedScenes.set(candidate, gltf.scenes?.length ? gltf.scenes : [candidate]);
       } else {
-        const geometry = await plyLoader.loadAsync(input.url);
+        const geometry = await plyLoader.loadAsync(input.url, downloadProgress);
         const colored = !!geometry.getAttribute('color');
         if (geometry.index) {
           if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();

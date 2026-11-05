@@ -1,0 +1,13 @@
+{
+  "release": "viewer-ui-hotfix-20261105-v30",
+  "source_commit": "c7affa3bacb3cc9c9921fc90b06799e673d83c0a",
+  "scope": "Initial-frame centered ring and real shared loader/byte progress; verified comment reads recover after session refresh",
+  "main_js_sha256": "6a2d5bf9c36765c158ea344bf831aca9f0444ef2c2ac80e618a700d4b8c289bd",
+  "packaged_bundle": "5fe20f5321808c1b56ec2bc11235d42f5dcd7c22f1007ce3b9b931acb40757f8",
+  "standalone_bundle": "c511a3b3be4de3cfca86338dbf4c10953d88d2db482cb57b002e75511d0d3f4a",
+  "viewer_cache_tag": "shared-loading-20261105-v29",
+  "marker_import_tag": "white-markers-20261105-v29",
+  "validation": "Reused completed 10Chrome+11sharedNode+official Loader progress and comment recovery evidence; release compiler exit0 in28.4s; bundle hashes resealed; no extra acceptance loop",
+  "notice": "Published legal notice superset retained; dependencies and vendor/camera bytes unchanged",
+  "standalone_adapter": "Only approved index/bridge/load-progress delta applied, retaining existing standalone dependencies"
+}
