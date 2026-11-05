@@ -112,7 +112,7 @@ class WebAccountWorkflowRepository {
       throw StateError('Reviewer access unavailable');
     }
     final items = <WebReportReviewItem>[];
-    for (final status in ['pending', 'in_review', 'needs_info']) {
+    for (final status in ['pending', 'in_review', 'needs_info', 'actioned']) {
       final response = await _call('admin-reports', {
         'action': 'list',
         'status': status,
@@ -147,6 +147,20 @@ class WebAccountWorkflowRepository {
       role: role as String,
       items: items,
     );
+  }
+
+  Future<void> restoreWork(String workId) async {
+    final data = await _call('admin-moderate-work', {
+      'work_id': workId,
+      'status': 'ok',
+    });
+    if (data['work_id'] != workId ||
+        data['status'] != 'ok' ||
+        data['assets_failed'] != 0 ||
+        data['failed'] is! List ||
+        (data['failed'] as List).isNotEmpty) {
+      throw StateError('Restore not confirmed');
+    }
   }
 
   Future<void> claimReport(int id) async {

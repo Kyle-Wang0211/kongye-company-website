@@ -35,9 +35,11 @@ class WebReportReviewPage extends StatefulWidget {
     required this.onClaim,
     required this.onTransition,
     this.onOpenWork,
+    this.onRestoreWork,
   });
   final String accountId;
   final ValueChanged<String>? onOpenWork;
+  final Future<void> Function(String workId)? onRestoreWork;
   final Future<WebReportReviewQueue> Function() loader;
   final Future<void> Function(int reportId) onClaim;
   final Future<void> Function(int reportId, String status, String feedback)
@@ -51,6 +53,10 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
   int _generation = 0;
   int? _busy;
   String? _error;
+  String? _notice;
+  bool _restoreUnconfirmed = false;
+  bool _unconfirmed = false;
+  final Map<int, String> _feedbackDrafts = {};
   @override
   void initState() {
     super.initState();
@@ -64,45 +70,65 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
       _generation++;
       _busy = null;
       _error = null;
+      _notice = null;
+      _restoreUnconfirmed = false;
+      _unconfirmed = false;
+      _feedbackDrafts.clear();
       _load();
     }
   }
 
   void _load() {
-    _request = Future.sync(widget.loader);
+    final generation = _generation;
+    _request = Future.sync(widget.loader).then((queue) {
+      if (mounted && generation == _generation) {
+        if (!_restoreUnconfirmed) {
+          _unconfirmed = false;
+          _error = null;
+        }
+      }
+      return queue;
+    });
   }
 
   Future<void> _act(WebReportReviewItem item, String? status) async {
-    if (_busy != null) return;
+    if (_busy != null || _unconfirmed) return;
     final generation = _generation;
-    String feedback = '';
+    String feedback = _feedbackDrafts[item.id] ?? '';
     if (status != null) {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('确认处理举报'),
-          content: TextField(
-            onChanged: (value) => feedback = value.trim(),
-            maxLength: 2000,
-            minLines: 2,
-            maxLines: 5,
-            decoration: const InputDecoration(labelText: '给举报人的处理说明'),
+        builder: (context) => Theme(
+          data: _theme(context),
+          child: AlertDialog(
+            title: const Text('确认处理举报'),
+            content: TextFormField(
+              initialValue: feedback,
+              onChanged: (value) {
+                feedback = value.trim();
+                _feedbackDrafts[item.id] = value;
+              },
+              maxLength: 1000,
+              minLines: 2,
+              maxLines: 5,
+              decoration: const InputDecoration(labelText: '给举报人的处理说明'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('确认提交'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('确认提交'),
-            ),
-          ],
         ),
       );
       if (!mounted || generation != _generation || confirmed != true) return;
-      if (feedback.isEmpty) {
-        setState(() => _error = '请填写处理说明后提交。');
+      if (feedback.isEmpty || feedback.length > 1000) {
+        setState(() => _error = '请填写1000字符以内的处理说明后提交。');
         return;
       }
     }
@@ -117,24 +143,91 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
       } else {
         await widget.onTransition(item.id, status, feedback);
       }
-      if (mounted && generation == _generation) setState(_load);
+      if (mounted && generation == _generation) {
+        _feedbackDrafts.remove(item.id);
+        setState(_load);
+      }
     } catch (_) {
       if (mounted && generation == _generation) {
-        setState(() => _error = '操作结果未确认，请刷新核对。');
+        setState(() {
+          _unconfirmed = true;
+          _error = '操作结果未确认，处理说明已保留。请刷新核对后再操作。';
+        });
       }
     } finally {
       if (mounted && generation == _generation) setState(() => _busy = null);
     }
   }
 
+  Future<void> _restore(WebReportReviewItem item) async {
+    final workId = item.sourceWorkId;
+    final restore = widget.onRestoreWork;
+    if (_busy != null || _unconfirmed || workId == null || restore == null) {
+      return;
+    }
+    final generation = _generation;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => Theme(
+        data: _theme(context),
+        child: AlertDialog(
+          title: const Text('恢复关联作品？'),
+          content: const Text('服务端将检查当前审核、作品版本和处理权限。原举报记录会保留。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('确认恢复'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted ||
+        generation != _generation ||
+        confirmed != true ||
+        _busy != null) {
+      return;
+    }
+    setState(() {
+      _busy = item.id;
+      _error = null;
+      _notice = null;
+    });
+    try {
+      await restore(workId);
+      if (mounted && generation == _generation) {
+        setState(() {
+          _notice = '关联作品恢复结果已确认，可打开作品核对。';
+          _load();
+        });
+      }
+    } catch (_) {
+      if (mounted && generation == _generation) {
+        setState(() {
+          _unconfirmed = true;
+          _restoreUnconfirmed = true;
+          _error = '恢复结果未确认，请打开关联作品核对后再继续处理。';
+        });
+      }
+    } finally {
+      if (mounted && generation == _generation) setState(() => _busy = null);
+    }
+  }
+
+  ThemeData _theme(BuildContext context) => Theme.of(context).copyWith(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.black,
+      dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => Theme(
-    data: Theme.of(context).copyWith(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.black,
-        dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-      ),
-    ),
+    data: _theme(context),
     child: Scaffold(
       appBar: AppBar(
         title: const Text('人工举报处理'),
@@ -174,6 +267,7 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (_notice != null) Text(_notice!),
               if (_error != null)
                 Text(_error!, style: const TextStyle(color: Colors.red)),
               if (queue.items.isEmpty) const Text('暂无待处理举报'),
@@ -202,27 +296,42 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
                             if (item.claimedBy == null &&
                                 ['pending', 'needs_info'].contains(item.status))
                               OutlinedButton(
-                                onPressed: _busy == null
+                                onPressed: _busy == null && !_unconfirmed
                                     ? () => _act(item, null)
                                     : null,
                                 child: const Text('领取处理'),
                               ),
-                            if (item.claimedBy == queue.userId) ...[
+                            if (queue.role == 'lead' &&
+                                item.status == 'actioned' &&
+                                item.sourceWorkId != null &&
+                                widget.onRestoreWork != null)
                               OutlinedButton(
-                                onPressed: _busy == null
+                                onPressed: _busy == null && !_unconfirmed
+                                    ? () => _restore(item)
+                                    : null,
+                                child: const Text('恢复关联作品'),
+                              ),
+                            if (item.claimedBy == queue.userId &&
+                                [
+                                  'pending',
+                                  'in_review',
+                                  'needs_info',
+                                ].contains(item.status)) ...[
+                              OutlinedButton(
+                                onPressed: _busy == null && !_unconfirmed
                                     ? () => _act(item, 'needs_info')
                                     : null,
                                 child: const Text('要求补充说明'),
                               ),
                               OutlinedButton(
-                                onPressed: _busy == null
+                                onPressed: _busy == null && !_unconfirmed
                                     ? () => _act(item, 'dismissed')
                                     : null,
                                 child: const Text('不予采纳'),
                               ),
                               if (queue.role == 'lead')
                                 FilledButton(
-                                  onPressed: _busy == null
+                                  onPressed: _busy == null && !_unconfirmed
                                       ? () => _act(item, 'actioned')
                                       : null,
                                   child: const Text('确认采取措施'),

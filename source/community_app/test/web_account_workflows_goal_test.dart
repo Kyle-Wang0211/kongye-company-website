@@ -201,4 +201,140 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('确认采取措施'), findsOneWidget);
   });
+  testWidgets(
+    'review failure retains feedback and requires fresh queue before retry',
+    (tester) async {
+      var calls = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(colorSchemeSeed: Colors.green),
+          home: WebReportReviewPage(
+            accountId: 'self',
+            loader: () async => const WebReportReviewQueue(
+              userId: 'self',
+              role: 'reviewer',
+              items: [
+                WebReportReviewItem(
+                  id: 1,
+                  reason: 'spam',
+                  status: 'in_review',
+                  targetId: 'target',
+                  claimedBy: 'self',
+                ),
+              ],
+            ),
+            onClaim: (_) async {},
+            onTransition: (_, _, feedback) async {
+              calls++;
+              expect(feedback, '保留处理说明');
+              throw StateError('ambiguous');
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('不予采纳'));
+      await tester.pumpAndSettle();
+      final colors = Theme.of(
+        tester.element(find.byType(AlertDialog)),
+      ).colorScheme;
+      expect((colors.primary.r - colors.primary.g).abs(), lessThan(.012));
+      await tester.enterText(find.byType(TextFormField), '保留处理说明');
+      await tester.tap(find.text('确认提交'));
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+      expect(
+        tester
+            .widget<OutlinedButton>(find.widgetWithText(OutlinedButton, '不予采纳'))
+            .onPressed,
+        isNull,
+      );
+      expect(find.textContaining('处理说明已保留'), findsOneWidget);
+      await tester.tap(find.byTooltip('刷新队列'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('不予采纳'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextFormField>(find.byType(TextFormField)).initialValue,
+        '保留处理说明',
+      );
+      expect(calls, 1);
+    },
+  );
+  test(
+    'restore accepts only confirmed matching work with no failed assets',
+    () async {
+      final client = SupabaseClient('http://localhost', 'test');
+      var failed = 0;
+      final repository = WebAccountWorkflowRepository(
+        client: client,
+        accountId: 'self',
+        userIdProvider: () => 'self',
+        invoke: (name, body) async {
+          expect(name, 'admin-moderate-work');
+          expect(body, {'work_id': 'work', 'status': 'ok'});
+          return FunctionResponse(
+            status: 200,
+            data: {
+              'ok': true,
+              'work_id': 'work',
+              'status': 'ok',
+              'assets_failed': failed,
+              'failed': failed == 0 ? [] : ['asset'],
+            },
+          );
+        },
+      );
+      await repository.restoreWork('work');
+      failed = 1;
+      await expectLater(repository.restoreWork('work'), throwsStateError);
+      client.dispose();
+    },
+  );
+  testWidgets(
+    'lead restore waits for backend and preserves actioned report history',
+    (tester) async {
+      final pending = Completer<void>();
+      var calls = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WebReportReviewPage(
+            accountId: 'self',
+            loader: () async => const WebReportReviewQueue(
+              userId: 'self',
+              role: 'lead',
+              items: [
+                WebReportReviewItem(
+                  id: 1,
+                  reason: 'spam',
+                  status: 'actioned',
+                  targetId: 'target',
+                  sourceWorkId: 'work',
+                ),
+              ],
+            ),
+            onClaim: (_) async {},
+            onTransition: (_, _, _) async {},
+            onRestoreWork: (id) {
+              expect(id, 'work');
+              calls++;
+              return pending.future;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('恢复关联作品'));
+      await tester.pumpAndSettle();
+      expect(calls, 0);
+      await tester.tap(find.text('确认恢复'));
+      await tester.pump();
+      expect(calls, 1);
+      expect(find.textContaining('恢复结果已确认'), findsNothing);
+      pending.complete();
+      await tester.pumpAndSettle();
+      expect(find.textContaining('恢复结果已确认'), findsOneWidget);
+      expect(find.textContaining('actioned'), findsOneWidget);
+    },
+  );
 }
