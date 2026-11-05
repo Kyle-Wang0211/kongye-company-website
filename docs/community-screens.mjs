@@ -3,13 +3,18 @@ const stage=document.querySelector('.community-screen-stage');
 const links=[...document.querySelectorAll('.community-feature-screen')];
 const choices=[...document.querySelectorAll('.community-screen-choice')];
 const keys=['siteScreenOne','siteScreenTwo','siteScreenThree'];
-let selected=1;
+let selected=1,rotationTimer;
+function scheduleRotation(){
+ clearTimeout(rotationTimer);
+ if(!document.hidden)rotationTimer=setTimeout(()=>select(selected+1),5000);
+}
 try{const raw=sessionStorage.getItem('pw-community-screen'),value=Number(raw);if(raw!==null&&Number.isInteger(value)&&value>=0&&value<3)selected=value;}catch{}
 const relative=index=>(index-selected+4)%3-1;
 function select(index){
  selected=(index+3)%3;
  links.forEach((link,i)=>{link.dataset.position=['left','center','right'][relative(i)+1];choices[i].setAttribute('aria-pressed',String(i===selected));});
  try{sessionStorage.setItem('pw-community-screen',String(selected));}catch{}
+ scheduleRotation();
 }
 choices.forEach((button,index)=>button.addEventListener('click',()=>select(index)));
 document.querySelector('.community-screen-switcher').addEventListener('keydown',event=>{
@@ -29,4 +34,7 @@ function labels(){
  choices.forEach((button,i)=>button.setAttribute('aria-label',t(keys[i])));
 }
 window.addEventListener(localeEvent,labels);
+document.addEventListener('visibilitychange',scheduleRotation);
+window.addEventListener('pagehide',()=>clearTimeout(rotationTimer));
+window.addEventListener('pageshow',scheduleRotation);
 select(selected);labels();
