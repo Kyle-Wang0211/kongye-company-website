@@ -35,7 +35,7 @@ class PreviewState extends State<Preview> {
         result = widget.harness.camera;
       }
       if (request['method'] == 'capture') {
-        result = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jVAAAAABJRU5ErkJggg==';
+        result = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4DwQACfsD/fteaysAAAAASUVORK5CYII=';
       }
       widget.controller.receive({
         'protocol': sharedViewerProtocol,
