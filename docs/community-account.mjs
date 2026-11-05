@@ -2,7 +2,7 @@ import {localizeElement,localeReady} from './site-l10n.mjs?v=rds-web-20261104-79
 import {avatarDataUrl,readAccount} from './community-account-data.mjs';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 const lifetime=300000,storageKey='pw-current-account-presentation-rds-v1';
-let publishLink;
+let publishLink,signingOut=false;
 let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false;
 const cache=new Map();
 function forget(){cache.clear();try{sessionStorage.removeItem(storageKey);}catch{}}
@@ -16,10 +16,24 @@ function retry(){
  if(displayedId)return; // A transient refresh failure keeps the current presentation.
  guest();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);
 }
+async function signOutAccount(owner,button){
+ if(signingOut||displayedId!==owner||!client)return;
+ signingOut=true;button.disabled=true;actions.querySelector('[data-logout-retry]')?.remove();
+ try{
+  const {error}=await client.auth.signOut({scope:'local'});if(error)throw error;
+  if(displayedId===owner){revision++;forget();guest();}else schedule();
+ }catch{
+  if(displayedId===owner){
+   const message=document.createElement('span');message.dataset.logoutRetry='true';message.setAttribute('role','alert');
+   localizeElement(message,'authRetry');actions.append(message);
+  }
+ }finally{signingOut=false;if(displayedId===owner)button.disabled=false;}
+}
 function render(account,src){
  if(!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
  if(displayedId!==account.id){
-  summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/';localizeElement(profileLink,'siteAccount');actions.append(profileLink);
+  summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/?profile='+encodeURIComponent(account.id);localizeElement(profileLink,'siteAccount');actions.append(profileLink);
+  const logout=document.createElement('button');logout.type='button';logout.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(logout,'meSignOut');logout.addEventListener('click',()=>signOutAccount(account.id,logout));actions.append(logout);
   const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');const name=document.createElement('span');name.className='community-account-name';summary.append(avatar,name);displayedId=account.id;
  }
  const name=summary.querySelector('.community-account-name');
