@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
+
 import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:pw_shared_viewer/pw_shared_viewer.dart';
+
 import '../../community/web_publication_service.dart';
 import 'web_publication_selection_page.dart';
 
@@ -20,12 +25,19 @@ class WebPublicationPage extends StatefulWidget {
     @visibleForTesting this.identityChangesForTesting,
     @visibleForTesting this.pickFileForTesting,
     @visibleForTesting this.selectionBuilderForTesting,
+    @visibleForTesting this.previewHostBuilderForTesting,
   });
   final WebPublicationService? service;
   final String? Function()? ownerForTesting;
   final Stream<String?>? identityChangesForTesting;
   final Future<PlatformFile?> Function()? pickFileForTesting;
   final Widget Function(BuildContext, Uint8List)? selectionBuilderForTesting;
+  final Widget Function(
+    SharedViewerController,
+    VoidCallback,
+    ValueChanged<Object>,
+  )?
+  previewHostBuilderForTesting;
   @override
   State<WebPublicationPage> createState() => _WebPublicationPageState();
 }
@@ -41,6 +53,171 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       ? widget.ownerForTesting!()
       : Supabase.instance.client.auth.currentUser?.id;
   Uint8List? _bytes;
+  SharedViewerController? _previewController;
+  Map<String, dynamic>? _confirmedView;
+  Uint8List? _coverPreview;
+  int _previewEpoch = 0;
+  bool _previewReady = false, _confirming = false;
+
+  void _resetPreview({bool keepConfirmed = false}) {
+    _previewEpoch++;
+    _previewController?.dispose();
+    _previewController = _bytes == null ? null : SharedViewerController();
+    _previewReady = false;
+    _confirming = false;
+    _coverPreview = null;
+    if (!keepConfirmed) _confirmedView = null;
+  }
+
+  Future<void> _previewLoaded(
+    int epoch,
+    SharedViewerController controller,
+  ) async {
+    bool current() =>
+        _current &&
+        epoch == _previewEpoch &&
+        identical(controller, _previewController);
+    final bytes = _bytes;
+    if (!current() || bytes == null) return;
+    try {
+      await controller.configure(
+        interactive: true,
+        autoRotate: false,
+        background: 0,
+      );
+      if (!current()) return;
+      await controller.loadBytes(bytes, format: SharedModelFormat.glb);
+      if (!current()) return;
+      await controller.setSelectionPreview(_selection, decorations: false);
+      if (!current()) return;
+      if (_confirmedView != null)
+        await controller.setCameraFraming(_confirmedView!);
+      if (current()) setState(() => _previewReady = true);
+    } catch (_) {
+      if (current()) setState(() => _message = '3D 预览暂不可用，请重新选择 GLB');
+    }
+  }
+
+  Future<void> _confirmView() async {
+    final controller = _previewController;
+    final epoch = _previewEpoch;
+    bool current() =>
+        _current &&
+        epoch == _previewEpoch &&
+        identical(controller, _previewController);
+    if (!current() ||
+        controller == null ||
+        !_previewReady ||
+        _busy ||
+        _confirming ||
+        _key != null)
+      return;
+    setState(() => _confirming = true);
+    try {
+      await controller.configure(interactive: false);
+      if (!current()) return;
+      final camera = await controller.getCameraFraming();
+      if (!current()) return;
+      final image = await controller.capture(type: 'image/png');
+      if (!current()) return;
+      if (image is! String || !image.startsWith('data:image/png;base64,')) {
+        throw const WebPublicationException('cover_preview_unavailable');
+      }
+      final confirmed = validatePublicationInitialView(
+        {
+          'schema': 'pw.camera-framing.v1',
+          'source_sha256': _sourceHash,
+          'selection_box': _selection,
+          ...camera,
+        },
+        sourceSha256: _sourceHash!,
+        selectionBox: _selection,
+      );
+      final png = base64Decode(
+        image.substring('data:image/png;base64,'.length),
+      );
+      if (!current()) return;
+      setState(() {
+        _confirmedView = confirmed;
+        _coverPreview = png;
+        _message = '已确认封面和初始视角';
+      });
+    } catch (_) {
+      if (current()) setState(() => _message = '当前画面未确认，请重试');
+    } finally {
+      if (current()) {
+        try {
+          await controller.configure(interactive: true);
+        } catch (_) {}
+        if (current()) setState(() => _confirming = false);
+      }
+    }
+  }
+
+  Widget _preview() {
+    final controller = _previewController!;
+    final epoch = _previewEpoch;
+    void ready() => unawaited(_previewLoaded(epoch, controller));
+    void failed(Object error) {
+      if (_current && epoch == _previewEpoch)
+        setState(() {
+          _previewReady = false;
+          _message = '3D 预览暂不可用，请重新选择 GLB';
+        });
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AspectRatio(
+          aspectRatio: 1.5,
+          child: ColoredBox(
+            color: Colors.black,
+            child: KeyedSubtree(
+              key: ValueKey('publication-preview-$epoch'),
+              child:
+                  widget.previewHostBuilderForTesting?.call(
+                    controller,
+                    ready,
+                    failed,
+                  ) ??
+                  SharedViewer(
+                    controller: controller,
+                    onReady: ready,
+                    onError: failed,
+                  ),
+            ),
+          ),
+        ),
+        const Text('拖动旋转、缩放或平移模型，再确认当前画面。'),
+        OutlinedButton(
+          onPressed: _previewReady && !_busy && !_confirming && _key == null
+              ? _confirmView
+              : null,
+          child: Text(_confirming ? '正在确认画面…' : '确认当前画面为封面和初始视角'),
+        ),
+        TextButton(
+          onPressed: _previewReady && !_busy && !_confirming && _key == null
+              ? () async {
+                  try {
+                    await controller.resetCamera();
+                  } catch (_) {}
+                }
+              : null,
+          child: const Text('恢复默认视角'),
+        ),
+        if (_coverPreview != null) ...[
+          const Text('已确认的封面预览'),
+          Image.memory(
+            _coverPreview!,
+            key: const ValueKey('publication-confirmed-cover'),
+            errorBuilder: (_, _, _) => const Text('已保存当前视角'),
+          ),
+        ],
+      ],
+    );
+  }
+
   Map<String, dynamic>? _selection;
   String? _key, _submission, _message, _sourceHash;
   WebPublicationStatus? _status;
@@ -77,6 +254,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     _title.clear();
     _description.clear();
     _bytes = null;
+    _resetPreview();
     _selection = null;
     _status = null;
     _key = null;
@@ -112,6 +290,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _submission = draft['submission'] as String?;
         _sourceHash = draft['sha256'] as String?;
         _selection = (draft['selection'] as Map?)?.cast<String, dynamic>();
+        _confirmedView = (draft['initial_view'] as Map?)
+            ?.cast<String, dynamic>();
         _title.text = draft['title'] as String? ?? '';
         _description.text = draft['description'] as String? ?? '';
         _message = _submission == null
@@ -137,6 +317,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         'submission': _submission,
         'sha256': _sourceHash,
         'selection': _selection,
+        'initial_view': _confirmedView,
         'title': _title.text,
         'description': _description.text,
       }),
@@ -154,6 +335,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       _submission = null;
       _sourceHash = null;
       _bytes = null;
+      _resetPreview();
       _selection = null;
       _status = null;
       _selected = false;
@@ -192,6 +374,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         }
         setState(() {
           _bytes = bytes;
+          _resetPreview(keepConfirmed: true);
           _selected = true;
         });
         return;
@@ -209,6 +392,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       setState(() {
         _bytes = bytes;
         _selection = selection.box?.toJson();
+        _sourceHash = sha256.convert(bytes).toString();
+        _resetPreview();
         _selected = true;
       });
     } catch (_) {
@@ -219,7 +404,13 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   }
 
   Future<void> _submit() async {
-    if (!_current || _bytes == null || !_selected || _busy) return;
+    if (!_current ||
+        _bytes == null ||
+        !_selected ||
+        _busy ||
+        _confirming ||
+        (_key == null && _confirmedView == null))
+      return;
     if (_title.text.trim().isEmpty ||
         _title.text.runes.length > 100 ||
         _description.text.runes.length > 30) {
@@ -241,6 +432,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         description: _description.text,
         idempotencyKey: _key!,
         selectionBox: _selection,
+        initialView: _confirmedView,
+        expectedSourceSha256: _sourceHash,
         onSubmissionCreated: (id) async {
           if (!_current) return;
           _submission = id;
@@ -328,6 +521,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   void dispose() {
     _poll?.cancel();
     _auth?.cancel();
+    _previewController?.dispose();
     _title.dispose();
     _description.dispose();
     super.dispose();
@@ -369,6 +563,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                   ),
                   if (_selected)
                     Text(_selection == null ? '保留整个模型' : '已确认模型选区'),
+                  if (_previewController != null) _preview(),
                   TextField(
                     controller: _title,
                     enabled: !_busy && _key == null,
@@ -384,6 +579,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                     onPressed:
                         !_busy &&
                             _selected &&
+                            !_confirming &&
+                            (_key != null || _confirmedView != null) &&
                             (_submission == null ||
                                 _status?.status == 'uploading' ||
                                 _status == null)

@@ -1,4 +1,4 @@
-import {feedUrl,workUrl,authorUrl,assetUrl,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=rds-web-20261104-7931926b3d74';
+import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=publication-camera-20261105-v1';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
@@ -95,11 +95,13 @@ function cardFor(work){
  const card=document.createElement('article');card.className='community-card';
  const open=document.createElement('button');open.type='button';open.className='community-open';localizeElement(open,'siteViewWork',{title:work.title||t('siteUntitled')},'aria-label');
  const picture=document.createElement('div');picture.className='community-picture';
+ const coverAspect=publicationCoverAspect(work);
+ if(coverAspect!==null)picture.style.aspectRatio=String(coverAspect);
  const label=document.createElement('span');label.className='community-card-title';work.title?label.textContent=work.title:localizeElement(label,'siteUntitled');
  const coverMessage=key=>{const message=document.createElement('span');message.className='community-cover-message';localizeElement(message,key);picture.replaceChildren(message,label);};
  if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){
   try{
-   const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';img.loading=seen.size<4?'eager':'lazy';if(seen.size<2)img.fetchPriority='high';img.decoding='async';
+   const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';if(coverAspect!==null)img.style.objectFit='contain';img.loading=seen.size<4?'eager':'lazy';if(seen.size<2)img.fetchPriority='high';img.decoding='async';
    picture.classList.add('is-loading');picture.dataset.mediaState='loading';
    let settled=false,deadline,observer;
    const fail=()=>{if(settled)return;settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='error';img.remove();coverMessage('siteCoverUnavailable');};

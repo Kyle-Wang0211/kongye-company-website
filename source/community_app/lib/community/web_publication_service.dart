@@ -1,6 +1,7 @@
 // Private GLB submission using the existing authenticated Supabase client.
 // A submission status never substitutes for server publication authorization.
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
@@ -17,6 +18,78 @@ class WebPublicationException implements Exception {
   });
   @override
   String toString() => 'WebPublicationException($code)';
+}
+
+/// Frozen source/selection-bound camera. Public cover pixels are produced by the server.
+Map<String, dynamic> validatePublicationInitialView(
+  Map<String, dynamic> value, {
+  required String sourceSha256,
+  required Map<String, dynamic>? selectionBox,
+}) {
+  Object? canonical(Object? value) {
+    if (value is Map) {
+      final keys = value.keys.cast<String>().toList()..sort();
+      return {for (final key in keys) key: canonical(value[key])};
+    }
+    if (value is List) return value.map(canonical).toList();
+    return value is num ? value.toDouble() : value;
+  }
+
+  bool vector(Object? value) =>
+      value is List &&
+      value.length == 3 &&
+      value.every((v) => v is num && v.isFinite);
+  final fov = value['fov_y_degrees'], aspect = value['aspect'];
+  if (value.keys.any(
+        (key) => !const {
+          'schema',
+          'source_sha256',
+          'selection_box',
+          'projection',
+          'position',
+          'target',
+          'up',
+          'fov_y_degrees',
+          'aspect',
+        }.contains(key),
+      ) ||
+      value['schema'] != 'pw.camera-framing.v1' ||
+      !RegExp(r'^[a-f0-9]{64}$').hasMatch(sourceSha256) ||
+      value['source_sha256'] != sourceSha256 ||
+      jsonEncode(canonical(value['selection_box'])) !=
+          jsonEncode(canonical(selectionBox)) ||
+      value['projection'] != 'perspective' ||
+      !vector(value['position']) ||
+      !vector(value['target']) ||
+      !vector(value['up']) ||
+      fov is! num ||
+      !fov.isFinite ||
+      fov < 1 ||
+      fov > 120 ||
+      aspect is! num ||
+      !aspect.isFinite ||
+      aspect < 0.1 ||
+      aspect > 10) {
+    throw const WebPublicationException('invalid_initial_view');
+  }
+  final position = (value['position'] as List).cast<num>();
+  final target = (value['target'] as List).cast<num>();
+  final up = (value['up'] as List).cast<num>();
+  final d = List.generate(3, (i) => target[i] - position[i]);
+  final cross = [
+    d[1] * up[2] - d[2] * up[1],
+    d[2] * up[0] - d[0] * up[2],
+    d[0] * up[1] - d[1] * up[0],
+  ];
+  final distanceSquared = d.fold<double>(0, (sum, v) => sum + v * v);
+  final upLengthSquared = up.fold<double>(0, (sum, v) => sum + v * v);
+  if ([...position, ...target].any((v) => v.abs() > 1e9) ||
+      distanceSquared < 1e-16 ||
+      (upLengthSquared - 1).abs() > 1e-6 ||
+      cross.every((v) => v == 0)) {
+    throw const WebPublicationException('invalid_initial_view');
+  }
+  return Map<String, dynamic>.from(jsonDecode(jsonEncode(value)) as Map);
 }
 
 class WebPublicationStatus {
@@ -231,6 +304,7 @@ class WebPublicationService {
     required String idempotencyKey,
     Map<String, dynamic>? selectionBox,
     String? expectedSourceSha256,
+    Map<String, dynamic>? initialView,
     required FutureOr<void> Function(String submissionId) onSubmissionCreated,
     void Function(String phase, double fraction)? onProgress,
   }) async {
@@ -264,6 +338,13 @@ class WebPublicationService {
       if (expectedSourceSha256 != null && hash != expectedSourceSha256) {
         throw const WebPublicationException('source_changed');
       }
+      final frozenView = initialView == null
+          ? null
+          : validatePublicationInitialView(
+              initialView,
+              sourceSha256: hash,
+              selectionBox: selectionBox,
+            );
       _signedIn(uid);
       final initiated = await _call({
         'action': 'initiate',
@@ -274,6 +355,7 @@ class WebPublicationService {
         'source_sha256': hash,
         'idempotency_key': idempotencyKey,
         'selection_box': ?selectionBox,
+        'initial_view': ?frozenView,
       });
       _signedIn(uid);
       final current = _status(initiated);

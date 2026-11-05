@@ -62,6 +62,7 @@ class ProductModelView extends StatefulWidget {
   const ProductModelView({
     super.key,
     required this.modelUrl,
+    this.initialView,
     this.interactive = false,
     this.concealRenderSource = false,
     this.autoRotate = false,
@@ -96,6 +97,7 @@ class ProductModelView extends StatefulWidget {
   final String? communitySessionKey;
   final CommunityViewerSessions? communitySessions;
   final String modelUrl;
+  final Map<String, dynamic>? initialView;
   final bool interactive;
 
   /// Keep the mounted source out of paint while presenting decoded captures.
@@ -172,6 +174,7 @@ class _ProductModelViewState extends State<ProductModelView>
   int _epoch = 0;
   Stopwatch _loadClock = Stopwatch()..start();
   int _loadedEpoch = -1;
+  int _initialViewAttemptedEpoch = -1;
   int _notifiedEpoch = -1;
   int _frameEpoch = -1;
   int _layoutRevision = 0;
@@ -399,6 +402,9 @@ class _ProductModelViewState extends State<ProductModelView>
       _userTookControl = false;
       _error = null;
       _cancelCapture();
+    }
+    if (oldWidget.initialView != widget.initialView && _loaded) {
+      unawaited(_applyInitialView(_epoch));
     }
     // A web parent's size-only rebuild needs ordinary layout, not another
     // configure/resume round trip to the same iframe. Keep native behavior.
@@ -765,6 +771,8 @@ class _ProductModelViewState extends State<ProductModelView>
         }
       }
       if (_disposed || epoch != _epoch) return;
+      await _applyInitialView(epoch);
+      if (_disposed || epoch != _epoch) return;
       _loadedEpoch = epoch;
       _notifyIdealAspect();
       _logLoadPhase('decoded');
@@ -777,6 +785,22 @@ class _ProductModelViewState extends State<ProductModelView>
       }
     } finally {
       if (_loadingEpoch == epoch) _loadingEpoch = null;
+    }
+  }
+
+  Future<void> _applyInitialView(int epoch) async {
+    if (_disposed || epoch != _epoch || _initialViewAttemptedEpoch == epoch) return;
+    final initialView = widget.initialView;
+    if (initialView == null || initialView['schema'] != 'pw.camera-framing.v1' ||
+        _modelContentHash == null || initialView['asset_sha256'] != _modelContentHash) return;
+    _initialViewAttemptedEpoch = epoch;
+    // An opening-card seed may precede the server descriptor. Never move a
+    // camera the user has already adjusted while that metadata was arriving.
+    if (_controller.state['userHasInteracted'] == true || _userTookControl) return;
+    try {
+      await _controller.setCameraFraming(initialView);
+    } catch (_) {
+      // Invalid server framing retains the official loaded-model camera.
     }
   }
 

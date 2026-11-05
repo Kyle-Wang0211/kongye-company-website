@@ -19,6 +19,7 @@ import '../config/endpoint_config.dart';
 import '../storage/signed_upload_broker.dart';
 import 'community_cover_processor.dart';
 import 'feed_models.dart';
+import 'publication_cover_url.dart';
 
 /// How the community feed is ordered.
 ///   • recent  → published_at desc (the "发现 / Discover" tab).
@@ -174,7 +175,7 @@ class CommunityService {
         .from('works')
         .select(
           'id, user_id, title, description, format, '
-          'model_storage_path, thumbnail_storage_path, '
+          'model_storage_path, thumbnail_storage_path, initial_view, '
           'file_size_bytes, likes_count, views_count, published_at, '
           'publish_region',
         )
@@ -291,6 +292,7 @@ class CommunityService {
         description: w['description'] as String?,
         format: (w['format'] as String?) ?? 'glb',
         modelStoragePath: w['model_storage_path'] as String?,
+        initialView: w['initial_view'] is Map ? Map<String, dynamic>.from(w['initial_view'] as Map) : null,
         thumbnailStoragePath: w['thumbnail_storage_path'] as String?,
         fileSizeBytes: (w['file_size_bytes'] as num?)?.toInt(),
         likesCount: (w['likes_count'] as int?) ?? 0,
@@ -534,6 +536,8 @@ class CommunityService {
   /// Routed through [_cdn] so the bytes can be served from an edge cache
   /// instead of hitting Supabase egress on every feed scroll.
   String thumbnailUrlFor(String path) {
+    final publication = publicationCoverUrl(Uri.parse(_client.rest.url), path);
+    if (publication != null) return publication;
     return _cdn(_client.storage.from('thumbnails').getPublicUrl(path));
   }
 

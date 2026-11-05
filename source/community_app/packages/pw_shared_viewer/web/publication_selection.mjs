@@ -49,7 +49,7 @@ export function createSelectionPreview({scene,renderer,getModel}) {
     }
     if (helper) { scene.remove(helper); helper.geometry.dispose(); helper.material.dispose(); helper = null; }
   }
-  function set(box) {
+  function set(box, decorations = true) {
     if (box == null) { clear(); return; }
     const model = getModel();
     if (checkedModel !== model) {
@@ -66,6 +66,7 @@ export function createSelectionPreview({scene,renderer,getModel}) {
       m.clippingPlanes = planes; m.clipIntersection = false; m.needsUpdate = true;
     }
     renderer.localClippingEnabled = true;
+    if (!decorations) return;
     // Red outside indication is a second material pass through the SAME meshes,
     // using Three's documented clipIntersection; no mesh cutting/export occurs.
     outside = model.clone(true);
