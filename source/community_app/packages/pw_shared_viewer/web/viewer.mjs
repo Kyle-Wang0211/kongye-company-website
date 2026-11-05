@@ -105,7 +105,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   useOfficialTextureLoader(gltfLoader, THREE);
   let current = null, request = 0, disposed = false, paused = false;
   let importAbort = null, importInfo = null;
-  let framing = null, userHasInteracted = false;
+  let framing = null, userHasInteracted = false, explicitCameraFraming = false;
   const framedFoVDeg = 45;
   // Selected product configuration: Google's documented external FramingInfo
   // fieldOfViewAspect=1 bounds both camera axes by the framing sphere. Keep the
@@ -271,7 +271,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
       current = candidate; url = input.url; format = input.format; status = 'ready'; error = null;
       importInfo = candidateImportInfo;
       framing = candidateFraming;
-      if (shouldFit) userHasInteracted = false;
+      if (shouldFit) { userHasInteracted = false; explicitCameraFraming = false; }
       replacementStarted = false;
       disposeObject(previous);
       notify();
@@ -328,7 +328,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
       setSelectionView(getSelectionView(),bounds.min.map((v,i)=>(v+bounds.max[i])/2));
       camera.updateProjectionMatrix(); render(); notify(); return getState();
     }
-    controls.reset?.(); userHasInteracted = false;
+    controls.reset?.(); userHasInteracted = false; explicitCameraFraming = false;
     if (framing) camera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, camera.aspect);
     camera.updateProjectionMatrix(); render(); notify(); return getState();
   }
@@ -342,9 +342,9 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     if (selectionCamera) updateSelectionProjection();
-    // Before interaction, follow Google's viewport framing without moving the
-    // center/orbit. Once the user starts controls, preserve their orbit and zoom.
-    if (framing && !userHasInteracted) {
+    // Only automatic framing follows Google's viewport adjustment. Explicit
+    // camera metadata and genuine user interaction preserve their chosen FOV.
+    if (framing && !userHasInteracted && !explicitCameraFraming) {
       camera.fov = adjustedFoV(framedFoVDeg, fieldOfViewAspect, camera.aspect);
     }
     camera.updateProjectionMatrix(); render(); notify();
@@ -440,7 +440,7 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
       throw new Error('Invalid camera direction');
     }
     camera.position.copy(position); controls.target.copy(target); camera.up.copy(up);
-    camera.fov = value.fov_y_degrees;
+    camera.fov = value.fov_y_degrees; explicitCameraFraming = true;
     // Keep the displayed viewport undistorted. Cover rendering uses the saved aspect.
     camera.aspect = width / height;
     camera.updateProjectionMatrix(); camera.lookAt(target); camera.updateMatrixWorld();

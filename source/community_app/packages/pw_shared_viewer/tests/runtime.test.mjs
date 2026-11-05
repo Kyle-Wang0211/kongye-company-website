@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as RealTHREE from '../web/vendor/three/build/three.module.js';
 import { createViewerWithDependencies } from '../web/viewer.mjs';
+import { adjustedFoV } from '../web/model_framing.mjs';
 
 class Vec extends RealTHREE.Vector3 {}
 class Object3D extends RealTHREE.Object3D {}
@@ -268,4 +269,28 @@ test('publication camera framing roundtrips official perspective camera and vali
  }
  f.viewer.resetCamera();assert.notDeepEqual(f.viewer.getCameraFraming().position,selected.position);
  assert.deepEqual(f.viewer.getCameraFraming().target,original.target);f.viewer.dispose();
+});
+
+
+test('explicit camera FOV survives resize without inventing interaction and clears on reset or new fit',async()=>{
+ const f=fixture();f.viewer.resize(600,400);
+ const first=f.viewer.load({url:'framing-first.glb',format:'glb'});
+ f.pending.get('framing-first.glb').resolve(glb());await first;
+ const selected={projection:'perspective',position:[12,8,16],target:[1,2,3],up:[0,1,0],fov_y_degrees:55,aspect:1.5};
+ f.viewer.setCameraFraming(selected);assert.equal(f.viewer.getState().userHasInteracted,false);
+ f.viewer.resize(400,600);
+ assert.equal(f.viewer.getCameraFraming().fov_y_degrees,55);
+ assert.deepEqual(f.viewer.getCameraFraming().position,selected.position);
+ assert.equal(f.viewer.getState().userHasInteracted,false);
+ f.viewer.resetCamera();assert.equal(f.viewer.getCameraFraming().fov_y_degrees,adjustedFoV(45,1,400/600));
+ f.viewer.resize(800,400);assert.equal(f.viewer.getCameraFraming().fov_y_degrees,45);
+ f.viewer.setCameraFraming(selected);
+ const retained=f.viewer.load({url:'framing-preserved.glb',format:'glb',preserveCamera:true});
+ f.pending.get('framing-preserved.glb').resolve(glb());await retained;
+ f.viewer.resize(400,600);assert.equal(f.viewer.getCameraFraming().fov_y_degrees,55);
+ const replacement=f.viewer.load({url:'framing-new.glb',format:'glb'});
+ f.pending.get('framing-new.glb').resolve(glb());await replacement;
+ assert.equal(f.viewer.getCameraFraming().fov_y_degrees,adjustedFoV(45,1,400/600));
+ f.viewer.resize(800,400);assert.equal(f.viewer.getCameraFraming().fov_y_degrees,45);
+ assert.equal(f.viewer.getState().userHasInteracted,false);f.viewer.dispose();
 });
