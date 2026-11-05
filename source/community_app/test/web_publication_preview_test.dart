@@ -202,6 +202,11 @@ void main() {
       -200,
       scrollable: find.byType(Scrollable).first,
     );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('重新选择 GLB / 调整选区')),
+      alignment: 0.5,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('重新选择 GLB / 调整选区'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('保留模型'));
