@@ -1,4 +1,4 @@
-import { sourceWorldBounds, createSelectionPreview } from './publication_selection.mjs';
+import { sourceWorldBounds, createSelectionPreview } from './publication_selection.mjs?v=publication-camera-20261105-v1';
 import { createSurfaceComments } from './surface_comments.mjs?v=white-markers-20261105-v29';
 import { useOfficialTextureLoader } from './image_loader_lifecycle.mjs';
 import { framingForObject, adjustedFoV } from './model_framing.mjs';
@@ -421,6 +421,32 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     controls.autoRotate = saved.autoRotate; autoRotateUntilTouched = saved.autoRotateUntilTouched;
     camera.updateMatrixWorld(); render(); notify();
   }
+  function getCameraFraming() {
+    assertActive();
+    if (selectionCamera || !camera.isPerspectiveCamera || !current) throw new Error('Perspective camera unavailable');
+    return {projection:'perspective', position:camera.position.toArray(), target:controls.target.toArray(),
+      up:camera.up.toArray(), fov_y_degrees:camera.fov, aspect:camera.aspect};
+  }
+  function setCameraFraming(value) {
+    assertActive();
+    const vector = v => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
+    if (selectionCamera || !camera.isPerspectiveCamera || !current || value?.projection !== 'perspective' ||
+        !vector(value.position) || !vector(value.target) || !vector(value.up) ||
+        !Number.isFinite(value.fov_y_degrees) || value.fov_y_degrees < 1 || value.fov_y_degrees > 120 ||
+        !Number.isFinite(value.aspect) || value.aspect < 0.1 || value.aspect > 10) throw new Error('Invalid perspective camera framing');
+    const position = new THREE.Vector3().fromArray(value.position), target = new THREE.Vector3().fromArray(value.target);
+    const up = new THREE.Vector3().fromArray(value.up), forward = target.clone().sub(position);
+    if ([...value.position,...value.target].some(v=>Math.abs(v)>1e9) || forward.lengthSq() < 1e-16 || Math.abs(up.lengthSq()-1)>1e-6 || forward.clone().cross(up).lengthSq() === 0) {
+      throw new Error('Invalid camera direction');
+    }
+    camera.position.copy(position); controls.target.copy(target); camera.up.copy(up);
+    camera.fov = value.fov_y_degrees;
+    // Keep the displayed viewport undistorted. Cover rendering uses the saved aspect.
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix(); camera.lookAt(target); camera.updateMatrixWorld();
+    rebindCameraUp(); controls.autoRotate = false; autoRotateUntilTouched = false;
+    render(); notify(); return getCameraFraming();
+  }
   function getSelectionView() {
     assertActive(); camera.updateMatrixWorld();
     const e = camera.matrixWorldInverse.elements;
@@ -448,12 +474,12 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
     }
     return format === 'glb' && status === 'ready' ? selectionBounds : null;
   }
-  function setSelectionPreview(box) {
+  function setSelectionPreview(box, decorations = true) {
     assertActive();
     if (box != null && !getSelectionBounds()) throw new Error('GLB source bounds unavailable');
-    selectionPreview.set(box); render();
+    selectionPreview.set(box, decorations); render();
   }
-  return { beginSelectionEditing, endSelectionEditing, getSelectionView, setSelectionView, getSelectionBounds, setSelectionPreview, setSurfaceCommentMode, setSurfaceCommentMarkers, focusSurfaceComment, load, configure, resetCamera, resize, capture, pause, resume, dispose, getState };
+  return { getCameraFraming, setCameraFraming, beginSelectionEditing, endSelectionEditing, getSelectionView, setSelectionView, getSelectionBounds, setSelectionPreview, setSurfaceCommentMode, setSurfaceCommentMarkers, focusSurfaceComment, load, configure, resetCamera, resize, capture, pause, resume, dispose, getState };
 }
 
 if (typeof window !== 'undefined') window.PWSharedViewer = Object.freeze({ create, engineVersion: ENGINE_VERSION });

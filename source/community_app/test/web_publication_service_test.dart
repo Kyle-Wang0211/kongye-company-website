@@ -1,5 +1,9 @@
 import 'dart:async';
+
+import 'package:crypto/crypto.dart';
+
 import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pocketworld_flutter/community/web_publication_service.dart';
 
@@ -90,6 +94,65 @@ void main() {
     selectionBox: box,
     onSubmissionCreated: created ?? (_) {},
   );
+  Map<String, dynamic> camera({Map<String, dynamic>? selection}) => {
+    'schema': 'pw.camera-framing.v1',
+    'source_sha256': sha256.convert(glb()).toString(),
+    'selection_box': selection,
+    'projection': 'perspective',
+    'position': [3, 2, 4],
+    'target': [0, 0, 0],
+    'up': [0, 1, 0],
+    'fov_y_degrees': 45,
+    'aspect': 1.5,
+  };
+  test(
+    'confirmed camera bound to source and selection is sent on initiate',
+    () async {
+      final p = Ports();
+      final view = camera();
+      await WebPublicationService.forTest(p).submit(
+        bytes: glb(),
+        title: '作品',
+        idempotencyKey: key,
+        initialView: view,
+        onSubmissionCreated: (_) {},
+      );
+      expect(p.calls.first['initial_view'], view);
+      expect(
+        (p.calls.first['initial_view'] as Map).containsKey('asset_sha256'),
+        false,
+      );
+    },
+  );
+  test('stale source selection and non-finite camera never initiate', () async {
+    for (final mutation in [
+      {'source_sha256': '0' * 64},
+      {
+        'selection_box': {'v': 2},
+      },
+      {
+        'position': [double.nan, 0, 0],
+      },
+      {
+        'up': [0, 0, 0],
+      },
+      {'fov_y_degrees': 179},
+      {'aspect': 100},
+    ]) {
+      final p = Ports();
+      await expectLater(
+        WebPublicationService.forTest(p).submit(
+          bytes: glb(),
+          title: '作品',
+          idempotencyKey: key,
+          initialView: {...camera(), ...mutation},
+          onSubmissionCreated: (_) {},
+        ),
+        throwsA(isA<WebPublicationException>()),
+      );
+      expect(p.calls, isEmpty);
+    }
+  });
   test('real initiate upload seal; queued is not published', () async {
     final p = Ports();
     final s = WebPublicationService.forTest(p);
@@ -187,16 +250,24 @@ void main() {
     );
   });
   for (final includeNull in [false, true]) {
-    test('published rejects ${includeNull ? 'null' : 'missing'} work id', () async {
-      final ports = Ports()
-        ..state = 'published'
-        ..statusFields = includeNull ? {'work_id': null} : {};
-      await expectLater(
-        WebPublicationService.forTest(ports).getStatus(sid),
-        throwsA(isA<WebPublicationException>().having(
-          (error) => error.code, 'code', 'invalid_response')),
-      );
-    });
+    test(
+      'published rejects ${includeNull ? 'null' : 'missing'} work id',
+      () async {
+        final ports = Ports()
+          ..state = 'published'
+          ..statusFields = includeNull ? {'work_id': null} : {};
+        await expectLater(
+          WebPublicationService.forTest(ports).getStatus(sid),
+          throwsA(
+            isA<WebPublicationException>().having(
+              (error) => error.code,
+              'code',
+              'invalid_response',
+            ),
+          ),
+        );
+      },
+    );
   }
   test('published retains validated work id', () async {
     final ports = Ports()

@@ -40,9 +40,11 @@ class AetherCppCardDemo extends StatelessWidget {
     this.localWork,
     this.communitySessionKey,
     this.communitySessions,
+    this.initialView,
   });
 
   final String modelUrl;
+  final Map<String, dynamic>? initialView;
   final LocalWorkViewerBinding? localWork;
   final String? communitySessionKey;
   final CommunityViewerSessions? communitySessions;
@@ -73,6 +75,7 @@ class AetherCppCardDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ProductModelView(
     modelUrl: modelUrl,
+    initialView: initialView,
     localWork: localWork,
     communitySessionKey: communitySessionKey,
     communitySessions: communitySessions,

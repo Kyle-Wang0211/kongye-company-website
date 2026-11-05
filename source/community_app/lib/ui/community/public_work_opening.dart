@@ -28,6 +28,7 @@ FeedWork? readOpeningWork() {
       description: row['description'] as String?,
       format: row['format'] as String? ?? 'glb',
       modelStoragePath: row['model_storage_path'] as String?,
+      initialView: row['initial_view'] is Map ? Map<String, dynamic>.from(row['initial_view'] as Map) : null,
       thumbnailStoragePath: row['thumbnail_storage_path'] as String?,
       fileSizeBytes: (row['file_size_bytes'] as num?)?.toInt(),
       likedByMe: false,

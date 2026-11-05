@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_internal_member
 import 'dart:async';
+
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,10 +30,12 @@ class _Host extends StatefulWidget {
 
 class _HostState extends State<_Host> {
   String? loadId;
+  final methods = <String>[];
   @override
   void initState() {
     super.initState();
     widget.controller.attachTransport((request) async {
+      methods.add(request['method'] as String);
       if (request['method'] == 'load') {
         loadId = request['id'] as String;
         await widget.decode;
@@ -60,10 +63,12 @@ Widget _view(
   GlobalKey<NavigatorState>? navigatorKey,
   bool trackedDownload = true,
   ValueChanged<ProductViewerCapture>? onViewerReady,
+  Map<String, dynamic>? initialView,
 }) => MaterialApp(
   navigatorKey: navigatorKey,
   home: ProductModelView(
     modelUrl: url,
+    initialView: initialView,
     interactive: true,
     browserModelClient: client,
     onSurfacePicked: trackedDownload ? (_) {} : null,
@@ -288,6 +293,60 @@ void main() {
     await _flush(tester);
     await _flush(tester);
     expect(identity, sha256.convert(bytes).toString());
+    await tester.pumpWidget(const SizedBox());
+  });
+  testWidgets(
+    'server framing applies once only after matching model identity',
+    (tester) async {
+      final client = _Client();
+      final decode = Completer<void>();
+      final hash = sha256.convert([1, 2, 3, 4, 5, 6, 7, 8]).toString();
+      final initial = <String, dynamic>{
+        'schema': 'pw.camera-framing.v1',
+        'asset_sha256': hash,
+      };
+      await tester.pumpWidget(_view(client, decode, initialView: initial));
+      await _flush(tester);
+      final host = tester.state<_HostState>(find.byType(_Host));
+      expect(host.methods.where((m) => m == 'setCameraFraming'), isEmpty);
+      client.streams.single.add([1, 2, 3, 4, 5, 6, 7, 8]);
+      unawaited(client.streams.single.close());
+      decode.complete();
+      await _flush(tester);
+      await _flush(tester);
+      expect(host.methods.where((m) => m == 'setCameraFraming'), hasLength(1));
+      await tester.pumpWidget(
+        _view(client, decode, initialView: Map.from(initial)),
+      );
+      await _flush(tester);
+      expect(host.methods.where((m) => m == 'setCameraFraming'), hasLength(1));
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets('mismatched server asset preserves official auto framing', (
+    tester,
+  ) async {
+    final client = _Client();
+    final decode = Completer<void>();
+    await tester.pumpWidget(
+      _view(
+        client,
+        decode,
+        initialView: {
+          'schema': 'pw.camera-framing.v1',
+          'asset_sha256': '0' * 64,
+        },
+      ),
+    );
+    await _flush(tester);
+    final host = tester.state<_HostState>(find.byType(_Host));
+    client.streams.single.add([1, 2, 3, 4, 5, 6, 7, 8]);
+    unawaited(client.streams.single.close());
+    decode.complete();
+    await _flush(tester);
+    await _flush(tester);
+    expect(host.methods.where((m) => m == 'setCameraFraming'), isEmpty);
+    expect(find.byKey(const ValueKey('product-model-download')), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
 }

@@ -94,3 +94,13 @@ test('official loader progress is correlated with its original load request',asy
  await bridge.request({id:'model-A',method:'load',args:{url:'https://assets.example/models/scene.glb',format:'glb'}});
  assert.deepEqual(sent[0],{protocol:'PW_SHARED_VIEWER_V1',type:'pw-viewer-download-progress',id:'model-A',receivedBytes:3,totalBytes:8});
 });
+
+test('camera framing bridge roundtrips and preview decorations are optional',async()=>{
+ const calls=[],framing={projection:'perspective',position:[3,2,4],target:[0,0,0],up:[0,1,0],fov_y_degrees:45,aspect:1.5};
+ const bridge=createHostBridge({ready:Promise.resolve({getCameraFraming:()=>framing,
+   setCameraFraming:value=>calls.push(['camera',value]),setSelectionPreview:(...args)=>calls.push(['selection',...args])}),send:()=>{}});
+ assert.deepEqual((await bridge.request({id:'get',method:'getCameraFraming'})).result,framing);
+ await bridge.request({id:'set',method:'setCameraFraming',args:{framing}});
+ await bridge.request({id:'preview',method:'setSelectionPreview',args:{box:null,decorations:false}});
+ assert.deepEqual(calls,[['camera',framing],['selection',null,false]]);
+});

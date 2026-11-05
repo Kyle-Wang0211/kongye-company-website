@@ -174,7 +174,7 @@ class CommunityService {
         .from('works')
         .select(
           'id, user_id, title, description, format, '
-          'model_storage_path, thumbnail_storage_path, '
+          'model_storage_path, thumbnail_storage_path, initial_view, '
           'file_size_bytes, likes_count, views_count, published_at, '
           'publish_region',
         )
@@ -291,6 +291,7 @@ class CommunityService {
         description: w['description'] as String?,
         format: (w['format'] as String?) ?? 'glb',
         modelStoragePath: w['model_storage_path'] as String?,
+        initialView: w['initial_view'] is Map ? Map<String, dynamic>.from(w['initial_view'] as Map) : null,
         thumbnailStoragePath: w['thumbnail_storage_path'] as String?,
         fileSizeBytes: (w['file_size_bytes'] as num?)?.toInt(),
         likesCount: (w['likes_count'] as int?) ?? 0,

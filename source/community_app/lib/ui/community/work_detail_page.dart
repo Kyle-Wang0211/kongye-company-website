@@ -904,6 +904,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           pointerEventsEnabledNotifier: _commentViewerPointerEvents,
           key: ValueKey('work-mesh-${widget.work.id}'),
           modelUrl: widget.service.modelUrlFor(widget.work.modelStoragePath!),
+          initialView: widget.work.initialView,
           communitySessionKey: jsonEncode([
             widget.service.currentUserId,
             widget.work.id,

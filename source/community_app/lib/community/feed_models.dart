@@ -12,6 +12,7 @@ class FeedWork {
   final String? description;
   final String format; // 'glb' | 'spz' | 'gsplat' | 'ply'
   final String? modelStoragePath;
+  final Map<String, dynamic>? initialView;
 
   /// works.file_size_bytes. Surfaced to the feed so a card can show the
   /// scan's point count — the domain-meaningful number for a 3D-capture
@@ -77,6 +78,7 @@ class FeedWork {
     this.fileSizeBytes,
     this.authorHandle,
     this.publishRegion,
+    this.initialView,
   });
 
   /// Point count implied by [fileSizeBytes], or null when it cannot be
@@ -114,6 +116,7 @@ class FeedWork {
       description: description,
       format: format,
       modelStoragePath: modelStoragePath,
+      initialView: initialView,
       thumbnailStoragePath: thumbnailStoragePath,
       likesCount: likesCount ?? this.likesCount,
       viewsCount: viewsCount ?? this.viewsCount,

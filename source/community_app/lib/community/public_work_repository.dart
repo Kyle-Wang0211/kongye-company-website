@@ -22,7 +22,7 @@ class PublicWorkRepository {
     final row = await client
         .from('works')
         .select(
-          'id,user_id,title,description,format,model_storage_path,thumbnail_storage_path,file_size_bytes,likes_count,views_count,published_at,publish_region',
+          'id,user_id,title,description,format,model_storage_path,thumbnail_storage_path,initial_view,file_size_bytes,likes_count,views_count,published_at,publish_region',
         )
         .eq('id', id)
         .eq('visibility', 'public')
@@ -45,6 +45,7 @@ class PublicWorkRepository {
       description: row['description'] as String?,
       format: row['format'] as String? ?? 'glb',
       modelStoragePath: row['model_storage_path'] as String?,
+      initialView: row['initial_view'] is Map ? Map<String, dynamic>.from(row['initial_view'] as Map) : null,
       thumbnailStoragePath: row['thumbnail_storage_path'] as String?,
       fileSizeBytes: (row['file_size_bytes'] as num?)?.toInt(),
       likedByMe: false,

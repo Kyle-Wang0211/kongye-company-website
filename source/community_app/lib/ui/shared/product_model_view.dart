@@ -62,6 +62,7 @@ class ProductModelView extends StatefulWidget {
   const ProductModelView({
     super.key,
     required this.modelUrl,
+    this.initialView,
     this.interactive = false,
     this.concealRenderSource = false,
     this.autoRotate = false,
@@ -96,6 +97,7 @@ class ProductModelView extends StatefulWidget {
   final String? communitySessionKey;
   final CommunityViewerSessions? communitySessions;
   final String modelUrl;
+  final Map<String, dynamic>? initialView;
   final bool interactive;
 
   /// Keep the mounted source out of paint while presenting decoded captures.
@@ -172,6 +174,7 @@ class _ProductModelViewState extends State<ProductModelView>
   int _epoch = 0;
   Stopwatch _loadClock = Stopwatch()..start();
   int _loadedEpoch = -1;
+  int _initialViewAttemptedEpoch = -1;
   int _notifiedEpoch = -1;
   int _frameEpoch = -1;
   int _layoutRevision = 0;
@@ -765,6 +768,18 @@ class _ProductModelViewState extends State<ProductModelView>
         }
       }
       if (_disposed || epoch != _epoch) return;
+      final initialView = widget.initialView;
+      if (_initialViewAttemptedEpoch != epoch && initialView != null &&
+          initialView['schema'] == 'pw.camera-framing.v1' &&
+          _modelContentHash != null && initialView['asset_sha256'] == _modelContentHash) {
+        _initialViewAttemptedEpoch = epoch;
+        try {
+          await _controller.setCameraFraming(initialView);
+        } catch (_) {
+          // Invalid server framing retains the official loaded-model camera.
+        }
+        if (_disposed || epoch != _epoch) return;
+      }
       _loadedEpoch = epoch;
       _notifyIdealAspect();
       _logLoadPhase('decoded');

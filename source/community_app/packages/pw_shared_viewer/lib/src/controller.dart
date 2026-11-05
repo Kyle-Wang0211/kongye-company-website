@@ -346,8 +346,8 @@ class SharedViewerController extends ChangeNotifier {
     await _request('endSelectionEditing');
   }
 
-  Future<void> setSelectionPreview(Map<String, dynamic>? box) async {
-    await _request('setSelectionPreview', {'box': box});
+  Future<void> setSelectionPreview(Map<String, dynamic>? box, {bool decorations = true}) async {
+    await _request('setSelectionPreview', {'box': box, if (!decorations) 'decorations': false});
   }
 
   Future<void> setSelectionView(
@@ -362,6 +362,16 @@ class SharedViewerController extends ChangeNotifier {
       throw const SharedViewerException('Camera unavailable');
     }
     return result.map((v) => (v as num).toDouble()).toList();
+  }
+
+  Future<Map<String, dynamic>> getCameraFraming() async {
+    final result = await _request('getCameraFraming');
+    if (result is! Map) throw const SharedViewerException('Camera unavailable');
+    return Map<String, dynamic>.from(result);
+  }
+
+  Future<void> setCameraFraming(Map<String, dynamic> framing) async {
+    await _request('setCameraFraming', {'framing': framing});
   }
 
   Future<void> resetCamera() async {
