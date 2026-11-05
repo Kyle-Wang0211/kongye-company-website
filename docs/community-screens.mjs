@@ -1,4 +1,4 @@
-import {t,localeEvent} from './site-l10n.mjs?v=rds-web-20261104-7931926b3d74';
+import {t,localeEvent} from './site-l10n.mjs?v=community-sidebar-20261105-v36';
 const stage=document.querySelector('.community-screen-stage');
 const links=[...document.querySelectorAll('.community-feature-screen')];
 const choices=[...document.querySelectorAll('.community-screen-choice')];
