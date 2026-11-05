@@ -6,6 +6,9 @@ import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
+import 'ui/community/web_publication_page.dart';
+import 'ui/community/public_work_exit_stub.dart'
+    if (dart.library.js_interop) 'ui/community/public_work_exit_web.dart';
 import 'auth/current_user.dart';
 import 'auth/unavailable_auth_service.dart';
 import 'auth/supabase_auth_service.dart';
@@ -189,7 +192,9 @@ class _CommunityWeb extends StatelessWidget {
               CurrentUserSignedIn() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
-                    : const VaultPage(),
+                    : Uri.base.queryParameters['publish'] == '1'
+                        ? const _WebPublicationEntry()
+                        : const VaultPage(),
               CurrentUserSignedOut() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
@@ -271,4 +276,31 @@ class _ServiceUnavailableView extends StatelessWidget {
       ),
     );
   }
+}
+
+
+/// Website publication returns to the website feed, not the native vault feed.
+class _WebPublicationEntry extends StatefulWidget {
+  const _WebPublicationEntry();
+  @override
+  State<_WebPublicationEntry> createState() => _WebPublicationEntryState();
+}
+
+class _WebPublicationEntryState extends State<_WebPublicationEntry> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _open());
+  }
+
+  Future<void> _open() async {
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const WebPublicationPage()),
+    );
+    if (mounted) exitPublicWork();
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
 }

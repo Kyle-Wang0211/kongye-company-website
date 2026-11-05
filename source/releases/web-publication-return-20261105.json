@@ -1,0 +1,9 @@
+{
+  "release": "publication-return-20261105-v26",
+  "scope": "Website only: publication exit returns to static homepage without constructing VaultPage",
+  "main_js_sha256": "a381f1df503aec1072701a43cc6d28d17726f867d6860e37440831da34f830db",
+  "sdk": "Flutter 3.47.1 / Dart 3.13.1",
+  "build": "release --no-pub; existing locked package configuration; existing RDS deployment identity",
+  "validation": "Compiler succeeded; read-only route review; live authenticated navigation not exercised",
+  "notice": "Retained existing license notice superset; unchanged asset bytes reused"
+}
