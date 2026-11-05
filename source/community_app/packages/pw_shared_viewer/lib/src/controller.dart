@@ -36,6 +36,13 @@ class SharedViewerController extends ChangeNotifier {
   SharedViewerBytesRegistrar? _registerBytes;
   SharedViewerResourceReleaser? _releaseResource;
   int _nextId = 1;
+  String? _downloadRequestId;
+  int _downloadProgressRevision = 0;
+  int get downloadProgressRevision => _downloadProgressRevision;
+  int get downloadedBytes => _downloadedBytes;
+  int _downloadedBytes = 0;
+  int? get downloadTotalBytes => _downloadTotalBytes;
+  int? _downloadTotalBytes;
   bool _disposed = false;
   Map<String, Object?> _state = const {};
   Map<String, Object?> get state => Map.unmodifiable(_state);
@@ -92,6 +99,19 @@ class SharedViewerController extends ChangeNotifier {
       }
     }
     if (decoded is! Map || decoded['protocol'] != sharedViewerProtocol) return;
+    if (decoded['type'] == 'pw-viewer-download-progress') {
+      final received = decoded['receivedBytes'];
+      final total = decoded['totalBytes'];
+      if (decoded['id'] != _downloadRequestId ||
+          received is! int ||
+          received < _downloadedBytes ||
+          (total != null && (total is! int || total <= 0))) return;
+      _downloadedBytes = received;
+      _downloadTotalBytes = total as int?;
+      _downloadProgressRevision++;
+      notifyListeners();
+      return;
+    }
     if (decoded['type'] == 'pw-viewer-surface-marker-layout') {
       if (!decoded.containsKey('layout')) return;
       final layout = decoded['layout'];
@@ -164,6 +184,11 @@ class SharedViewerController extends ChangeNotifier {
     final send = _transport;
     if (send == null) throw StateError('Shared Viewer host is not ready');
     final id = '$_requestPrefix${_nextId++}';
+    if (method == 'load') {
+      _downloadRequestId = id;
+      _downloadedBytes = 0;
+      _downloadTotalBytes = null;
+    }
     final completer = Completer<Object?>();
     _pending[id] = completer;
     // Subscribe before dispatch so synchronous responses and transport errors
@@ -205,6 +230,14 @@ class SharedViewerController extends ChangeNotifier {
       'url': url.toString(),
       'format': format.name,
       'preserveCamera': preserveCamera
+    });
+  }
+
+  /// Mirrors the product's observed HTTP body bytes into the shared loading UI.
+  Future<void> setDownloadProgress(int receivedBytes, int? totalBytes) async {
+    await _request('setDownloadProgress', {
+      'receivedBytes': receivedBytes,
+      'totalBytes': totalBytes,
     });
   }
 

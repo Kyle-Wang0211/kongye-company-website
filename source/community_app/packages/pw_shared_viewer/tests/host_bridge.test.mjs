@@ -74,3 +74,23 @@ test('native channel emits readiness after delayed module initialization', async
   assert.equal(sent[0].type,'pw-viewer-ready');
   assert.equal(sent[0].state.status,'empty');
 });
+
+
+test('download UI accepts observed byte progress before renderer readiness',async()=>{
+ const events=[],sent=[];
+ const bridge=createHostBridge({ready:new Promise(()=>{}),send:p=>sent.push(p),onDownloadProgress:p=>events.push(p)});
+ assert.equal((await bridge.request({id:'progress',method:'setDownloadProgress',args:{receivedBytes:2,totalBytes:8}})).ok,true);
+ assert.deepEqual(events,[{receivedBytes:2,totalBytes:8}]);
+ assert.equal((await bridge.request({id:'invalid',method:'setDownloadProgress',args:{receivedBytes:-1,totalBytes:8}})).ok,false);
+ assert.equal(events.length,1);
+});
+
+test('official loader progress is correlated with its original load request',async()=>{
+ const sent=[];
+ const bridge=createHostBridge({ready:Promise.resolve({load:async(args,progress)=>{
+   assert.equal(args.url,'https://assets.example/models/scene.glb');
+   progress({receivedBytes:3,totalBytes:8});return {status:'loaded'};
+ }}),send:p=>sent.push(p)});
+ await bridge.request({id:'model-A',method:'load',args:{url:'https://assets.example/models/scene.glb',format:'glb'}});
+ assert.deepEqual(sent[0],{protocol:'PW_SHARED_VIEWER_V1',type:'pw-viewer-download-progress',id:'model-A',receivedBytes:3,totalBytes:8});
+});

@@ -153,6 +153,7 @@ class _ProductModelViewState extends State<ProductModelView>
         ? _modelContentHash
         : null,
   );
+  int _lastDownloadProgressRevision = 0;
   int _lastSurfacePickRevision = 0;
   int _lastSurfaceMarkerSelectionRevision = 0;
   int _lastSurfaceMarkerLayoutRevision = 0;
@@ -434,6 +435,22 @@ class _ProductModelViewState extends State<ProductModelView>
   }
 
   void _observeRotation() {
+    final progressRevision = _controller.downloadProgressRevision;
+    if (progressRevision != _lastDownloadProgressRevision) {
+      _lastDownloadProgressRevision = progressRevision;
+      if (!_disposed &&
+          mounted &&
+          _active &&
+          widget.onSurfacePicked == null &&
+          _loadingEpoch == _epoch) {
+        final total = _controller.downloadTotalBytes;
+        setState(
+          () => _downloadProgress = total == null
+              ? null
+              : (_controller.downloadedBytes / total).clamp(0.0, 1.0),
+        );
+      }
+    }
     final layoutRevision = _controller.surfaceMarkerLayoutRevision;
     if (layoutRevision != _lastSurfaceMarkerLayoutRevision) {
       _lastSurfaceMarkerLayoutRevision = layoutRevision;
@@ -700,6 +717,13 @@ class _ProductModelViewState extends State<ProductModelView>
               final progress = total == null
                   ? null
                   : (received / total).clamp(0.0, 1.0);
+              unawaited(
+                controller.setDownloadProgress(received, total).catchError((
+                  Object error,
+                ) {
+                  if (current()) _fail(error);
+                }),
+              );
               if (_downloadProgress != progress) {
                 setState(() => _downloadProgress = progress);
               }

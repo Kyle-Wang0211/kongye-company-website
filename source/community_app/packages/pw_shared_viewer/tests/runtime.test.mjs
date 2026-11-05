@@ -19,9 +19,9 @@ class Material {
 class Mesh extends RealTHREE.Mesh {}
 class Points extends RealTHREE.Points {}
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
-function fixture(){
+function fixture(options = {}){
   const pending=new Map();let renderer,camera,controls;
-  class Loader {register(factory){this.pluginFactory=factory;return this;}loadAsync(url){const d=deferred();pending.set(url,d);return d.promise;}}
+  class Loader {register(factory){this.pluginFactory=factory;return this;}loadAsync(url,onProgress){const d=deferred();d.progress=onProgress;pending.set(url,d);return d.promise;}}
   class Renderer {
     constructor({canvas}){renderer=this;this.domElement=canvas;this.capabilities={isWebGL2:true};this.renders=0;this.disposals=0;}
     setSize(w,h,style){this.size=[w,h,style];}
@@ -46,7 +46,7 @@ function fixture(){
     addEventListener:(k,v)=>pointerEvents.set(k,v),removeEventListener:k=>pointerEvents.delete(k),
     getBoundingClientRect:()=>({left:0,top:0,width:320,height:200})};
   const api={THREE,OrbitControls:Controls,GLTFLoader:Loader,PLYLoader:Loader};
-  const viewer=createViewerWithDependencies(canvas,{pixelRatio:2},api);
+  const viewer=createViewerWithDependencies(canvas,{pixelRatio:2,...options},api);
   return {viewer,pending,canvas,renderer,camera,controls,pointerEvents};
 }
 function glb(){
@@ -229,4 +229,26 @@ test('surface mode preserves loaded model and controls, focus camera and lifecyc
  const cloud=f.viewer.load({url:'cloud.ply',format:'ply'});f.pending.get('cloud.ply').resolve(new Geometry());await cloud;
  assert.equal(f.viewer.getState().surfaceCommentMode,false);assert.throws(()=>f.viewer.setSurfaceCommentMode(true),/GLB/);
  f.viewer.dispose();assert.equal(f.pointerEvents.size,0);
+});
+
+
+test('official loader byte progress retains URL semantics and ignores superseded callbacks',async()=>{
+ const events=[],responses=[];
+ const f=fixture({onDownloadProgress:p=>events.push(p)});
+ const original='https://assets.example/models/scene.glb?token=test';
+ const a=f.viewer.load({url:original,format:'glb'},p=>responses.push(p));
+ const first=f.pending.get(original);
+ first.progress({loaded:2,total:8,lengthComputable:true});
+ assert.deepEqual(events,[{receivedBytes:2,totalBytes:8}]);
+ assert.deepEqual(responses,events);
+ const b=f.viewer.load({url:'second.glb',format:'glb'});
+ first.progress({loaded:8,total:8,lengthComputable:true});
+ assert.equal(events.length,1);
+ f.pending.get('second.glb').progress({loaded:3,total:0,lengthComputable:false});
+ assert.deepEqual(events.at(-1),{receivedBytes:3,totalBytes:null});
+ f.pending.get('second.glb').resolve(glb());await b;
+ first.resolve(glb());await a;
+ f.viewer.dispose();
+ first.progress({loaded:8,total:8,lengthComputable:true});
+ assert.equal(events.length,2);
 });
