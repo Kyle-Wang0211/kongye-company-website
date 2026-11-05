@@ -66,16 +66,35 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     // pointerup/click. Content and identity changes still rebuild atomically.
     if (signature === markerSignature) { update(); return; }
     markerSignature = signature;
+    for (const marker of markers) marker.animation?.cancel();
     overlay?.replaceChildren(); markers = validated;
     for (const marker of markers) {
       if (!overlay) continue;
       const button = document.createElement('button'); marker.button = button;
-      button.type = 'button'; button.textContent = String(marker.number);
+      button.type = 'button';
       button.setAttribute('aria-label', `查看评论 ${marker.number}`);
       button.setAttribute('aria-pressed', String(marker.selected));
       Object.assign(button.style, {position:'absolute',width:'26px',height:'26px',borderRadius:'50%',
-        border:'2px solid white',background:marker.selected ? '#ff7354' : '#222',color:'white',
-        font:'600 12px system-ui',padding:'0',pointerEvents:'auto',zIndex:marker.selected?'2':'1',transform:'translate(-50%,-50%)',boxShadow:'0 1px 5px #0008'});
+        border:'0',background:'transparent',color:'white',padding:'0',pointerEvents:'auto',
+        zIndex:marker.selected?'2':'1',transform:'translate(-50%,-50%)',cursor:'pointer'});
+      const halo = document.createElement('span'); marker.halo = halo;
+      halo.setAttribute('aria-hidden', 'true');
+      Object.assign(halo.style, {position:'absolute',left:'50%',top:'50%',width:'22px',height:'22px',
+        borderRadius:'50%',background:'#fff',opacity:'.3',filter:'blur(4px)',
+        transform:'translate(-50%,-50%)',pointerEvents:'none'});
+      const dot = document.createElement('span'); marker.dot = dot;
+      dot.setAttribute('aria-hidden', 'true');
+      Object.assign(dot.style, {position:'absolute',left:'50%',top:'50%',borderRadius:'50%',
+        background:'#fff',transform:'translate(-50%,-50%)',pointerEvents:'none'});
+      button.appendChild(halo); button.appendChild(dot);
+      styleSelection(marker);
+      if (!document.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        marker.animation = halo.animate?.([
+          {opacity:.2,transform:'translate(-50%,-50%) scale(.85)'},
+          {opacity:.6,transform:'translate(-50%,-50%) scale(1.3)'},
+          {opacity:.2,transform:'translate(-50%,-50%) scale(.85)'},
+        ], {duration:2400,iterations:Infinity,easing:'ease-in-out'});
+      }
       const stopRotation = () => { controls.autoRotate = false; onMarkerInteraction?.(); };
       button.addEventListener('pointerdown', event => { event.stopPropagation(); stopRotation(); });
       // The pin is above the canvas. Preserve OrbitControls' wheel handling
@@ -102,8 +121,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
         for (const other of markers) {
           other.selected = other.id === marker.id;
           other.button.setAttribute('aria-pressed', String(other.selected));
-          other.button.style.background = other.selected ? '#ff7354' : '#222';
-          other.button.style.zIndex = other.selected ? '2' : '1';
+          styleSelection(other);
         }
         update();
         emitEvent('pw-viewer-surface-marker-selected', {id:marker.id});
@@ -125,6 +143,13 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       overlay.appendChild(button);
     }
     update();
+  }
+  function styleSelection(marker) {
+    const size = marker.selected ? '12px' : '9px';
+    marker.dot.style.width = size;
+    marker.dot.style.height = size;
+    marker.halo.style.boxShadow = marker.selected ? '0 0 12px 5px #fff9' : '0 0 8px 2px #fff6';
+    marker.button.style.zIndex = marker.selected ? '2' : '1';
   }
   function visible(node, root) {
     for (let object = node; object; object = object.parent) {
@@ -272,7 +297,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     camera.position.copy(position);controls.target.copy(target);controls.update();controls.enableDamping=damping;
     update();
   }
-  function clear() { enabled=false;down=null;pointers.clear();markers=[];markerSignature=null;overlay?.replaceChildren();publishLayout(null); }
+  function clear() { enabled=false;down=null;pointers.clear();for(const marker of markers)marker.animation?.cancel();markers=[];markerSignature=null;overlay?.replaceChildren();publishLayout(null); }
   function dispose() { disposed=true;clear();for(const [name,handler] of Object.entries(handlers))canvas.removeEventListener?.(name,handler);overlay?.remove(); }
   return {setMode,setMarkers,focus,update,clear,dispose,get enabled(){return enabled;}};
 }
