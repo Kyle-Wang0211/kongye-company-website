@@ -1997,8 +1997,8 @@
     },
     {
       "path": "lib/main_community_web.dart",
-      "sha256": "d037df04b0fe1ed1928429a30bfd924c0b763fe0b6803124304282318e593409",
-      "size": 10525
+      "sha256": "5f703c860fc8e6f31025224eb4c58d26cd1ac3674e2c0968c0a14cf94f05d74a",
+      "size": 13162
     },
     {
       "path": "lib/me/cloud_library.dart",
@@ -3142,13 +3142,13 @@
     },
     {
       "path": "lib/ui/community/public_work_exit_stub.dart",
-      "sha256": "65a6b208fb16702c4b490d09674c84620381654ed56447b35181ad71d6c5dfbd",
-      "size": 96
+      "sha256": "1ebb701ba6e15664c6e76526b0967b333428492c1aa722a60aa27370e66cd8aa",
+      "size": 125
     },
     {
       "path": "lib/ui/community/public_work_exit_web.dart",
-      "sha256": "0294b5d145b9d8302958a2060416419b8790e9a7abefcb7971ff18981596f559",
-      "size": 332
+      "sha256": "28d44b39a722c4275dea10a1f517e0129a22a2516984119fcaa3ffeea0caf08a",
+      "size": 580
     },
     {
       "path": "lib/ui/community/public_work_handoff_stub.dart",
@@ -5000,5 +5000,5 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "b7c27a0760eea7155bb84108f39bff51400b6e90"
+  "source_revision": "3653755c03bcc3d88ed3af762017de788ae196aa"
 }

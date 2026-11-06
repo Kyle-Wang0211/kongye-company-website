@@ -8,3 +8,11 @@ external void _assignLocation(JSString value);
 void exitPublicWork() {
   _assignLocation(Uri.base.resolve('../').toString().toJS);
 }
+
+@JS('window.location.replace')
+external void _replaceLocation(JSString value);
+
+/// Replace the Flutter root so browser Back cannot reopen an empty handoff.
+void exitCommunityHome() {
+  _replaceLocation(Uri.base.resolve('../').toString().toJS);
+}

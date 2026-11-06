@@ -1,0 +1,23 @@
+{
+  "entrypoint": "lib/main_community_web.dart",
+  "native_entrypoint": "lib/main.dart",
+  "capabilities": {
+    "PW_COMMUNITY_FAVORITES_ENABLED": "true",
+    "PW_COMMUNITY_MESSAGING_READY": "true",
+    "PW_COMMUNITY_PROFILES_ENABLED": "true"
+  },
+  "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
+  "main_js_sha256": "4f3319208299552a373c030029b5ad3d8e1dc53636f78e727c9f0f059f67c3dd",
+  "status": "built-local-not-deployed",
+  "source_revision": "3653755c03bcc3d88ed3af762017de788ae196aa",
+  "source_manifest_sha256": "a27dac8b5bf856523fab8af8c690f80ba9dff5ea7975c4423c4ca2af06d464f6",
+  "release": "canonical-web-home-20261106-v43",
+  "scope": "Remove the legacy web home route. Return Messages and authentication to the canonical website home using location.replace.",
+  "validation": {
+    "root_auth_browser_tests": 10,
+    "broader_browser_tests": 20,
+    "targeted_analysis": "no issues",
+    "independent_review": "accept"
+  },
+  "phone_rebuilt": false
+}

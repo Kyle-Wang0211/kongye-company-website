@@ -22,7 +22,6 @@ import 'l10n/app_localizations.dart';
 import 'ui/auth/auth_root_view.dart';
 import 'ui/design_system.dart';
 import 'ui/startup_splash_gate.dart';
-import 'ui/vault_page.dart';
 import 'ui/shared/community_viewer_session.dart';
 import 'util/device_log.dart';
 
@@ -174,9 +173,15 @@ ThemeData communityWebTheme() => ThemeData(
 );
 
 class CommunityWebApp extends StatefulWidget {
-  const CommunityWebApp({super.key, required this.user, required this.locale});
+  const CommunityWebApp({
+    super.key,
+    required this.user,
+    required this.locale,
+    this.onExit = exitCommunityHome,
+  });
   final CurrentUser user;
   final LocaleNotifier locale;
+  final VoidCallback onExit;
 
   @override
   State<CommunityWebApp> createState() => _CommunityWebAppState();
@@ -186,6 +191,19 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
   CurrentUser get user => widget.user;
   LocaleNotifier get locale => widget.locale;
   final _navigationIdentity = CommunityAccountNavigationIdentity();
+  // Keep the observer with the account-owned Navigator. Identity changes create
+  // a fresh Navigator and must not reuse an observer still attached to the old one.
+  Key? _navigatorKey;
+  RouteObserver<ModalRoute<void>> _routes = RouteObserver<ModalRoute<void>>();
+
+  Key _navigationKey() {
+    final key = _navigationIdentity.keyFor(user);
+    if (_navigatorKey != key) {
+      _navigatorKey = key;
+      _routes = RouteObserver<ModalRoute<void>>();
+    }
+    return key;
+  }
 
   @override
   Widget build(BuildContext context) => LocaleScope(
@@ -193,7 +211,8 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
     child: AnimatedBuilder(
       animation: Listenable.merge([locale, user]),
       builder: (context, _) => MaterialApp(
-        key: _navigationIdentity.keyFor(user),
+        key: _navigationKey(),
+        navigatorObservers: [_routes],
         title: 'PocketWorld',
         debugShowCheckedModeBanner: false,
         theme: communityWebTheme(),
@@ -210,6 +229,13 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
           animation: user,
           builder: (context, _) {
             final state = user.state;
+            final query = Uri.base.queryParameters;
+            if (!query.containsKey('profile') &&
+                !query.containsKey('work') &&
+                query['publish'] != '1' &&
+                !query.containsKey('auth')) {
+              return _WebsiteHomeEntry(routes: _routes, onExit: widget.onExit);
+            }
             // Public profiles use the existing mobile page for guests and
             // members, once the shared backend initialization has completed.
             if ((state is CurrentUserSignedIn ||
@@ -223,7 +249,11 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
                     ? PublicWorkEntry(user: user)
                     : Uri.base.queryParameters['publish'] == '1'
                     ? const _WebPublicationEntry()
-                    : const VaultPage(),
+                    : _WebsiteHomeEntry(
+                        routes: _routes,
+                        onExit: widget.onExit,
+                        completeAuthentication: query.containsKey('auth'),
+                      ),
               CurrentUserSignedOut() =>
                 Uri.base.queryParameters.containsKey('work')
                     ? PublicWorkEntry(user: user)
@@ -249,6 +279,62 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
       ),
     ),
   );
+}
+
+/// The website owns the homepage. This blank route is only a return target
+/// beneath direct-linked Flutter pages, never a second community feed.
+class _WebsiteHomeEntry extends StatefulWidget {
+  const _WebsiteHomeEntry({
+    required this.routes,
+    required this.onExit,
+    this.completeAuthentication = false,
+  });
+  final RouteObserver<ModalRoute<void>> routes;
+  final VoidCallback onExit;
+  final bool completeAuthentication;
+
+  @override
+  State<_WebsiteHomeEntry> createState() => _WebsiteHomeEntryState();
+}
+
+class _WebsiteHomeEntryState extends State<_WebsiteHomeEntry> with RouteAware {
+  bool _exited = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of<void>(context);
+    if (route != null) widget.routes.subscribe(this, route);
+  }
+
+  @override
+  void didPush() => _returnHome();
+
+  @override
+  void didPopNext() => _returnHome();
+
+  void _returnHome() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _exited) return;
+      // Standalone signup/reset forms may still cover a successful auth entry.
+      // Replacing the document also closes those authentication routes.
+      if (!widget.completeAuthentication &&
+          ModalRoute.of(context)?.isCurrent != true) {
+        return;
+      }
+      _exited = true;
+      widget.onExit();
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.routes.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
 }
 
 /// Website publication returns to the website feed, not the native vault feed.
