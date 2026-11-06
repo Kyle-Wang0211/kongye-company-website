@@ -1581,6 +1581,11 @@
       "size": 8175
     },
     {
+      "path": "lib/community/account_work_library_repository.dart",
+      "sha256": "5df564b952ccdb4e00f455a29255658cb3ba846bc932b13f59e6f17be2c4f659",
+      "size": 4311
+    },
+    {
       "path": "lib/community/anchor_viewer.dart",
       "sha256": "4bd483b521ff436d00f1f4a1e283ff35fe6443acbf3c478e36a0e060d7d91957",
       "size": 2520
@@ -1947,28 +1952,28 @@
     },
     {
       "path": "lib/l10n/app_en.arb",
-      "sha256": "0972c0524585ca328da2f1b1f74a2b1817715c774371b9546641cb5136d2613d",
-      "size": 113416
+      "sha256": "46c8b58b7148090da09c0aa59b172d069e973b6008d7a7fc0370adf1c5d309f4",
+      "size": 113532
     },
     {
       "path": "lib/l10n/app_localizations.dart",
-      "sha256": "137066386772c9e4bdcd3f4aa42d50d266c2f9a1d0750b839de16eecebee2200",
-      "size": 245145
+      "sha256": "a6d925caa21badfbfd6ebc02d02c7413859f79cab633d6c111b64baab75bdbd7",
+      "size": 245621
     },
     {
       "path": "lib/l10n/app_localizations_en.dart",
-      "sha256": "74937103fd9f369a1240406775c232a6fb375b33aba8b8e1c02081c4ee7d3f14",
-      "size": 137420
+      "sha256": "13cb3680b78841d385dbc412e22e1db3539941d5f1942ad8432ae284c51273be",
+      "size": 137608
     },
     {
       "path": "lib/l10n/app_localizations_zh.dart",
-      "sha256": "2428108cd1506af98226e7bff0a5ebe2bb8c8c6057d5a950f049d8a40836ce79",
-      "size": 125326
+      "sha256": "5c88c185efef6cbb13bedf4ef58bad4d5ed4609155e8b0cffce90372859b0775",
+      "size": 125515
     },
     {
       "path": "lib/l10n/app_zh.arb",
-      "sha256": "36b3fca393726cf0853d1b0866b6b33230b8564dd7ef15e1d035ea20505b13c1",
-      "size": 98302
+      "sha256": "dce70a75244a43e6d872b1737d7d4d2b5234c61a10de373c6eaa3d481b38eb06",
+      "size": 98419
     },
     {
       "path": "lib/l10n/phone_country_names.dart",
@@ -3541,9 +3546,14 @@
       "size": 3599
     },
     {
+      "path": "lib/ui/social/account_work_library_page.dart",
+      "sha256": "2f630b5abed785f8c2dd1a78f8430b08396237724c0f790682d5e4d4563bfc84",
+      "size": 8922
+    },
+    {
       "path": "lib/ui/social/community_account_routes.dart",
-      "sha256": "3f7595db76a8b3347ba218f32383919511d3757176de8b1054a326c6519fae80",
-      "size": 15968
+      "sha256": "299966a6f0de4b3f6b8977cdf03b52d5be71e0831a78bcc595ceb89f93bf8f1f",
+      "size": 17945
     },
     {
       "path": "lib/ui/social/community_capabilities.dart",
@@ -3567,8 +3577,8 @@
     },
     {
       "path": "lib/ui/social/web_favorites_page.dart",
-      "sha256": "e7435ccd43e9cdcc456020b99c7ca752b71a3e6fad8c211a778aad1a1cd37a2b",
-      "size": 17114
+      "sha256": "aeedf885821499bd8a1c08ce93d70bc55a9bf04d66df53c85b3685602ac0ae81",
+      "size": 17103
     },
     {
       "path": "lib/ui/social/web_messages_page.dart",
@@ -5000,5 +5010,5 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "3653755c03bcc3d88ed3af762017de788ae196aa"
+  "source_revision": "a34dfa849cb235f4cf12b1517c31c175bf4599e3"
 }

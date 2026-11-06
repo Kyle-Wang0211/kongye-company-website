@@ -3769,4 +3769,13 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get webHelpContactLabel => 'Contact support';
+
+  @override
+  String get webAccountLikes => 'My likes';
+
+  @override
+  String get webAccountFavorites => 'My favorites';
+
+  @override
+  String get webAccountHistory => 'Viewing history';
 }

@@ -1,4 +1,4 @@
-import {currentLocale, setLocale, t, localeEvent} from './site-l10n.mjs?v=shared-community-20261106-v40';
+import {currentLocale, setLocale, t, localeEvent} from './site-l10n.mjs?v=account-library-20261106-v44';
 
 const accountMenu = document.querySelector('#account-menu');
 const dialog = document.querySelector('#site-settings');

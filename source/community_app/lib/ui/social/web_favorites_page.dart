@@ -356,7 +356,7 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
     final image = AspectRatio(
       aspectRatio: compact ? 1 : 4 / 3,
       child: ColoredBox(
-        color: AetherColors.bgElevated,
+        color: Colors.black,
         child: item.thumbnailUrl?.trim().isNotEmpty == true
             ? Image.network(
                 item.thumbnailUrl!,

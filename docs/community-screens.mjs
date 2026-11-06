@@ -1,4 +1,4 @@
-import {t,localeEvent} from './site-l10n.mjs?v=shared-community-20261106-v40';
+import {t,localeEvent} from './site-l10n.mjs?v=account-library-20261106-v44';
 const stage=document.querySelector('.community-screen-stage');
 const links=[...document.querySelectorAll('.community-feature-screen')];
 const choices=[...document.querySelectorAll('.community-screen-choice')];

@@ -1104,5 +1104,8 @@
   "webHelpPublishAnswer": "作品完成审核后会出现在社区，可在个人页面的发布记录中查看处理状态。",
   "webHelpAccountQuestion": "登录后可以使用哪些功能？",
   "webHelpAccountAnswer": "登录后可以发布作品、点赞、收藏、评论、关注作者和发送私信。",
-  "webHelpContactLabel": "联系客服"
+  "webHelpContactLabel": "联系客服",
+  "webAccountLikes": "我的喜欢",
+  "webAccountFavorites": "我的收藏",
+  "webAccountHistory": "观看历史"
 }

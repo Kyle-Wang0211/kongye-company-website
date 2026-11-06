@@ -3603,4 +3603,13 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get webHelpContactLabel => '联系客服';
+
+  @override
+  String get webAccountLikes => '我的喜欢';
+
+  @override
+  String get webAccountFavorites => '我的收藏';
+
+  @override
+  String get webAccountHistory => '观看历史';
 }

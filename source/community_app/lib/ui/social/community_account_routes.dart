@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/current_user.dart';
 import '../../community/web_messaging_repository.dart';
+import '../../community/account_work_library_repository.dart';
+import 'account_work_library_page.dart';
 import '../../community/web_social_api.dart';
 import '../../community/public_work_repository.dart';
 import '../../community/community_service.dart';
@@ -42,7 +44,8 @@ class CommunityAccountNavigationIdentity {
 
 /// Private account destination remains behind the current Auth startup state.
 Route<void>? communityFavoritesRoute(RouteSettings settings, CurrentUser user) {
-  if (settings.name != '/favorites' || !CommunityCapabilities.favorites) {
+  if (!const {'/favorites', '/likes', '/history'}.contains(settings.name) ||
+      (settings.name == '/favorites' && !CommunityCapabilities.favorites)) {
     return null;
   }
   return MaterialPageRoute<void>(
@@ -66,9 +69,14 @@ Route<void>? communityFavoritesRoute(RouteSettings settings, CurrentUser user) {
                 );
         }
         return WebFavoritesAccountEntry(
-          key: ValueKey('${user.deployment.namespace}:$owner:favorites'),
+          key: ValueKey('${user.deployment.namespace}:$owner:${settings.name}'),
           user: user,
           ownerId: owner,
+          kind: switch (settings.name) {
+            '/likes' => AccountWorkLibraryKind.likes,
+            '/history' => AccountWorkLibraryKind.history,
+            _ => null,
+          },
         );
       },
     ),
@@ -372,7 +380,9 @@ class WebFavoritesAccountEntry extends StatefulWidget {
     required this.user,
     required this.ownerId,
     this.api,
+    this.kind,
   });
+  final AccountWorkLibraryKind? kind;
   final CurrentUser user;
   final String ownerId;
   final WebSocialApi? api;
@@ -431,14 +441,38 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
       final page = await _guard(
         () => _api.listFavorites(limit: 100, before: cursor),
       );
+      // Existing API remains authoritative for saved membership and order.
+      // Public summaries are a bulk, best-effort cover/name enhancement.
+      Map<String, AccountWorkLibraryItem> summaries = const {};
+      try {
+        summaries = await _guard(
+          () =>
+              AccountWorkLibraryRepository(
+                client: Supabase.instance.client,
+                ownerId: widget.ownerId,
+              ).visibleWorkSummaries(
+                page.items.map((item) => item.workId).toList(),
+              ),
+        );
+      } catch (_) {
+        if (!_current) rethrow;
+      }
+      final service = summaries.isEmpty ? null : CommunityService();
       items.addAll(
-        page.items.map(
-          (item) => WebFavoriteItem(
+        page.items.map((item) {
+          final summary = summaries[item.workId];
+          final path = summary?.thumbnailStoragePath;
+          return WebFavoriteItem(
             id: item.workId,
             title: item.title,
-            author: author,
-          ),
-        ),
+            author: summary?.authorDisplayName.trim().isNotEmpty == true
+                ? summary!.authorDisplayName
+                : author,
+            thumbnailUrl: path == null || path.isEmpty
+                ? null
+                : service?.thumbnailUrlFor(path),
+          );
+        }),
       );
       cursor = page.next;
       if (cursor != null &&
@@ -493,12 +527,25 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
   }
 
   @override
-  Widget build(BuildContext context) => WebFavoritesPage(
-    accountId: widget.ownerId,
-    loadFavorites: _load,
-    onOpen: _open,
-    onSetFavorite: (id, saved) => _guard(() async {
-      await _api.setFavorite(id, saved);
-    }),
-  );
+  Widget build(BuildContext context) => widget.kind != null
+      ? AccountWorkLibraryPage(
+          accountId: widget.ownerId,
+          kind: widget.kind!,
+          loadPage: (cursor) => _guard(
+            () => AccountWorkLibraryRepository(
+              client: Supabase.instance.client,
+              ownerId: widget.ownerId,
+            ).load(widget.kind!, before: cursor),
+          ),
+          thumbnailUrlFor: (path) => CommunityService().thumbnailUrlFor(path),
+          onOpen: _open,
+        )
+      : WebFavoritesPage(
+          accountId: widget.ownerId,
+          loadFavorites: _load,
+          onOpen: _open,
+          onSetFavorite: (id, saved) => _guard(() async {
+            await _api.setFavorite(id, saved);
+          }),
+        );
 }

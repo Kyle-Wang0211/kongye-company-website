@@ -9,7 +9,10 @@ export async function readAccount(client){
  const {data:profile,error:profileError}=await client.rpc('get_social_profile',{p_user_id:id});
  const {data:latest}=await client.auth.getSession();if(latest.session?.user.id!==id)return null;
  const meta=data.user.user_metadata||{};
- return {id,name:(!profileError&&profile?.[0]?.display_name)||meta.display_name||meta.full_name||meta.name||''};
+ const social=profileError?null:profile?.[0];
+ const count=value=>Number.isSafeInteger(value)&&value>=0?value:null;
+ return {id,name:social?.display_name||meta.display_name||meta.full_name||meta.name||'',
+  following_count:count(social?.following_count),followers_count:count(social?.followers_count)};
 }
 export async function avatarDataUrl(value){
  if(value?.version!=='jdenticon-3.3.0-pw-v2'||typeof value.png_base64!=='string'||value.png_base64.length>22000||!(/^[a-f0-9]{64}$/).test(value.png_sha256)||!(/^[a-f0-9]{64}$/).test(value.pixel_sha256))return null;

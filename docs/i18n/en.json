@@ -1104,5 +1104,8 @@
   "webHelpPublishAnswer": "Works appear in the community after review. Check the processing status in your publication history.",
   "webHelpAccountQuestion": "What can I do after signing in?",
   "webHelpAccountAnswer": "Sign in to publish, like, save and comment on works, follow creators and send private messages.",
-  "webHelpContactLabel": "Contact support"
+  "webHelpContactLabel": "Contact support",
+  "webAccountLikes": "My likes",
+  "webAccountFavorites": "My favorites",
+  "webAccountHistory": "Viewing history"
 }

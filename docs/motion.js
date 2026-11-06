@@ -1,5 +1,5 @@
 (async () => {
-  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=shared-community-20261106-v40');await localeReady;
+  const {t,localeReady,localeEvent}=await import('./site-l10n.mjs?v=account-library-20261106-v44');await localeReady;
   const button = document.getElementById('motion-toggle');
   if(!button)return;
   const label = button.querySelector('.motion-label');

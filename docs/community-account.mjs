@@ -1,15 +1,84 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=shared-community-20261106-v40';
-import {avatarDataUrl,readAccount} from './community-account-data.mjs';
+import {localizeElement,localeReady} from './site-l10n.mjs?v=account-library-20261106-v44';
+import {avatarDataUrl,readAccount} from './community-account-data.mjs?v=account-library-20261106-v44';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 const lifetime=300000,storageKey='pw-current-account-presentation-rds-v1';
 let publishLink,signingOut=false;
 let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false;
 const cache=new Map();
-function forget(){cache.clear();try{sessionStorage.removeItem(storageKey);}catch{}}
+const accountMenu=document.querySelector('#account-menu');
+const libraryLifetime=60000;
+let closeTimer,menuGeneration=0,menuName,menuAvatar,followingCount,followersCount;
+let countNodes={},libraryCache,libraryPending;
+function countText(value){return Number.isSafeInteger(value)&&value>=0?String(value):'—';}
+function renderLibraryCounts(row){
+ for(const key of ['likes','favorites','history'])if(countNodes[key])countNodes[key].textContent=countText(row?.[key+'_count']);
+}
+async function loadLibraryCounts(){
+ const owner=displayedId,epoch=menuGeneration;
+ if(!owner||!client)return;
+ if(libraryCache?.owner===owner&&libraryCache.until>Date.now()){renderLibraryCounts(libraryCache.row);return;}
+ if(libraryPending?.owner===owner&&libraryPending.epoch===epoch)return libraryPending.promise;
+ const request={owner,epoch};
+ request.promise=(async()=>{
+  try{
+   const {data:before,error:beforeError}=await client.auth.getSession();
+   if(beforeError||before.session?.user.id!==owner||menuGeneration!==epoch||displayedId!==owner)return;
+   const {data,error}=await client.rpc('get_my_library_counts');
+   if(error)throw error;
+   const {data:after,error:afterError}=await client.auth.getSession();
+   if(afterError||after.session?.user.id!==owner||menuGeneration!==epoch||displayedId!==owner)return;
+   const row=Array.isArray(data)?data[0]:data;
+   if(!row||['likes_count','favorites_count','history_count'].some(key=>!Number.isSafeInteger(row[key])||row[key]<0))return;
+   libraryCache={owner,row,until:Date.now()+libraryLifetime};renderLibraryCounts(row);
+  }catch{/* Counts can retry on the next menu opening while existing account pixels stay visible. */}
+  finally{if(libraryPending===request)libraryPending=null;}
+ })();
+ libraryPending=request;return request.promise;
+}
+function openAccountMenu(focus=false){
+ clearTimeout(closeTimer);accountMenu.open=true;summary.setAttribute('aria-expanded','true');
+ void loadLibraryCounts();
+ if(focus)actions.querySelector('a')?.focus();
+}
+function closeAccountMenu(){
+ clearTimeout(closeTimer);accountMenu.open=false;summary.setAttribute('aria-expanded','false');
+}
+if(accountMenu){
+ summary.setAttribute('aria-expanded',String(accountMenu.open));
+ summary.setAttribute('aria-controls','account-actions');
+ accountMenu.addEventListener('pointerenter',event=>{if(event.pointerType!=='touch')openAccountMenu();});
+ accountMenu.addEventListener('pointerleave',()=>{
+  clearTimeout(closeTimer);closeTimer=setTimeout(()=>{
+   if(!accountMenu.contains(document.activeElement))closeAccountMenu();
+  },180);
+ });
+ accountMenu.addEventListener('focusin',event=>{
+  clearTimeout(closeTimer);
+  if(event.target!==summary)openAccountMenu();
+ });
+ accountMenu.addEventListener('focusout',()=>{
+  clearTimeout(closeTimer);closeTimer=setTimeout(()=>{
+   if(!accountMenu.contains(document.activeElement))closeAccountMenu();
+  },0);
+ });
+ summary.addEventListener('keydown',event=>{
+  if(event.key==='ArrowDown'){event.preventDefault();openAccountMenu(true);}
+ });
+ accountMenu.addEventListener('toggle',()=>{
+  summary.setAttribute('aria-expanded',String(accountMenu.open));
+  if(accountMenu.open)void loadLibraryCounts();
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&accountMenu.open){event.preventDefault();closeAccountMenu();summary.focus();}
+ });
+ document.addEventListener('click',event=>{if(!accountMenu.contains(event.target))closeAccountMenu();});
+}
+
+function forget(){cache.clear();libraryCache=null;try{sessionStorage.removeItem(storageKey);}catch{}}
 function guest(){
  publishLink?.remove();publishLink=null;
  const profile=document.querySelector('#my-profile-link');if(profile)profile.href='community/?auth=signin';
- displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,document.querySelector('#upload-work')?'siteLogin':'siteGuest');summary.append(avatar,label);actions.replaceChildren();
+ menuGeneration++;libraryCache=null;countNodes={};displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,document.querySelector('#upload-work')?'siteLogin':'siteGuest');summary.append(avatar,label);actions.replaceChildren();
  for(const [mode,key] of [['signin','siteLogin'],['signup','siteRegister']]){const a=document.createElement('a');a.href='community/?auth='+mode;localizeElement(a,key);actions.append(a);}
  nav.setAttribute('aria-busy','false');
 }
@@ -34,14 +103,44 @@ function render(account,src){
  const profile=document.querySelector('#my-profile-link');if(profile)profile.href='community/?profile='+encodeURIComponent(account.id);
  if(!document.querySelector('#upload-work')&&!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
  if(displayedId!==account.id){
-  summary.replaceChildren();actions.replaceChildren();const profileLink=document.createElement('a');profileLink.href='community/?profile='+encodeURIComponent(account.id);localizeElement(profileLink,'siteAccount');actions.append(profileLink);
-  const logout=document.createElement('button');logout.type='button';logout.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(logout,'meSignOut');logout.addEventListener('click',()=>signOutAccount(account.id,logout));actions.append(logout);
+  menuGeneration++;libraryCache=null;countNodes={};
+  summary.replaceChildren();actions.replaceChildren();
+  const profileLink=document.createElement('a');profileLink.href='community/?profile='+encodeURIComponent(account.id);profileLink.className='account-profile-card';
+  menuAvatar=document.createElement('span');menuAvatar.className='account-card-avatar account-avatar-pending';menuAvatar.setAttribute('aria-hidden','true');
+  menuName=document.createElement('span');menuName.className='account-card-name';profileLink.append(menuAvatar,menuName);actions.append(profileLink);
+  const stats=document.createElement('div');stats.className='account-social-counts';
+  for(const [kind,key] of [['following','socialFollowing'],['followers','socialFollowers']]){
+   const stat=document.createElement('span');stat.className='account-social-stat';
+   const value=document.createElement('strong');value.className='account-'+kind+'-count';
+   if(kind==='following')followingCount=value;else followersCount=value;
+   const label=document.createElement('span');localizeElement(label,key);stat.append(value,label);stats.append(stat);
+  }
+  actions.append(stats);
+  for(const [kind,key] of [['likes','webAccountLikes'],['favorites','webAccountFavorites'],['history','webAccountHistory']]){
+   const link=document.createElement('a');link.className='account-library-link';link.href='community/#/'+kind;
+   const label=document.createElement('span');localizeElement(label,key);
+   const value=document.createElement('span');value.className='account-'+kind+'-count account-library-count';value.textContent='—';countNodes[kind]=value;
+   link.append(label,value);actions.append(link);
+  }
+  const logout=document.createElement('button');logout.type='button';logout.className='account-logout';localizeElement(logout,'meSignOut');logout.addEventListener('click',()=>signOutAccount(account.id,logout));actions.append(logout);
   const avatar=document.createElement('span');avatar.className='account-avatar-pending';avatar.setAttribute('aria-hidden','true');const name=document.createElement('span');name.className='community-account-name';summary.append(avatar,name);displayedId=account.id;
  }
  const name=summary.querySelector('.community-account-name');
- if(account.name){delete name.dataset.i18n;name.textContent=account.name;}else localizeElement(name,'siteAccount');
- if(src){const current=summary.querySelector('img');if(current?.getAttribute('src')!==src){const img=document.createElement('img');img.alt='';img.width=34;img.height=34;img.src=src;(current||summary.querySelector('.account-avatar-pending')).replaceWith(img);}}
+ for(const node of [name,menuName]){
+  if(account.name){delete node.dataset.i18n;node.textContent=account.name;}else localizeElement(node,'siteAccount');
+ }
+ followingCount.textContent=countText(account.following_count);followersCount.textContent=countText(account.followers_count);
+ if(src){
+  for(const [container,size] of [[summary,34],[menuAvatar,48]]){
+   const current=container.querySelector('img');
+   if(current?.getAttribute('src')===src)continue;
+   const img=document.createElement('img');img.alt='';img.width=size;img.height=size;img.src=src;
+   if(container===summary)(current||summary.querySelector('.account-avatar-pending')).replaceWith(img);
+   else menuAvatar.replaceChildren(img);
+  }
+ }
  nav.setAttribute('aria-busy','false');
+ if(accountMenu?.open)void loadLibraryCounts();
 }
 async function cachedPresentation(id){
  const memory=cache.get(id);if(memory?.until>Date.now())return memory;
@@ -61,7 +160,10 @@ async function update(){
   if(!id){forget();guest();return;}
   if(displayedId&&displayedId!==id)guest();
   const saved=await cachedPresentation(id);if(current!==revision)return;
-  if(saved){render(saved.account,saved.src);return;}
+  if(saved){
+   render(saved.account,saved.src);
+   if(Number.isSafeInteger(saved.account.following_count)&&Number.isSafeInteger(saved.account.followers_count))return;
+  }
   const account=await readAccount(client);if(current!==revision)return;
   if(!account){forget();guest();return;}
   render(account);

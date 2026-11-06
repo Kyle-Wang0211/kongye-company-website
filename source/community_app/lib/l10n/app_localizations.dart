@@ -6738,6 +6738,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Contact support'**
   String get webHelpContactLabel;
+
+  /// No description provided for @webAccountLikes.
+  ///
+  /// In en, this message translates to:
+  /// **'My likes'**
+  String get webAccountLikes;
+
+  /// No description provided for @webAccountFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'My favorites'**
+  String get webAccountFavorites;
+
+  /// No description provided for @webAccountHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing history'**
+  String get webAccountHistory;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
