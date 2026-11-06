@@ -1,0 +1,103 @@
+{
+  "site_commit": "a5b3ee62464b1885d3886f0a0996e5e15d66ce38",
+  "pages_run": 42176914706,
+  "pages_result": "success",
+  "source_sha256": "5f901db59fa81190e8273129c1fb81f95d97b5971e32a88b4ffa1d4db950c90b",
+  "asset_bytes": 237452282,
+  "source_points": 19226213,
+  "guide_points": 10,
+  "cloud": {
+    "fetch-result.json": {
+      "bytes": 237452282,
+      "sha256": "5f901db59fa81190e8273129c1fb81f95d97b5971e32a88b4ffa1d4db950c90b"
+    },
+    "upload-result.json": {
+      "status": 200,
+      "bytes": 237452282,
+      "object": "b5e271cb-1bc9-4738-b83d-4e98e4803579/resort-guide-5f901db59fa81190e8273129c1fb81f95d97b5971e32a88b4ffa1d4db950c90b.copc.laz",
+      "response": "{\"Key\":\"works/b5e271cb-1bc9-4738-b83d-4e98e4803579/resort-guide-5f901db59fa81190e8273129c1fb81f95d97b5971e32a88b4ffa1d4db950c90b.copc.laz\",\"Id\":\"9525dbc8-dde2-49ff-bd47-b1438014c480\"}"
+    },
+    "gateway-result.json": {
+      "main_before_sha256": "18c00ffdd5277dcbc24e5e9a38bebee0e778b9b7910f0176acceee8193b240fa",
+      "main_after_sha256": "668c136d1b5f7afc9ff1ae24dacd2c99a2c7bfb99f9930c68e5bbffe7f63c918",
+      "include_sha256": "f3e37d6ad857e40f09c0393877104aadfa9eaad8baf3216bb08e509a512e9db8",
+      "nginx_t": "PASS",
+      "reload": "PASS",
+      "include": "/etc/nginx/pw-resort-guide-20261106.inc",
+      "metadata_note": "Origin HEAD and GET Last-Modified differ by 4 seconds. Exact route hides this inconsistent optional validator; ETag, If-Match and Range total remain enforced."
+    }
+  },
+  "range_readback": [
+    {
+      "http": 206,
+      "headers": {
+        "Content-Range": "bytes 0-4095/237452282",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges, ETag",
+        "Content-Length": "4096",
+        "ETag": "\"59A3B92DD48C314005647E9C2AE18C8D\""
+      },
+      "bytes": 4096,
+      "matches_source": true
+    },
+    {
+      "http": 206,
+      "headers": {
+        "Content-Range": "bytes 233556960-233561055/237452282",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges, ETag",
+        "Content-Length": "4096",
+        "ETag": "\"59A3B92DD48C314005647E9C2AE18C8D\""
+      },
+      "bytes": 4096,
+      "matches_source": true
+    }
+  ],
+  "site_readback": [
+    {
+      "file": "screen.html",
+      "sha256": "d38178df9eac95ceff027f06edf086d7703659b17884587dc477da9014e057ba",
+      "matches_candidate": true
+    },
+    {
+      "file": "community-screens.css",
+      "sha256": "498ecc9b38398889142b363a24d38a2ddbcf9062a2b55f2e3440651911137972",
+      "matches_candidate": true
+    },
+    {
+      "file": "screen-page.mjs",
+      "sha256": "85c460d999bfb3d9efd694479300b69ebfc1db0d487fdec457a3d8a315d45ee6",
+      "matches_candidate": true
+    },
+    {
+      "file": "community-resort.mjs",
+      "sha256": "22a842fe1ab18e9fe7d7ab1dacb2168ecf9b30507529d3938eb9a3eba5b85093",
+      "matches_candidate": true
+    },
+    {
+      "file": "community-resort-data.mjs",
+      "sha256": "1c15242b2f484946d3a8fc99af295bd673cd63d760316c286cdb307a61faa79b",
+      "matches_candidate": true
+    },
+    {
+      "file": "community-resort.css",
+      "sha256": "58f01c22b665f566eb30401893d14ae876fa46118dd2c357ac045c39a965339f",
+      "matches_candidate": true
+    }
+  ],
+  "browser": {
+    "native_marker_popup": "PASS",
+    "category_filter": "PASS",
+    "source_point_count": "PASS",
+    "pan_zoom": "PASS",
+    "overview_reset": "PASS",
+    "home_back_local": "PASS",
+    "selected_dot_no_outline_local": "PASS"
+  },
+  "notes": [
+    "The immutable original COPC is stored using the existing Supabase Storage service.",
+    "Viewer and annotation projection reuse bundled OpenLiDARViewer.",
+    "Facility names and cooperation branding are fictional template content.",
+    "Origin HEAD and GET report different Last-Modified timestamps. Exact gateway route suppresses that inconsistent optional header, retaining strong ETag and If-Match identity."
+  ]
+}
