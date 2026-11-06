@@ -69,9 +69,9 @@ function escapeHtml(value) {
 const annotationStyle = `
 .olv-anno-svg{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none}
 .olv-anno-marker{pointer-events:auto;cursor:pointer;outline:none}
-.olv-anno-halo{fill:#172c36b3;stroke:#ffffff80;stroke-width:1}
-.olv-anno-disc{fill:#e8f5ef;stroke:#183a36;stroke-width:1}
-.olv-anno-num{font:700 12px system-ui;fill:#183a36}
+.olv-anno-halo{fill:#000000b3;stroke:#ffffff80;stroke-width:1}
+.olv-anno-disc{fill:#ffffff;stroke:#000000;stroke-width:1}
+.olv-anno-num{font:700 12px system-ui;fill:#000000}
 .olv-anno-marker:hover .olv-anno-halo,.olv-anno-marker:focus .olv-anno-halo,.olv-anno-selected .olv-anno-halo{stroke:#fff;stroke-width:3}
 `;
 
@@ -89,7 +89,7 @@ export function mountCommunityResort(config = resortConfig) {
   document.title = '云栖山庄 · 三维度假导览 · 窗后城';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = new URL('./community-resort.css?v=resort-guide-20261106',import.meta.url).href;
+  stylesheet.href = new URL('./community-resort.css?v=monochrome-20261106-v46',import.meta.url).href;
   document.head.append(stylesheet);
   main.innerHTML = `
     <section class="resort-opening" aria-labelledby="resort-title">

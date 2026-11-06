@@ -20,8 +20,8 @@ import 'package:flutter/material.dart';
 
 // ─── Color tokens ───────────────────────────────────────────────────
 //
-// Strict grayscale. Single accent color reserved for destructive state
-// (danger) so failure never gets lost visually. Keep gray ramp shallow
+// Grayscale UI. Red is reserved for errors and destructive actions, including
+// account deletion. Success and ordinary feedback use grayscale. Keep the ramp shallow
 // but varied enough to layer cards over background without needing
 // borders everywhere.
 
@@ -31,7 +31,7 @@ class AetherColors {
   // Surfaces — near-white / white / soft gray (light theme).
   static const Color bg = Color(0xFFFAFAFA); // app背景 — 暖白
   static const Color bgCanvas = Color(0xFFFFFFFF); // 卡片 / sheet / modal
-  static const Color bgElevated = Color(0xFFF3F3F2); // 第三层 — 内嵌面板
+  static const Color bgElevated = Color(0xFFF3F3F3); // 第三层 — 内嵌面板
   static const Color bgOverlay = Color(0xE6FAFAFA); // 半透明覆盖
 
   // Ink — pure(ish) blacks for type and primary actions.
@@ -50,20 +50,18 @@ class AetherColors {
   // Shadows — intentional, very gentle.
   static const Color shadow = Color(0x14000000); // alpha ~8% black
 
-  // Status — minimal. Danger is the one allowed chromatic accent, so
-  // failure states can't be misread as "just another card". Success /
-  // info stay grayscale and rely on iconography.
+  // Red identifies errors and destructive actions. Other states use
+  // grayscale, with text and iconography conveying their meaning.
   static const Color danger = Color(0xFFC83E3E);
   static const Color success = Color(0xFF111111);
   static const Color warning = Color(0xFF6B6B6B);
   static const Color info = Color(0xFF6B6B6B);
 
-  // Inspector (dev-time overlay colors — intentionally chromatic so the
-  // overlay is unmissable against the black-and-white chrome).
-  static const Color inspCustomizable = Color(0xFF34D399); // 绿 — 全可定制
-  static const Color inspPartial = Color(0xFFFBBF24); // 黄 — 部分可改
-  static const Color inspLocked = Color(0xFFF87171); // 红 — iOS 系统锁
-  static const Color inspBackend = Color(0xFF3B82F6); // 蓝 — 需后端接入
+  // Inspector roles use grayscale and their existing role labels.
+  static const Color inspCustomizable = Color(0xFF111111); // 黑 — 全可定制
+  static const Color inspPartial = Color(0xFF6B6B6B); // 灰 — 部分可改
+  static const Color inspLocked = Color(0xFF9B9B9B); // 浅灰 — iOS 系统锁
+  static const Color inspBackend = Color(0xFF3A3A3A); // 深灰 — 需后端接入
 }
 
 class AetherSpacing {
@@ -156,11 +154,9 @@ class AetherTextStyles {
 class AetherGradients {
   AetherGradients._();
 
-  /// Splash gradient: barely-there so the splash reads as "blank + logo"
-  /// rather than "designed gradient". When Figma brings a brand gradient,
-  /// swap this one value and the splash picks it up.
+  /// Subtle grayscale splash gradient under the monochrome interface contract.
   static const LinearGradient splash = LinearGradient(
-    colors: [Color(0xFFFFFFFF), Color(0xFFF3F3F2)],
+    colors: [Color(0xFFFFFFFF), Color(0xFFF3F3F3)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -169,7 +165,7 @@ class AetherGradients {
   /// a neutral grayscale gradient so the card's visual weight is
   /// preserved but doesn't commit to any chromatic direction.
   static const LinearGradient thumbnailPlaceholder = LinearGradient(
-    colors: [Color(0xFFE8E8E7), Color(0xFFCFCFCE)],
+    colors: [Color(0xFFE8E8E8), Color(0xFFCFCFCF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
