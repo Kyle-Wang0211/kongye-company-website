@@ -1,0 +1,350 @@
+{
+  "method": "Read-only reuse of bundled OLV laz-perf WASM ChunkDecoder on original COPC root node; nearest real classification=6 record to each target XY. Front-end roles are illustrative, not claims about those buildings.",
+  "rootNode": {
+    "key": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "offset": 233556960,
+    "bytes": 1927745,
+    "points": 115475
+  },
+  "samplePointCount": 115475,
+  "classCounts": {
+    "1": 42371,
+    "2": 56329,
+    "6": 7495,
+    "9": 9057,
+    "26": 223
+  },
+  "nonzeroRGBPoints": 115475,
+  "renderOrigin": [
+    202499,
+    526499,
+    15
+  ],
+  "pois": [
+    {
+      "id": "reception",
+      "targetXY": [
+        202519,
+        526588
+      ],
+      "nearestBuildingPoint": {
+        "index": 103036,
+        "source": [
+          202517.585,
+          526588.118,
+          4.413
+        ],
+        "rgb": [
+          12925,
+          13736,
+          14469
+        ],
+        "dist": 1.4199116169772743,
+        "local": [
+          18.585,
+          89.118,
+          -10.587
+        ],
+        "localMarker": [
+          18.585,
+          89.118,
+          -8.587
+        ]
+      },
+      "supportWithin10m": 16
+    },
+    {
+      "id": "dining",
+      "targetXY": [
+        202477,
+        526292
+      ],
+      "nearestBuildingPoint": {
+        "index": 38932,
+        "source": [
+          202476.657,
+          526290.718,
+          6.972
+        ],
+        "rgb": [
+          23889,
+          25928,
+          28328
+        ],
+        "dist": 1.3270919335193938,
+        "local": [
+          -22.343,
+          -208.282,
+          -8.028
+        ],
+        "localMarker": [
+          -22.343,
+          -208.282,
+          -6.028
+        ]
+      },
+      "supportWithin10m": 34
+    },
+    {
+      "id": "heritage",
+      "targetXY": [
+        202470,
+        526326
+      ],
+      "nearestBuildingPoint": {
+        "index": 14863,
+        "source": [
+          202471.456,
+          526325.563,
+          6.106
+        ],
+        "rgb": [
+          12376,
+          12515,
+          12446
+        ],
+        "dist": 1.5201661093598915,
+        "local": [
+          -27.544,
+          -173.437,
+          -8.894
+        ],
+        "localMarker": [
+          -27.544,
+          -173.437,
+          -6.894
+        ]
+      },
+      "supportWithin10m": 18
+    },
+    {
+      "id": "gallery",
+      "targetXY": [
+        202512,
+        526657
+      ],
+      "nearestBuildingPoint": {
+        "index": 103241,
+        "source": [
+          202511.524,
+          526659.131,
+          6.663
+        ],
+        "rgb": [
+          26922,
+          26405,
+          25879
+        ],
+        "dist": 2.1835148271119262,
+        "local": [
+          12.524,
+          160.131,
+          -8.337
+        ],
+        "localMarker": [
+          12.524,
+          160.131,
+          -6.337
+        ]
+      },
+      "supportWithin10m": 27
+    },
+    {
+      "id": "guest-west",
+      "targetXY": [
+        202350,
+        526550
+      ],
+      "nearestBuildingPoint": {
+        "index": 97380,
+        "source": [
+          202420.483,
+          526525.33,
+          2.2800000000000002
+        ],
+        "rgb": [
+          34285,
+          33691,
+          31217
+        ],
+        "dist": 74.6757135151926,
+        "local": [
+          -78.517,
+          26.33,
+          -12.72
+        ],
+        "localMarker": [
+          -78.517,
+          26.33,
+          -10.72
+        ]
+      },
+      "supportWithin10m": 0
+    },
+    {
+      "id": "guest-east",
+      "targetXY": [
+        202640,
+        526550
+      ],
+      "nearestBuildingPoint": {
+        "index": 106417,
+        "source": [
+          202632.382,
+          526527.954,
+          1.3860000000000001
+        ],
+        "rgb": [
+          21439,
+          22740,
+          24196
+        ],
+        "dist": 23.325094640721638,
+        "local": [
+          133.382,
+          28.954,
+          -13.614
+        ],
+        "localMarker": [
+          133.382,
+          28.954,
+          -11.614
+        ]
+      },
+      "supportWithin10m": 0
+    },
+    {
+      "id": "guest-north",
+      "targetXY": [
+        202550,
+        526820
+      ],
+      "nearestBuildingPoint": {
+        "index": 69034,
+        "source": [
+          202549.203,
+          526821.235,
+          3.791
+        ],
+        "rgb": [
+          53600,
+          51777,
+          49310
+        ],
+        "dist": 1.4698414880359592,
+        "local": [
+          50.203,
+          322.235,
+          -11.209
+        ],
+        "localMarker": [
+          50.203,
+          322.235,
+          -9.209
+        ]
+      },
+      "supportWithin10m": 23
+    },
+    {
+      "id": "waterfront",
+      "targetXY": [
+        202440,
+        526450
+      ],
+      "nearestBuildingPoint": {
+        "index": 22218,
+        "source": [
+          202438.264,
+          526453.498,
+          2.192
+        ],
+        "rgb": [
+          23268,
+          22312,
+          17714
+        ],
+        "dist": 3.905086426721592,
+        "local": [
+          -60.736,
+          -45.502,
+          -12.808
+        ],
+        "localMarker": [
+          -60.736,
+          -45.502,
+          -10.808
+        ]
+      },
+      "supportWithin10m": 10
+    },
+    {
+      "id": "garden",
+      "targetXY": [
+        202650,
+        526720
+      ],
+      "nearestBuildingPoint": {
+        "index": 107733,
+        "source": [
+          202648.176,
+          526725.162,
+          2.838
+        ],
+        "rgb": [
+          13400,
+          15319,
+          16973
+        ],
+        "dist": 5.47478036089949,
+        "local": [
+          149.176,
+          226.162,
+          -12.162
+        ],
+        "localMarker": [
+          149.176,
+          226.162,
+          -10.162
+        ]
+      },
+      "supportWithin10m": 5
+    },
+    {
+      "id": "boat-house",
+      "targetXY": [
+        202440,
+        526180
+      ],
+      "nearestBuildingPoint": {
+        "index": 13723,
+        "source": [
+          202448.965,
+          526177.554,
+          4.432
+        ],
+        "rgb": [
+          10266,
+          11262,
+          12720
+        ],
+        "dist": 9.292692882040123,
+        "local": [
+          -50.035,
+          -321.446,
+          -10.568
+        ],
+        "localMarker": [
+          -50.035,
+          -321.446,
+          -8.568
+        ]
+      },
+      "supportWithin10m": 3
+    }
+  ]
+}

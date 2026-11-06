@@ -1,0 +1,5 @@
+- [x] Select and download licensed whole-village point cloud.
+- [x] Remove selector ring and add guide page, native annotations and template narratives.
+- [x] Review API, exact coordinates and camera behavior.
+- [x] Publish immutable cloud asset and verify Range/CORS.
+- [ ] Verify browser interaction and deploy the site.

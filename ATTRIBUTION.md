@@ -154,3 +154,8 @@ Source UID: a29dc46c88ab4a919d4d9332b8328e12
 Model SHA-256: b7f8c8a1d4c94dc2c52946ef0e98352ef863139576a686e7f5dab8d06abc3dd3
 Mirror: https://huggingface.co/datasets/allenai/objaverse/resolve/556637099bf4fa79ea7b239d0d9c328b8a2e9ac8/glbs/000-134/a29dc46c88ab4a919d4d9332b8328e12.glb
 No endorsement by the original creator is implied.
+
+
+## AHN6 Giethoorn resort guide
+
+The screen-two resort guide uses the complete AHN6 2025 Giethoorn Binnenpad COPC tile. Bron: AHN (www.ahn.nl), AHN6 2025. Data is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). [Official release and license notice](https://www.ahn.nl/eerste-deel-ahn-6-beschikbaar). Original point-cloud data is unchanged. Rendering, camera viewpoints and illustrative guide annotations are added. Yunqi resort, facilities, room numbers and cooperation branding are fictional template content.

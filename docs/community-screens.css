@@ -11,11 +11,11 @@
 .community-screen-title{font-size:clamp(18px,2.5vw,34px);font-weight:500;letter-spacing:.02em}
 .community-screen-placeholder{font-size:12px;color:#737373}
 .community-screen-switcher{display:flex;align-items:center;justify-content:center;width:max-content;gap:0;margin:-35px auto 0;padding:0;border-radius:0;background:transparent;position:relative;z-index:3}
-.community-screen-choice{display:flex;align-items:center;justify-content:center;width:20px;height:24px;padding:0;border:0;background:transparent;cursor:pointer;border-radius:50%}
+.community-screen-choice{display:flex;align-items:center;justify-content:center;width:20px;height:24px;padding:0;border:0;background:transparent;cursor:pointer;border-radius:50%;outline:0}
 .community-screen-dot{display:block;width:8px;height:8px;border-radius:50%;background:#b5b5b5}
 .community-screen-choice:hover .community-screen-dot{background:#777}
 .community-screen-choice[aria-pressed="true"] .community-screen-dot{background:#161616;transform:scale(1.25)}
-.community-screen-choice:focus-visible{outline:2px solid #161616;outline-offset:2px}
+.community-screen-choice:focus-visible{outline:0;background:#ececec;border-radius:3px}
 .community-placeholder-header{min-height:80px;gap:20px}
 .community-screen-back{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-size:14px;white-space:nowrap}
 .community-screen-back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
