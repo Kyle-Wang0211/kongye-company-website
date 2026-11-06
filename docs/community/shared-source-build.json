@@ -6,9 +6,9 @@
     "PW_COMMUNITY_MESSAGING_READY": "true",
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
-  "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "c50f3a6abcd38fc22b0033432f4b5bd877cf3798a255bb9379d54ed7bf827394",
+  "viewer_bundle_sha256": "400aa3d206f70b3afe62810f87d76873d368d33e7cb547ddf65d528a98b2bdae",
+  "main_js_sha256": "c7375dbfabf62859309221399697b1f56f9b190ab96dccd97bb691ef88105d04",
   "status": "built-local-not-deployed",
-  "source_revision": "a34dfa849cb235f4cf12b1517c31c175bf4599e3",
-  "source_manifest_sha256": "b0090837e3441e1964193c5b2fe023419daf9f7752a0e4c3d89d2b747c1bdfe8"
+  "source_revision": "eca45d5e10cfe29793b13d6ebb884f5f4ebfc4e8",
+  "source_manifest_sha256": "8e37953ef883fbfdc9162b8e7964e162092cc645cc7fe570100079ddc59cf394"
 }
