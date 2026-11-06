@@ -1186,9 +1186,74 @@
       "size": 2798
     },
     {
+      "path": "assets/pointcloud_viewer/copc/assets/__vite-browser-external-9wXp6ZBx.js",
+      "sha256": "ffb8ae68fda0222e47efaa14ab3bc0920ea18a35a4df842fb0b5aac067e28639",
+      "size": 31
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/__vite-browser-external-BIHI7g3E.js",
+      "sha256": "82507b0bb9ac4affaeb17c40968d830cbd6d14a2ffa04d8994faf1a78e58e1b5",
+      "size": 33
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/copc_adapter_wasm-DPpneWS_.wasm",
+      "sha256": "07b77c9d2583565620a86e668ae21a65d8a7b3751d7a6facf926cc9014bb51db",
+      "size": 866878
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/copc_adapter_wasm-DzbJvGvO.js",
+      "sha256": "eed15517eb28cc603eab0796e180a88fe070a382c6e08a6e530f2a0634884abf",
+      "size": 95
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/copc_adapter_wasm-Kla4x_Cz.js",
+      "sha256": "10d0ef03a21c9654d93a08a6eb362e3e192331b8a8943a8ac6e1b8eee13d6ec2",
+      "size": 97
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/index-BTpKj7jY.js",
+      "sha256": "cb82209eb29274bc7bc34623db5658e372d335c9d712addfc7fda756fd02a903",
+      "size": 1079929
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/laz-perf-CFJp03W6.wasm",
+      "sha256": "9c1802bc31b567dd4aa1ce9ab010e7e51e095dc42af8379b474ae6f221a9327f",
+      "size": 214351
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/laz-perf-CzYxG42p.js",
+      "sha256": "2451217b298bd6108abdd56b14164cacbdedd7c63957ebfa499188166c978920",
+      "size": 88
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/rustCopcDecodeWorker-DsrWIC2l.js",
+      "sha256": "1c0a505852272fcb08515e5397f2ac0f6a8ac968674d2b14ed57cf37690cdc93",
+      "size": 15073
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/assets/rustCopcWorkerFactory-B9MpXQST.js",
+      "sha256": "d9a0067725b267c33f9ad58f232cc608bc07c57f80572e8b234fcc0479bc496e",
+      "size": 178
+    },
+    {
+      "path": "assets/pointcloud_viewer/copc/index.html",
+      "sha256": "56b373f73990877711d12015223cc065161a962d5f46f3b5680b1121a46cc60b",
+      "size": 1485
+    },
+    {
       "path": "assets/pointcloud_viewer/index.html",
+      "sha256": "b09518948490f2a71db3d7e18138dbe7d86922137c1e1763eb03a6ac0b15c64b",
+      "size": 284
+    },
+    {
+      "path": "assets/pointcloud_viewer/legacy.html",
       "sha256": "1ef5b9a57307a40198fca303b109c2975032a88d5c94bdf31f704a075785db10",
       "size": 6928
+    },
+    {
+      "path": "assets/pointcloud_viewer/route.js",
+      "sha256": "1ea300598035095a8c5c3837ea9f28fe823f12b5aba4ffea001018359470b2f1",
+      "size": 951
     },
     {
       "path": "assets/pointcloud_viewer/source/LICENSE",
@@ -1196,9 +1261,14 @@
       "size": 34523
     },
     {
+      "path": "assets/pointcloud_viewer/source/copc-adapter-source.tar.gz",
+      "sha256": "7397e50d613dcdb309ef342a7cce6ed56a0940f7a431c499e08f03f6b0af15c7",
+      "size": 1739289
+    },
+    {
       "path": "assets/pointcloud_viewer/source/index.html",
-      "sha256": "446cccd8cd4feff39307cb12dc1d8af077598a9b063466783e554833ea32811b",
-      "size": 663
+      "sha256": "faad671f3e59cff5423a98e205cc4a7d133013128b9bca5bc34feabf4340cb3f",
+      "size": 828
     },
     {
       "path": "ios/Vendor/JXL/licenses/brotli-LICENSE",
@@ -4842,8 +4912,8 @@
     },
     {
       "path": "pubspec.yaml",
-      "sha256": "0a29497fe45c033c38c945d6d3905c97a285233e29988362630eb9d52626637b",
-      "size": 15069
+      "sha256": "bfaa205fa470ba10f4e9ed749bd5680d0f59885e6f4b037e66c1607392a495bf",
+      "size": 15150
     },
     {
       "path": "third_party/libphonenumber/LICENSE",
@@ -5010,5 +5080,5 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "a34dfa849cb235f4cf12b1517c31c175bf4599e3"
+  "source_revision": "de5dfcbbbdd84df0438784b137c24badff34e427"
 }

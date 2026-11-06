@@ -248,6 +248,8 @@ flutter:
 
   assets:
     - assets/pointcloud_viewer/
+    - assets/pointcloud_viewer/copc/
+    - assets/pointcloud_viewer/copc/assets/
     - assets/pointcloud_viewer/assets/
     - assets/pointcloud_viewer/source/
     - vendor/generated_avatar/licenses/
