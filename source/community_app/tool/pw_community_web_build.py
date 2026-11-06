@@ -63,12 +63,17 @@ def main():
     if source != manifest(root):
         raise SystemExit("Source changed during the web build")
     build = root / "build/web"
+    viewer = build / 'assets/packages/pw_shared_viewer/web'
+    subprocess.run([
+        'python3', str(root / 'packages/pw_shared_viewer/tool/browser_bundle.py'),
+        '--stage', str(viewer),
+    ], check=True)
     receipt = {
         "entrypoint": "lib/main_community_web.dart",
         "native_entrypoint": "lib/main.dart",
         "capabilities": community_defines(),
         "viewer_bundle_sha256": json.loads(
-            (root / "packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json").read_text()
+            (viewer / "BUNDLE_MANIFEST.json").read_text()
         )["bundle_sha256"],
         "main_js_sha256": hashlib.sha256((build / "main.dart.js").read_bytes()).hexdigest(),
         "status": "built-local-not-deployed",

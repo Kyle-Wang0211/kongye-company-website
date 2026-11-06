@@ -102,6 +102,7 @@
     }
     window.pwSharedViewerReady = verifyLocalBundle().then(bundleIdentity =>
       create(canvas, { onStateChange: stateChanged, onDownloadProgress: updateDownloadProgress, bundleIdentity,
+        bundleIdentityScope: 'runtime-bundle', runtimeBundleBytesVerified: true,
         onSurfaceEvent: (type, detail) => window.dispatchEvent(new CustomEvent(type, {detail})) })).then(async controller => {
       window.pwSharedViewerController = controller;
       const resize = () => {

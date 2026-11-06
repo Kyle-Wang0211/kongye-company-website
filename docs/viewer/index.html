@@ -33,9 +33,9 @@
     <div id="download-ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle id="download-track" cx="32" cy="32" r="30"/><circle id="download-value" cx="32" cy="32" r="30"/></svg><span id="download-number">0%</span></div>
   </div>
   <script type="module">
-    import { create } from './viewer.mjs?v=publication-camera-20261105-v1';
+    import { create } from './viewer.mjs?v=web-release-startup-20261107-v1';
     import { installHostBridge } from './host_bridge.mjs?v=publication-camera-20261105-v1';
-    import { verifyLocalBundle } from './bundle_identity.mjs';
+    import { readReleaseIdentity } from './bundle_identity.mjs?v=web-release-startup-20261107-v1';
     const canvas = document.querySelector('#viewer');
     const status = document.querySelector('#status');
     let resizeObserver;
@@ -100,8 +100,9 @@
       renderUi();
       window.dispatchEvent(new CustomEvent('pw-viewer-state', { detail: state }));
     }
-    window.pwSharedViewerReady = verifyLocalBundle().then(bundleIdentity =>
+    window.pwSharedViewerReady = readReleaseIdentity().then(bundleIdentity =>
       create(canvas, { onStateChange: stateChanged, onDownloadProgress: updateDownloadProgress, bundleIdentity,
+        bundleIdentityScope: 'release-manifest', runtimeBundleBytesVerified: false,
         onSurfaceEvent: (type, detail) => window.dispatchEvent(new CustomEvent(type, {detail})) })).then(async controller => {
       window.pwSharedViewerController = controller;
       const resize = () => {

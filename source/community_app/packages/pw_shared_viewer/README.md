@@ -13,7 +13,7 @@ One locally bundled Three.js 0.186.1 renderer for GLB, PLY and a limited SKP sur
 
 **This is not yet four-platform runtime acceptance or a production deployment.** No existing production viewer route, account/work record, reconstruction algorithm, dependency lock or daily-use app has been replaced by this candidate.
 
-The selected Three.js vendor files match upstream; `UPSTREAM.json` records source identity. `web/BUNDLE_MANIFEST.json` identifies all packaged resources. The page verifies their SHA-256 before initializing the renderer and reports `bundleIdentity` in ready/state receipts. Native build/staging tools verify the same identity. This is a reproducibility check, not a signed remote-attestation or hostile-host security claim.
+The selected Three.js vendor files match upstream; `UPSTREAM.json` records source identity. `web/BUNDLE_MANIFEST.json` identifies all packaged resources. The default/native page verifies their SHA-256 before initializing the renderer and reports `bundleIdentity` with `bundleIdentityScope: runtime-bundle` and `runtimeBundleBytesVerified: true` in ready/state receipts. Website staging uses `tool/browser_bundle.py` to check every artifact byte and adapt only startup HTML to normal module loading. The website validates the small canonical release manifest and reports `bundleIdentityScope: release-manifest` and `runtimeBundleBytesVerified: false`. A self-consistent manifest does not prove release freshness or executed-byte integrity. Native build/staging tools verify the same identity. This is a reproducibility check, not a signed remote-attestation or hostile-host security claim.
 
 ## Formats and SKP limits
 
