@@ -1,0 +1,1 @@
+function e(e){let t=Math.max(0,e);return t>=1024**3?`${(t/1024**3).toFixed(1)} GiB`:t>=1024**2?`${(t/1024**2).toFixed(1)} MiB`:t>=1024?`${(t/1024).toFixed(1)} KiB`:`${Math.round(t)} B`}var t={kB:1e3,MB:1e6,GB:1e9,KiB:1024,MiB:1024**2,GiB:1024**3};function n(e,n,r=1){let i=e/t[n];return`${r===0?Math.round(i):i.toFixed(r)} ${n}`}export{n,e as t};

@@ -1,0 +1,1 @@
+var e=class extends Error{code;constructor(e,t){super(t),this.name=`RangeReadError`,this.code=e}};function t(t,n,r){if(!Number.isFinite(t)||!Number.isFinite(n)||t<0||n<0)throw new e(`out-of-range`,`Invalid range request: offset=${t}, length=${n}`);if(t>r)throw new e(`out-of-range`,`Range offset ${t} is past the source size ${r}`);return Math.min(n,r-t)}export{t as n,e as t};

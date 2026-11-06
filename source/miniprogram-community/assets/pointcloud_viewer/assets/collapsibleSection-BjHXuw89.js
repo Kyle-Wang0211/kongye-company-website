@@ -1,0 +1,1 @@
+import{n as e}from"./dom-CAsELGRn.js";function t(t,n,r={}){let i=e(`details`,{className:`olv-section olv-section-collapsible`});r.open&&(i.open=!0);let a=e(`summary`,{className:`olv-section-label olv-section-summary`,text:t});return i.append(a,n),i}export{t};

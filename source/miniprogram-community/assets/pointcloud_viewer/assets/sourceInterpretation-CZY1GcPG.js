@@ -1,0 +1,1 @@
+var e=`olv.provenance.source-interpretation`,t=new Set([`full`,`sampled`,`resident-only`,`partial`]);function n(e,n){return{interpretationLevel:e||(e===null?`not-probed`:`not-recorded`),dataBasis:n&&t.has(n)?n:`unknown`}}function r(e,t=`  `){return[`${t}Interpretation level  ${e.interpretationLevel}`,`${t}Data basis            ${e.dataBasis}`]}export{r as n,n as r,e as t};

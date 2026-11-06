@@ -1,0 +1,5014 @@
+{
+  "files": [
+    {
+      "path": "analysis_options.yaml",
+      "sha256": "403d2c563287e55f12ff36526c0eeebec0510f7bf1a7b18a44bb6fef89cf7661",
+      "size": 1546
+    },
+    {
+      "path": "assets/ibl/default_env_ibl.ktx",
+      "sha256": "0245800fa846c2a3c15cb1d2aa6ded86fcf8355e568907dcd50e073c589f85d6",
+      "size": 2095464
+    },
+    {
+      "path": "assets/models/Avocado.glb",
+      "sha256": "85ae91e60ed519f53a7e2096508837fedd446dcc450f8e05678b7a204679bd12",
+      "size": 8328156
+    },
+    {
+      "path": "assets/models/BoomBox.glb",
+      "sha256": "84c32a396684d0b329bbe60428f5cb89c5f447356ccf359b0374856653eca331",
+      "size": 10945640
+    },
+    {
+      "path": "assets/models/DamagedHelmet.glb",
+      "sha256": "a1e3b04de97b11de564ce6e53b95f02954a297f0008183ac63a4f5974f6b32d8",
+      "size": 3773916
+    },
+    {
+      "path": "assets/models/Duck.glb",
+      "sha256": "65bf938f54d6073e619e76e007820bbf980cdc3dc0daec0d94830ffc4ae54ab5",
+      "size": 120484
+    },
+    {
+      "path": "assets/models/Lantern.glb",
+      "sha256": "2d7ea69e1f4b7f5b9f00854978b20f41b9effa392272c50f4c98b5a8db3152b2",
+      "size": 9872848
+    },
+    {
+      "path": "assets/models/WaterBottle.glb",
+      "sha256": "074341e0c9b991244ea88fed77221754dfa33b53ee13523fa5f3c10a28a30160",
+      "size": 8961340
+    },
+    {
+      "path": "assets/models/edgesam/README.md",
+      "sha256": "23ff18cd4e5960b48bccf29ae204dc9939e8c088078c939fc851f839ff388511",
+      "size": 2147
+    },
+    {
+      "path": "assets/models/edgesam/mobile_sam_image_encoder.onnx",
+      "sha256": "b34498f699755c8d3b3baf076c686a10f948dddbd6f05cfbddbae11cc381e95b",
+      "size": 133
+    },
+    {
+      "path": "assets/models/edgesam/sam_mask_decoder_single.onnx",
+      "sha256": "6ba8d7c36a1dc9d4b6d24de6a57f6cfebc2453c2e531063835fa57ff7059bcfd",
+      "size": 133
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/AnalysePanel-Tn0PsQ3f.js",
+      "sha256": "285d69ba70069e1d61eff4fc76bc931df09080ad189f13aebc4bf172b4769aee",
+      "size": 91133
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/AnnotationEditor-CPD4I7dS.js",
+      "sha256": "df533769321048edd8b7c8ce9d41c7aa9a801dfcb2f4bf153d98d7d79ec549dc",
+      "size": 8454
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/ArrayBufferRangeSource-DrGwS2aI.js",
+      "sha256": "bd95b98eb78f5aac02794cd5e416a615c0c6e61b783c7a0fec762112ad01517b",
+      "size": 430
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/BatchConverter-T8h8fI4E.js",
+      "sha256": "13cfe92e573219c8e9a41b19a430cd3c72d4a2b8f0837d95d98e7e36f1df13e6",
+      "size": 53867
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/CoordinateTypes-CqI17hPq.js",
+      "sha256": "4155e488a79fb1a30ee7796cc6cba5fd6ccb58928cabcc734b950d825be7084a",
+      "size": 1337
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/LocalFileRangeSource-BLApVa62.js",
+      "sha256": "5a947c235145746ccc7de0c2ea84602e138456321c3d2876f5d64ec7f306cd92",
+      "size": 454
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/LocalFileRangeSource-Bgd_ugWT.js",
+      "sha256": "f4b0c4e65f396b5bd60c66e038fa08fc9253cacbcdbff5e88003a2fb51cd29bc",
+      "size": 454
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/MeasurePanel-BkSH5buQ.js",
+      "sha256": "4091e2f68dc0ffd8d48c47ab19218cfe475f46244ed8805e36bfb27d705c8b7b",
+      "size": 35933
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/Modal-BpoWM_JZ.js",
+      "sha256": "988df08d130238d27eb7e97bc7d24b17092ec07715c4eddb87b8c841046465f8",
+      "size": 3330
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/ObservatoryOverlay-BoWUH82W.js",
+      "sha256": "b7d2645b46bc52a9025eb2947ee5d525e1864a17fc0824027bd728947a43abfb",
+      "size": 6220
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/OrganizedRange-CogmCCZ7.js",
+      "sha256": "69009f015a12b1783346738263ff6c3c59d54e6f79fba7629d8b6651e9c9f73c",
+      "size": 3495
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/PointCloud-D8n052W5.js",
+      "sha256": "57bf2d01576173aaaffb7d314041d42c8a37cce5bffd1d1b3181eda4a49c84e5",
+      "size": 5603
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/ProfileWorkbench-C1liu6YB.js",
+      "sha256": "31e3d29ba09aa1cccf5e7ec26efc128101e1d0363884f978f11dbff77d0d4192",
+      "size": 10623
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/QuadLayer-Dc_9Wjot.js",
+      "sha256": "a7319643fb45abaaa1749556d8b949c6ac705456cbb99106a511a1dc5f434289",
+      "size": 7795
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/QualityPanel-mPn1GPWG.js",
+      "sha256": "fb29c3e3046ed2eb14bcad4ccac3c60002b24cf43ababac108fa05cf1f1f1f88",
+      "size": 24269
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/RangeSource-BR5TA-9l.js",
+      "sha256": "b3469b033782ef0b30ba6d97767fdb7a43bc0c8254ebf03b5a243949eaa11d39",
+      "size": 607
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/RangeSource-D95IJ5W6.js",
+      "sha256": "8fdb963a735176f52ac0489e8b4ac46cde6ebdc3b38cab5d054b1b685ce0205c",
+      "size": 377
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/ScanReportRenderer-C6w9vuQA.js",
+      "sha256": "4e729b1e56e3d372cd50144c499917f9955eedeb5faf3c83ad20803a581d5b28",
+      "size": 4921
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/SpatialContext-CN3MNfJ6.js",
+      "sha256": "b4a2ac218d90d3407ea5b0f9fbcb1371bd06986c62f361d1fdc7cb1769be8c84",
+      "size": 4633
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/StreamingRenderer-CpdPyHLA.js",
+      "sha256": "23829e3ff4ffda2cd718db8323ab1d9483213d7373fb8835c5664392e43193d8",
+      "size": 8267
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/StreamingScheduler-Dt_btenh.js",
+      "sha256": "044537b5669cdaf7f44ae7e73101f19099148874b6aefb95db4f1b82de37190a",
+      "size": 23464
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/UtmConverter-gHFaNiDZ.js",
+      "sha256": "6f0a1342863212e545d5f9aad5a1ee580abe8929b87f0b42bfe0a707b90d9b34",
+      "size": 5506
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/Viewer-eQJ8a7Ei.js",
+      "sha256": "615c417422972ad9cc5530a275e443aa16d04f37b0aeebc8201d44a0b726a880",
+      "size": 1017302
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/aboveGroundSurface-DZQUODwa.js",
+      "sha256": "77474360ba6bc9b365ce1c55f9d91c0222fc914a42f252193531059efc501874",
+      "size": 1130
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/acquisitionStationsRemap-CGAazbMz.js",
+      "sha256": "7c783b7eb8308cdd35fdec894c52c76047dc487b26fb8be884121ed8d1e991f0",
+      "size": 1217
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/acquisitionStationsRemap-peM7Cwil.js",
+      "sha256": "577980a0a6f1ecd8bcdaf47cad5808daee8a53d5e4b97df27b822ac5c266abf7",
+      "size": 1214
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/actionDefinitions-B3_7y6_L.js",
+      "sha256": "3a285d9937a29d1d8e2975fe1663655c4816929dd05a95ce686a6217c6332d3f",
+      "size": 36359
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/actionDescriptors-F1o8_UQG.js",
+      "sha256": "7ef573ac9752db72da6cbb4c44fbab71dae97ca371330defd2352ecac639b70a",
+      "size": 897
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/auditLog-CTYE8keI.js",
+      "sha256": "190b347e4bfff3a4eff82f6b1ed3024f7cab55a62b84c2864a2b55b8b2897d0c",
+      "size": 2462
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/authoredNormals-CYgCb42f.js",
+      "sha256": "6fe954023d474fa554731f5c6e7891f912e3fb88be6a65425d81ed974f746f09",
+      "size": 260
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/buildIdentity-XWVW08cd.js",
+      "sha256": "1ff1a34022fa4736fc230cb34fd0a8363f91b72f73dac3ea9846ee8008d0ad7c",
+      "size": 439
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/busyScan-D1jsN_ho.js",
+      "sha256": "947493e5757b37b19e8c7fa9c2e7c99a6abf8d41b603e380852fcaeb6f6c5b95",
+      "size": 2905
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/cameraPresets-s5itlzQg.js",
+      "sha256": "d3d30b14387a9edb52c9dd6c8d0e83faea4f051cbda7baa433e708d228d9bf86",
+      "size": 3812
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/canonicalHash-DBdtkwyE.js",
+      "sha256": "f05691b7f8d046dbdc58a60a2e6f5014391281cfde207dc6ae6f7dadbdbc19c0",
+      "size": 476
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/classificationFilter-DN3UoRNs.js",
+      "sha256": "c8b604065f5e971303b371e0dce9cc20dfa9f4ef14e05db75ba9c3736c8f51d6",
+      "size": 242
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/collapsibleSection-BjHXuw89.js",
+      "sha256": "1eb4d1bac6eaeb15aeb2c33679bfb45e1b9f29342e1bed5ec99f3d1c1aa85009",
+      "size": 259
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/colorModes-DfV2gvix.js",
+      "sha256": "afcbc087166cdabc9bdf1ea2d5a96a1a5076ae32982494cb2ed05fb409a8982b",
+      "size": 10804
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contextRecovery-7RHkbHYv.js",
+      "sha256": "b93f21a579cbe8d4d7b2b3a4a9228812d2dfa6e9d921ae2a6da3a3bf39ca7dfe",
+      "size": 1331
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourCopy-wT7DrnvI.js",
+      "sha256": "1f27713d17e7243c701ddad439f6341a776a2b284f15475de39793ec00b65e52",
+      "size": 7872
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourDeliverableBuild-BtIM9GlI.js",
+      "sha256": "2d64370274651db122b556f6af79ecfa03a5db1890d17286a79679057d273567",
+      "size": 17297
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourDownload-CkcwB_r-.js",
+      "sha256": "38514feeac7d98c301a3b1c5cacb6986c73ad769ac87375cc8b7d6450c744d47",
+      "size": 11694
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourExportAdapter-ZIp4eC-3.js",
+      "sha256": "b26b38b64096e2e3fe14027d8814952f53ce4f53d5652a01d329ba03fd5dc4c8",
+      "size": 2046
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourExportPermit-Sz8Y1bw1.js",
+      "sha256": "d786f05402071ce3316387e87adf9dfdc55f256f6d873f7751ea48fc30a4ff0d",
+      "size": 4708
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourShapeStyle-DxssdPtP.js",
+      "sha256": "4952ce7f8798eb9b25a7ad8de221ad58198bc192f5733cc4a76b2fd6c341f9fd",
+      "size": 1557
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/contourStudioMount-Btlmm52z.js",
+      "sha256": "41bbbd443ca77588bb1dd7b5ad0124041139c7557fc9d3d04c5d4b641276411c",
+      "size": 23747
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/coordinateBridge-809eXa4G.js",
+      "sha256": "5819134e4fee418e35e17d9fa7d0e5a0f83b4f5ab0d6ca1187708ce4245aa5a6",
+      "size": 411
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/copcWorker-B8A9gRBs.js",
+      "sha256": "e108cfbfef06768fd9d6b96c5406d5cbadbd1a67d6433f98f63780f063465bd5",
+      "size": 345572
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/copyDiagnostics-4RgRrQ4W.js",
+      "sha256": "485fd018606f90e83d97ccf4322a2f3b68e7ec4ef9a2b4af8849e65192ee2cd8",
+      "size": 7131
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/crs-CdKskA1b.js",
+      "sha256": "475436346593e6af428d018f01404ea02ce08177976c7e29b271f96ad26d8642",
+      "size": 19813
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/crsIdentifier-DOCOqJB8.js",
+      "sha256": "93ac7e5d9366a0f6bb380e3afe2efa94743f5bc75fed41697f23609fb303bac6",
+      "size": 289
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/datasetIntelligence-DKunQczg.js",
+      "sha256": "57171f3091c7b532adfbdf389ba81a7d8b4f77f7ad6457c8bfe710a015cb3047",
+      "size": 1552
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/deduce-mesh-schema-CoZ3enXb.js",
+      "sha256": "9588bdef2b8c32583c2dc608e0a43dd31bfbbea3f2afa2dcab1a3307946be27d",
+      "size": 561
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/deduce-mesh-schema-D3A0pklj.js",
+      "sha256": "a4f6f0d16e9f5ed63b90b8e5a1d6ddcc18e0fd79b0f9fc44455335610c7868e8",
+      "size": 561
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/demAsciiGrid-BjBLD532.js",
+      "sha256": "f636717bfa513f1eae8dd01f822689a5a370420eeee00e2e4bdb5c66eac97eb2",
+      "size": 1369
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/demGeoTiff-u498rXTo.js",
+      "sha256": "4d87dba694eb8cc68a796403406f71b04152951d27b3203a398db396fb46a51b",
+      "size": 9099
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/demNoData-JxYbJxmP.js",
+      "sha256": "b09b703d701b017d44edb83861d4d429bb57aaddb0ab122b826bbacdfa776ff1",
+      "size": 1052
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/demPackage-C-wcK3As.js",
+      "sha256": "2843591212aad4dd7a097ddde85830ae1439f1855ad95fb98ee029d8ef1c86fd",
+      "size": 40879
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/densityColors-CIaDkqjn.js",
+      "sha256": "f217100247906b40b883261ad78678dd9b86597d97883a64802d7d8d0d48410f",
+      "size": 2288
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/devFlags-pAjShr_q.js",
+      "sha256": "c62e27caf321ac7fdd21b4deb74091ec34d16bfac72be687a696f1b6ac330f59",
+      "size": 602
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/displayGrade-CZhtTPbr.js",
+      "sha256": "c2ea58c711b5c6006be347b043abfbca015fdac68d376130d04eba8f2d94840d",
+      "size": 134
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/dockIcons-CXPLD3u-.js",
+      "sha256": "cc237e0c6d152fd61d6d5d1a72cbe5dc692fd21cc23268eff11c571abade314d",
+      "size": 1807
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/dom-CAsELGRn.js",
+      "sha256": "c368d434b5e33a239e3abd9027cb0600f97f9458972a0cf39abc5912ab065548",
+      "size": 5872
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/download-zXCVjGFo.js",
+      "sha256": "c209194754e2dfeb7fd0e67b8e3b8f472e771dd8fd22bcbc710ffd8ddb98472b",
+      "size": 353
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/dtmProductDigest-Dj7l2iuN.js",
+      "sha256": "4ca4ea596b34ddfef07eddd7c49168d06acf3cdeca78d430e20fba31fb4b896e",
+      "size": 1297
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/eptLaszipWorker-DSR6twHD.js",
+      "sha256": "97528c49ae3e6b1f3233f5b8acbc404f9afaaff4b6ba20a10d2089c805719456",
+      "size": 367935
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/errorLedger-6I3XJaZ3.js",
+      "sha256": "fd3ed638551861f975812489fb4bbf04e6d837df40eab024418df528b7f35e4a",
+      "size": 683
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/evidenceComposition-CYc7q1Qt.js",
+      "sha256": "6c40260ee5a33baa5c3a64b9ade0cfad08bcb3d14f81b755e804dbba2d2755bd",
+      "size": 690
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/evidenceGrade-CtLGmDq-.js",
+      "sha256": "1f7a2717742062ebe59c394788d087c5ced8c9732a9baf53e68d6ba6684a4069",
+      "size": 2319
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/export-CsFCHFys.js",
+      "sha256": "0fbf35813fb4ec39723a0b7f2c2e1f02df1f27b52e9cc5da2dd1205d8957e6f0",
+      "size": 19996
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/exportDigestRecord-Bk2kCRRH.js",
+      "sha256": "37a1731c89a501fb607debd3fcca1037a3b4517c0824ebf5c70cec99bd8f4f2f",
+      "size": 1674
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/exportDigests-DXMyI8Lt.js",
+      "sha256": "58af4bd744806aaba3a89c29264460aab4570ea09b2442f8183823d94dc91d67",
+      "size": 3516
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/exportEvidenceNote-CXwHKML8.js",
+      "sha256": "a97a00b7c42f2bd5317dae8b9719263d569859b03b84e397baa2228b4a983bb6",
+      "size": 959
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/exportNotes-y_qUPur3.js",
+      "sha256": "d6b6053881d8064727f550bc42a237d3c1e8b999c1481e9c26c36151365b0d9d",
+      "size": 100
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/exportProvenance-DLOE0zoK.js",
+      "sha256": "2f89a52a08e25d81c3c373572503dabcd8fdeb055f7c641847eaca41cf582be9",
+      "size": 15123
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/featureCandidatesMount-DK_77Gqg.js",
+      "sha256": "fb71290f80442f7646cb8213ba51664dc439095c82a4d3594775615cdf7ed0a0",
+      "size": 17918
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/flowPulseLab-fOJK3K3y.js",
+      "sha256": "230c7ca835b95b4c7251a3bee405d845a859f25c87285bb3bcff2f8aa08ca9ea",
+      "size": 64470
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/flowPulsePackage-Co3ff-9q.js",
+      "sha256": "5004a63c878ac83abff29fbca2309bfc86c91aa5807b737b43179c8c4a2744be",
+      "size": 19305
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/flowTerrainCaveat-nZqekPxr.js",
+      "sha256": "c0923832152098b389fde4ef8f1c915ad15876daccc2669c488708652fff95fa",
+      "size": 507
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/flowTypes-BYcdftJa.js",
+      "sha256": "854c1c1b6a6cc5e0bd446da75c0aec75b33aac68cd4c9cf26bec3b70ce03b6a7",
+      "size": 922
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/format-CLVbGb7m.js",
+      "sha256": "317cb5ce4a898d3a9b889d9a0a7c242f3a09c5d820730e8aacdd907dd20062e9",
+      "size": 5406
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/formatByteSize-BdwgUUQx.js",
+      "sha256": "a410bc0e72d5e1c5a2e8ac7b7038b4d3a6873968340156f3177f9db39c9b297c",
+      "size": 346
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/formatProbeWorker-ChlLmdf2.js",
+      "sha256": "843aa3e17c6b53b54bbeafdd1b9e142791c0b2c86765ce172e1c80817ca2c104",
+      "size": 11886
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/formatProbeWorkerClient-CFnoz8_1.js",
+      "sha256": "f6041b72effd398c27c8634d0b3f680282ef2a8ab6bc788be61c90d55d2c2386",
+      "size": 15142
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/geometry-CjNGWb7b.js",
+      "sha256": "6a107239bf6e75bc9b81ed186ec2d47b9772492413f89bc44f9fa3b4cdb8f4d0",
+      "size": 6477
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/height-DgWHIeCU.js",
+      "sha256": "65a1cf2d12fdfa51b1cdfb14eac1dc9e4a3e137cd71255d68317b1992e5ae117",
+      "size": 4100
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/horizontalScale-BY_6DtP3.js",
+      "sha256": "800febf0b65adfeacd23b06a846425b9ac994a12d83bd3b12cb600d2c9cc8e18",
+      "size": 1155
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/inMemoryPrecision-I9vyXHow.js",
+      "sha256": "5c615d2a1d81191033f0ba60b79fc5a6ca5dc4d0fd125c14b02c4cef98ed9de3",
+      "size": 470
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/incrementalSha256-CgWTQRZz.js",
+      "sha256": "1f139abfc8493f0fb91f026396f19d2040cf93badb010d84460446a0d0d0fae0",
+      "size": 3108
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/index-D-4jWNRT.js",
+      "sha256": "138359d38c3378287643f2890b4ba0e36d83079248b04254c1512590f2406684",
+      "size": 90474
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/isMobileDevice-DICCbX7O.js",
+      "sha256": "03f2853273bf691a4781abde12d50be8e11bf440b305f7eb5d816f40b078a291",
+      "size": 520
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/issueWorkflow-By9BXxT_.js",
+      "sha256": "712df4a3fdfd3f2a54883a0b8131909fdd547305e287455458d436ec83650449",
+      "size": 1795
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/labColormaps-BVKdIeaq.js",
+      "sha256": "2c8681874be85aeba8740cece5a0ab39f03fc2f524c28444f021054b09af5683",
+      "size": 545
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/labGuide-CsZ7w5QD.js",
+      "sha256": "70fac09782e39e27199451fbc5f33d631acf15cd8fc2ea46ab1fa9a4b67dbb55",
+      "size": 6553
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/las14Availability-DBgQMrtR.js",
+      "sha256": "37bf4156aabbc90f3017e555c1d6db4f8391890eb91a7996b1a86bc671921276",
+      "size": 404
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lasDataOrigin-C2pslivj.js",
+      "sha256": "eafe8364810d476ecb0e81d3017617bb460cf4738dbe68f8cb5d4b3c292c4db7",
+      "size": 969
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lasDecodeShared-CBiuAbmY.js",
+      "sha256": "86dba57799830b56bfa9112100eb652c7ef763263d68a38ea4cfd49eb69151e8",
+      "size": 3346
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lasHeader-BvT28dN7.js",
+      "sha256": "6e66777588c312cafdaac0174a0cc1a1e5a217391e3d000b6d7aab6e2e7b6ee6",
+      "size": 4833
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lasSemantics-hybMTZU5.js",
+      "sha256": "5be524c34c25ae0371f6220f4cd785e45aa7f3ba8b1c8c2b041894b1de224bbc",
+      "size": 2505
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/layerUpFrame-DFuVv_n9.js",
+      "sha256": "755b5ea76cb572b0f37fffc00d9c2b4816f5e90f0d96d37671580e9fb0724cf3",
+      "size": 2634
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazChunkTable-CKCyZjcw.js",
+      "sha256": "b1c656040ba995a7673b14d7872f0a1b0dae295227ffd9be25701b49cdb6ac6b",
+      "size": 8204
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazChunkTable-Q-8ti3Lg.js",
+      "sha256": "f1b7fbd76bf80446470af317a0a91605368607a06bbd61301386445cc8701e6c",
+      "size": 8127
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazChunkWorker-5RRSll4U.js",
+      "sha256": "d26dce799aa4a8bb4a3676f392d48018c22216b393ee68584830d46b3565cc90",
+      "size": 348675
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazChunkWorkerClient-7nehE-kF.js",
+      "sha256": "e41b20fc1431d14c41d8e89e750a12cee572d2372fb9b4939a3e7ded3e44a30b",
+      "size": 9871
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazChunkWorkerClient-CISgNqJT.js",
+      "sha256": "a2ba3d736a8b975b80d997db2ff5137289c6aedc08d19c85cda0ff1bc23a80e2",
+      "size": 5078
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazDecode-Bc-pgm34.js",
+      "sha256": "f175b04ca147624e254df786f2368ce4c1347669484d7704df4acad9673630ec",
+      "size": 339319
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazDecode-DshO6MlR.js",
+      "sha256": "340a890f5fddee1288e6a5eb1619a84e01df2654563b9a2b92302e5e841e37ac",
+      "size": 339329
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazRecord0-BfFUtuUZ.js",
+      "sha256": "49bad5a5c98992ab8c9627d1ba2ca145aaa5f962a2284e56bc16a58426bb7d3b",
+      "size": 923
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazRecord0-fGdRLJUS.js",
+      "sha256": "1bb3b07642fbd790f7c3276df2037ebc13e79f29a2005fab3f91bef481c0741f",
+      "size": 911
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazyChunks-CrJ10Hre.css",
+      "sha256": "e1081ffdee475ea69ee25895abd12ac9eaadfc966c0e6fc4d62b0b9dfe40e836",
+      "size": 6299
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lazyChunks-jNtqVNsE.js",
+      "sha256": "18e126547b28419c6ccebcee340e184a4f18a4a43635fec2381b59cf149b2f62",
+      "size": 11537
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/lib-BV5J7o3o.js",
+      "sha256": "07ed6fb62ba0201eac800bada2db9e396febd69eca0284ab769f1c5d5c0348ea",
+      "size": 130366
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadE57-DfHqAOFw.js",
+      "sha256": "59912fee4eedf7066c130b9c485d3072595679fd5dfe25af1b8ce606bbcc2145",
+      "size": 35419
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadE57-DqAn8wXx.js",
+      "sha256": "b71b8a846e300ea7a2d093c50486ba4c67c23fb9d015a49264670bc50eae051c",
+      "size": 35675
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadErrors-BySwnGnR.js",
+      "sha256": "110f4b80f98cfd2d7f48efcd6cf7fee1d7e2bae24acd722e982cc65d6d1b3bee",
+      "size": 392
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadGltf-B4Eg9cil.js",
+      "sha256": "d7c14202a31d53a8b91d33fbf4d4815aa0448ca312503feaf8328504ff46f641",
+      "size": 119034
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadGltf-_aJksG4r.js",
+      "sha256": "2dbc829a681922637ea4228b9ef93c7cb382ea671940694850cf8c685dfcc83c",
+      "size": 119093
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadLas-BFvxICuj.js",
+      "sha256": "86b64422e8f0f7617da4bbf4a06302d860088f16cc6f9358e7f4d33a19d4a598",
+      "size": 38665
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadLas-DBkdhU5P.js",
+      "sha256": "db63a9d311be370cb37f9883f6c36a23a1b406af0aa19ab36253f2bd4391e794",
+      "size": 12978
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadObj-DGkWg9Af.js",
+      "sha256": "037b42ee966bb5a90822482f8fc0cddff8eae66aa6ff00507bc3559bc640fe29",
+      "size": 8672
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadObj-YUChd9WF.js",
+      "sha256": "41e7a059c62615b5aa0572134a2c556598201ac3707e8b9af12a6309b33ffbcd",
+      "size": 8679
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPcd-BghOYsx1.js",
+      "sha256": "da19fcae645ccf851e97ffafca069bc79762bad6aa03a04930a10eddc276d960",
+      "size": 15359
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPcd-peHuKs0o.js",
+      "sha256": "1fd19066d8a8f69252dc1d846d9eb40743628693872f7e7a171817fcb97ffffa",
+      "size": 15265
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPlan-DQXpsCz5.js",
+      "sha256": "6ea2aede5fe862f79e36b6b64246851a46f34f04ddd74b6f2a00dd47c81e18ab",
+      "size": 3424
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPlan-DYcvILDt.js",
+      "sha256": "978f88c8201271461293e142d081751b05bc7322fdf79dd89d510c63750fcc4b",
+      "size": 2511
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPly-BG9BephP.js",
+      "sha256": "30888cfdf5a6ad14ff6348f809cbc1956dcd96cb6d6977e92e87263b623f14e0",
+      "size": 15085
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPly-DjX3ZFAK.js",
+      "sha256": "830cc9cec350601d2c2cddf671debfcebc5def7d39fef15629799315f687ef94",
+      "size": 15057
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPnts-BpvAa3Bi.js",
+      "sha256": "fe0f6dae90bb6ae25ae5410a63085556e795cdcd9efe08adf304a10565353b66",
+      "size": 8308
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPnts-DLxK049u.js",
+      "sha256": "fd7d32d3c3fd1f0e06cc376ae7b50a6fd91b7bb74043e7593f32b0540d36a167",
+      "size": 771
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPts-DdL4OAmE.js",
+      "sha256": "86a040e0cd5b6e100a7c87142db776ba77b4ba02a2b9f53ad5975d1e1ab307af",
+      "size": 1937
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPts-DyPm1iVl.js",
+      "sha256": "210db1c8df45b35490f2a199a01d6080d5e057ce3ed298e56dd5800a2e55f520",
+      "size": 1936
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPtx-BHld7Toh.js",
+      "sha256": "02b544206fbbeb4beeda1d8593a5c4d5f68f061bb306a3b0ee40fb1ebfdfbb38",
+      "size": 4828
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadPtx-DaqNLjCr.js",
+      "sha256": "8d6328ac67c730e358cb762c9089b9c0d6b2ae3416c73fab1fdb8033e1f6e763",
+      "size": 4870
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadXyz-B31a_Rl9.js",
+      "sha256": "e73470921a46c5baca06e50953d05dba5e5786844d9258a4efc84178608e57cd",
+      "size": 1410
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loadXyz-DT6wsYvD.js",
+      "sha256": "37615e187c9e724ca9f46fec7424c1d1c28d0b1d018e2b169035f2fb8643a7b7",
+      "size": 1409
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loaderConfig-B1V1bQYG.js",
+      "sha256": "35c50816b365d8b1f370fad960bde8721c446fef8911ddaf31c735b4d8201cbe",
+      "size": 32987
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/loaderConfig-CQ0BuHf-.js",
+      "sha256": "56763ef1cd9042fff40b1976ca8cbe0ca90fc39ea01730a28fb55f3f650bae76",
+      "size": 32976
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/localOocIndexerWorker-BEcKL7Ih.js",
+      "sha256": "ce44ea5ad15063fa890bda42ed8c8f45c139bbc7062eaee3f8d0aa8c8848ab5f",
+      "size": 404075
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/mapSheetLayout-CkMxUb39.js",
+      "sha256": "820a3f23f0b3bd01648a6cac40d43c6069de88a1bfbabb8af78d8a9d758ee7f9",
+      "size": 1189
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/mapSheetPdf-DFpnh6Pq.js",
+      "sha256": "8bacc1cb9f56b3bd403d9cd9be7d9f798a7721c4ce9c3fb8795ea555e0b71958",
+      "size": 22161
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/measurementTrust-BApQ2neE.js",
+      "sha256": "0d0c910cd07584aa00e796146947797d48c778fa7429ee2c317127d0e8ee5a50",
+      "size": 3105
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/methodRegistry-BZJ-FHEV.js",
+      "sha256": "106044329b01dae6c6bae5a66f8b76ca63a728651fa8b273f6af24829303e8e3",
+      "size": 45435
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/observatoryPackage-C-VX_dbQ.js",
+      "sha256": "6940f87ffad5392d859b00ff4df9f025f99122522df7c97213e90fc0b5775e8f",
+      "size": 14464
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/observatoryPanel-1K7K1XUa.js",
+      "sha256": "a774c2a179ce7c5bafc33789ed5b9493da5f467030d9c723cb31bcdc2f078951",
+      "size": 12271
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/observatoryWorker-i2lmHvB0.js",
+      "sha256": "9a1b68320ed85f38f03fc4e771097b947b38c128f3d1eecca7f7422b4867a7d2",
+      "size": 38749
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/offlineCopy-r3YxX1Tc.js",
+      "sha256": "3d21d446057805f570f63b4c11436742af49b9c9f3cf171df1ba4b12fb1271a1",
+      "size": 1693
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/openObservatoryRun-CHCccoyn.js",
+      "sha256": "cccae3ed7696e0daf03f58754d1701731a7dc5d1ee8b19014e26a5fbeea20da1",
+      "size": 21808
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/organizedRangeLink-DliqXjGM.js",
+      "sha256": "e19c96514f02f480f7b16d49cc334c50a14653d9ef43540bfa848f476c85e84d",
+      "size": 626
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/overlayRegistry-DHjgMxpd.js",
+      "sha256": "461fae5bfef5221d4f3d558930f8748fd380f0736dd9ac16f2dbc9f5981efa31",
+      "size": 1004
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/parseWorker-CL04IVus.js",
+      "sha256": "90ea6cf6d3a6a923af7ccd44355afc167626ed47150cca5bab81a90bf97d8810",
+      "size": 23963
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pdfInfoDate-DPHY6gCf.js",
+      "sha256": "c224be99a25286187bc609c63c0b879b7676d521eb8f2645e2143f9678cf9ddc",
+      "size": 271
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/permitStamp-Ct1BjZJM.js",
+      "sha256": "d2d18029028f7ea510682fe783831b14b65ca7329e25beae17295fa08884b14d",
+      "size": 176
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pixelRatioCeiling-gnLwFoaU.js",
+      "sha256": "b590f1b4e384a6d6db0052f26369e92f2f1a5f5b89f538fc361f3fe47699029b",
+      "size": 53
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pnts-BBRcOgxZ.js",
+      "sha256": "d4e57fecd39791ddd744b513f5b5895ea7e73948b574ed42be5eb98860c7c885",
+      "size": 7679
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pointFrames-uZ6_KrZ4.js",
+      "sha256": "658c5cbb238757aaa13b4fdf8aa540e317d2260acdd5492fb709bdace241d678",
+      "size": 83
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pointInfo-BIrBqBjP.js",
+      "sha256": "2e45b169fb686d7d35a4ba624cf8651c8723716e0141c0a7a5ae42d04047c6f4",
+      "size": 3572
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pointsSha256-BWiIUNmJ.js",
+      "sha256": "fefbe298e54bf3bfaa810874808eea5d749b42d69d3d493fa30cddbb4d690f65",
+      "size": 348
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/politeAnnounce-CjEUigWq.js",
+      "sha256": "ca8bd60b970a5fdd77ed724d3a517054a89f32a5d8548ac0bbf53915f7cf138d",
+      "size": 292
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/pourPointSnap-DbufJH6L.js",
+      "sha256": "d5c715e56ae178d419f91ec5b904a2592c03d82483afa2b6c6e7e46f04d43f01",
+      "size": 520
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/preload-helper-CRzLMJPS.js",
+      "sha256": "bcc465e3e61dc3878a69ffa95ccb53cb82d95b1639ada223420b281ebd150048",
+      "size": 1534
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/processingManifest-C9iUwUlq.js",
+      "sha256": "14c05ba25735f810e15e80d2b09dfce8ff2f38ab078cd411254c759e28f33f75",
+      "size": 2042
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileAxes-CqxNREHV.js",
+      "sha256": "965f49e647734fb66d81930f56dd337e8ac9a8b0699da48cdcf3afcf5470c23f",
+      "size": 5647
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileGeometry-DnWc-BRH.js",
+      "sha256": "7b1900a3f188c94fc14477946ef73600e88615a31f4731d4dd331396c657e113",
+      "size": 1149
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profilePath-qja5uDo8.js",
+      "sha256": "ef8c96d43c06595b5d1a2fdd8c7d45c47fc860cbf37cf7f3459e92d6da9c7634",
+      "size": 179
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profilePdf-CO7lcVi0.js",
+      "sha256": "95a466a06ef9ce82e9df272451f2dbb132602afd43e6311412627e82c3094bb3",
+      "size": 28619
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileRawFilter-CXdRLgPN.js",
+      "sha256": "910af20b63daf76a0a774f3c00572ba61606d64c623b6822d14ac950ca56384c",
+      "size": 2295
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileSampler-mSHuB_Jn.js",
+      "sha256": "5ed80b62c5b8d06c6e1bb1c04f7e2cc8f1f3675944ab52d1c64733955f8053cf",
+      "size": 4371
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileSectionBuilder-2JZ_g7MK.js",
+      "sha256": "e56b7332ed350c2c818747082a06e322491ef4f138ce48e0ffdaa689cde92e9f",
+      "size": 3733
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileSectionSnapshot-BRF1vs5u.js",
+      "sha256": "962fd5f8b172270b82969d8dda1427b5f42e4d6a02abb8095068e9a23b6503e4",
+      "size": 1491
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileSummary-DSmSG0pP.js",
+      "sha256": "5076cb305485b373b3cf57e668b0420c948a832c26da3c8b80579b070aadc7e0",
+      "size": 8288
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/profileWorkbenchRuntime-BXb07_H-.js",
+      "sha256": "9690a48c28e7fd4012e1c9ad7b4711dc2ed93b293d3d7c43ad7053755f3acb31",
+      "size": 47417
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/quantile-BLrU2JwU.js",
+      "sha256": "16146cf89d96d233f300371a9be1394140a8369baddc79ad030d04d72df4037b",
+      "size": 589
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/rangeLedger-xkECGYI8.js",
+      "sha256": "5780b4500005510907746bfec7a8e3f206798b2442e3657b8748026aeb522383",
+      "size": 418
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/rangeWorkbenchMount-BrfyTnj6.js",
+      "sha256": "62e697d12dc3c6c8aa7a13d85de4310d0aa0f6329b3ae4647d76eed949f419aa",
+      "size": 19044
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/rationalDischarge-DxnZBMQq.js",
+      "sha256": "22459b0a785d0df42f91b18f3c51a61c4fbe2532bdfabd960944e92270274175",
+      "size": 4276
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/recoveryController-Cqrj0OTQ.js",
+      "sha256": "b9a72817d645ca7e161fef4f3cb2990d701ca50a16f76d7670b0fd8bad80b360",
+      "size": 15010
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/recoveryStatus-BlxRlg7w.js",
+      "sha256": "f937d0f48fbb845ef5109fae495b717a9d29edec209fe9a3c2115dcafc735f26",
+      "size": 257
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/reducedMotion-BYlSnDxt.js",
+      "sha256": "faf8fd6df46be14149d7d9d80912bd22e6fd1e1e1b5f669ec870772eb7242c36",
+      "size": 179
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/refinementPhase-BZaO7kHY.js",
+      "sha256": "5b7f8e4101697a79a0bceae51776fe02e0b19e9f651fd64e45518eb67b62562a",
+      "size": 700
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/refinementReadiness-CcRC7aOr.js",
+      "sha256": "d4e9836ece2e98592d6bd3c27c6a318f507df36d256b8424f131086c5a2fdc00",
+      "size": 1734
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/reportVerifier-CvCPjO5Y.js",
+      "sha256": "b0fc4b0bf4db86c30814d208fc1f6a29c190b5910d5d80c91bf0cdb214767a0e",
+      "size": 18365
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/resultSignals-D5wUl9xB.js",
+      "sha256": "400dc844bbe46bd2dffd41fc07762c2359bf0e7ff420568c6de2206e330b2ba4",
+      "size": 353
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/rgbAppearance-CnC4FQVb.js",
+      "sha256": "af7dfa00aa626b2d5d5069a1e3d66d74a4a17aa383af4b34a10411c1f733bc28",
+      "size": 4266
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/rolldown-runtime-Dd_uD5pT.js",
+      "sha256": "c5f0356f5d0918a3137e4e811fd18950efe8ac8f6bf84d1d4da7811c477a24d8",
+      "size": 1106
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/rolldown-runtime-EyZ2wyi3.js",
+      "sha256": "f274af3d745c531243aedd39bc50813c6e0c009124334fee9a5f2e581c7cf623",
+      "size": 612
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/runRecord-DlfSJtQ_.js",
+      "sha256": "720424338e2bf52ea12285db467e5ddd01bb7f43e10b1fb84f3b741ca17358d2",
+      "size": 13713
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/safeStorage-BrKQuqjd.js",
+      "sha256": "c61b07b3c20b89e1581f3e128730e81a0ba80e69976e03776e7b3ea1c2064e99",
+      "size": 296
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/safeText-RRXxPPLb.js",
+      "sha256": "174cf51469ac58b5e5c242806f0336f8434614007af9d4b42fbeb0ac1050994e",
+      "size": 1683
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sanitizeCloud-DIGBPAk-.js",
+      "sha256": "08739bc2cfd7003de895ec5d2155c3f6b80ab423eecf36f119ec2b73fce83fed",
+      "size": 3034
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sanitizeCloud-dk5FIQNL.js",
+      "sha256": "7e82b7c8db7ad209880a1bd45356b8f820929fceb65e279b76ed6b1b418fe12c",
+      "size": 2864
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sceneLineOverlay-BUtde5Er.js",
+      "sha256": "29570dafeafeeedf0742813368b5c3afc507aced8fd281b768e96924ac461192",
+      "size": 793
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/scientificAnalysisRecord-CHKk6dc1.js",
+      "sha256": "376c7d384635e3c1e480c18332d4900813a32a264b08587365f005fd5c391c93",
+      "size": 968
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/scientificArtifactPassport-Ctcq2BmZ.js",
+      "sha256": "f5cff1b6d43547781420222ecc65e647392934c282346306ff125090df7c7274",
+      "size": 2082
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/scopedEvidence-Cpq0HZma.js",
+      "sha256": "15ababc3bf94624228e4ffa795a4e18706d35592b1d36c5ae3a90bf3f7bc70c1",
+      "size": 12227
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sessionIo-B77T6lr2.js",
+      "sha256": "bea9156af5ab27e5b3928ce4fc470821dd1aab1ca42023cfe7faabdd1d960ba7",
+      "size": 17523
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sessionOwnership-CmD02bCv.js",
+      "sha256": "5c422c5616b15ba9a4f43b8bf20233af3e69aeb2516086cef55c4e9cb0cf1272",
+      "size": 5870
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sha256-CBC78NZG.js",
+      "sha256": "5680a3290081f950e40c75a9e42faf4365d0113feb8268467ca544efaaccf890",
+      "size": 1854
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/simulationInputBasis-BXbKOeGt.js",
+      "sha256": "0a0bf71581e100eef8a3d91d498fd46394861524b7c48e428523ad6e729ad6bc",
+      "size": 1999
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/snapshot-D-q-E9e3.js",
+      "sha256": "e9c343121c8d56ce2085418fbfd6dd7ca92ee4e88c0283c36953217466b3db18",
+      "size": 10117
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/snapshotAction-Cxzv7otQ.js",
+      "sha256": "45ca37ae61b6093d095b1826db4f7877190573c8190047d6e3874151399cdf69",
+      "size": 966
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/snapshotSvg-BAtpmjbp.js",
+      "sha256": "2c019e02a4f3c4aaefb856786469a15f90931e67f7da8eba000ad8e291e43ab2",
+      "size": 2483
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sniffFormat-DEozn1yG.js",
+      "sha256": "61d2a73ea38b4421072a0cff482ea6b4bf8ff5f8167019f85f879806e3246ad8",
+      "size": 1409
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sourceFiles-BfRiRgFl.js",
+      "sha256": "c8fe6b030eaf90cdb171d2aa22f069f1101ab36d8a8ce747e64d35e84074f24e",
+      "size": 170
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/sourceInterpretation-CZY1GcPG.js",
+      "sha256": "661cbcf2298b9f0579de3e0969f083028b2ebae5aca2c4f562f17f891160577b",
+      "size": 375
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/streamedClouds-DqyMVW29.js",
+      "sha256": "e77bbdc8bdc2564db773ce96d9b154e649bf9e8a2a4d946939d73dd5552d31ed",
+      "size": 175
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/streamingBudget-C9-h1Hw-.js",
+      "sha256": "63f30353bc0fea93757ca8c7c945f118f32f20ee95cccaadc2bf145dc3902344",
+      "size": 2765
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/streamingScore-B_MgngXQ.js",
+      "sha256": "01ac0670bee92c521a2b809ba136f0bfbf49fecdf9de8e1ac764d00a24988620",
+      "size": 1843
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/strideSample-CJ3wuXJE.js",
+      "sha256": "3fb5d64a98b42bfe18d0b2fca5e2cc19923830c41539458a0aea3ad273f1a7e3",
+      "size": 852
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/terrainAccessExplain-CFwdUgaB.js",
+      "sha256": "5488367a46cf3a8dfe0af8e1e4790ea3d2e5c002738abba78a156cc0ec2df0a0",
+      "size": 26016
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/terrainAccessLab-qx01USRD.js",
+      "sha256": "666004395dbeefc2261f88e254d34874a2887764fe8a353c9db50c36308d82d4",
+      "size": 58623
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/terrainAccessPackage-Cu2x6Ddc.js",
+      "sha256": "c0cf28c559b261a3dd240d7b1252a128830b1ac67a59b7fb7276080604e80d62",
+      "size": 13453
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/terrainAssessment-BrAeBKeW.js",
+      "sha256": "06249bf21a0e5fecd7b8da79ba7e545d5b4035d35461ef84017fcdeb5245e45e",
+      "size": 6420
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/terrainReportPdf-DzuGAF-m.js",
+      "sha256": "61f0073567978e03f159dff0fb011bafc021aac540eaf85fdf1a2bd7abd7b58c",
+      "size": 11776
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/textChunkReader-BJvtJ9NJ.js",
+      "sha256": "f2da19c02b5654fb2c812f78687f5a090f30c81655dfd2455d3e1cfe67ca4c60",
+      "size": 455
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/three.core-CwqoF0OI.js",
+      "sha256": "9607c1c18ebc3015bd022b75f48ac1f07899fa9945a914e92a903def3140e25a",
+      "size": 217468
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/three.core-DKABY_Ox.js",
+      "sha256": "f6ddd4953ec0de1867a070597e7a7bc91dcd13d004e1cc9a59406915b85c3d8d",
+      "size": 137778
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/truncation-CLxdS53m.js",
+      "sha256": "90c74d7e2343909b2aa2d02df32b1728836d60412c51e7b0921656b4c9e6d52b",
+      "size": 453
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/types-Dod75BTj.js",
+      "sha256": "22217faccbf8379d9bde9bdb316a35016ce645ff34f5969d0ac17b2b073def99",
+      "size": 501
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/types-OIAvqka8.js",
+      "sha256": "d94b5aea26a0dbc595e67f2e853f5ac9a409df032afc75a087882fb7fa528b72",
+      "size": 2075
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/units-D5RsvQSZ.js",
+      "sha256": "baea9f3cce4b65b737febd5376efd3627abddacb73f2c1d8df66f8ab6f664c8c",
+      "size": 1003
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/verifySessionManifest-CVIEQDUn.js",
+      "sha256": "868917cafaeea0ffaf8de1b756f208e1daec0ebce7035bc78e3f6fb286b22090",
+      "size": 1187
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/voxelDownsample-F8QiIzpO.js",
+      "sha256": "3104c8d8d2a243c2a3c98b59de5806530c40783f54e44a494da5ca95ebe0ccf0",
+      "size": 7216
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/watershedGif-Cm384Ez9.js",
+      "sha256": "7cc794c0bde58304df9a25f9c7fbd6e13a034ed97ae42122191258746a2d15b3",
+      "size": 16102
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/winAnsiText-MCY6WYtM.js",
+      "sha256": "7f2e77a0bef962e5c788e048563a6011bfa09e7afd4935aee1f543efb7662f82",
+      "size": 421545
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/withheldPolicy-BEx9McZ2.js",
+      "sha256": "aa0dd77886e977124a67ea700ac070051b0505a58c605812975de3b7a4d21c86",
+      "size": 259
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/writeLas-Ctr3NSe0.js",
+      "sha256": "7b3a5321fe1707418bf5874a8c285a6e64357adeeed33a544f88c19a2657a2eb",
+      "size": 37024
+    },
+    {
+      "path": "assets/pointcloud_viewer/assets/zipStore-C5bNBOLP.js",
+      "sha256": "b9f54c55907ff01cafead11c49b66194749f68305fec7593204c7949ddc9e938",
+      "size": 2798
+    },
+    {
+      "path": "assets/pointcloud_viewer/index.html",
+      "sha256": "1ef5b9a57307a40198fca303b109c2975032a88d5c94bdf31f704a075785db10",
+      "size": 6928
+    },
+    {
+      "path": "assets/pointcloud_viewer/source/LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "size": 34523
+    },
+    {
+      "path": "assets/pointcloud_viewer/source/index.html",
+      "sha256": "446cccd8cd4feff39307cb12dc1d8af077598a9b063466783e554833ea32811b",
+      "size": 663
+    },
+    {
+      "path": "ios/Vendor/JXL/licenses/brotli-LICENSE",
+      "sha256": "3d180008e36922a4e8daec11c34c7af264fed5962d07924aea928c38e8663c94",
+      "size": 1084
+    },
+    {
+      "path": "ios/Vendor/JXL/licenses/highway-LICENSE",
+      "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+      "size": 11356
+    },
+    {
+      "path": "ios/Vendor/JXL/licenses/highway-LICENSE-BSD3",
+      "sha256": "d25e82e26acd42ca3ccc9993622631163425b869b9e16284226d534cff6470f2",
+      "size": 1515
+    },
+    {
+      "path": "ios/Vendor/JXL/licenses/libjxl-LICENSE",
+      "sha256": "8405932022a556380c2d8c272eff154a923feb197233f348ce5f7334fb0a5ede",
+      "size": 1508
+    },
+    {
+      "path": "ios/Vendor/JXL/licenses/skcms-LICENSE",
+      "sha256": "e59bb5c5c6ba426a9ac4ba9fe667ad14c5166b12aa25be8af1d122b14fbe2e36",
+      "size": 1635
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/abseil-LICENSE",
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+      "size": 11361
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/ceres-LICENSE",
+      "sha256": "765fd9eac4cb827fa5de4304d1f81f4f2c5c332a3f1d6f0f3f7a69a33156729b",
+      "size": 14355
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/cgltf-LICENSE",
+      "sha256": "b7180ec5f85785c09399fe516a77209f9db031602ad2cb4b3cfef99191848c27",
+      "size": 1200
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/colmap-LICENSE",
+      "sha256": "62e79e3af0c6803bcd99098fe51d131398184f54eb17ccc12e5e2a66130540cb",
+      "size": 1727
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/dawn-LICENSE",
+      "sha256": "e2908f7576fb12be5bdb8480cddb0be62badb498cadb821d043aeaf01b0b0899",
+      "size": 1561
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/eigen-COPYING.MPL2",
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+      "size": 16726
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/glog-COPYING",
+      "sha256": "136d48dea7a681413691f3db3098f6cf5ffaa3119d96d97bb83b8cff3ce38c4a",
+      "size": 1479
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/libjpeg-turbo-LICENSE",
+      "sha256": "2189dc45a8fe96204069f8124caa53a148dfdc193f50f584c6ca7849a6072872",
+      "size": 5620
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/meshoptimizer-LICENSE",
+      "sha256": "d1bc307ff896c7fc65e3ff4823cc478194f7a5bc6436f99534ebede4d9e2017a",
+      "size": 1079
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/poselib-LICENSE",
+      "sha256": "16478850e8c62589803663d43e53333e6e1e3318cd4a4d2b8a3fd66e584309f8",
+      "size": 1694
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/stb-LICENSE",
+      "sha256": "e66576ac80990033030d9a8f8ade24f7482fc08c9c86eb2ce5bcd2ab6f4ecd64",
+      "size": 2454
+    },
+    {
+      "path": "ios/Vendor/NativeCore/licenses/vlfeat-LICENSE",
+      "sha256": "33b9f7703327199088d74f884b19997a0084180f984724720095a7cb412c4d89",
+      "size": 1365
+    },
+    {
+      "path": "ios/Vendor/Zpaq/Zpaq-LICENSE.txt",
+      "sha256": "927b5feda84f7a7f2063998b124829182967f54b954db2c3569e8bd07958bf07",
+      "size": 2741
+    },
+    {
+      "path": "l10n.yaml",
+      "sha256": "84c9497064453fe2db3b2b8733c2aabb9d1cc6ff2e243b9277bd0a07e732190f",
+      "size": 142
+    },
+    {
+      "path": "lib/aether_ffi.dart",
+      "sha256": "df38cf751c99a2a137284a83c40f7479ca66ac9f5e12608390eff0c05259efc9",
+      "size": 6613
+    },
+    {
+      "path": "lib/aether_prefs.dart",
+      "sha256": "13a0d1d8b3e2c07c594a8766276869ef1c244a8d897028d288cd86df2181e5c4",
+      "size": 1861
+    },
+    {
+      "path": "lib/aether_sfm_ffi.dart",
+      "sha256": "b9ef65eaf107ac6ff064d20da46acb0cf6ee4401ffe7923bb5d3fbd27c583208",
+      "size": 56903
+    },
+    {
+      "path": "lib/aether_view/format_detect.dart",
+      "sha256": "3c4fe83a53cd9dc8b4af7aafb709b65314af15ec2cfede9881556b697c7a9879",
+      "size": 6529
+    },
+    {
+      "path": "lib/aether_view/platform_check_io.dart",
+      "sha256": "1af770234d004410da2b947dff987d71839b753db2f846d48fd65b30177cd435",
+      "size": 1007
+    },
+    {
+      "path": "lib/aether_view/platform_check_web.dart",
+      "sha256": "d4ba14a86eea3b5fd64a47872379fab3a37d8a6c2a05060a0af100b71ae4c4f4",
+      "size": 339
+    },
+    {
+      "path": "lib/aether_view/scene_bridge.dart",
+      "sha256": "07591ec075ddf1e92131ee751a5ecdc68f79493caaabd504b05393b379aad7f1",
+      "size": 12701
+    },
+    {
+      "path": "lib/aether_view/scene_renderer_bindings.dart",
+      "sha256": "52a594df81537d2d1e9e8e22249a204da42027933e8c069c72558170e49c1af1",
+      "size": 5590
+    },
+    {
+      "path": "lib/aether_view/splat_engine_bindings.dart",
+      "sha256": "ec87ac123a44112a297035232af000c0603a15c5413fddddb85dbf974bab9ca6",
+      "size": 1817
+    },
+    {
+      "path": "lib/analytics/pw_analytics.dart",
+      "sha256": "c07438471b521ad540a98da2b4bd9c06b681acd869734000bf044fa2602ba411",
+      "size": 9673
+    },
+    {
+      "path": "lib/auth/account_workspace.dart",
+      "sha256": "33774b37354c72f60d87d7c85eb304a8e41a3e969d07ddcdc9a477d33ad59bcf",
+      "size": 1648
+    },
+    {
+      "path": "lib/auth/auth_error.dart",
+      "sha256": "7292aac1b21b82ef60bd2400dea58f75ffaea8f1e0389833a43e4639fee7aed1",
+      "size": 2712
+    },
+    {
+      "path": "lib/auth/auth_models.dart",
+      "sha256": "9c2e9697402bcd9a3db2a5ecf45b1a844d5a6b8f850f832f20b17182859d0b79",
+      "size": 4825
+    },
+    {
+      "path": "lib/auth/auth_scope.dart",
+      "sha256": "9ab35d3092757e4fb15f61926b9a695fef2abab66db49970ed46d473a1adbebf",
+      "size": 1036
+    },
+    {
+      "path": "lib/auth/auth_service.dart",
+      "sha256": "993d880aee7160981264d85543ebf501ed3671fe29f5ab5df2ee434d6d22efb4",
+      "size": 4053
+    },
+    {
+      "path": "lib/auth/cold_start_session_gate.dart",
+      "sha256": "3dc7d530f8cfc6b81ac69f4d834d3c8762c9b73ccd1dd173da5f9b23e7c352f4",
+      "size": 2413
+    },
+    {
+      "path": "lib/auth/connection_backoff.dart",
+      "sha256": "d8f704066623961b946f08d1ff2b591cd9b3dd3da9b194df5ced52e22ffd9376",
+      "size": 2360
+    },
+    {
+      "path": "lib/auth/current_user.dart",
+      "sha256": "fb98b216e00b2f8aec368f086d47de93d4ccfc34b2c241620d97b7510593d7e3",
+      "size": 21877
+    },
+    {
+      "path": "lib/auth/data_api_readiness_gate.dart",
+      "sha256": "c2eddbf7c71f231b78c99049479f5f9f4a8120ed2e1e4ea6909d202e5b267051",
+      "size": 2118
+    },
+    {
+      "path": "lib/auth/mock_auth_service.dart",
+      "sha256": "650e6700e95f90a8195add3f665c145fb21f09e3c92cd84af0ed2f2a6f7da852",
+      "size": 4315
+    },
+    {
+      "path": "lib/auth/password_sign_in.dart",
+      "sha256": "15021d8ecad28ccda886c5e249846bc6e2d5103944cf0c525a53715057e69dfe",
+      "size": 1378
+    },
+    {
+      "path": "lib/auth/phone_country_catalog.dart",
+      "sha256": "1e6bdfffb4948b3c69a7da5b6080a415b22defd9cae944db0f8c8073a6e31cb6",
+      "size": 33965
+    },
+    {
+      "path": "lib/auth/phone_number_input.dart",
+      "sha256": "9d0ae10e77d0a456d1fbb580f0536379c4f92c23f713fc22b073d9b7e1d1d67c",
+      "size": 2005
+    },
+    {
+      "path": "lib/auth/secure_session_storage.dart",
+      "sha256": "36ff9b1042e3ead7cd00cf90144bc168e5b9871c9779fe5d9a466d6ce1ae5a3c",
+      "size": 5924
+    },
+    {
+      "path": "lib/auth/supabase_auth_service.dart",
+      "sha256": "56da52d05b4ae8f4fa929ad9f7032949dbe19d849669d3e7f503759ded02b8e5",
+      "size": 23310
+    },
+    {
+      "path": "lib/auth/unavailable_auth_service.dart",
+      "sha256": "b102f885545b62cd11fb566299d78c152a23536f321c1df55f5500bcbf1f886e",
+      "size": 2345
+    },
+    {
+      "path": "lib/capture/capture_coverage_cloud.dart",
+      "sha256": "0e138b79e0c1a327475513ecd2e604f7825bbda41b83a27ef4fef8ae7e1184b5",
+      "size": 22182
+    },
+    {
+      "path": "lib/capture/capture_format.dart",
+      "sha256": "7279af1021e0d47f5d07c26456ea29e0e61782d021580dda40cb3d7c23467b8b",
+      "size": 1028
+    },
+    {
+      "path": "lib/capture/capture_session.dart",
+      "sha256": "4eb20240e33eb51e1646c3c3ddc9772355b433b8488ebe7480b7e63e855c5363",
+      "size": 75604
+    },
+    {
+      "path": "lib/capture/colorize_pipeline.dart",
+      "sha256": "4aea3ac75f373651d7fff960120bdbcd4b0b2baf624e2e15840941494cac8b62",
+      "size": 8765
+    },
+    {
+      "path": "lib/capture/dome/captured_frame_sample.dart",
+      "sha256": "5e8916e54953f2ced303caf2683b4fd144ae5cba26ad3ca16017b6ffb910c582",
+      "size": 8435
+    },
+    {
+      "path": "lib/capture/dome/dome_cell_state.dart",
+      "sha256": "82fd1f279906659d8f025b0b804bce5cfdf370952d72b7103a3ee17948382523",
+      "size": 1980
+    },
+    {
+      "path": "lib/capture/dome/dome_config.dart",
+      "sha256": "c4697a1a3f7006c988c6d7df7da859f10675fe57bc05af862bb9c1119c72fcea",
+      "size": 6242
+    },
+    {
+      "path": "lib/capture/dome/dome_target_points.dart",
+      "sha256": "449cfcd6851eede7491625a7cb048619bf44c437861849e39db6e2336fe60cd1",
+      "size": 31697
+    },
+    {
+      "path": "lib/capture/dome/dome_thresholds.dart",
+      "sha256": "e822116e535c9df25810400895dc648652327f43dbd81bd0844e99ee2ad7e9fb",
+      "size": 5552
+    },
+    {
+      "path": "lib/capture/dome/ring_buffer_cell.dart",
+      "sha256": "ddfbf658e5a33f06c997875e3c24813bf0b80c97cab86ce532ac12286e7e52fa",
+      "size": 9429
+    },
+    {
+      "path": "lib/capture/dome/session_view_graph_curator.dart",
+      "sha256": "06103f405c106352171fe1df7a9e672543296586a5d3f4ef5a5f32c448792895",
+      "size": 12952
+    },
+    {
+      "path": "lib/capture/floater_filter.dart",
+      "sha256": "f7df53b3612ee2dae5439fb5de51dba0a20e063e272bf89dbfe2b450010d3e75",
+      "size": 6966
+    },
+    {
+      "path": "lib/capture/fusion_ahrs.dart",
+      "sha256": "631adc3fe7d90f41dab9e0aa084d34e65b71f817afde3d91b4aeb5743dcb1646",
+      "size": 8499
+    },
+    {
+      "path": "lib/capture/gravity_align.dart",
+      "sha256": "5d5ba1b59ff80f9f3c94fa135f23b5c89c287b601539da17059a5ca336d1bd84",
+      "size": 4636
+    },
+    {
+      "path": "lib/capture/orientation_tracker.dart",
+      "sha256": "dfd0fd59137c1b40103068fccdc74d09beab406753ce7148e7f9c9dbf3069871",
+      "size": 8727
+    },
+    {
+      "path": "lib/capture/parallax_banner_gate.dart",
+      "sha256": "fc6dfe487922045588ebba9e002cca401347525072afcaa1dddd1af921946e68",
+      "size": 4388
+    },
+    {
+      "path": "lib/capture/photo_card_state.dart",
+      "sha256": "e0d9cb166dc42d3b377ed2b1d8098856c16818974434ac26ff60cc0f29b7244e",
+      "size": 9318
+    },
+    {
+      "path": "lib/capture/photo_slot_naming.dart",
+      "sha256": "4e6df6eae1d8c63122fb39e6e4695468cb33b69f27f3fcf1cde559f80a8ae8bd",
+      "size": 1812
+    },
+    {
+      "path": "lib/capture/pose_drift_tracker.dart",
+      "sha256": "c9db4abaa108d5cbb68cd7e007c15689a695c2809552f60ba4b4f8227ceca731",
+      "size": 15956
+    },
+    {
+      "path": "lib/capture/pw_telemetry.dart",
+      "sha256": "00f7d081862dc824ced95cfeb60328edf2f6544b06850ab247fa3629031364ad",
+      "size": 84
+    },
+    {
+      "path": "lib/capture/pw_telemetry_native.dart",
+      "sha256": "b4dbaf5554a6796356cc47462c074cf3c61215e7b91485a9c79c3f864e705906",
+      "size": 3059
+    },
+    {
+      "path": "lib/capture/pw_telemetry_web.dart",
+      "sha256": "243d9accd2a6875c3cfaf5b6e99b6e73f49fb8690a2ce670791b6d65999f177e",
+      "size": 943
+    },
+    {
+      "path": "lib/capture/realtime_capture_preview.dart",
+      "sha256": "7c4bcef1e4b5ccb21d3f330c95bfd298baa9152018dbd301947875a34a8cfcc7",
+      "size": 7689
+    },
+    {
+      "path": "lib/capture/representative_color.dart",
+      "sha256": "3693b1184013b0a7a07bccdcd4af7cfbcf3d5cedd53bed237fd002e032579676",
+      "size": 5428
+    },
+    {
+      "path": "lib/capture/sfm_feed_queue.dart",
+      "sha256": "fc9682f31818657bafb81310ef31e711e3a28d2fc335d3112435743d1f8cc430",
+      "size": 2723
+    },
+    {
+      "path": "lib/capture/sfm_live_recon.dart",
+      "sha256": "f4ce934afdebc7edbf406ec4aa854ab9e8025ef430835361d89251430a9d4cee",
+      "size": 89826
+    },
+    {
+      "path": "lib/capture/sfm_resume.dart",
+      "sha256": "a5597ab82683f938c51c90393ec3c33133339cdaecd1a3912487d8094a7169a6",
+      "size": 23102
+    },
+    {
+      "path": "lib/capture/shutter_backpressure_gate.dart",
+      "sha256": "f1dc962d12e162853d116e5e393172f8133e7a5cfa6d746d0abf5be7c4c571b1",
+      "size": 3040
+    },
+    {
+      "path": "lib/capture/sparse_ply.dart",
+      "sha256": "78974cb5476659ed2f7184025e0835b8bba7e2d43e30fd47490910b5bdfcd387",
+      "size": 6077
+    },
+    {
+      "path": "lib/capture/telemetry_writer.dart",
+      "sha256": "6ef0f2e94e6442868495b49e003e56e656e757e60f8190e092919357742fd3c2",
+      "size": 5355
+    },
+    {
+      "path": "lib/capture/true_parallax.dart",
+      "sha256": "245e6438dab2e02711252ab18855e096060f5ab8dfa437fd00fb4d2f595b68f9",
+      "size": 8175
+    },
+    {
+      "path": "lib/community/account_work_library_repository.dart",
+      "sha256": "5df564b952ccdb4e00f455a29255658cb3ba846bc932b13f59e6f17be2c4f659",
+      "size": 4311
+    },
+    {
+      "path": "lib/community/anchor_viewer.dart",
+      "sha256": "4bd483b521ff436d00f1f4a1e283ff35fe6443acbf3c478e36a0e060d7d91957",
+      "size": 2520
+    },
+    {
+      "path": "lib/community/author_feed_priority.dart",
+      "sha256": "c363a35b7fba95eca622ebb239ca0800434f15ceb357339ce626fde96fb22629",
+      "size": 868
+    },
+    {
+      "path": "lib/community/comments/comment_models.dart",
+      "sha256": "6bde8cfebe2790f2a251ffc8dec842e636537a7df0916e67f1f9fdf95dbbb96b",
+      "size": 14747
+    },
+    {
+      "path": "lib/community/comments/comment_moderation_models.dart",
+      "sha256": "79245db8ad78399c0e0ba818c60b83ba861d8af0ffd28fb83f0b50cebb13b893",
+      "size": 6131
+    },
+    {
+      "path": "lib/community/comments/comment_moderation_repository.dart",
+      "sha256": "401133306b3c2775eebb55837ce86754bad4fde9d5ef9009c8f9774db9b35e2f",
+      "size": 509
+    },
+    {
+      "path": "lib/community/comments/comment_repository.dart",
+      "sha256": "b85d36ca5bcf63997ac123a703cb37339873fbff17940834d51e4b350d3f442c",
+      "size": 19730
+    },
+    {
+      "path": "lib/community/comments/comment_time.dart",
+      "sha256": "87ef51a80ab22999aa7dae92b30dbd0067a0895606b344a3c6f449682e6b8017",
+      "size": 1209
+    },
+    {
+      "path": "lib/community/comments/comment_visibility_store.dart",
+      "sha256": "3534d0fd281bc3853c4d4a477f1bf95bc3cdb5d728c8162d866d1779390cc2a8",
+      "size": 1206
+    },
+    {
+      "path": "lib/community/community_cover_processor.dart",
+      "sha256": "4bd64a1a7a50fdeaa9a89ed964877180f30b53217551ff17501c5bdf856f1a4b",
+      "size": 2543
+    },
+    {
+      "path": "lib/community/community_service.dart",
+      "sha256": "5580fc50c8bef6a5b047429859782bdbe99563264f4d4ce1b299e53b70e8ce55",
+      "size": 29061
+    },
+    {
+      "path": "lib/community/feed_models.dart",
+      "sha256": "320a85e474c32df5533c08f1e8d347b5e40c4693d06e9a8488c62c5d30be51ac",
+      "size": 5600
+    },
+    {
+      "path": "lib/community/generated_avatar.dart",
+      "sha256": "c4dfacb7ca55143282715aad017d56bdc97edf4821acbccace1eee24b9fd7fc4",
+      "size": 1759
+    },
+    {
+      "path": "lib/community/generated_avatar_repository.dart",
+      "sha256": "8236c7f78424ca0ba506bd05d1c5602d29c013d3d386a45978bfc7e44ac60db8",
+      "size": 7937
+    },
+    {
+      "path": "lib/community/glb_asset_cache.dart",
+      "sha256": "12c00346d1ed693ec79800800f3dd98487526d67777fb5614024bfa534e3e18d",
+      "size": 4225
+    },
+    {
+      "path": "lib/community/glb_cache.dart",
+      "sha256": "da5a8d556ff4c1dde4279663d7003bd4c72a9e2415770f68c9747346981b334a",
+      "size": 12346
+    },
+    {
+      "path": "lib/community/glb_publication_service.dart",
+      "sha256": "d041fe8ec44f7986d9b153ae52a8b02e668fb93e4f6760ad26426421f2a430df",
+      "size": 13714
+    },
+    {
+      "path": "lib/community/point_cloud_streaming_sources.dart",
+      "sha256": "51c2c720447e705b2974513cea65d36bc7f8981eae32dadbac0f74e630115224",
+      "size": 1414
+    },
+    {
+      "path": "lib/community/public_work_repository.dart",
+      "sha256": "d09e3c54b81114ade9b18fed3c3f6e11e635c4ab4ece05ac292978129b664ff6",
+      "size": 3281
+    },
+    {
+      "path": "lib/community/publication_cover_url.dart",
+      "sha256": "41359e4b8082f8a3bf0eaa0dd16beb5416bbee342ec90151b18f3cff575c1dc1",
+      "size": 431
+    },
+    {
+      "path": "lib/community/publish_service.dart",
+      "sha256": "1b2c8aa918653f943c73f77601841c6a2cd2a56779334a1761171603a1099eb2",
+      "size": 23306
+    },
+    {
+      "path": "lib/community/report_evidence_processor.dart",
+      "sha256": "2e173854310180caeddd404236867410948fa6f7274da61d41abc91e48676821",
+      "size": 2887
+    },
+    {
+      "path": "lib/community/shared_viewer_model_path.dart",
+      "sha256": "28d0079e322b0274199c2ad0a7dee741bc33e46a0f955992adff70d34720927e",
+      "size": 116
+    },
+    {
+      "path": "lib/community/shared_viewer_model_path_native.dart",
+      "sha256": "2d7beff5e7cf42b5a66366b508050daee777968e9c7059c695454524a2ce5148",
+      "size": 119
+    },
+    {
+      "path": "lib/community/shared_viewer_model_path_web.dart",
+      "sha256": "caf63112ab77452c982ecb940d97366166b43ad28a46ae4ec5baac52a4bfc7f1",
+      "size": 207
+    },
+    {
+      "path": "lib/community/social_profile_models.dart",
+      "sha256": "ae24f08819b94da56ed7a79e5c32b685b6fb4c6eb6fa11a5aee52418cd1912af",
+      "size": 11767
+    },
+    {
+      "path": "lib/community/social_profile_repository.dart",
+      "sha256": "1e7840ea64d949f6768573bd330f254808989eb517e020a4253c6570fd57d27b",
+      "size": 7075
+    },
+    {
+      "path": "lib/community/thumb_baker.dart",
+      "sha256": "3906d46dd6510c4abae0a1c57ddb3a0e9b95bffd9bca68599b3c5e64ce48f724",
+      "size": 5945
+    },
+    {
+      "path": "lib/community/web_messaging_repository.dart",
+      "sha256": "81225a44746d7a50eb58747d55d2e610839e770281824e75628dc1ad55d651ab",
+      "size": 10829
+    },
+    {
+      "path": "lib/community/web_publication_service.dart",
+      "sha256": "17e8279fccf8b101084e6265b90fc15b2953af2b22725b940d947c80bb9c9a5c",
+      "size": 14849
+    },
+    {
+      "path": "lib/community/web_social_api.dart",
+      "sha256": "5e50705b72cefbd7467fe450396f7a711113e07c6c1d601b09ff60b095070013",
+      "size": 18365
+    },
+    {
+      "path": "lib/config/backend_deployment.dart",
+      "sha256": "e6455a74b3150bee6330756da56d48e1700e33255b2333f1154d148ff43430b9",
+      "size": 5007
+    },
+    {
+      "path": "lib/config/endpoint_config.dart",
+      "sha256": "08bc45ccf9f7033937b6e301adbf8b9290a5109c1b5ec10abfae00a688c29d25",
+      "size": 9407
+    },
+    {
+      "path": "lib/database_archive_benchmark_main.dart",
+      "sha256": "0a20a7a7ba83a9df84f4a0151e22ef8c2ace34af752d869ff0eaa7befb385820",
+      "size": 13247
+    },
+    {
+      "path": "lib/dense/dense_live_cloud.dart",
+      "sha256": "73e1d6a1d39ac7cf5e75136d6d970454aafd4fc0583ff721c3bdfc08f049de02",
+      "size": 4979
+    },
+    {
+      "path": "lib/dense/dense_recovery_action.dart",
+      "sha256": "d67321b1912497d434d5aae2e1173ca806ba9c314ada64fdb40884ba2554afcb",
+      "size": 8577
+    },
+    {
+      "path": "lib/dense/dense_stage_panel.dart",
+      "sha256": "9229725feafddc11c97e14629b8ec840ab02149e02a5c54466608eba6876abd0",
+      "size": 5182
+    },
+    {
+      "path": "lib/dense/dense_stage_progress.dart",
+      "sha256": "f86bc9a844e4a722b779b74779cf5590d9846a5a46c6f0c27eca25a4dd1d162c",
+      "size": 6082
+    },
+    {
+      "path": "lib/dense/dense_work_state.dart",
+      "sha256": "a819e1ebe346e287c72e3d925a928a5f02c7e6af6571ddeabfebdaffa86a1e3c",
+      "size": 14455
+    },
+    {
+      "path": "lib/dense/native_dense_stage_launcher.dart",
+      "sha256": "f23a8ea5394d4cb2fc9dafe0199b59e1afce14d1310e54c6d2632090441ab736",
+      "size": 22538
+    },
+    {
+      "path": "lib/dense/pw38_background_execution.dart",
+      "sha256": "baf2ca6cc702bd3f13080c3328eb5ca0195b10eb8cdc68f8d8486213721f9f47",
+      "size": 7844
+    },
+    {
+      "path": "lib/dense/pw38_capture_preparer_adapter.dart",
+      "sha256": "23251f85ebb6a43fe13c422441583a585d028c7bfe8821298c4082c4ba89ae5e",
+      "size": 16475
+    },
+    {
+      "path": "lib/dense/pw38_capture_retirement.dart",
+      "sha256": "34637ef39cbd738841685c6cea892dcffceeef428f38689ffbbfe4d5d4055b00",
+      "size": 14249
+    },
+    {
+      "path": "lib/dense/pw38_depth_preview.dart",
+      "sha256": "4a7da8c25cd8c0361f12dc1b498b0b95808668798368aa6c59a92d8059bf7d93",
+      "size": 6264
+    },
+    {
+      "path": "lib/dense/pw38_final_record_artifact.dart",
+      "sha256": "bb9b5142d8a36740ea40743a9067506a93e5a9fa985adf33f3feff18567dd540",
+      "size": 2839
+    },
+    {
+      "path": "lib/dense/pw38_generated_consumer_leases.dart",
+      "sha256": "e3288b4e6915750d6551fc9abab2edf461c9469e8b425b120d9645bc7f028581",
+      "size": 7965
+    },
+    {
+      "path": "lib/dense/pw38_geometry_preview.dart",
+      "sha256": "68119f78713b5d50d3bfb9f298cac8b4ca72dc77086c2fa39a8a90e3a8e4aae5",
+      "size": 4917
+    },
+    {
+      "path": "lib/dense/pw38_preview_artifact.dart",
+      "sha256": "91242be73fc54cfebfe5f77883b549c7ba33990f9fcdde78dc22598deca7ce3d",
+      "size": 2711
+    },
+    {
+      "path": "lib/dense/pw38_preview_handle_cleanup.dart",
+      "sha256": "f01b3b21a04e33f92cd94d233d725f1f1c91a9d755c4444104498f190bce7448",
+      "size": 499
+    },
+    {
+      "path": "lib/dense/pw38_production_launcher.dart",
+      "sha256": "76207f0a6d17e70775d11a6fe8cb666e2a7efdce81b5f5ee7245a43ac92a2006",
+      "size": 54453
+    },
+    {
+      "path": "lib/dense/pw38_production_package.dart",
+      "sha256": "15a670b591ada68e2123ae1b245d36d6348ef7292e0d2bbc3872670424b07a01",
+      "size": 19320
+    },
+    {
+      "path": "lib/dense/pw38_shared_mainline_runner.dart",
+      "sha256": "2eeeb599e3a1742bc2938a46152c506731536bb96f5626afd7f0344d3c60f48c",
+      "size": 16004
+    },
+    {
+      "path": "lib/dense/pw_dense_ffi.dart",
+      "sha256": "acf536e886394d983995c472b9ca4990147a485bba1d05bb10d7685f1388ce4b",
+      "size": 23571
+    },
+    {
+      "path": "lib/dome/ar_pose.dart",
+      "sha256": "dbed5c868dedc39d085649c8bbabb456512b11432799a317ff8850ee36edd152",
+      "size": 21371
+    },
+    {
+      "path": "lib/dome/coverage_map.dart",
+      "sha256": "b1ba7de5a794bb7b927d10c7a3409b7e0511d49d76252b97be5ebdca0f130376",
+      "size": 4248
+    },
+    {
+      "path": "lib/dome/dome_view.dart",
+      "sha256": "cde7fd02db62c852a73cde2950ccd60e0b90b80dd5f68f0f8f2e72bb5738438e",
+      "size": 6939
+    },
+    {
+      "path": "lib/dome/mock_pose_provider.dart",
+      "sha256": "eee7be1600fa531c64a09671b5096bfedeea2d951fe127354e54066e2cfb599d",
+      "size": 4313
+    },
+    {
+      "path": "lib/dome/platform_pose_provider.dart",
+      "sha256": "fe100b027a027bdf58885445f53e91d944d12bb3b99074d2afd2592ca23a2b8e",
+      "size": 15616
+    },
+    {
+      "path": "lib/eta/capture_to_mesh_eta.dart",
+      "sha256": "dfc4284872929f0c27a503b2e7ed61fa3ebb4939d44b6c65a71e8570fe9ab789",
+      "size": 2682
+    },
+    {
+      "path": "lib/eta/eta_prior_log.dart",
+      "sha256": "cd12658086188c545143cef11704d8c4d86d51f7b209e3d0888cdde70bcabf71",
+      "size": 2277
+    },
+    {
+      "path": "lib/eta/full38_eta.dart",
+      "sha256": "cae27c37f93ce1a7f8a5144ba0fc9f2282af1caee68886276fc88a9c41f3db86",
+      "size": 7015
+    },
+    {
+      "path": "lib/eta/ninja_progress_prediction.dart",
+      "sha256": "0dd20e9d9729fcc2dd99c583153626b904f55a08a8b384c9db8bfb7a7b2c9786",
+      "size": 7891
+    },
+    {
+      "path": "lib/eta/pipeline_eta.dart",
+      "sha256": "bbe4e32fbe3d45f0dc2a9f87419dd2cbedc6b1284fab9dd2d848b997b4a84611",
+      "size": 10477
+    },
+    {
+      "path": "lib/eta/sparse_browser_eta.dart",
+      "sha256": "569c90dfd06642425c538e5f6dcaba339ce4ca71b6aef3d86e63ff1b681ea7c8",
+      "size": 4921
+    },
+    {
+      "path": "lib/eta/stage_local_rate_eta.dart",
+      "sha256": "5a3dcb62c64f64459354e073b65452a0505174933717458aa300aae8371ddb8c",
+      "size": 8221
+    },
+    {
+      "path": "lib/eta/upstream/chromium_rate_estimator.dart",
+      "sha256": "a5e7acb279e7dbb8c572fc23049c96da5f6fd9978d9da9a66ed0bfb2df57cece",
+      "size": 2474
+    },
+    {
+      "path": "lib/eta/upstream/firefox_download_speed.dart",
+      "sha256": "badf2165543db71db0f32a6345bd7e4a0819aacf7b28a8fdf29beee56fc8661a",
+      "size": 2060
+    },
+    {
+      "path": "lib/eta/upstream/upstream_notices.dart",
+      "sha256": "b7c71ea94c2987325b95a609ec714fad7a83cea82e5ba5f63a6390cd8124b982",
+      "size": 19227
+    },
+    {
+      "path": "lib/glb_norm/_glb_norm_ffi_native.dart",
+      "sha256": "1ad72103fd25a323bbee40157bbd570549c39d692e956421ff6036c2231f24fd",
+      "size": 12987
+    },
+    {
+      "path": "lib/glb_norm/_glb_norm_ffi_web.dart",
+      "sha256": "43d20d7a943009c0cd48327930e622bdb29bed82d319ea41adf1f78df57ffe43",
+      "size": 1369
+    },
+    {
+      "path": "lib/glb_norm/glb_norm.dart",
+      "sha256": "1ef4c1c721114856ea50c62af22c9d1eb7d12f81872af6285fe84a3b4a846371",
+      "size": 5765
+    },
+    {
+      "path": "lib/global_ptol_benchmark_main.dart",
+      "sha256": "4650bac40a4021193871ffa45a362a238c82a41dc75fce4e97b263e363cf6a55",
+      "size": 18894
+    },
+    {
+      "path": "lib/i18n/locale_notifier.dart",
+      "sha256": "af846b3625cbf0d14e07031ee01bdbb4cb82ef1ca3f4fe590e6dbfd101407b2f",
+      "size": 3694
+    },
+    {
+      "path": "lib/i18n/relative_time.dart",
+      "sha256": "5f9f5fea85ac8b641c89a115416c2754c7cbd790e658435f6d01e86373b73db5",
+      "size": 776
+    },
+    {
+      "path": "lib/l10n/app_en.arb",
+      "sha256": "46c8b58b7148090da09c0aa59b172d069e973b6008d7a7fc0370adf1c5d309f4",
+      "size": 113532
+    },
+    {
+      "path": "lib/l10n/app_localizations.dart",
+      "sha256": "a6d925caa21badfbfd6ebc02d02c7413859f79cab633d6c111b64baab75bdbd7",
+      "size": 245621
+    },
+    {
+      "path": "lib/l10n/app_localizations_en.dart",
+      "sha256": "13cb3680b78841d385dbc412e22e1db3539941d5f1942ad8432ae284c51273be",
+      "size": 137608
+    },
+    {
+      "path": "lib/l10n/app_localizations_zh.dart",
+      "sha256": "5c88c185efef6cbb13bedf4ef58bad4d5ed4609155e8b0cffce90372859b0775",
+      "size": 125515
+    },
+    {
+      "path": "lib/l10n/app_zh.arb",
+      "sha256": "dce70a75244a43e6d872b1737d7d4d2b5234c61a10de373c6eaa3d481b38eb06",
+      "size": 98419
+    },
+    {
+      "path": "lib/l10n/phone_country_names.dart",
+      "sha256": "59d9bc7f4dc02d347214f3a898bfb4c8336632130cc8dc877fd88a1ab41e8671",
+      "size": 7107
+    },
+    {
+      "path": "lib/lepton_jxl_benchmark_main.dart",
+      "sha256": "9096e4f56a0a6d930be126256a5c177aee871b8849903a3d29fa4d9f9ed646c3",
+      "size": 11118
+    },
+    {
+      "path": "lib/lifecycle_observer.dart",
+      "sha256": "f1939f7460f77a2877ee67e96dd03b8737004b80f06e7c3c751c2ae2e31b66a0",
+      "size": 4568
+    },
+    {
+      "path": "lib/main.dart",
+      "sha256": "f5269473ad2b654286ba4fe0c01f3d4b3bd251e048c23bde20b5b943dff1556f",
+      "size": 44769
+    },
+    {
+      "path": "lib/main_china.dart",
+      "sha256": "fe4288c48e3e483670fa52518850662de89568fb517d9abc2c013baf1651ae7a",
+      "size": 239
+    },
+    {
+      "path": "lib/main_community_web.dart",
+      "sha256": "3e4cae4b89361a89610b9ea7b088282ea294c8b7a3c6fe4997c96905a6c9cf15",
+      "size": 13451
+    },
+    {
+      "path": "lib/me/cloud_library.dart",
+      "sha256": "6060ce30d3cd83b90d9c41747bc18b31e19efda18e0cdee687c097a5dae18922",
+      "size": 44036
+    },
+    {
+      "path": "lib/me/cloud_library_backend.dart",
+      "sha256": "e96c9e9fc5160bd4476235b488dc123268a45e64e7b81ef8f1cbd64ed4da2fa0",
+      "size": 16178
+    },
+    {
+      "path": "lib/me/cloud_library_payload.dart",
+      "sha256": "7f9123ec8eb3bc1fa136e9ef90256c4ce444c1ec78b27c742933a80b5f02b66a",
+      "size": 24338
+    },
+    {
+      "path": "lib/me/cloud_library_resumable.dart",
+      "sha256": "ae829e93afa43e8b2f9f64f4dad7107b96247cd0d6c58be1e01c08468010ab23",
+      "size": 19033
+    },
+    {
+      "path": "lib/me/cloud_library_runtime.dart",
+      "sha256": "ded3f51e167ff4a40ceb31a51932f10ff5b4f9f835427b1be1572a3b86bc396a",
+      "size": 2429
+    },
+    {
+      "path": "lib/me/draft_card_action.dart",
+      "sha256": "532f8e169d8cb472159ac10346a5ea6032a52ecb4e18b41fa122ab1354efa71d",
+      "size": 3188
+    },
+    {
+      "path": "lib/me/legacy_original_adoption.dart",
+      "sha256": "d49ecd07573de9061dace03a076b0d7d574583d6f71e1379fe7235f6da258899",
+      "size": 21897
+    },
+    {
+      "path": "lib/me/legacy_scan_record_importer.dart",
+      "sha256": "4a93a8676793a84df24bde3bbbe66871ae272920254d6851fb2b5d2d39a04b50",
+      "size": 37989
+    },
+    {
+      "path": "lib/me/profile_likes_repository.dart",
+      "sha256": "b84e4684ffce9cb6eacd085ccd81ce7787af5f2378694915f16d7997f6790282",
+      "size": 2421
+    },
+    {
+      "path": "lib/me/scan_record_store.dart",
+      "sha256": "f057e76e0294b6b044cc9612aadf9d0251e23063ac068b62506beaccb44fcf8e",
+      "size": 88436
+    },
+    {
+      "path": "lib/me/train_gate.dart",
+      "sha256": "0602948671be8d385af544a9e54b89929f6a0c4bebb0d27c263406657098e46b",
+      "size": 5433
+    },
+    {
+      "path": "lib/me/work_identity.dart",
+      "sha256": "01d9b5e02241eca3fb7a22bbf35d9c58d0395e02381da0ce428218fee7555027",
+      "size": 1614
+    },
+    {
+      "path": "lib/me/work_identity_licenses.dart",
+      "sha256": "0b622d3658c90ed3ab9fd0ef1a6a89b907efc144df149885285fb0bfe822dc78",
+      "size": 22192
+    },
+    {
+      "path": "lib/object_transform.dart",
+      "sha256": "263c991011e3020391b1301ee429ec65e62d904ee1417a721a1c42573cd554a7",
+      "size": 4196
+    },
+    {
+      "path": "lib/official_aether_ffi.dart",
+      "sha256": "83245d37f218325aa7c43a20335e3ea005fc3aa6b60119f2055fe2e52c3c5e9d",
+      "size": 2933
+    },
+    {
+      "path": "lib/official_aether_sfm_ffi.dart",
+      "sha256": "729ca54dc263339f1a7eb5947a8860031211c710d571687f535bffc6f8e228bb",
+      "size": 67618
+    },
+    {
+      "path": "lib/official_capture/alicevision_motion_segment.dart",
+      "sha256": "05a68ef141582547dcdb7115209d8d14809fdca0365f110143069a13d1549a66",
+      "size": 1153
+    },
+    {
+      "path": "lib/official_capture/archive_audit_store.dart",
+      "sha256": "14cf00b7a2682deb93f4f5c31aac068da9375532a23a7e11b3d18de113581c77",
+      "size": 3477
+    },
+    {
+      "path": "lib/official_capture/archive_background_runtime.dart",
+      "sha256": "e9515c6d681f03e15ef3f6be445dddd9d2db6ce40d0cef82885fef519851a87b",
+      "size": 2731
+    },
+    {
+      "path": "lib/official_capture/archive_background_scheduler.dart",
+      "sha256": "1476130e92e03199d2230bc0e618ed5836db32375070e1cee34ae86346496389",
+      "size": 343
+    },
+    {
+      "path": "lib/official_capture/archived_photo_rebuild.dart",
+      "sha256": "c02a8ea0ac2d275f432502084c9d0ed9c282050cbb0fdc136b3a6d431346931c",
+      "size": 11986
+    },
+    {
+      "path": "lib/official_capture/auto_capture_controller.dart",
+      "sha256": "b0befb5ded2f7ae9ea6fb947a678fda2b05d12adab4df9115a3a8333705ac8d1",
+      "size": 45042
+    },
+    {
+      "path": "lib/official_capture/auto_capture_geometry.dart",
+      "sha256": "d62939e213d8a6f59eee43902df80459a23a4a45470c2dece9e12a84466b67a4",
+      "size": 19261
+    },
+    {
+      "path": "lib/official_capture/auto_capture_governor.dart",
+      "sha256": "6b2cefbdccefe5ec7b9f3a02f35f9827a81b918ba01bd74c5770eb8b11062cbe",
+      "size": 19924
+    },
+    {
+      "path": "lib/official_capture/auto_capture_mode.dart",
+      "sha256": "d185553d4f8a26327cf128b102a1284c9e64d2bbb4d781e8e6c639e4693c201c",
+      "size": 6692
+    },
+    {
+      "path": "lib/official_capture/auto_capture_telemetry.dart",
+      "sha256": "85729af6927acd30a1073c55ee96fba4eee0309d0f8406cc2bdf640f320febb3",
+      "size": 35762
+    },
+    {
+      "path": "lib/official_capture/aux_archive_container.dart",
+      "sha256": "cda2e2dcbc21fd0d974c2cf213c8270edc9397611fb4176c289ab6897da53f97",
+      "size": 3906
+    },
+    {
+      "path": "lib/official_capture/aux_archive_manifest.dart",
+      "sha256": "7d80b53ef20ffd888bb97f094047caef9e5d3be3d3a968d484e4d98b72919c14",
+      "size": 5177
+    },
+    {
+      "path": "lib/official_capture/aux_archive_resolver.dart",
+      "sha256": "78b7ae7ef16613c19cdc13129e834925a4bed8825d0ef3835b53ca8f3edd7f98",
+      "size": 2834
+    },
+    {
+      "path": "lib/official_capture/aux_archive_transaction.dart",
+      "sha256": "18dcfa2821cc5f1640ef1c43b5b24b1b82f23c0a65e53dfbe9a1a4ee4635c194",
+      "size": 15782
+    },
+    {
+      "path": "lib/official_capture/b1_gate_runner.dart",
+      "sha256": "f4f7e92b121301a0f135d6a212d7c104ba1586a601b34c280a531af76d625053",
+      "size": 8575
+    },
+    {
+      "path": "lib/official_capture/capture_archive_service.dart",
+      "sha256": "bb259ba549eebcb446b25ff00775d93839505d9b9ce545829f60b4118324c0e6",
+      "size": 11318
+    },
+    {
+      "path": "lib/official_capture/capture_coverage_cloud.dart",
+      "sha256": "285fa8c888eac2888cd8ec1962f7d2c7512a6b337ba740dc12537fb436ce12d1",
+      "size": 22238
+    },
+    {
+      "path": "lib/official_capture/capture_format.dart",
+      "sha256": "58f8a2311e17b1b322d9100eebf7b0b2565e42c8e6535d965d9e0ff6a701851a",
+      "size": 1235
+    },
+    {
+      "path": "lib/official_capture/capture_session.dart",
+      "sha256": "55e68b20aa9abdcb0788c949b82fccfff9d904358e108e17649a729e228f42ec",
+      "size": 95409
+    },
+    {
+      "path": "lib/official_capture/colorize_pipeline.dart",
+      "sha256": "fc9c109b9fc08357041ef32c8774348f4cfc866d1cb0b60b102facfef39cf5d4",
+      "size": 8835
+    },
+    {
+      "path": "lib/official_capture/continuous_feature_tracks.dart",
+      "sha256": "f301c48aa650de1513c65eb240fcd89d02c2a132b901ffd0a7e7768a74350faa",
+      "size": 35557
+    },
+    {
+      "path": "lib/official_capture/database_archive_codec.dart",
+      "sha256": "ffd302e5f148cc75b4f63eb9431cef39761682737e4209144641c5f6d439da80",
+      "size": 660
+    },
+    {
+      "path": "lib/official_capture/database_archive_ffi_codec.dart",
+      "sha256": "8a161f01f28d5c20aec7732204e12d88bda74eff59268f7153e0a1cc9447aed0",
+      "size": 6017
+    },
+    {
+      "path": "lib/official_capture/database_archive_ffi_preprocessor.dart",
+      "sha256": "fe65ae3baa28f815223dd76a174b32f63ce49d66350f69011ede226656d7cd01",
+      "size": 6953
+    },
+    {
+      "path": "lib/official_capture/database_archive_manifest.dart",
+      "sha256": "e0f96ca852568d411141e47808221f469c0ff20cf84eb85ded22a9fcb646987d",
+      "size": 5066
+    },
+    {
+      "path": "lib/official_capture/database_archive_policy.dart",
+      "sha256": "2c5e244abfaaae9b35fd65e5f448d5a52209319feb48492c2013dddc603a98ec",
+      "size": 3142
+    },
+    {
+      "path": "lib/official_capture/database_archive_preprocessor.dart",
+      "sha256": "602078bb8bf46ebda5fd8cf531157e584b2e2ffc46c9d657edab21930c3aae28",
+      "size": 798
+    },
+    {
+      "path": "lib/official_capture/database_archive_resolver.dart",
+      "sha256": "d336b4e5489f2316bba120eab88c86175f01021250ed9bb2c5c94ca9d9043f1c",
+      "size": 3913
+    },
+    {
+      "path": "lib/official_capture/database_archive_transaction.dart",
+      "sha256": "966f78ca36145931f1b5a8f98a9d9d84c426d9964b89d232375a7a89e7786149",
+      "size": 15427
+    },
+    {
+      "path": "lib/official_capture/database_prune_ffi.dart",
+      "sha256": "0fcd0ec981ee92a276b444990c8de0cb51987a58a3e5dccbf5f9dd754deb53b3",
+      "size": 3543
+    },
+    {
+      "path": "lib/official_capture/database_recipe_transaction.dart",
+      "sha256": "c202d5637e9c8cf64af7072fbefd5d2050089f2c25335284cd19a382777fa520",
+      "size": 19344
+    },
+    {
+      "path": "lib/official_capture/dense_stage.dart",
+      "sha256": "52d80841582fe0117b3b993d2c2624025cce0c219b37f00e23b2df7ec0b9f9a7",
+      "size": 4420
+    },
+    {
+      "path": "lib/official_capture/dome/captured_frame_sample.dart",
+      "sha256": "5e8916e54953f2ced303caf2683b4fd144ae5cba26ad3ca16017b6ffb910c582",
+      "size": 8435
+    },
+    {
+      "path": "lib/official_capture/dome/dome_cell_state.dart",
+      "sha256": "c7efd7fa1d773a942cd75c412fa6edbfb52f552ea0f81326ea13c3e5b2d1e374",
+      "size": 1983
+    },
+    {
+      "path": "lib/official_capture/dome/dome_config.dart",
+      "sha256": "1e06a8a555b133437dc854e603d67659a4ff3f6be779581cd209c98ac89f0757",
+      "size": 6243
+    },
+    {
+      "path": "lib/official_capture/dome/dome_target_points.dart",
+      "sha256": "449cfcd6851eede7491625a7cb048619bf44c437861849e39db6e2336fe60cd1",
+      "size": 31697
+    },
+    {
+      "path": "lib/official_capture/dome/dome_thresholds.dart",
+      "sha256": "e822116e535c9df25810400895dc648652327f43dbd81bd0844e99ee2ad7e9fb",
+      "size": 5552
+    },
+    {
+      "path": "lib/official_capture/dome/ring_buffer_cell.dart",
+      "sha256": "ddfbf658e5a33f06c997875e3c24813bf0b80c97cab86ce532ac12286e7e52fa",
+      "size": 9429
+    },
+    {
+      "path": "lib/official_capture/dome/session_view_graph_curator.dart",
+      "sha256": "06103f405c106352171fe1df7a9e672543296586a5d3f4ef5a5f32c448792895",
+      "size": 12952
+    },
+    {
+      "path": "lib/official_capture/encoder_probe.dart",
+      "sha256": "b9e2a0c7a564f2754518bc49b4220da6cbebf0fee7fcb196b3a42cd86b7dc135",
+      "size": 6149
+    },
+    {
+      "path": "lib/official_capture/floater_filter.dart",
+      "sha256": "f7df53b3612ee2dae5439fb5de51dba0a20e063e272bf89dbfe2b450010d3e75",
+      "size": 6966
+    },
+    {
+      "path": "lib/official_capture/fusion_ahrs.dart",
+      "sha256": "291252ca755f8d27c6f3410ff4e398610b5f442a865800bb2da955c972e7685f",
+      "size": 8480
+    },
+    {
+      "path": "lib/official_capture/global_ptol_benchmark_gate.dart",
+      "sha256": "9e0141342b3c7dfda0b9198ac6891af073a1f1c8114e531f20ce859bfcd6ae2f",
+      "size": 7343
+    },
+    {
+      "path": "lib/official_capture/gravity_align.dart",
+      "sha256": "83a03b0a2320f73bbe4c48f06473bf1929a34c8f06d0ce88cd14a6b81b783c34",
+      "size": 17071
+    },
+    {
+      "path": "lib/official_capture/lepton_jxl_benchmark_gate.dart",
+      "sha256": "499b1c4fcd74df7badd92f9f51d49a3983a374484b725cab5c9f0e114e941f0a",
+      "size": 576
+    },
+    {
+      "path": "lib/official_capture/lepton_photo_archive_ffi_codec.dart",
+      "sha256": "2b06eee273a0d35c54c12d9b4741396b0e050d2c3c15c2c5ff81e88b3f8037bf",
+      "size": 6324
+    },
+    {
+      "path": "lib/official_capture/live_cloud_diagnostics.dart",
+      "sha256": "575280b8d927a1f650d22299d32e82a39a496e977fc073d00c51ec72a14dda68",
+      "size": 4398
+    },
+    {
+      "path": "lib/official_capture/live_sfm_publish_policy.dart",
+      "sha256": "9fe8e5db7e6b1d9dac9d36266e0103bc8f5aeb10259043e50f7cb8bca76b5ec2",
+      "size": 2744
+    },
+    {
+      "path": "lib/official_capture/logical_world_frame.dart",
+      "sha256": "79051ff651bd54e87eb5fb985768973db762fca20d86f29870543d0fa1e1b394",
+      "size": 3496
+    },
+    {
+      "path": "lib/official_capture/manual_capture_queue.dart",
+      "sha256": "8f5b7c9be250dd16766368fd7f2408537472016e0524299cb0085975b2fdf1a0",
+      "size": 6203
+    },
+    {
+      "path": "lib/official_capture/map_frame_alignment.dart",
+      "sha256": "2fb38271dcf82c6cac05c6774e17115da0108c97549345ddb42668f7415c1408",
+      "size": 5980
+    },
+    {
+      "path": "lib/official_capture/map_keyframe_evidence.dart",
+      "sha256": "79571d76ff7ce8c8e27b7d294b8fc1e7d1666d6af68191b9080af224f4b34454",
+      "size": 6428
+    },
+    {
+      "path": "lib/official_capture/map_landmark_counts.dart",
+      "sha256": "946863c5614109c2132623d057b40ad7711056d74402df935cfd626360a95a8c",
+      "size": 5955
+    },
+    {
+      "path": "lib/official_capture/map_landmark_observability.dart",
+      "sha256": "d77dbae4d015f61e46183080ad809c084d54263d50cb0aa818696cf9717a810f",
+      "size": 8998
+    },
+    {
+      "path": "lib/official_capture/map_local_map.dart",
+      "sha256": "43bc8deeac8d61a36d9b3aeef58da24e32bc5d1b0417309c3bcb9899844105af",
+      "size": 8169
+    },
+    {
+      "path": "lib/official_capture/multiband_color.dart",
+      "sha256": "2b75cbd042dba6d09c30721dd58331b07a71b1122aa9c35b808e300557a0d529",
+      "size": 6625
+    },
+    {
+      "path": "lib/official_capture/official_actual_photo_gate.dart",
+      "sha256": "f757336646858f0276cbedf2493b11de4b4543d7ea787b78fa0908ebded13be9",
+      "size": 3165
+    },
+    {
+      "path": "lib/official_capture/official_highres_reconstruction_input.dart",
+      "sha256": "90851d9c9d5ff48167c958b45c07bdea1e69eb6c11b001cc3c5e1d6ba4a4d765",
+      "size": 3596
+    },
+    {
+      "path": "lib/official_capture/one_euro_filter.dart",
+      "sha256": "6e897df1e9efddf1e5d1a3001e349aac1821021477aa85710766912f22c2d454",
+      "size": 5020
+    },
+    {
+      "path": "lib/official_capture/orb_descriptor.dart",
+      "sha256": "44d262836eb37d8ce0eaea2e7a2771c8df53a0bba8895eccd51ef1654dc79f06",
+      "size": 18885
+    },
+    {
+      "path": "lib/official_capture/orientation_tracker.dart",
+      "sha256": "a145808b6828f2e6b164fd2be7f5b45bd06ee113154594ceb25d695e53ac52d7",
+      "size": 8688
+    },
+    {
+      "path": "lib/official_capture/parallax_banner_gate.dart",
+      "sha256": "a512a72e53aed1bdfbc0b62919df105a7c9acd48a8da7a6f7917a313720a9f9c",
+      "size": 4384
+    },
+    {
+      "path": "lib/official_capture/photo_archive_codec.dart",
+      "sha256": "0bbf61b251f3ca149330b2059ae0aa07a8f5f1db3d714b08f152c6c713f3e328",
+      "size": 765
+    },
+    {
+      "path": "lib/official_capture/photo_archive_coordinator.dart",
+      "sha256": "c036f025a26d9aebc8154121e3fe3e54a8f67d61377882f762c70b64917719d4",
+      "size": 18939
+    },
+    {
+      "path": "lib/official_capture/photo_archive_ffi_codec.dart",
+      "sha256": "bf60aa461a90d2ebe0cac9ac241f9adf580307d055571ecc46d98a4f532892e3",
+      "size": 7050
+    },
+    {
+      "path": "lib/official_capture/photo_archive_manifest.dart",
+      "sha256": "37925c3b93ccb6ed7279e4c026b327017b1dcffd1b003cee35224a39ddde7e18",
+      "size": 8093
+    },
+    {
+      "path": "lib/official_capture/photo_archive_policy.dart",
+      "sha256": "c31964723b5d94ff09dc94f0e46701ebbea4930465ed29282762cc589322b02e",
+      "size": 4287
+    },
+    {
+      "path": "lib/official_capture/photo_archive_resolver.dart",
+      "sha256": "f4285a6f5fa93eaea79b05641361a82467b7de0e340c1e4ea5b1580289cc95fe",
+      "size": 10858
+    },
+    {
+      "path": "lib/official_capture/photo_archive_runtime.dart",
+      "sha256": "09837ad5cccc59f6ef75e97d85a0f025ef27ef3f117eef5bb011b7a4a9a93f10",
+      "size": 5398
+    },
+    {
+      "path": "lib/official_capture/photo_archive_transaction.dart",
+      "sha256": "333c974818ab1638ee5c30887550244c064f5dd8fc2270c628415d85e034af84",
+      "size": 9093
+    },
+    {
+      "path": "lib/official_capture/photo_card_state.dart",
+      "sha256": "8be560684a03c2fba627a11c56bfcab607f9fc69e4fb2e70d92dfd974ab59005",
+      "size": 10147
+    },
+    {
+      "path": "lib/official_capture/photo_slot_naming.dart",
+      "sha256": "13038170e4de9e0df7489ff28eecdbf01c4c4d6f3adaaee5d0a9f1cd00fde85d",
+      "size": 3926
+    },
+    {
+      "path": "lib/official_capture/place_recognition_bayes.dart",
+      "sha256": "36452aee1d16724c6523cbb56281ca99436b6b8b86fb46cabcd715fd75a42bc2",
+      "size": 10028
+    },
+    {
+      "path": "lib/official_capture/pose_drift_tracker.dart",
+      "sha256": "4ccb2f9bfaaefdd5ad22c79511f4b6059b5db9176e798f5b14f4be6f553756e4",
+      "size": 16002
+    },
+    {
+      "path": "lib/official_capture/project_photo_album.dart",
+      "sha256": "2daf5db190df5c285b88bb25e8716850fac9e44d025702dc1b5e06d87fd3a6dd",
+      "size": 5334
+    },
+    {
+      "path": "lib/official_capture/pw_telemetry.dart",
+      "sha256": "1c2d2004df06805826a266bda0efc42674c463b78df35e6e05677d6c9e2bc0d8",
+      "size": 3077
+    },
+    {
+      "path": "lib/official_capture/pwva_master.dart",
+      "sha256": "6cd0556b3a9fc681c1b65490c089cf51aad77921373ff2ee8c0b9588cb424c16",
+      "size": 11950
+    },
+    {
+      "path": "lib/official_capture/realtime_capture_preview.dart",
+      "sha256": "2a9c1eab87ff2cd6cc873a8997c72452de3014afeaf86f4e294a98478c1d47d5",
+      "size": 7698
+    },
+    {
+      "path": "lib/official_capture/representative_color.dart",
+      "sha256": "b06c9381e6a583d00828a7b8b01d0147731210df7c6b645f1f001b22a24a3ae5",
+      "size": 19830
+    },
+    {
+      "path": "lib/official_capture/selection_box.dart",
+      "sha256": "0a3da2f93b1f66fe788869e1651a773a078ad1f644fcbc62ac8961aa43bbedb1",
+      "size": 10655
+    },
+    {
+      "path": "lib/official_capture/selection_box_storage_io.dart",
+      "sha256": "6e7b89909151bae2449c811ebcc740523139d56dabe1bc7ae1861be56caf25a2",
+      "size": 521
+    },
+    {
+      "path": "lib/official_capture/selection_box_storage_stub.dart",
+      "sha256": "06e2ec4f6285bf0b5e3f33288beef880964703107811f54d12ce9d381e19fe2d",
+      "size": 277
+    },
+    {
+      "path": "lib/official_capture/sfm_db_regen.dart",
+      "sha256": "0718852f179fe50c1c46e5fc6ac54020ed42bcf582ed2c145b15e509941b617b",
+      "size": 7914
+    },
+    {
+      "path": "lib/official_capture/sfm_feed_queue.dart",
+      "sha256": "fc9682f31818657bafb81310ef31e711e3a28d2fc335d3112435743d1f8cc430",
+      "size": 2723
+    },
+    {
+      "path": "lib/official_capture/sfm_live_recon.dart",
+      "sha256": "b0026fcc72a1ff409aceee5e0388edccf3f53c11b1143e8b195ef3d4137a7e15",
+      "size": 124765
+    },
+    {
+      "path": "lib/official_capture/sfm_resume.dart",
+      "sha256": "a6b16cfc54e223a65ae90b7d93c209c0cea5379a3a99c82696ddb5a7d542b5ae",
+      "size": 43655
+    },
+    {
+      "path": "lib/official_capture/shutter_backpressure_gate.dart",
+      "sha256": "a420d41217708c6f2ce9712fe3530c5c44f2c4f076de0044a99bbe23c3e21926",
+      "size": 3048
+    },
+    {
+      "path": "lib/official_capture/sparse_ply.dart",
+      "sha256": "77712bd59ac52763b145ede716e8173c92cade3b4af14dd6dbff2c7ec9a5bf7e",
+      "size": 7326
+    },
+    {
+      "path": "lib/official_capture/sqlite_db_health.dart",
+      "sha256": "ea759468e0c47a0cec9b663b75a13766067755d1d9b4bf1867fe27fce01e333a",
+      "size": 5925
+    },
+    {
+      "path": "lib/official_capture/telemetry_writer.dart",
+      "sha256": "8ad122f187efbcada914a57d4e65f04de68fffa18d490b9606e8d0c677895424",
+      "size": 7650
+    },
+    {
+      "path": "lib/official_capture/transient_preview_cleanup.dart",
+      "sha256": "fceac79706abb361ad3ba209fda256aa940b1318a3c0682e6838136203bcade5",
+      "size": 1076
+    },
+    {
+      "path": "lib/official_capture/true_parallax.dart",
+      "sha256": "d2d86282701c8f003ca808674d43b53be3d66e2f29a6a33876a5449354a81b32",
+      "size": 8716
+    },
+    {
+      "path": "lib/official_capture/visual_word_dictionary.dart",
+      "sha256": "7193ea5cdc924a3a5fabff902229b994d867e4782fffa6abd3ea33393fe150d1",
+      "size": 9082
+    },
+    {
+      "path": "lib/official_dome/ar_pose.dart",
+      "sha256": "27df4a46fe279521235e57297f03efaddcc71b60ec354a9c7e787294f663ade2",
+      "size": 23584
+    },
+    {
+      "path": "lib/official_dome/coverage_map.dart",
+      "sha256": "863a2f06ff05928cecb8909d48466b9e1c408cc2ab9a247d04116a858676889d",
+      "size": 4259
+    },
+    {
+      "path": "lib/official_dome/dome_view.dart",
+      "sha256": "28f86eb8586eaca4fef91246bab7a1a184803efb06c7a84266848ec3bd640c22",
+      "size": 6901
+    },
+    {
+      "path": "lib/official_dome/mock_pose_provider.dart",
+      "sha256": "5e4bdf04b8a09c51d80956c067f88bf660bcb393d2d98051c47c35b207d4eb3c",
+      "size": 4341
+    },
+    {
+      "path": "lib/official_dome/platform_pose_provider.dart",
+      "sha256": "ea018d0ab3e8132bf69486cbe71ab010dcf4c87d99a6119a5f3edba555c0fcbd",
+      "size": 20328
+    },
+    {
+      "path": "lib/official_quality/frame_quality_constants.dart",
+      "sha256": "74881fe1a93c75f0f7818dc27b66aa30deb1b3d7111e1625a3e5ef07d25efd07",
+      "size": 2949
+    },
+    {
+      "path": "lib/official_quality/frame_signature_similarity.dart",
+      "sha256": "26e8a22569476f28d11c1bf91c466c5383b6cc551e632dd42620152f4f18f601",
+      "size": 649
+    },
+    {
+      "path": "lib/official_quality/guidance_engine.dart",
+      "sha256": "d6ae669afa42bc4f80fb104b5ecf3602a636b2ac3a16524adbd3965253609a64",
+      "size": 19236
+    },
+    {
+      "path": "lib/official_quality/local_preview_profile.dart",
+      "sha256": "cff50e41b88d3c94d38d29f5700d5fca5c0a805ee89c3465df9df20c154a7e83",
+      "size": 5226
+    },
+    {
+      "path": "lib/official_quality/mock_frame_driver.dart",
+      "sha256": "ce18c28c941204da6ec67774ddd39a3c6a3fba8179501e72e1f56bccf6733755",
+      "size": 5421
+    },
+    {
+      "path": "lib/official_quality/quality_compute.dart",
+      "sha256": "294e8c7403582608b2d2f0f899124c3abf5b2ffe122a3980f9e6311d0c275f44",
+      "size": 10607
+    },
+    {
+      "path": "lib/official_quality/quality_debug_overlay.dart",
+      "sha256": "3785bb37c1821de4cc1475440b8e04f195aee0da626cc00ab195e05e5fa2c1f2",
+      "size": 6408
+    },
+    {
+      "path": "lib/official_quality/training_convergence.dart",
+      "sha256": "58d9bd55d31b30b7138d56f68e2a1bb24aad5b6e09ac8585ea230eabe3170ff5",
+      "size": 5058
+    },
+    {
+      "path": "lib/official_util/capture_storage_admission.dart",
+      "sha256": "9445f0c239f3c22c0e19c0bad9f2efb9711a9762c3cd4cf9f18604c621e73efd",
+      "size": 2924
+    },
+    {
+      "path": "lib/official_util/device_log.dart",
+      "sha256": "241f4e96d66fb784c02fbfef9123bcb6d9ad591fa4244b44845b18179624f886",
+      "size": 2346
+    },
+    {
+      "path": "lib/official_util/first_frame_startup.dart",
+      "sha256": "b4e282dee6dd9e505b3e3e07d3c45398c7d64768c6369be341060bbfca2a5ed5",
+      "size": 664
+    },
+    {
+      "path": "lib/official_util/startup_trace.dart",
+      "sha256": "20ece484f1413e205f6551d14a3dc0719347beb92c8695a866366982e2781cbc",
+      "size": 5032
+    },
+    {
+      "path": "lib/official_util/worker_storage_query.dart",
+      "sha256": "1d4a57e181926a3b48369d2aa96d4a2c9a65e1755069699d43cb706a3d05095a",
+      "size": 3090
+    },
+    {
+      "path": "lib/orbit_controls.dart",
+      "sha256": "932a8907e8e1419903168dbd220be98b49e14c27c53d5736b6b2a4956381cfba",
+      "size": 6709
+    },
+    {
+      "path": "lib/pipeline/geometry_verification.dart",
+      "sha256": "b87ffd0a4d4b29719f99834aa57cbf6d879d79380c592576183c7faa2bcc2660",
+      "size": 43041
+    },
+    {
+      "path": "lib/pipeline/pre_sap_uncertainty_benchmark.dart",
+      "sha256": "6b9b09e775502c5de221212e77aa53db90b1184c63c7154b2b5f10a1d65faad6",
+      "size": 17459
+    },
+    {
+      "path": "lib/point_cloud_display/progressive_octree_order.dart",
+      "sha256": "3007866035104d69f6af2b05ec31a6e86ff79539e2b16d046ec801f6aff6851e",
+      "size": 7082
+    },
+    {
+      "path": "lib/point_cloud_lod/dense_lod_cache.dart",
+      "sha256": "123afaa2aca80f3e87b5b6cbd89c52eecb0319b5029be9621be108ba4591796e",
+      "size": 21032
+    },
+    {
+      "path": "lib/point_cloud_lod/gpu_cloud_layer.dart",
+      "sha256": "e2d067527d4189ce79bb85ca84a30bdf72403e76546d28fbdfe92006ebdc7cb3",
+      "size": 15348
+    },
+    {
+      "path": "lib/point_cloud_lod/lod_bridge.dart",
+      "sha256": "fe493e5eda4df744f17b1f2ef3270c0798cbf23a0cbe4ff332c42f729b74bc61",
+      "size": 23305
+    },
+    {
+      "path": "lib/point_cloud_lod/lod_camera.dart",
+      "sha256": "11d38be5e9a884cff4ce7942559abf118dc685942db0ff60abc8820c84bec591",
+      "size": 11898
+    },
+    {
+      "path": "lib/point_cloud_lod/lod_scene_fit.dart",
+      "sha256": "64c090d8e5134292bfd315de0fc861635cd083111987ad7ed0a2c0aa7ddda7cc",
+      "size": 3789
+    },
+    {
+      "path": "lib/pw38/cache_completion.dart",
+      "sha256": "f84890de03e23218eb37a24ae6e787e7d096440f453f0bb7ef40679e3c513aca",
+      "size": 17612
+    },
+    {
+      "path": "lib/pw38/cached_downstream_mainline.dart",
+      "sha256": "ed01a163c45e0c01518bdd873799886daabdef7435555bb5cab602a017e883d3",
+      "size": 11466
+    },
+    {
+      "path": "lib/pw38/cached_downstream_request.dart",
+      "sha256": "f1172963038ac76e08091ea4aec1b4f28e04afb306bda7fbae7c18bfe3f6f870",
+      "size": 19783
+    },
+    {
+      "path": "lib/pw38/cached_phone_segment.dart",
+      "sha256": "4ea61f65803cce4e0aa0dbda7695e8afc82d39579ed9b4d9bdee4af923ba62c9",
+      "size": 15750
+    },
+    {
+      "path": "lib/pw38/capture_artifact_retirement.dart",
+      "sha256": "e44aa6a0c91f7018fc809bb52d9ed094194922c4040744612ceea933e297f8e3",
+      "size": 8484
+    },
+    {
+      "path": "lib/pw38/dense_binding_contract.dart",
+      "sha256": "cb49f0c81fff57714e09ed844fefcae036c555d92faf64d174af4d47096f131e",
+      "size": 14667
+    },
+    {
+      "path": "lib/pw38/execution_identity_scope.dart",
+      "sha256": "9d6f38397f78c53c7136c44bf515e0d795edd1a81da5edd55c17b67bbaba5138",
+      "size": 9961
+    },
+    {
+      "path": "lib/pw38/final_artifact_completion.dart",
+      "sha256": "8ed37a4b468dbea7977ba75cada500a0b7194df70b406c8814bf76549337c1db",
+      "size": 3967
+    },
+    {
+      "path": "lib/pw38/frame_transport.dart",
+      "sha256": "d5a7adb0879319415ef84f331d9e9a550d5f801b7f861c964d2ec5562d967c4e",
+      "size": 8039
+    },
+    {
+      "path": "lib/pw38/generated_artifact_retirement.dart",
+      "sha256": "e763510bd9ed7f56af8881004b36c5ff4bdd5adaddb8a127db08f04314218d09",
+      "size": 10230
+    },
+    {
+      "path": "lib/pw38/generated_normal_input_retirement.dart",
+      "sha256": "40419b18522765ece7949b2161385c6fa13dd5722afed3399bfda29315df8734",
+      "size": 1124
+    },
+    {
+      "path": "lib/pw38/mainline.dart",
+      "sha256": "ff5f0424367042d11d53e253efc85fc6026a6cbb175d8be3561b46a56eaa80a6",
+      "size": 4683
+    },
+    {
+      "path": "lib/pw38/memory_policy.dart",
+      "sha256": "d2ce42356b8e38cfc6bafff6513c5c6b092721da356ff91f2c359c1ae63c6fb7",
+      "size": 1123
+    },
+    {
+      "path": "lib/pw38/mobile_input_transport.dart",
+      "sha256": "05f59c84a8db2fe7d5a4ac9e6a8e59c53975f9df7169b1125b73337ddbf5b56a",
+      "size": 28294
+    },
+    {
+      "path": "lib/pw38/native_downstream.dart",
+      "sha256": "90759198646b42334216b4572e0f655ae6aa7f47136a15ce4bc8b11b1d8da7ca",
+      "size": 26659
+    },
+    {
+      "path": "lib/pw38/original_retention_io.dart",
+      "sha256": "960b30d58498e08dea6e161fd687affeffd72e7f0947906d138d7ae293f2b293",
+      "size": 4178
+    },
+    {
+      "path": "lib/pw38/pending_capture_retirement.dart",
+      "sha256": "414b26f3ef8fa8765f24c4f8c5e759a3cfd7d6a0f670feef611e2d6f97917e55",
+      "size": 14353
+    },
+    {
+      "path": "lib/pw38/production_capture_request.dart",
+      "sha256": "aedd35f77b8024858a11417c2b60c8c49cbe31b05237ff1afaab39baaf56e986",
+      "size": 25687
+    },
+    {
+      "path": "lib/pw38/production_image_binding.dart",
+      "sha256": "d08a4c7771a61a2a79766c9b6db6437a98e87fb318492fe4d78996b25e3089df",
+      "size": 12005
+    },
+    {
+      "path": "lib/pw38/production_material_preparer.dart",
+      "sha256": "5c120ce0f59939a3dda0302a13d89133fd91b61eb26a2b28dd20cd3f22c668c2",
+      "size": 31507
+    },
+    {
+      "path": "lib/pw38/production_native_downstream_adapter.dart",
+      "sha256": "39658dafc54aeb2fb825fe61434d17f61d3788312aa001bbdaa9bbd1016e800d",
+      "size": 5280
+    },
+    {
+      "path": "lib/pw38/production_original_fixture_binding.dart",
+      "sha256": "6917a09a137d0823a3777c51d101767864fbb84e900b65b6f4a47d715469d746",
+      "size": 40107
+    },
+    {
+      "path": "lib/pw38/production_result_contract.dart",
+      "sha256": "421a8fb29552e5e96a1068341f3f2dd179c53a4db0cc97480f249b8be422a85e",
+      "size": 14772
+    },
+    {
+      "path": "lib/pw38/production_runtime_binding.dart",
+      "sha256": "1c6d176086b5d5da4c510f1e8e1c3d7bcb8dde254b2db9b6cfa51f41725d8a7a",
+      "size": 5061
+    },
+    {
+      "path": "lib/pw38/production_runtime_closure.dart",
+      "sha256": "3c8d6bd83878459898f8937bd2339185c130a077aad3e5952f14e804f107df1a",
+      "size": 6388
+    },
+    {
+      "path": "lib/pw38/production_scene_binding.dart",
+      "sha256": "ee8345b751649fd83d7f376f648a7be507e3994bcf63a465b80124d67f7ceaf9",
+      "size": 6968
+    },
+    {
+      "path": "lib/pw38/production_session_binding.dart",
+      "sha256": "9bb54fd86a713ff9b108532801857c96564133f7a2ae1d0e0fe24cc7e3966d2d",
+      "size": 8270
+    },
+    {
+      "path": "lib/pw38/production_whole_runtime.dart",
+      "sha256": "5b7a615af9e45a4cdc8b37b4ee5f67159f81ef546e7b2bfddf66e5342c9e8936",
+      "size": 11733
+    },
+    {
+      "path": "lib/pw38/reconstruction_artifact_gate.dart",
+      "sha256": "82282a9dd8be977172f3194354bd8849895d2fdc40ae97f11ff526e32e790e5c",
+      "size": 7159
+    },
+    {
+      "path": "lib/pw38/reconstruction_mainline.dart",
+      "sha256": "60269f9920fd1f09e827b344a1982f0fc187b119ce82d06cf16a7116891cd83b",
+      "size": 35833
+    },
+    {
+      "path": "lib/pw38/reconstruction_region.dart",
+      "sha256": "bd35e46a4a88f22830ba068b8dd76876c68d5409ae291857e66e14f8ee364534",
+      "size": 4638
+    },
+    {
+      "path": "lib/pw38/reconstruction_request.dart",
+      "sha256": "b5024669d3a7319f2469357e0e6bc352832039bf00cbb577dac745870d93b73d",
+      "size": 20375
+    },
+    {
+      "path": "lib/pw38/region_retention_io.dart",
+      "sha256": "7b0064b72768a51cca7469fdf1614c6391c2d11117b5606791f3e2185b5ebf4f",
+      "size": 13397
+    },
+    {
+      "path": "lib/pw38/request.dart",
+      "sha256": "af518fd1a213c1164f734b94089c522b9a419020056f71cb28b7e7dd5db228f3",
+      "size": 11803
+    },
+    {
+      "path": "lib/pw38/result_failure_persistence.dart",
+      "sha256": "2383e9f6102d0e7c8162753d398bcfd5ca81cc0184cd21e21b890d71348c79c3",
+      "size": 1343
+    },
+    {
+      "path": "lib/pw38/terminal_glb.dart",
+      "sha256": "2a5f9dd4ad4a4a11fa1ace4638f9b912e689563291087b10801950631c9a9277",
+      "size": 17484
+    },
+    {
+      "path": "lib/pw38/vendor/dart_pipeline/lib/pw38_geometry_ffi.dart",
+      "sha256": "b6091dc0bdbce021b5b3071951ade5d180fcf3b724fd420ed0452dcfb0245456",
+      "size": 8347
+    },
+    {
+      "path": "lib/pw38/vendor/dart_pipeline/lib/pw38_pipeline.dart",
+      "sha256": "c3cad0dfc028833adc4c71326fa30f6b5540fe6ef704fb6e96b2039c83924cd1",
+      "size": 14226
+    },
+    {
+      "path": "lib/pw38/vendor/dart_texture_integration_v1/lib/pw38_texture_ffi.dart",
+      "sha256": "cbf4b04f831819d01c8930953fc62a32b3e5cf6a5bc6f3d85c1905eef6759ab8",
+      "size": 29987
+    },
+    {
+      "path": "lib/pw38/vendor/production_downstream_bridge_v3/lib/pw38_downstream.dart",
+      "sha256": "a98dcefac85828e7ff2280a85c4652d0f63f906ad7e6b9960f5f35eb0e677f9f",
+      "size": 32241
+    },
+    {
+      "path": "lib/pw38/whole_dense_binding.dart",
+      "sha256": "5a85df5f606eb630ab023147a2a0ec49355d57f75afb2c32bfc642f648c116f5",
+      "size": 16599
+    },
+    {
+      "path": "lib/pw38/whole_dense_live_observer.dart",
+      "sha256": "15b4c4408aee3096ca26de8fae5838ddc30b56df64a9ab0b4e8cac7872d346cd",
+      "size": 9730
+    },
+    {
+      "path": "lib/pw38/whole_disk_admission.dart",
+      "sha256": "4ba2391dd6096f91f2a8f748eced7f706acc69ee5cfd194027534e82406e8185",
+      "size": 5719
+    },
+    {
+      "path": "lib/quality/frame_quality_constants.dart",
+      "sha256": "74881fe1a93c75f0f7818dc27b66aa30deb1b3d7111e1625a3e5ef07d25efd07",
+      "size": 2949
+    },
+    {
+      "path": "lib/quality/guidance_engine.dart",
+      "sha256": "fa9837507aa22c788361af657d11c4f1c83260f238bff2ca66a65a9a0daa1d7a",
+      "size": 19455
+    },
+    {
+      "path": "lib/quality/local_preview_profile.dart",
+      "sha256": "cff50e41b88d3c94d38d29f5700d5fca5c0a805ee89c3465df9df20c154a7e83",
+      "size": 5226
+    },
+    {
+      "path": "lib/quality/mock_frame_driver.dart",
+      "sha256": "0e29c0a447561ef17c9a9eced648e9dcf96248c88f2bc355d504f2519e5dd85b",
+      "size": 5363
+    },
+    {
+      "path": "lib/quality/quality_compute.dart",
+      "sha256": "b008242c96fe3d1a1f8c2b59a24ad868d30b6e120e4a21462b62877f264cb90d",
+      "size": 10368
+    },
+    {
+      "path": "lib/quality/quality_debug_overlay.dart",
+      "sha256": "788832b9dd81df93977977f24933ae67e8d67c97ea0af8c36a499c40e2b7dd64",
+      "size": 6473
+    },
+    {
+      "path": "lib/quality/training_convergence.dart",
+      "sha256": "45392fc01993408f8549940d0a1406d0a214f1ca9bd1d86fc2c086b997296420",
+      "size": 5068
+    },
+    {
+      "path": "lib/reconstruction_lease.dart",
+      "sha256": "8cb8eea2e4ceded212d2668b53317dec027073e29a376e43e64ffd775c857f83",
+      "size": 2234
+    },
+    {
+      "path": "lib/storage/signed_upload_broker.dart",
+      "sha256": "1cf8c126f28b15973f66d77068569a15a4254eb36d24cf8ec9ae49f37a794243",
+      "size": 3212
+    },
+    {
+      "path": "lib/ui/app_shell.dart",
+      "sha256": "feff3813169a3e8b8eabc4776409d28bdd566a0105a3298dab5d5417d5aaa5e8",
+      "size": 9838
+    },
+    {
+      "path": "lib/ui/auth/auth_minimal_widgets.dart",
+      "sha256": "6704cefe44e88cf0210194d8664b2eefa67b1a1784025a9ffecfd8de714e94ee",
+      "size": 13568
+    },
+    {
+      "path": "lib/ui/auth/auth_policy_consent.dart",
+      "sha256": "185ab418571f6b3726d1896508872cbac5e0931061cc648a2e76893fb11bd37c",
+      "size": 1054
+    },
+    {
+      "path": "lib/ui/auth/auth_root_view.dart",
+      "sha256": "1a3133e3d5d53506dad1b8ab147046324d9e045ce3bfe08594f5c634bbfd7e82",
+      "size": 11038
+    },
+    {
+      "path": "lib/ui/auth/auth_shared_widgets.dart",
+      "sha256": "e4d8007960960056f0fdeb958837d0f39651df41761066ddeed45657762c1bef",
+      "size": 10056
+    },
+    {
+      "path": "lib/ui/auth/email_sign_in_view.dart",
+      "sha256": "432685c04ff748808c350f041d17c20f1f60c84a72bbb67d454b6a21d3497c6a",
+      "size": 8915
+    },
+    {
+      "path": "lib/ui/auth/otp_verification_view.dart",
+      "sha256": "ed2e67374d5b7715388e43bf5399dbba22ef666749fda4a474c35e00eb47ce28",
+      "size": 11328
+    },
+    {
+      "path": "lib/ui/auth/phone_country_picker.dart",
+      "sha256": "2baa996a312e05e264d7c8efb8e1387bd3e0eb11849962b36392700bba7dd833",
+      "size": 2508
+    },
+    {
+      "path": "lib/ui/auth/phone_sign_in_view.dart",
+      "sha256": "d4bc4829b906c7920417a3dd4c1beac4fdd0f0a185d47cbe54d7a2c39ebc88cc",
+      "size": 13409
+    },
+    {
+      "path": "lib/ui/auth/reset_password_view.dart",
+      "sha256": "a4bad16e6910ad74b52409b9c929d3ac95c5c0eea5b7c3d1e202e471d12b00ef",
+      "size": 8973
+    },
+    {
+      "path": "lib/ui/capture/ar_album_page.dart",
+      "sha256": "add6d9fe5cc2c9f61c1001d1f2516a46db411dac3c61fd10339fcc4dc7348dae",
+      "size": 11180
+    },
+    {
+      "path": "lib/ui/capture/capture_page.dart",
+      "sha256": "8dcebdc8fe94409463bf9ccb4bcbba87c5eef9688638e612f1e5c184d3fb6662",
+      "size": 63448
+    },
+    {
+      "path": "lib/ui/capture/dome_painter.dart",
+      "sha256": "4be150d708603395040d88d2ba200b5b0686e2fc5badd7de92dde1a4d674b66f",
+      "size": 6241
+    },
+    {
+      "path": "lib/ui/capture/dome_view.dart",
+      "sha256": "6bacbcc166bd47f9f134b3804b50235409f66d15205db3a0e56bab2b27a2107b",
+      "size": 15531
+    },
+    {
+      "path": "lib/ui/capture/sfm_preview_overlay.dart",
+      "sha256": "f0c8690be61d85fbdab786892c51c680f8a81ee2cc32737a1ddddbf2412401c9",
+      "size": 9093
+    },
+    {
+      "path": "lib/ui/capture/sfm_resume_wait_page.dart",
+      "sha256": "ce99727141126b616427f9ee6c208d99e1b39f24a7203a33e2f930f06db6dfce",
+      "size": 7515
+    },
+    {
+      "path": "lib/ui/capture/sparse_cloud_view.dart",
+      "sha256": "b0661d6963f6a7a3f47a810afe685aff9fedd33621b8ba148ef080e37f5e1ca5",
+      "size": 31870
+    },
+    {
+      "path": "lib/ui/capture/sparse_cloud_viewer_page.dart",
+      "sha256": "4128fa749929748560c83065a5019a2372b1d9f5675a4016bd348b97acebc437",
+      "size": 4711
+    },
+    {
+      "path": "lib/ui/community/aether_cpp_card_demo.dart",
+      "sha256": "b6e323d33cdca23d16b1c3658708191586e70b1a357c54234a8556532f4655bc",
+      "size": 4110
+    },
+    {
+      "path": "lib/ui/community/blocked_users_page.dart",
+      "sha256": "529f23173f58099188f7b6e55309059923dc16799e651c1e982619a50068f4d2",
+      "size": 4644
+    },
+    {
+      "path": "lib/ui/community/card_live_governor.dart",
+      "sha256": "b6504c0f5ecfac6dca441852e3f11630d161d4a8ca2a73a5c9c1a7c4953813aa",
+      "size": 15023
+    },
+    {
+      "path": "lib/ui/community/comment_moderation_routes.dart",
+      "sha256": "3b1936c8a708f82599a654f268d6d39083161f0e64d65c17321cbf8b0a1eb35b",
+      "size": 4363
+    },
+    {
+      "path": "lib/ui/community/comments/comment_report_sheet.dart",
+      "sha256": "12f34f58ddaedcc17ba6311b1a82ff42feea28af3de45fe1d176402e295fe2af",
+      "size": 6291
+    },
+    {
+      "path": "lib/ui/community/comments/community_comments_panel.dart",
+      "sha256": "fbf2a401c0ae6bed10f11b81f937a8af7810ae29f236d8a45c2514308c6dc8a6",
+      "size": 68018
+    },
+    {
+      "path": "lib/ui/community/community_loading.dart",
+      "sha256": "052dcf44619223119390d4ce43fb9fa3f841a98c686a4782ef411629face0bac",
+      "size": 3125
+    },
+    {
+      "path": "lib/ui/community/first_pair_policy.dart",
+      "sha256": "caa0cfd66a6571f9fe72320beaf42fc5bfd13144f08ea33c517e0a0069bd2f0c",
+      "size": 2501
+    },
+    {
+      "path": "lib/ui/community/following_list_page.dart",
+      "sha256": "0b1fd29666d094558bdb36281b07f2425d0cd29daaa096e290aac2ac487c4c55",
+      "size": 5345
+    },
+    {
+      "path": "lib/ui/community/generated_account_avatar.dart",
+      "sha256": "9e5831274d2170230147b1c4bbfea95aaca9c92e4c036d718f59ebe6324a51e2",
+      "size": 4556
+    },
+    {
+      "path": "lib/ui/community/generated_avatar_licenses.dart",
+      "sha256": "71d9f937a6d3d277123a571b0ed18fb2fdb561a3afd3f4f0a369349f87845c39",
+      "size": 2640
+    },
+    {
+      "path": "lib/ui/community/live_model_view.dart",
+      "sha256": "9fac123d451da70c1076c585f4af37cad03cd5932bfa3de2bbb79dab165763d6",
+      "size": 825
+    },
+    {
+      "path": "lib/ui/community/masonry_layout.dart",
+      "sha256": "fc6337abc89759a18b1a22401cee1d3cac5fb1b87a3b508c4a4e2c784d8b9918",
+      "size": 1800
+    },
+    {
+      "path": "lib/ui/community/masonry_policy.dart",
+      "sha256": "aae436dcceecf24300c982b03e6ee8ecff960eea969ecd899189b92f89745eef",
+      "size": 1154
+    },
+    {
+      "path": "lib/ui/community/notifications/community_comment_case_page.dart",
+      "sha256": "babec2dd7fbd699ed86f90a5c5972b3327ed2b516d0c235ba6223d7e15dda2d8",
+      "size": 14240
+    },
+    {
+      "path": "lib/ui/community/notifications/community_comment_inbox_button.dart",
+      "sha256": "b994c77fc44676c8ee7d3de2f3e2ba343752bce0c725b69a074485e58933a776",
+      "size": 4408
+    },
+    {
+      "path": "lib/ui/community/notifications/community_comment_inbox_page.dart",
+      "sha256": "e19599d4335071294dcf5ba46c3b5d95ee9fcdb1083c76452e51d870ef1be723",
+      "size": 11362
+    },
+    {
+      "path": "lib/ui/community/notifications/moderation_ui_support.dart",
+      "sha256": "4dfc9ded4fb4ff8349e877fca853f54f80e70b11ceb21b2d3cfba9d3dee9e9ce",
+      "size": 3077
+    },
+    {
+      "path": "lib/ui/community/post_card.dart",
+      "sha256": "889c3f54ac2bf33cdbe99c6f7896ebbb60717df29e880f49f8bee02190dfabd2",
+      "size": 31932
+    },
+    {
+      "path": "lib/ui/community/profile_work_grid.dart",
+      "sha256": "31e4d9ef20416a946153527a2b8c27722783fa470fb0680196fe5962d550b1d5",
+      "size": 2472
+    },
+    {
+      "path": "lib/ui/community/public_profile_entry.dart",
+      "sha256": "52a9b19613b790a0fb6e38eca21790b02fdbc3fb2234f0e0e3ca25656628a4e7",
+      "size": 5714
+    },
+    {
+      "path": "lib/ui/community/public_work_entry.dart",
+      "sha256": "e00f26fc54b68d28f13888a0ccd0cedfdab871122a51df3fc931d99f837e095c",
+      "size": 4594
+    },
+    {
+      "path": "lib/ui/community/public_work_exit_stub.dart",
+      "sha256": "1ebb701ba6e15664c6e76526b0967b333428492c1aa722a60aa27370e66cd8aa",
+      "size": 125
+    },
+    {
+      "path": "lib/ui/community/public_work_exit_web.dart",
+      "sha256": "3b4d11bb2609cadd7369cc42e370f2c1a13886a0433a11188d0ccd39650a3d3e",
+      "size": 900
+    },
+    {
+      "path": "lib/ui/community/public_work_handoff_stub.dart",
+      "sha256": "b936845d5b3a0be99b23af8ae78c6eb28f3f8b48038f962597974d52818e7c1e",
+      "size": 35
+    },
+    {
+      "path": "lib/ui/community/public_work_handoff_web.dart",
+      "sha256": "5bb8cef723c98ba77ce415f6f90b479655a9ee63cd4a20a33c428c577daf29a9",
+      "size": 247
+    },
+    {
+      "path": "lib/ui/community/public_work_opening.dart",
+      "sha256": "9f3c54ee6d10743bdfdaf8d0a1e4e1aa6f2e70bd19b8a858fe19e9bab91c86d2",
+      "size": 3911
+    },
+    {
+      "path": "lib/ui/community/published_cover.dart",
+      "sha256": "0fe0f14b1c0d4e4a6d90185d365d096af7eadc6ed05407032ffcca1ece90460a",
+      "size": 797
+    },
+    {
+      "path": "lib/ui/community/report_history_page.dart",
+      "sha256": "fb4a2770194d33b3a50d192dfb87a40bf16f042bfca59b867939412088d09521",
+      "size": 5497
+    },
+    {
+      "path": "lib/ui/community/reveal_gate.dart",
+      "sha256": "6f6e2e260dcd8ca94e6b56d942302a66fbf4277b2557b65651fc8421fe2033e1",
+      "size": 3250
+    },
+    {
+      "path": "lib/ui/community/skeleton_shimmer.dart",
+      "sha256": "63b992e07fe776b5c21b975b41989e21c560f69bd124d3a41dc484a926af9bd3",
+      "size": 8614
+    },
+    {
+      "path": "lib/ui/community/user_profile_page.dart",
+      "sha256": "f28f7ea1d6a670883ed014e9233e5d61a65bfda80f58df9de547bc7ca6ee9ebf",
+      "size": 15235
+    },
+    {
+      "path": "lib/ui/community/user_report_page.dart",
+      "sha256": "50dc762d7ff16749d91a83b9c9ff54c9200964fb13c15b846063ead5df7f8644",
+      "size": 12158
+    },
+    {
+      "path": "lib/ui/community/viewer_impl.dart",
+      "sha256": "a9eba2183656b0ad5d5f83e0eb6c4d55362c1fa073cd373c8be5d17292af3870",
+      "size": 19550
+    },
+    {
+      "path": "lib/ui/community/web_publication_page.dart",
+      "sha256": "8390e7b8c35e5613666767838a5086ab0d237057e5cdbeb6607e155cdd9b9329",
+      "size": 24153
+    },
+    {
+      "path": "lib/ui/community/web_publication_selection_page.dart",
+      "sha256": "fd250fdbbbf130143b09adfe99b0cfae8c2abfaa480c576fed18e71f9bb50c4e",
+      "size": 16624
+    },
+    {
+      "path": "lib/ui/community/work_card.dart",
+      "sha256": "f56a6496242b0d08e9b5bddc30f74162cb5e898315a12d416dc6ff81e95c99cc",
+      "size": 17078
+    },
+    {
+      "path": "lib/ui/community/work_detail_page.dart",
+      "sha256": "0c2542821daa3b6f81f016565cb1c6d91f390f5129a8b00a26836bf65f0c1f8f",
+      "size": 55386
+    },
+    {
+      "path": "lib/ui/cube_scene.dart",
+      "sha256": "b948e6faa67592a9b4d2f9e083352a96e9198f670cb24d5de384285b66637817",
+      "size": 2600
+    },
+    {
+      "path": "lib/ui/cube_transition_demo.dart",
+      "sha256": "4c2d66f0bc163a29d4fc1988bf2d2d707f1080e860238e398b709d1e8e6cf43c",
+      "size": 14644
+    },
+    {
+      "path": "lib/ui/design_system.dart",
+      "sha256": "c37db61bced5b639abe1547b1ee19a27acecebc96647b38c5a2b106646f0d31d",
+      "size": 17748
+    },
+    {
+      "path": "lib/ui/final_mesh_thumbnail.dart",
+      "sha256": "25013d333c5687fbf6ca9e164c51149f2ec5b4707af2d9a8a8ec7cdf195315bd",
+      "size": 20021
+    },
+    {
+      "path": "lib/ui/frame_quiet_detector.dart",
+      "sha256": "9db1e0589282c049c961d41427c226373e3a881f2aa921753cd6ca998c49986a",
+      "size": 4651
+    },
+    {
+      "path": "lib/ui/home_view_model.dart",
+      "sha256": "ccfeaa82b50b1ec4d441076ba92657e7b6a6c9a296cc6f23d40da176142a66e9",
+      "size": 6524
+    },
+    {
+      "path": "lib/ui/legal/legal_doc_links_row.dart",
+      "sha256": "d4b15af89d8b1c65e44cf15910cb65e33dfe114654860f20bf94f05d98a48328",
+      "size": 1950
+    },
+    {
+      "path": "lib/ui/legal/legal_doc_model.dart",
+      "sha256": "7804d4b5583efc83de2d152171bfba17fe73590a06ef18286985dabaa1bea27a",
+      "size": 1185
+    },
+    {
+      "path": "lib/ui/legal/legal_doc_page.dart",
+      "sha256": "c528c27780ddd399c1917e090947af127db1f978c312aaed0ac6a674401d18a3",
+      "size": 5054
+    },
+    {
+      "path": "lib/ui/legal/platform_rules_content.dart",
+      "sha256": "9660426ae364ee5696ff9816ff75aedf12317ea4da00b950769dd9825d5f99de",
+      "size": 9766
+    },
+    {
+      "path": "lib/ui/legal/platform_rules_page.dart",
+      "sha256": "44ea3a12ec699f1895cffda7ccbc99ad1d533fe6402d7eb2f677a5d902583636",
+      "size": 4579
+    },
+    {
+      "path": "lib/ui/legal/privacy_policy_content.dart",
+      "sha256": "7f85d2e417acaa73a9a2a40a347d41a740b9ad968ea6d5e7b9eadf02da867042",
+      "size": 24858
+    },
+    {
+      "path": "lib/ui/legal/user_agreement_content.dart",
+      "sha256": "d02d5346d52fb28853503e5b77c51f9ea86ef3dcb695fed559884bea513e63f9",
+      "size": 29255
+    },
+    {
+      "path": "lib/ui/me/my_work_detail_page.dart",
+      "sha256": "5190885d242945e37ac6107ac2c62260e0e109a2768180ca0901a193e2a02c69",
+      "size": 40877
+    },
+    {
+      "path": "lib/ui/me_centered_notice.dart",
+      "sha256": "6363d44e51c1b36b5ba79c2d8246191ff31d5b08bcef9c4dc142f2189f72eb7e",
+      "size": 1142
+    },
+    {
+      "path": "lib/ui/me_page.dart",
+      "sha256": "0a8e3ef59ac677bdb041d3d066d1e08eeabb5498fe3e6e2179cb91b6151e8e61",
+      "size": 58838
+    },
+    {
+      "path": "lib/ui/me_profile_header.dart",
+      "sha256": "3e29e645d7c190aa4eb69ee1e8ff4943348d5d7b2b376b3263d834860f2ae022",
+      "size": 4909
+    },
+    {
+      "path": "lib/ui/me_settings_drawer.dart",
+      "sha256": "ec489b1c82a1eb484781aa7091ed668327702901a97a4a4e73158b6b2e67841b",
+      "size": 1539
+    },
+    {
+      "path": "lib/ui/me_settings_page.dart",
+      "sha256": "8b91151f631db365518427a167fd7e517ef407292cbaf5fc6b63f181a9468454",
+      "size": 27025
+    },
+    {
+      "path": "lib/ui/me_stats_view_model.dart",
+      "sha256": "b73c932823646043f4fa9519982f771957945d52856702d7ab4deb369e8c706d",
+      "size": 5502
+    },
+    {
+      "path": "lib/ui/official_capture/ar_album_page.dart",
+      "sha256": "ab8aa3f6930e81da19479c04de26e7465116d8b96754b2c6b1ef34fb8cc6d529",
+      "size": 17665
+    },
+    {
+      "path": "lib/ui/official_capture/ar_capture_page.dart",
+      "sha256": "b6f34a26af2bd2f958208f70a327ce06edb99f8718df0f59f07bf91a077ddfe5",
+      "size": 350844
+    },
+    {
+      "path": "lib/ui/official_capture/auto_rotating_cloud_view.dart",
+      "sha256": "51290fda2815ef28fe28184eb3ebcd140e868af929b8d4f3317ecc9ddd7529e9",
+      "size": 2149
+    },
+    {
+      "path": "lib/ui/official_capture/automatic38_flow.dart",
+      "sha256": "4decd6af9ebd8a0440f3b73a3681c0816869e4b4733e207fe85546cd7abdba5b",
+      "size": 6350
+    },
+    {
+      "path": "lib/ui/official_capture/capture_exit_dialog.dart",
+      "sha256": "bc48a0c630e3466870b7751331895f4c1d80a13cbcfa43c771c54e3f76bbd87b",
+      "size": 13005
+    },
+    {
+      "path": "lib/ui/official_capture/capture_page.dart",
+      "sha256": "892bcf1473e3b5ea00116831b62b6899721d11328a84af1644c00a82f3fdba3f",
+      "size": 63588
+    },
+    {
+      "path": "lib/ui/official_capture/capture_pose_camera.dart",
+      "sha256": "71d0d9cfcf6a8166676f511afb5583f24db724c4d632ba1fb2363d05239d3a95",
+      "size": 7739
+    },
+    {
+      "path": "lib/ui/official_capture/capture_preview_rect.dart",
+      "sha256": "36f552e74fbd80fcca643fafe7f5b2cc7ad526a0e26834ad6eaa7b6ec5ba1c3c",
+      "size": 10512
+    },
+    {
+      "path": "lib/ui/official_capture/cloud_camera.dart",
+      "sha256": "d0c3283b23fe833b9b9ca191cc603be3a78e191a5262ae1c1c4b96eee610cad5",
+      "size": 13478
+    },
+    {
+      "path": "lib/ui/official_capture/cloud_view_controls.dart",
+      "sha256": "8256ef3fcf0c7b07add09d0fa123bbad1be617ee92547e6999224228a0590a64",
+      "size": 2776
+    },
+    {
+      "path": "lib/ui/official_capture/community_sparse_cloud_data.dart",
+      "sha256": "6afd728c123fbe0beff302dd9cece44ba3ede69e3c44629fbce61f0dbb4fff94",
+      "size": 1943
+    },
+    {
+      "path": "lib/ui/official_capture/dense_wait_eta.dart",
+      "sha256": "e15f5ebb84422bc1163e9aaa9486d407a66f3dd51037f0d79ded42b61a43341c",
+      "size": 11269
+    },
+    {
+      "path": "lib/ui/official_capture/dome_painter.dart",
+      "sha256": "e1df691b0850a41558fe09ee8e9b9f34f804bbd357d56b04d10c919a72ff0e4e",
+      "size": 6247
+    },
+    {
+      "path": "lib/ui/official_capture/dome_view.dart",
+      "sha256": "84e72a92052115e77b0e7b84612ab85f569869a4dd90e82b7873929542a858f0",
+      "size": 15606
+    },
+    {
+      "path": "lib/ui/official_capture/eta_countdown_text.dart",
+      "sha256": "beb400947ab5bc38b2bdd507d26ea62ad82b2262c23170544a4c1fb521791b55",
+      "size": 897
+    },
+    {
+      "path": "lib/ui/official_capture/official_gallery_routes.dart",
+      "sha256": "ba75e6e1e2573e76c0b3b21457166ac0d93b2b76d721c02e90765a55d31410f0",
+      "size": 9302
+    },
+    {
+      "path": "lib/ui/official_capture/ruler_scrubber.dart",
+      "sha256": "a3b654ad607261647e7f42c30d4cd286f3c81c7320a9e2c86072993f9ab400ef",
+      "size": 25767
+    },
+    {
+      "path": "lib/ui/official_capture/selection_handles_3d.dart",
+      "sha256": "b6e1bb2c58325b217b8823c0a22eb0a5c81c2c0d20699d3b859591a8a0ef529f",
+      "size": 7205
+    },
+    {
+      "path": "lib/ui/official_capture/selection_rect_handles.dart",
+      "sha256": "d8f26bca6b15b871adc905ebc69b898c496a4f3f514d5394e1cc5028b95a3a99",
+      "size": 11127
+    },
+    {
+      "path": "lib/ui/official_capture/selection_tools_layer.dart",
+      "sha256": "d4840c3e99eb6cd246fa8c4cd5d158a8502450026bf785655afee82c1854cd1c",
+      "size": 34526
+    },
+    {
+      "path": "lib/ui/official_capture/sfm_preview_overlay.dart",
+      "sha256": "c638d54fae30abc1e8a79c950a90a3193acd353548592e9bc00d940f27e9d1ea",
+      "size": 26503
+    },
+    {
+      "path": "lib/ui/official_capture/sparse_cloud_view.dart",
+      "sha256": "c46c24715534c3ba6824c6c60dce3ca3c3b2c8bef29513aa3062d76cd2f472be",
+      "size": 90040
+    },
+    {
+      "path": "lib/ui/official_capture/sparse_cloud_viewer_page.dart",
+      "sha256": "f11d681df61eb21ad3bdee1ad242bf7f883cff60b212eb0fe311c17cdedd3158",
+      "size": 54919
+    },
+    {
+      "path": "lib/ui/official_capture/view_cube.dart",
+      "sha256": "778eb345a5c18bea1d7a0eeafacd21cf4364a0529ac4951ed19584f2dc552c1f",
+      "size": 12231
+    },
+    {
+      "path": "lib/ui/official_capture/web_publication_camera_controls.dart",
+      "sha256": "8683ec35c37bd71c79a6c689a2e13abbd7bca15bc6a5d4d0256aafe1df4199f3",
+      "size": 77
+    },
+    {
+      "path": "lib/ui/reconstruction_draft_route_state.dart",
+      "sha256": "5555240ed566075afc123dd7469cb9fd4c22b5705d3ea03c14122f1416a1a3f7",
+      "size": 450
+    },
+    {
+      "path": "lib/ui/reconstruction_route_release_gate.dart",
+      "sha256": "a16f77ae31522dc30f1ea87bd4a6e3097d8a6a4f4b1ebdc7865088f1cb2d24e4",
+      "size": 580
+    },
+    {
+      "path": "lib/ui/scan_record.dart",
+      "sha256": "8c30d780c25f5ab8efa0d152a1eb72a1ca0a25d67a681abf308bab6a0fa67655",
+      "size": 21341
+    },
+    {
+      "path": "lib/ui/scan_record_cell.dart",
+      "sha256": "200fa75435de15c5f8a247f31d273293b49af37444fc5a8e76e7ddea902141bb",
+      "size": 15911
+    },
+    {
+      "path": "lib/ui/shared/browser_model_transport.dart",
+      "sha256": "8380abb777f637567aa8e450cf67b83af7b61f3d01757c03888b81bfa51b8f0c",
+      "size": 2413
+    },
+    {
+      "path": "lib/ui/shared/community_viewer_session.dart",
+      "sha256": "d4e0d78d948701640d02fb7a544e6695a9368a99adef1dc025b1ae38a8759b55",
+      "size": 8131
+    },
+    {
+      "path": "lib/ui/shared/local_work_viewer_session.dart",
+      "sha256": "c25ed36cfa63fa01e9170e5cc767b1f65b6d4139d9124dcfae2f838923ca6a03",
+      "size": 110
+    },
+    {
+      "path": "lib/ui/shared/local_work_viewer_session_native.dart",
+      "sha256": "e16103d5c3b8ca74ba4feffeab703d62bfc1ad523e61cd85dcce97ccd2ab865c",
+      "size": 16603
+    },
+    {
+      "path": "lib/ui/shared/local_work_viewer_session_web.dart",
+      "sha256": "f2de771d6e01de9d06c13f80558e126d21d5aead8080f3ab03b6aa36406b6963",
+      "size": 2429
+    },
+    {
+      "path": "lib/ui/shared/model_content_identity.dart",
+      "sha256": "56194d4e953cfd47afe6bb41cfdf9bea46718b2809a85db1f966ea3dc8ca88ae",
+      "size": 112
+    },
+    {
+      "path": "lib/ui/shared/model_content_identity_native.dart",
+      "sha256": "bbb36d68e6949f9a5b67a031c9f91eada15753292f036074f0d6a316a5e2f880",
+      "size": 747
+    },
+    {
+      "path": "lib/ui/shared/model_content_identity_web.dart",
+      "sha256": "f0ac391a70e6aad1d9429899dbccaf65897551fccb278a8b0ff68a9880e3ae6f",
+      "size": 133
+    },
+    {
+      "path": "lib/ui/shared/product_model_view.dart",
+      "sha256": "0a052bd7ee80f2f5d241abeb05beb20b547e2734e6aef82ab6fdee170f4ec7b3",
+      "size": 42130
+    },
+    {
+      "path": "lib/ui/shared/product_point_view.dart",
+      "sha256": "595998fdeca000e606b2dab72b11d2d28907acbd2c33b2e8019f383a298e213a",
+      "size": 18182
+    },
+    {
+      "path": "lib/ui/shared/product_preview_cover.dart",
+      "sha256": "59463ba6af0d1a88163ff1cf0095aa7d9fb428d2bd9215aa475bf007d3bf234f",
+      "size": 15394
+    },
+    {
+      "path": "lib/ui/shared/streaming_point_cloud_view.dart",
+      "sha256": "b1c6607688e1777fdccfdc75ddba488a656ca13e80fa37b439e962ee3fc21f35",
+      "size": 338
+    },
+    {
+      "path": "lib/ui/shared/streaming_point_cloud_view_native.dart",
+      "sha256": "b74a1f369ca3687fd0cd719079e80d998913342764bd01b87d99c766d75ae004",
+      "size": 8558
+    },
+    {
+      "path": "lib/ui/shared/streaming_point_cloud_view_stub.dart",
+      "sha256": "0c2b17f7a840e0d4b87c8efc5ee63abb5af30705d7f73405daa42629855b08e2",
+      "size": 278
+    },
+    {
+      "path": "lib/ui/shared/streaming_point_cloud_view_web.dart",
+      "sha256": "f588c9cc403ea05a1ea5fbc7fd3461196b7637ee322fd9a9fdb8bf3772541c83",
+      "size": 3599
+    },
+    {
+      "path": "lib/ui/social/account_work_library_page.dart",
+      "sha256": "2f630b5abed785f8c2dd1a78f8430b08396237724c0f790682d5e4d4563bfc84",
+      "size": 8922
+    },
+    {
+      "path": "lib/ui/social/community_account_routes.dart",
+      "sha256": "299966a6f0de4b3f6b8977cdf03b52d5be71e0831a78bcc595ceb89f93bf8f1f",
+      "size": 17945
+    },
+    {
+      "path": "lib/ui/social/community_capabilities.dart",
+      "sha256": "094e9aef33c5881c5247d5e62646873e93d1744d7706405bdf2f951a213e37d8",
+      "size": 665
+    },
+    {
+      "path": "lib/ui/social/web_account_privacy_page.dart",
+      "sha256": "3306cf44f751efd27be1d47c97786eaef4c6c40c03a50959afd6806226b60926",
+      "size": 18347
+    },
+    {
+      "path": "lib/ui/social/web_account_workflow_repository.dart",
+      "sha256": "d2a4c1b0624011b36f95425e1e28609233673c15fc4f503042bd573b107c8050",
+      "size": 5856
+    },
+    {
+      "path": "lib/ui/social/web_conversation_page.dart",
+      "sha256": "e03bbcfcfcdf0519628165c74a1a5889fceb71d5df1483c9720f5948db477711",
+      "size": 21933
+    },
+    {
+      "path": "lib/ui/social/web_favorites_page.dart",
+      "sha256": "aeedf885821499bd8a1c08ce93d70bc55a9bf04d66df53c85b3685602ac0ae81",
+      "size": 17103
+    },
+    {
+      "path": "lib/ui/social/web_messages_page.dart",
+      "sha256": "a63c44859894c1155f9ddde09221bbc7b9aac59a94469f42d03c078c09d1cce4",
+      "size": 12425
+    },
+    {
+      "path": "lib/ui/social/web_messaging_entry.dart",
+      "sha256": "1aba314681e0499f07e33dd845bfc02a539bc720c588d076a05c6e75a95bd4ad",
+      "size": 7887
+    },
+    {
+      "path": "lib/ui/social/web_profile_edit_entry.dart",
+      "sha256": "6c6ce9a76f0a103df51c7e6f32ab6506ac5fd14ac2b64bc4989eb93c46eb9c9b",
+      "size": 8573
+    },
+    {
+      "path": "lib/ui/social/web_profile_edit_page.dart",
+      "sha256": "6a76d9c52f458831ef863b5dd3553a3d79f75c8cc92619cefb4e1d9566e912ba",
+      "size": 13378
+    },
+    {
+      "path": "lib/ui/social/web_publication_status_page.dart",
+      "sha256": "56fa74df14457cf2472fb5e823f059965c5620d3f57b398ddd46f9833dbfc640",
+      "size": 15297
+    },
+    {
+      "path": "lib/ui/social/web_report_history_page.dart",
+      "sha256": "2aa5ed120712be5a6dd9d4bf414ed4de7552d4510560e0883ce78a2b8787dfc2",
+      "size": 12366
+    },
+    {
+      "path": "lib/ui/social/web_report_review_page.dart",
+      "sha256": "685e5dde8b3cd2ca1a56788d8acbbfa193891718564d38d08475783e929659e9",
+      "size": 12139
+    },
+    {
+      "path": "lib/ui/social/work_favorite_button.dart",
+      "sha256": "af411deeb13fefd6f517dd677093c868401743bb1076d84bc3c6806347d9c99b",
+      "size": 7233
+    },
+    {
+      "path": "lib/ui/sparse_thumbnail.dart",
+      "sha256": "036c2e26bb411e82ab2417b82b2e0e6c295e472cfd01945b3ad4abe38f406796",
+      "size": 9674
+    },
+    {
+      "path": "lib/ui/splash_overlay.dart",
+      "sha256": "a1c66db472d7563517907d4e9052a311b1190471a497de732dcb472ba2f631c1",
+      "size": 9698
+    },
+    {
+      "path": "lib/ui/splash_solving_orb.dart",
+      "sha256": "325b690a2178e016d96afefe6de9695c03a41d666c9afb104d1c097df424737a",
+      "size": 19126
+    },
+    {
+      "path": "lib/ui/startup_splash_gate.dart",
+      "sha256": "d027d5b56ecb9339eac1254c38bffd00783f292e6a494370f7ae6473337d2f76",
+      "size": 1323
+    },
+    {
+      "path": "lib/ui/vault_page.dart",
+      "sha256": "b203760069770665c693c765bcbe8b66dfea9ee8b827e64276d6269b8d1ab447",
+      "size": 55374
+    },
+    {
+      "path": "lib/ui/viewer_social_contract.dart",
+      "sha256": "11ab86101578df195988af833d83c40d0f274c5e2af922dd15401128532e4f8d",
+      "size": 2287
+    },
+    {
+      "path": "lib/util/device_log.dart",
+      "sha256": "95186b41536d3846dfcd65e714421e53ff0c884822318ba7cce6745cd46b1eed",
+      "size": 2319
+    },
+    {
+      "path": "lib/util/file_signature.dart",
+      "sha256": "04ba1e22fdd864644917ae61027c6cf767ee984ad0403c3fe82d6f0123690b00",
+      "size": 3579
+    },
+    {
+      "path": "lib/util/image_sanitize.dart",
+      "sha256": "17e81f44028f9fb73244f95fb3254fe1171157964ce0c74fe1c448fea3fa2910",
+      "size": 2294
+    },
+    {
+      "path": "lib/vio/capability/android_capability_adapter.dart",
+      "sha256": "41f614535a22b1263a9130799b15b33d834e1bba2a5f641d8cf232900d7896e6",
+      "size": 10049
+    },
+    {
+      "path": "lib/vio/capability/capability_decision.dart",
+      "sha256": "d8c120a06408843656559b9c8c7f5a85520e657eac41f6e4f63581ed72dee372",
+      "size": 6758
+    },
+    {
+      "path": "lib/vio/capability/capability_evidence.dart",
+      "sha256": "22ed5646ec4ba42e692b1f90b91c4927078dc155c6458243e20301aa671090cf",
+      "size": 17136
+    },
+    {
+      "path": "lib/vio/capability/capability_probe.dart",
+      "sha256": "33a2cb8895709eb179965a83a13aab99f859b42df5b76a9f6213b329d747cc32",
+      "size": 28509
+    },
+    {
+      "path": "lib/vio/capability/imu_timing_probe.dart",
+      "sha256": "26b91cde48299bb74c75e95530483ef8c43e1507088faaedfefa9a3f6e6d62bb",
+      "size": 14992
+    },
+    {
+      "path": "lib/vio/diagnostics/vio_diagnostics_recorder.dart",
+      "sha256": "9f10493dde2da4b6231a43f85c17e31c9641c56c8aef39125583deb37a92f91d",
+      "size": 50232
+    },
+    {
+      "path": "lib/vio/diagnostics/vio_shadow_downsample_contract.dart",
+      "sha256": "de28799fc3b79f65fadfd31b960286c5b5d8e43c00bf841daff86e9d11079ae8",
+      "size": 1036
+    },
+    {
+      "path": "lib/vio/diagnostics/vio_shadow_health.dart",
+      "sha256": "86401ef7e0b10b83ba1d08e52c7b9f4c7b8c3f0963d00dcb25bf5b543dd05df5",
+      "size": 43628
+    },
+    {
+      "path": "lib/vio/diagnostics/vio_shadow_se3_comparison.dart",
+      "sha256": "7b54534ca588f66cde5c4aea52cc60f3c5a0540797c78c04ebb8aad8eb37fdb0",
+      "size": 21898
+    },
+    {
+      "path": "lib/vio/diagnostics/vio_shadow_switch.dart",
+      "sha256": "73e3253ce340ca77ea17351b9489f2286ff496af85f6195ccf88b897158bf9c2",
+      "size": 154
+    },
+    {
+      "path": "lib/vio/ffi/xrslam_bindings.dart",
+      "sha256": "36fbc32eab83ada2176812ff6752e73a73b3b19175dcbd90b57319eb1aa16043",
+      "size": 38014
+    },
+    {
+      "path": "lib/vio/ffi/xrslam_build_contract.dart",
+      "sha256": "7b0877b3638ef77a90a33a2425dad3bb07872031737c2fa87f09bc2170cd2306",
+      "size": 2869
+    },
+    {
+      "path": "lib/vio/ffi/xrslam_config.dart",
+      "sha256": "b8e22404777f4d3a29d835bd4cd88fc07263e4c6c09743938bb2168d725da488",
+      "size": 18357
+    },
+    {
+      "path": "lib/vio/ffi/xrslam_extrinsics.dart",
+      "sha256": "5a6714f91d008280be86bd52e4d12aae99d4f796319109359510efd3ebdd5921",
+      "size": 5740
+    },
+    {
+      "path": "lib/vio/ffi/xrslam_smoke.dart",
+      "sha256": "2092d5598e45cf46e42697c96ecb57c9da14580db4b2f843d48ffed6d9823df0",
+      "size": 9079
+    },
+    {
+      "path": "lib/vio/ffi/xrslam_status.dart",
+      "sha256": "9a08910e84537ebbe812483aa9b373581dc3ccf883a8d8470954ce009fb133f7",
+      "size": 3333
+    },
+    {
+      "path": "lib/vio/platform_pose/extrinsics_contract.dart",
+      "sha256": "3e2614d6aa4d6e95efdaf80658f095eb22c15f7cad83c137a58a34fdc6117585",
+      "size": 11523
+    },
+    {
+      "path": "lib/vio/platform_pose/platform_pose_source.dart",
+      "sha256": "501ff50df2b3350f5bf2f0da957fbdc8d7a02c72d8f8d468465f31b3ebcf22d8",
+      "size": 20172
+    },
+    {
+      "path": "lib/vio/quality/capture_guidance.dart",
+      "sha256": "ec5cb6a907cb0799bce43ba972baabfbf1e5a8d715d3c94398e27be3cb75524e",
+      "size": 6616
+    },
+    {
+      "path": "lib/vio/quality/initialization_window.dart",
+      "sha256": "1795ccfd2ec585a46718386a0d19ce5c541a4308121c2c5b86cac636e3daaa5d",
+      "size": 10610
+    },
+    {
+      "path": "lib/vio/quality/scale_observability.dart",
+      "sha256": "557bfef013c5370104cab2c05865edf52b2b8d8e00dc6cef706f4dd6858e748d",
+      "size": 27371
+    },
+    {
+      "path": "lib/vio/quality/scale_observability_ledger.dart",
+      "sha256": "474fc544f0be7b7e091c5ecac9e9efc7b84165a88d4ed58f52568c3fc5949a47",
+      "size": 8074
+    },
+    {
+      "path": "lib/vio/quality/texture_sufficiency.dart",
+      "sha256": "95ede9c523bd213a3e9542aa43bfe6b0bafd75fa30edad1ef98dc32d92448c4b",
+      "size": 15586
+    },
+    {
+      "path": "lib/vio/quality/world_frame_accel.dart",
+      "sha256": "0fda04127aba871ddbe6efcc6b8b267eefda02e25d774cc04aa0864cfb7e5ecb",
+      "size": 4102
+    },
+    {
+      "path": "lib/vio/thermal/proc_cpu_probe.dart",
+      "sha256": "99ab009d9e5bb83491bd3c2a7b660a58f05b19e0cf24d174e57d0c71b0f5a037",
+      "size": 4990
+    },
+    {
+      "path": "lib/vio/thermal/slowdown_attribution.dart",
+      "sha256": "3fd84d6b738d2bf7cb3b03f74cd9af3c3994482fc626f3b0d88b70693d29d4a3",
+      "size": 9224
+    },
+    {
+      "path": "lib/vio/thermal/thermal_governor.dart",
+      "sha256": "8008c7c961177ee8af3eac1029cb47ad1bae006ae01f917a0f7aca03bdfe4606",
+      "size": 6011
+    },
+    {
+      "path": "lib/vio/thermal/thermal_signal.dart",
+      "sha256": "f64394256482a955b45d689a809eb6e3277c268940418d5ff8055edd8d402b4c",
+      "size": 7313
+    },
+    {
+      "path": "lib/vio/thermal/thermal_tier.dart",
+      "sha256": "307ed583ecbd08a02291d21a71a092bb175e5f39f018cba6d2113d02281b575b",
+      "size": 5522
+    },
+    {
+      "path": "lib/vio/thermal/vio_frame_scheduler.dart",
+      "sha256": "cb99c3ecc383ffea1b8c268af51c1c0a98bb51267a1906d08d223b39a31e3db0",
+      "size": 6857
+    },
+    {
+      "path": "lib/vio/thermal/vio_thermal_channel.dart",
+      "sha256": "b2c56e45a32a892bf520136c4ff3b5eab04137e438ba451664721c9235fc13c9",
+      "size": 2519
+    },
+    {
+      "path": "lib/vio/thermal/vio_thermal_telemetry.dart",
+      "sha256": "2c160e9102a5f660e365ede682ec4593d54e9a0e2935041bf229b5c8dd2f917d",
+      "size": 4310
+    },
+    {
+      "path": "lib/vio/timebase/android_boottime_bridge.dart",
+      "sha256": "a185d3dcfb8a306661a2df4fafc2593baf49dc01c5e17d54b5d2eef96cd8cc35",
+      "size": 9579
+    },
+    {
+      "path": "lib/vio/timebase/clock_offset_estimator.dart",
+      "sha256": "5f7be2ad0bd51967363b8a56b9a70572ea9ba8383329557634fa3da202d03aaa",
+      "size": 11216
+    },
+    {
+      "path": "lib/vio/timebase/domain_mismatch_detector.dart",
+      "sha256": "f9ba3d074dc97c20374f612ac3a306a1fa76c2095079ebb5be0dd21beca8e690",
+      "size": 12819
+    },
+    {
+      "path": "lib/vio/timebase/ios_timebase_channel.dart",
+      "sha256": "a2af7a6cc23f03cf51bf59b58029452187b69ca5c622bc9602907bc8629bee70",
+      "size": 32985
+    },
+    {
+      "path": "lib/vio/timebase/monotonicity_detector.dart",
+      "sha256": "a84e52e3d9aebe535ef5d1b6b349899e2f0adba08d6997a6ebd22c9e9b64c8dc",
+      "size": 5973
+    },
+    {
+      "path": "lib/vio/timebase/timebase_contract.dart",
+      "sha256": "cd6afd255e0a70eb8677a1aa535cc540cfd15e2cb72997d23900f1e6259c8a74",
+      "size": 15290
+    },
+    {
+      "path": "lib/vio/timebase/timebase_normalizer.dart",
+      "sha256": "79c9a165f548417037419d73e954452e260172907647f240c6b3c90b2c236007",
+      "size": 12867
+    },
+    {
+      "path": "packages/aether_capture_services/lib/aether_capture_services.dart",
+      "sha256": "bb6814b7d7a409f445cfe9afb6ec3633df3b7cb7cb0a992971df2e6b44880086",
+      "size": 278
+    },
+    {
+      "path": "packages/aether_capture_services/lib/src/photo_bundle_derivation_service.dart",
+      "sha256": "1917245abea2dbfd8b616c622604b866c820fafdc1235f9c045955093491b1dc",
+      "size": 25019
+    },
+    {
+      "path": "packages/aether_capture_services/lib/src/photo_bundle_manifest_service.dart",
+      "sha256": "4cbb75676f0507a2622a031193085abf85bfd2530c09390ebac9abd1412796d6",
+      "size": 4560
+    },
+    {
+      "path": "packages/aether_capture_services/lib/src/photo_bundle_pipeline_policy_service.dart",
+      "sha256": "de04967e9a1b72b61346b282f2fa2687f2d6ca4c8d88117d709211fe1f3925c3",
+      "size": 44863
+    },
+    {
+      "path": "packages/aether_capture_services/lib/src/photo_bundle_quality_service.dart",
+      "sha256": "06f3ab17b798315a84731f2e1b236c22024815fd4ca887ac5010d9deb199029d",
+      "size": 12495
+    },
+    {
+      "path": "packages/aether_capture_services/lib/src/photo_bundle_service.dart",
+      "sha256": "9fc83eb012cb7d6ae7899ecf0e81c6cb9802602e568d2344d5e85faa6a73d6ff",
+      "size": 22947
+    },
+    {
+      "path": "packages/aether_capture_services/pubspec.lock",
+      "sha256": "76b349fcca9faf9d20a22209da11878d8c9310fa4a7982290cf229d507f96168",
+      "size": 2114
+    },
+    {
+      "path": "packages/aether_capture_services/pubspec.yaml",
+      "sha256": "0e19cfdd9ba495b33e63a96743db2e39df0ae9fa408682fc21b5a9f25705e2fc",
+      "size": 375
+    },
+    {
+      "path": "packages/official_capture_services/lib/official_capture_services.dart",
+      "sha256": "a855d50696892fa3d56a7eb99fa0d505d5611d318dfe3df6efdf0b3d923c1233",
+      "size": 280
+    },
+    {
+      "path": "packages/official_capture_services/lib/src/photo_bundle_derivation_service.dart",
+      "sha256": "210fba7f940285267e79c715facb0d642e84bb529e6e66cae8a070e0222cb414",
+      "size": 25191
+    },
+    {
+      "path": "packages/official_capture_services/lib/src/photo_bundle_manifest_service.dart",
+      "sha256": "5393fd666058336ca0537ceddfef7d3585d13dc00153a8a89db384227549683b",
+      "size": 4916
+    },
+    {
+      "path": "packages/official_capture_services/lib/src/photo_bundle_pipeline_policy_service.dart",
+      "sha256": "52a0d6b512cf91c146c2a7fd56f59a7dae081e4c552fc595cecdfb28016ee718",
+      "size": 44960
+    },
+    {
+      "path": "packages/official_capture_services/lib/src/photo_bundle_quality_service.dart",
+      "sha256": "06f3ab17b798315a84731f2e1b236c22024815fd4ca887ac5010d9deb199029d",
+      "size": 12495
+    },
+    {
+      "path": "packages/official_capture_services/lib/src/photo_bundle_service.dart",
+      "sha256": "40ba2fac4da8d548dbc8132db85d9e4098dee56c4cd23df9f4f19f0b631ada41",
+      "size": 23113
+    },
+    {
+      "path": "packages/official_capture_services/pubspec.lock",
+      "sha256": "76b349fcca9faf9d20a22209da11878d8c9310fa4a7982290cf229d507f96168",
+      "size": 2114
+    },
+    {
+      "path": "packages/official_capture_services/pubspec.yaml",
+      "sha256": "2ab2854eaa55d5921cc9dc224f8ee9520a41c991ab09bd9b57e05c12bc66a3ae",
+      "size": 377
+    },
+    {
+      "path": "packages/pw_hevc/lib/pw_ply.dart",
+      "sha256": "a1965ba10c88a1f8fbd9cd10668dc3d0fe4ceba5740d9ee4d0c0db7b3b6149c0",
+      "size": 10394
+    },
+    {
+      "path": "packages/pw_hevc/lib/pw_sidecar.dart",
+      "sha256": "1b010258ab7ff2c9041423438678d03f64cc7f87ca95ea98e2ad31eb604fd6af",
+      "size": 3072
+    },
+    {
+      "path": "packages/pw_hevc/lib/pwva.dart",
+      "sha256": "f6cafe9be1e848f3b416457bfae9e614227908796b32fbfb4bfe5aa96e37ff07",
+      "size": 7954
+    },
+    {
+      "path": "packages/pw_hevc/lib/pwva_apple.dart",
+      "sha256": "5264ee6455b97a762bb73fba906124febf77185b24a4fbb337327de95f4d7111",
+      "size": 9566
+    },
+    {
+      "path": "packages/pw_hevc/pubspec.lock",
+      "sha256": "d49cbfd66924def8c73b37c748787da49ca3b3638aca10d51be78627cf33fd00",
+      "size": 11190
+    },
+    {
+      "path": "packages/pw_hevc/pubspec.yaml",
+      "sha256": "20a4c5a7910c30da1bd56e7d745c66be491f5aebc18ec7fe4d58fa8d9ec975eb",
+      "size": 404
+    },
+    {
+      "path": "packages/pw_shared_viewer/.gitignore",
+      "sha256": "1fb4199852f171cbd03a9fbf7105670185a3ded1f3913e23b0447bb66925e9ba",
+      "size": 103
+    },
+    {
+      "path": "packages/pw_shared_viewer/README.md",
+      "sha256": "ba6a1528197ff72feacd1328bab7f5e9d2be5d8574af043e3ac105dfbe54976a",
+      "size": 8343
+    },
+    {
+      "path": "packages/pw_shared_viewer/UPSTREAM.json",
+      "sha256": "057e80b1b9d72f8d59e8ae1782206ad59131a42a428b69281ed589fd9efb3f64",
+      "size": 1397
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/.gitignore",
+      "sha256": "a1c222ad7af18e55c52c9e75a245904bc82d31ef9464132f64aae6de5b3ce314",
+      "size": 827
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/.metadata",
+      "sha256": "f86e32f6a31b6acf001009fd06f29753085348092d8e0209ba8ae2f4a0685e48",
+      "size": 1121
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/README.md",
+      "sha256": "05ddf7bd0b2af653e2289326e8239564aef2dd5ef1c41dbef77017dafed5f02c",
+      "size": 1554
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/analysis_options.yaml",
+      "sha256": "435d0edf75e56e2b67157309620833e14fcb164e7a230e1e01e7a2e732165ee5",
+      "size": 126
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/.gitignore",
+      "sha256": "b027c9de1011765c015e5819bf857c0d75bfcd0886fb01721c091159012e50f1",
+      "size": 253
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/build.gradle.kts",
+      "sha256": "0d19f621a5f7c7933eaa877fc00e5943d4bda8da66cc8420de848b17f9e6ac22",
+      "size": 1830
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/debug/AndroidManifest.xml",
+      "sha256": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "size": 378
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/AndroidManifest.xml",
+      "sha256": "ba57e141547556d3ce8124b27f8bffeb4e526092e070d1fc41f08687b3050258",
+      "size": 2352
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/kotlin/dev/pocketworld/viewer/pw_shared_viewer_host_example/MainActivity.kt",
+      "sha256": "720a17c26578d66428121c94b2e04c3abfc987b5420eee2c86e67703c50ce8e6",
+      "size": 154
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/drawable-v21/launch_background.xml",
+      "sha256": "7ca6d5cec2169c5a98661a119db23a6f3399c8fef2256ff04f3a642831282478",
+      "size": 438
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/drawable/launch_background.xml",
+      "sha256": "94433756fe10005ddd6fc55cc5c0b1e9f3c10b66a08ceac795ece6713d34e28a",
+      "size": 434
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "sha256": "6a7c8f0d703e3682108f9662f813302236240d3f8f638bb391e32bfb96055fef",
+      "size": 544
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "sha256": "c7c0c0189145e4e32a401c61c9bdc615754b0264e7afae24e834bb81049eaf81",
+      "size": 442
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "sha256": "e14aa40904929bf313fded22cf7e7ffcbf1d1aac4263b5ef1be8bfce650397aa",
+      "size": 721
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "sha256": "4d470bf22d5c17d84edc5f82516d1ba8a1c09559cd761cefb792f86d9f52b540",
+      "size": 1031
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "sha256": "3c34e1f298d0c9ea3455d46db6b7759c8211a49e9ec6e44b635fc5c87dfb4180",
+      "size": 1443
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/values-night/styles.xml",
+      "sha256": "8c5bad5152f217e837519f9c15211d19f39bd45f5f67faf6dd81cb4b299e518f",
+      "size": 995
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/values/styles.xml",
+      "sha256": "937d7c82f539c72eb94fd3a3773f29b3d3fef1997213c92cb632298cedf4bda9",
+      "size": 996
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/main/res/xml/network_security_config.xml",
+      "sha256": "a5746bbc4f4f7f5a5b42af582c344ab71a192a6ab61399799912d19070870940",
+      "size": 263
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/app/src/profile/AndroidManifest.xml",
+      "sha256": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "size": 378
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/build.gradle.kts",
+      "sha256": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba",
+      "size": 537
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/gradle.properties",
+      "sha256": "0f82b18017fba6bb5ce3aa4b2d1a00c9382fc8aae7b1d9326e44b18abd66d80b",
+      "size": 300
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/gradle/wrapper/gradle-wrapper.properties",
+      "sha256": "b690d26223576fe4e63889fad9a00df81945cb870b9476cc5a563152a1a88a74",
+      "size": 202
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/android/settings.gradle.kts",
+      "sha256": "016759283e88ade6eba92910583feeef88b962839b957aa414296afd2952d122",
+      "size": 770
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/.gitignore",
+      "sha256": "37380775aeb2499662b7aca80f4ac4c95ae827c3ba2bfa179aa3e9af4812c623",
+      "size": 569
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Flutter/AppFrameworkInfo.plist",
+      "sha256": "da12038f9b2688a8a26160fea2609fa8fcb11421448c109f09c0f573efe7698d",
+      "size": 720
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Flutter/Debug.xcconfig",
+      "sha256": "690b8a8b1ae15ddd29b241429963e971bbc6720ab22f154cf8cf6b085b6d4925",
+      "size": 107
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Flutter/Release.xcconfig",
+      "sha256": "75abb819a9de1e0e41c835e7307bc64a506cac25a9a5c0b0d8253fa1c3d5d422",
+      "size": 109
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Podfile",
+      "sha256": "f58e643b37a91401e0ab83570b844718ddb78b14cc062a4bdee5934a29b86fd8",
+      "size": 1391
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Podfile.lock",
+      "sha256": "eb4098a61e6d7d3b5a96126bedb09ce03a3b3cbfa9284469d43be39a032d2d26",
+      "size": 592
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcodeproj/project.pbxproj",
+      "sha256": "ec1ad4c56b8e93f54e9880b72a53570f626500b96f015307ec6d765e199796ea",
+      "size": 31414
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "sha256": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f",
+      "size": 135
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "sha256": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "size": 238
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "sha256": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "size": 226
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+      "sha256": "2dd28b879e66081e28a3324cf2bee7ab2f70be9a3e50e08926b7366dadff7d6e",
+      "size": 3833
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcworkspace/contents.xcworkspacedata",
+      "sha256": "465e6de5660384eb6832e8078920ba6cd5305c445cb29a24a86a2fda4aa6b67e",
+      "size": 224
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "sha256": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "size": 238
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "sha256": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "size": 226
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/AppDelegate.swift",
+      "sha256": "fa475824a1c4280a7e7fcf0814d31494997dc200689a680b1183224f4a0d6030",
+      "size": 1040
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "sha256": "3b1e214f466ffedff74baa5598ad5c4421130eea6bc8d57b8fe23435e8280ae4",
+      "size": 2519
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "sha256": "7770183009e914112de7d8ef1d235a6a30c5834424858e0d2f8253f6b8d31926",
+      "size": 10932
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "sha256": "cab10a0d391ec5bc09ef50ce49e8ad401cee7ef03707ec0923a222c5c2b3d212",
+      "size": 295
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "sha256": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "size": 406
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "sha256": "c6e6d3b215ae744a9c391f4c4d44157eff5e739d6ad6c39f9bfa5df66dddd267",
+      "size": 450
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "sha256": "5dee24dc104ac76dc162e42ae0beb163d426bf365562ee28ba7b3ad368559a60",
+      "size": 282
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "sha256": "a9b21eb6f4271385655a8771f76e29eef8c1107d7879cbcfc567e6619d1f716a",
+      "size": 462
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "sha256": "e677d701ffe4af7bc2935098d6b3984cc9ab7ace573e6900955a5535b12410cf",
+      "size": 704
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "sha256": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "size": 406
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "sha256": "7c61c42fc7b657d9cf314d32a4ec458f0647c3aaf360be1b9377857266ec2499",
+      "size": 586
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "sha256": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "size": 862
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "sha256": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "size": 862
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "sha256": "4209a49e44a92ec40a327d3455eb1b1c153ee83d75de1c2be0a12ab18b2ff9de",
+      "size": 1674
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "sha256": "836c918cb613249eba0483a6b02fa3df3c1c0a89a315ee4d3b88509b83c7ab73",
+      "size": 762
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "sha256": "41c7d42f6e61f8fe7f30b1ffa2256aecbc9682be06d18c4a3062043e1a2e547c",
+      "size": 1226
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "sha256": "5d7e5bdf01b93802bc973345b3a78c038907147625035952a08a115a563b7f81",
+      "size": 1418
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+      "sha256": "ccc7950fd5f5b82067c85f667940a9d59189151460761ece8098ca78daa19469",
+      "size": 391
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png",
+      "sha256": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "size": 68
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png",
+      "sha256": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "size": 68
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png",
+      "sha256": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "size": 68
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+      "sha256": "a985b626c4f7546a8ba392d135e9226c3547c8e2b46895f5f2bdf40d7b14ef9f",
+      "size": 336
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Base.lproj/LaunchScreen.storyboard",
+      "sha256": "857e61203b3deafb05766d8fcda898b86a7cb6f3d5e385ecc9926c4d698215e9",
+      "size": 2377
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Base.lproj/Main.storyboard",
+      "sha256": "fd367b6c43006d61b730f674970dd48b9f662c8f2264e52ffc1558102a2c9f2d",
+      "size": 1605
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Info.plist",
+      "sha256": "0d35972f2af214c5b939ba8f876e10b39c3b15809eceb0edbe16759f51ab046a",
+      "size": 2256
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/Runner-Bridging-Header.h",
+      "sha256": "1a8d11d01d1cc92c650c9c9ed35299240052d4683a15a719a2315ef44185e074",
+      "size": 38
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/Runner/SceneDelegate.swift",
+      "sha256": "add68b905971dedfcc0d0b5b7118030de5925ba8c081ad9815463699e3a444ad",
+      "size": 76
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/ios/RunnerTests/RunnerTests.swift",
+      "sha256": "5e8f4908dacea6f29b2a790e4d38bf5fded69096063f9a27a2f21584d62b30c0",
+      "size": 285
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/lib/device_main.dart",
+      "sha256": "e47d11f4e5b39e1705a027b3891d558b174c68216d6a8e857a38c5ae892f8f5f",
+      "size": 9542
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/lib/host_receipt.dart",
+      "sha256": "717ffdf6d0af5ff293669b24d7b15a8548b50f8e02912b5f0eedbe77771bde95",
+      "size": 92
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/lib/host_receipt_native.dart",
+      "sha256": "4bbac9127b184fec1b35d8bc8e6fdb159e9098c905ebf21cd1b3d483d4e59ca0",
+      "size": 298
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/lib/host_receipt_web.dart",
+      "sha256": "ea05f5f0544a339899c280eaffface89380ff8aa98743d7c28bc80c7f6c1b181",
+      "size": 451
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/lib/main.dart",
+      "sha256": "8a5c0c655e79e9f433aa694eedd020005441c3215b0b178fb487ed81275e9bb2",
+      "size": 1849
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/lib/product_device_main.dart",
+      "sha256": "52234baa1b3f0c3904096b611473e2c279054d03d7d103f5ccd1de7d518a279b",
+      "size": 9035
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/pubspec.lock",
+      "sha256": "6678b8209982344a22c5cb3859d4fe96d7737c062c8290022fb07a7261ecd33f",
+      "size": 11550
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/pubspec.yaml",
+      "sha256": "664f09fcd0385c08fd856533788bef2ce4cc4331b48b13781b68d6a967b37d4b",
+      "size": 402
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/tool/prepare_product_fixture.py",
+      "sha256": "6119c2b97a1f2b3b08b03c169e5dc0d047e0d2fae60fc744eae31c7503cd7732",
+      "size": 1184
+    },
+    {
+      "path": "packages/pw_shared_viewer/example/web/index.html",
+      "sha256": "133096eabb34a33d3bed87729e314f496092b1b13e45fdc707e0c0ce502d7114",
+      "size": 306
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/pw_shared_viewer.dart",
+      "sha256": "43b6f30e6f6952474bb8eaf95e6b6ec40c76bee49566fe11dc4246f230c505c8",
+      "size": 212
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/controller.dart",
+      "sha256": "5508eac826a5e004faa9cbb70f456fdd46d5dc4e3e34c83e13c5437130681225",
+      "size": 15491
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/local_server.dart",
+      "sha256": "4715d1bc29ccf281fb8c662d328e97343b00d8343cbe420119528bf126892736",
+      "size": 6542
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/native_bootstrap.dart",
+      "sha256": "42e2a7bcb2689774b750e341e5e2228befa4f00ca6efbea5b4a0c2f85ae6dba7",
+      "size": 5302
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/native_retained_session.dart",
+      "sha256": "0c22ba8bd7d59f7db881bf90cb845d09328b46eb1be865f200ea828962aceb97",
+      "size": 12889
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/point_cloud_transport.dart",
+      "sha256": "9d686e53226c8265bb8e48a1b2bb39c998ca85766952309aa2005ccbcfea86a7",
+      "size": 1227
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/retained_session_unsupported.dart",
+      "sha256": "7257b71909d32157e63e87e6796b3635502b7267496455102d40393585a4ac6c",
+      "size": 777
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/surface_comments.dart",
+      "sha256": "621430dc79bd991ec94b3053712cbdb4c4406577c0eb0b17107370155b4a94d6",
+      "size": 5052
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/viewer.dart",
+      "sha256": "7de8e1e1c3434efb9123499fffe5abb3ff710e2227ba20cb697fb4eec0b767e8",
+      "size": 131
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/viewer_native.dart",
+      "sha256": "5a85db960705f165ac40abf72a125607d9196ed4aee2c99f171f28cacdbda633",
+      "size": 7563
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/viewer_unsupported.dart",
+      "sha256": "0fb8c9b4b8add9cfcd9d70e9e0955512b5e348db0df1068cf910d3576dd87595",
+      "size": 1091
+    },
+    {
+      "path": "packages/pw_shared_viewer/lib/src/viewer_web.dart",
+      "sha256": "baa50268234109a360fe2590be6db57384e6e4a9086561f5cf98dc0ec0c5e33f",
+      "size": 9245
+    },
+    {
+      "path": "packages/pw_shared_viewer/native_bridge/PWSharedWebViewBridge.h",
+      "sha256": "28232cf5bfa2d9ecffdde52d5507ab79ed43e5db410b1015b8ec5e3cc935e8cd",
+      "size": 763
+    },
+    {
+      "path": "packages/pw_shared_viewer/native_bridge/PWSharedWebViewBridge.m",
+      "sha256": "bf782f68a8c176f12017639c7b56a84166ef311f9bc052dbb26eaae74d859e8e",
+      "size": 5333
+    },
+    {
+      "path": "packages/pw_shared_viewer/native_bridge/README.md",
+      "sha256": "e0479c605581c6aac8f6c848b0357d7e68ef7c2bc8cc8c72822ac4685c730c6f",
+      "size": 5741
+    },
+    {
+      "path": "packages/pw_shared_viewer/native_bridge/build_bridge.py",
+      "sha256": "4182273fb26b4e70f22024e91782cc58503f3fd5c02b6630696a10ee395631aa",
+      "size": 8066
+    },
+    {
+      "path": "packages/pw_shared_viewer/native_bridge/test_build_bridge.py",
+      "sha256": "e296d22ff11a59b1269e26ddcf13bca6d1f7f9dccd50243a1e635ab240c2d5e3",
+      "size": 3553
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/API_SOURCES.json",
+      "sha256": "8ade530ea68ac71815032aca695d249168c051ce4ebd2118f950d65afa7746aa",
+      "size": 1277
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/AndroidManifest.xml",
+      "sha256": "94be826c4e404ccfa16c68caef989ec2ce1fb1642e5517bd5dff6de35ab96a35",
+      "size": 903
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/README.md",
+      "sha256": "11f86cf5c6eba2879c759e7fa81f892b388c23702edb0028c31e5461db5c4c52",
+      "size": 7795
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/build_unsigned_apk.py",
+      "sha256": "c17512e7c5f75e861e6c0aae4a0990b5ea623059ca4ce0f6d5de38e0ec4ede9d",
+      "size": 8573
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/src/dev/pocketworld/sharedviewerfixture/HostPolicy.java",
+      "sha256": "90c222e0d5f9cf30c2003654ea044dcd930d53335d3d3af608b04ab2d8cbb305",
+      "size": 2031
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/src/dev/pocketworld/sharedviewerfixture/MainActivity.java",
+      "sha256": "b1992765ba4b5eba0e8616a83df66433742203836b49cb64ae5908b4691b228b",
+      "size": 6548
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/src/dev/pocketworld/sharedviewerfixture/ModelRegistry.java",
+      "sha256": "c0ac9bcacd6f9032dbbf246659b5be37b8d0fb3bb1d933f30eea2ef0640cd720",
+      "size": 4617
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/src/dev/pocketworld/sharedviewerfixture/ViewerHost.java",
+      "sha256": "5aabef2ba7f816f7ea1aa2bb5fc4839a5bbf3d1d93e4bb64badfa2702e9b4414",
+      "size": 13589
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/tests/HostPolicyTest.java",
+      "sha256": "69fedaefb775859953bfb530ea78db58590181bc6b7f9571689243c0b64ef63a",
+      "size": 2517
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/android/tests/ModelRegistryTest.java",
+      "sha256": "6742b4bcd10cf44f121e714ff60e6a58b1d8c54d83325a7ff43df746e9ddd252",
+      "size": 8385
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/harmony/API_SOURCES.json",
+      "sha256": "addca0137c1b1de56a9ae94dbdfd7f26f137267cf6e39b657b343418ce887730",
+      "size": 2011
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/harmony/README.md",
+      "sha256": "bd38b602e4119012e9ce2caf3bd886e549ca672907b025da65f26e4d287679e7",
+      "size": 8130
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/harmony/ets/PwArkWebHost.ets",
+      "sha256": "01cae1d5195e742ee4295f00e5e3bfa2476f0ab9d154e33206488d4cc0b2d28c",
+      "size": 10296
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/harmony/ets/PwArkWebViewer.ets",
+      "sha256": "804bfd4946cb7dee8635e7cfc8403ca50b2c33aec4f1930743ad43f2abeed068",
+      "size": 1782
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/harmony/stage_assets.mjs",
+      "sha256": "f3ae6c21b629f703af8b20c15ec5a745937d596728c3b3426d9d722f13939df7",
+      "size": 6450
+    },
+    {
+      "path": "packages/pw_shared_viewer/platform_hosts/tests/harmony_host.test.mjs",
+      "sha256": "c982326680abddf6c48c12b9e409e9d79ee70c8b1747788539d96afe6b30ecff",
+      "size": 9883
+    },
+    {
+      "path": "packages/pw_shared_viewer/pubspec.lock",
+      "sha256": "473a2102436909f2262be4c76cfdfbb63b6e0c9171970ad3a7399f4d9304ca8a",
+      "size": 7347
+    },
+    {
+      "path": "packages/pw_shared_viewer/pubspec.yaml",
+      "sha256": "1d122192655875b320ba828f3b831ea5c1c8f5b583cead0f84aa3988b1f2bfd2",
+      "size": 1136
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/browser/startup_failure_test.dart",
+      "sha256": "903822e1eb14229a5daaf0f1310b45f2fe127f9fbe9276af56f279877bc3235b",
+      "size": 2011
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/controller_test.dart",
+      "sha256": "6b60cc5c11ae78087ed4639ec1e2e4a603be1bd0d81fe42ebffddd6ebb8d4057",
+      "size": 6098
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/local_server_test.dart",
+      "sha256": "b2246d016227726543b2b03567c76eb9faa19ffd4c9b1ce451db2c2f7ba8cea4",
+      "size": 4370
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/native_bootstrap_test.dart",
+      "sha256": "4b40c03097eea7dbf29543886ba6b24522160570bf9681e892dd92efa4d3705d",
+      "size": 4783
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/native_retained_session_test.dart",
+      "sha256": "7a9a758b047d3b110d42a6690f15bf3c6c9039e281b3bed0cad79e95184221e3",
+      "size": 17048
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/point_cloud_transport_test.dart",
+      "sha256": "96baa3b25b3d7ecdeca4c7d95a981025caed6da0fff900a588e8e1fa1f3036d9",
+      "size": 1861
+    },
+    {
+      "path": "packages/pw_shared_viewer/test/surface_comments_test.dart",
+      "sha256": "6a0a0ead80f84d2d9b55937f7815d2992d28a8a7d7394f8299734d29109dc57c",
+      "size": 4066
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/browser_floating_comments_frontend.cjs",
+      "sha256": "76ee8eabef456be9108b9606e53dea4944b6337af77be50482ca9b8ee5cd2377",
+      "size": 11091
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/browser_flutter_skp.cjs",
+      "sha256": "ae541ab9121cd1ea13e2316bb058e4499617d269aa325173048f7046e2b80b53",
+      "size": 1170
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/browser_formats.cjs",
+      "sha256": "53b6ec4e62db2dc833404e4db5bb70cce015e968b2cce76367c489a6994c6104",
+      "size": 1964
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/built_bundle_assets.test.mjs",
+      "sha256": "953a65576bb49bc237e7c32272d0580bf38c77df27eabb563a0ea98ea8993f0a",
+      "size": 970
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/bundle_identity.test.mjs",
+      "sha256": "81ddded0ae075e5ac5741a7afb4d7288f58b52a30af07c291080a3b9ac433546",
+      "size": 1524
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/bundle_verification_loading.test.mjs",
+      "sha256": "8ba76d009624534bb3f44d8b09d2c22cd9544e6af799ea4d4edba5907ccf68ff",
+      "size": 3691
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/direct_gesture_camera.test.mjs",
+      "sha256": "b29aa157f56ca15e5e5e06ead00aee7477e0f8e756e40bff06c626fa0bf7a414",
+      "size": 10225
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/fixtures/skp/LICENSE",
+      "sha256": "7c70ac0b7916390744a5f6361c59008cada08149a54348530b767953e050dbc6",
+      "size": 1075
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/fixtures/skp/NOTICE.md",
+      "sha256": "a3a83dc9c76218cc0aa813c0ac98d223fda0140d95bdc0e2f1764a9b1605a510",
+      "size": 653
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/fixtures/skp/legacy_v3_textured.skp",
+      "sha256": "f68a36f4578ffb8533eae9a29c1b3dc2f6b5683bacc3e53c52fc5406b1375688",
+      "size": 4121
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/host_bridge.test.mjs",
+      "sha256": "e43c67ca4cf204971518a38226c8012e2ad78c23b83de983fb4623bd7eea2191",
+      "size": 6592
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/host_capabilities.test.mjs",
+      "sha256": "500b3595872c6d4b382d144358f3196d0887b05e26a17f9feb322f6a5032b285",
+      "size": 844
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/image_loader_lifecycle.test.mjs",
+      "sha256": "e607c0a8876f27691e3b8b04b662c9b636e7f564634f559086afd25be56bf142",
+      "size": 1204
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/initial_cover_camera.test.mjs",
+      "sha256": "2f09b0479750b3908403f297705d1f7c92d6defc5ad9228fe25de6f2b4b9bdf5",
+      "size": 10388
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/model_framing.test.mjs",
+      "sha256": "cae41e8eca15497888d14e27ac6734cc80ab83290c58b4a8afa2b5746ac18eb3",
+      "size": 4356
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/model_framing_reference.mjs",
+      "sha256": "95aaf95e98b1eadec03109dc46b709baa393d427f7d8f25b4c685d2a541db151",
+      "size": 3420
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/publication_selection.test.mjs",
+      "sha256": "59c5ef8acd848db4bc6163f4716372886a535ebff0e1a32b7dfcc3a51dd70211",
+      "size": 2706
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/runtime.test.mjs",
+      "sha256": "1214f4298d548d7808df25bec7c1e117e691b9e08c0a8bcdd52d9b4339d0fa79",
+      "size": 19457
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/shared_loading_ui.test.mjs",
+      "sha256": "ade091c2af5ce5b67d146754b8c30b41261a254a56ca12a05f875598f02e3dc5",
+      "size": 2752
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/skp_import.test.mjs",
+      "sha256": "c34784ba68e0bb1661ab7ac0ea37e749fd707d5b5fbf1d8a53013b01e7362342",
+      "size": 1402
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/spatial_cache_release.test.mjs",
+      "sha256": "6951267064a78a865ccd80f564e279684775f6703041b74816552fc217385397",
+      "size": 719
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/surface_comments.test.mjs",
+      "sha256": "0c443b8a2566379c95558c7cf6093e7eb7305eab11e88c68b61c71d2180f089c",
+      "size": 18469
+    },
+    {
+      "path": "packages/pw_shared_viewer/tool/bundle_manifest.py",
+      "sha256": "190ccee23585e41306cfd2ef212aa65928dca915b7ec8a2b65d466df91863ab0",
+      "size": 1034
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json",
+      "sha256": "3d42f9eca6568305714dd4652b448db66fd6b9f07f78071913db2a2ee6709c21",
+      "size": 3297
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/MODEL_FRAMING_LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "size": 11358
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/MODEL_FRAMING_NOTICE",
+      "sha256": "da599a090c4c21ef0295cdfc6af402468a91e780f3211d68ad1ddc7ba24307b5",
+      "size": 958
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/MODEL_FRAMING_UPSTREAM.json",
+      "sha256": "40c675a6699a44d7fcd5fe7f0bf936fe1e7d1dfb1f488d8c8b582444b25cc135",
+      "size": 6447
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/SURFACE_COMMENTS_LICENSE",
+      "sha256": "1a4db66ba930fc7c09ea430225111b500e23537fdb52404a2d994468192226dc",
+      "size": 1076
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/SURFACE_COMMENTS_NOTICE",
+      "sha256": "6d8219f7a0c690e4857c6bf345d842c7f7fe90c8d553a2ecf70c9bdd0cdbcfbf",
+      "size": 1807
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/bundle_identity.mjs",
+      "sha256": "07cb9352c34f7e6340c8b6805d1fb897c7d0d2b4cb571c715578586ba656c239",
+      "size": 2683
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/host_bridge.mjs",
+      "sha256": "591de29a628680a3c183965d2f28e1c68fce6a9c6032ff678c1198b6fa4cd00e",
+      "size": 5169
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/image_loader_lifecycle.mjs",
+      "sha256": "97a6149a09667d515e496304ed03b1b8137530828fc1602bc74f9fe89de7fcff",
+      "size": 644
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/index.html",
+      "sha256": "79495c03a47d78538bdd3f53cacbfb22ba43fded3c0432b07010f362f3a44392",
+      "size": 7781
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/model_framing.mjs",
+      "sha256": "22bc2551b22d52cd0fef089ec5c644028c5ef4866e0da000357a8f04a855b41f",
+      "size": 3368
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/publication_selection.mjs",
+      "sha256": "ac141f182dede5b5272204c9eea4964756ce019cf6777c0aa338d6c287d5b61c",
+      "size": 4564
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/skp_import.mjs",
+      "sha256": "fe32bcdc1880b14aef2bb2a7ce6e8040888bcef12fca585d1a3a233db90ece05",
+      "size": 1990
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/skp_import_worker.mjs",
+      "sha256": "b1192094c5a366351415c6637fccc8ab1e861f6f98d2e4d0323aede20ef72286",
+      "size": 1020
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/skp_policy.mjs",
+      "sha256": "654cd68309f8b12c920cc6b207b72ea9bcbe2fc5d7b2b286bf5e6ae5c3c458f3",
+      "size": 1396
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/surface_comments.mjs",
+      "sha256": "0aa5594196cb50983e4cd3f3753822ca6f1e252a7640e04080357328716f6e30",
+      "size": 18263
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/openskp/BUNDLE_IDENTITY.json",
+      "sha256": "73d5258f1eadcdb2d4120e06bf680b94894b0623756ae262102de7eeb97ac8dc",
+      "size": 4135
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/openskp/THIRD_PARTY_NOTICES.txt",
+      "sha256": "4539f45ce7c48667a359ee836d23b937f0a11ec41a06d2468af9a69279fa96f5",
+      "size": 15458
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/openskp/openskp-browser.mjs",
+      "sha256": "46ebaee2b99da7534e702a72f4a51df00889b96ba532a6c576794ef9e702f2cc",
+      "size": 86226
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/LICENSE",
+      "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
+      "size": 1081
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/build/three.core.js",
+      "sha256": "9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6",
+      "size": 1458113
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/build/three.module.js",
+      "sha256": "9052042d676cb0fdc1ddfefe193053f34b7ac0513a616fdac4535d49987812ea",
+      "size": 662772
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/examples/jsm/controls/OrbitControls.js",
+      "sha256": "3d79d07ecb686b4e5d93232eedab255331c1beef711e13164eaa1f68655a5f2b",
+      "size": 40755
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/examples/jsm/loaders/GLTFLoader.js",
+      "sha256": "131c0f78c01d19368ae495caa65b3adaa10487810a36a05bb5901b769a35ac16",
+      "size": 117570
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/examples/jsm/loaders/PLYLoader.js",
+      "sha256": "67b8c1015209b89081a92fdd69dc9df4a61284c3e9f8bb5380e441e4c64e5111",
+      "size": 21869
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/examples/jsm/utils/BufferGeometryUtils.js",
+      "sha256": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797",
+      "size": 37712
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/examples/jsm/utils/SkeletonUtils.js",
+      "sha256": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f",
+      "size": 11535
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/vendor/three/package.json",
+      "sha256": "f9c474a27c920b9435353a6235968f4453436bee0444fac7e5fd289c8fa463de",
+      "size": 3672
+    },
+    {
+      "path": "packages/pw_shared_viewer/web/viewer.mjs",
+      "sha256": "f418bff69c74a97590c45b1ab58f786eb5681787da9d299bff5e303209fcd937",
+      "size": 29507
+    },
+    {
+      "path": "pubspec.lock",
+      "sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
+      "size": 40499
+    },
+    {
+      "path": "pubspec.yaml",
+      "sha256": "0a29497fe45c033c38c945d6d3905c97a285233e29988362630eb9d52626637b",
+      "size": 15069
+    },
+    {
+      "path": "third_party/libphonenumber/LICENSE",
+      "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "size": 10173
+    },
+    {
+      "path": "third_party/libphonenumber/NOTICE",
+      "sha256": "daef63de8df58953e157562dc295ca78958bb55ed39ab1af27fa85ddec72fd5e",
+      "size": 958
+    },
+    {
+      "path": "third_party/libphonenumber/PROVENANCE.json",
+      "sha256": "c1e0e1189e57a3d479734beaabfd95ddfa08c2bfb45253987140469b5924cb6b",
+      "size": 789
+    },
+    {
+      "path": "tool/community_build_features.py",
+      "sha256": "b5fa71465571bf0c60963d45b9e0392063c86a4ec9a3e1cff01c00cd617dca87",
+      "size": 609
+    },
+    {
+      "path": "tool/community_features.json",
+      "sha256": "9304145aff67720807ca98c99537cc4391b3687a4bbb88f2e3aeea4eccd7278a",
+      "size": 126
+    },
+    {
+      "path": "tool/pw_community_source_export.py",
+      "sha256": "856c3536ace5f1a79f7b71a4871cd59cab2ec6340528df2469f773bf5bfbf450",
+      "size": 8562
+    },
+    {
+      "path": "tool/pw_community_web_build.py",
+      "sha256": "61a94a24a93193459f777ac513541863918e60770bcc433f0ca9fc6c3034ccf3",
+      "size": 3651
+    },
+    {
+      "path": "tool/pw_release_legacy_import_defines.py",
+      "sha256": "e87430e182a6382abfb3a3a0b5172036dee8f30cb119dd303f74efb1176960ed",
+      "size": 2117
+    },
+    {
+      "path": "tool/pw_release_regional_defines.py",
+      "sha256": "ba8935a240f913b91c9be3a50a76615ccfea6516129fda5a0b5b481578470460",
+      "size": 4654
+    },
+    {
+      "path": "vendor/cloud_library/licenses/cross_file-0.3.5+4-LICENSE.txt",
+      "sha256": "420f7739f169097f0aad1242045169cd643c8f1d94e62866fad265ae4c369b7d",
+      "size": 1497
+    },
+    {
+      "path": "vendor/cloud_library/licenses/hive_ce-2.19.3-LICENSE.txt",
+      "sha256": "a56011480ee8475bdfff349c4b8ea5735129241305a31b12a498b6927ae2b3bb",
+      "size": 13104
+    },
+    {
+      "path": "vendor/cloud_library/licenses/isolate_channel-0.6.0-LICENSE.txt",
+      "sha256": "9322d3fbda6078ab299a9ffcd3940427cb9fbc064e6d14c251d00e8eecb304eb",
+      "size": 1456
+    },
+    {
+      "path": "vendor/cloud_library/licenses/json_annotation-4.9.0-LICENSE.txt",
+      "sha256": "143839f62c9b7f88143ea9f688361c27050888acde7696b34e04414bd254fafc",
+      "size": 1524
+    },
+    {
+      "path": "vendor/cloud_library/licenses/tusc-4.0.0-LICENSE.txt",
+      "sha256": "524cdafaab286bd4829570b57946fdfe67f6ace48db3b925f0138a0cc0fd827c",
+      "size": 1082
+    },
+    {
+      "path": "vendor/generated_avatar/licenses/Jdenticon-MIT.txt",
+      "sha256": "56f14f731959cf24c3a9d1dfa005ebb8df5de7cc08b37c60253508554ffd53ad",
+      "size": 1088
+    },
+    {
+      "path": "vendor/generated_avatar/licenses/canvas-renderer-MIT.txt",
+      "sha256": "7d2baf4e7257c621b4151500a056bd0576d8fd4a428ba415f071b286d7faf22c",
+      "size": 1109
+    },
+    {
+      "path": "vendor/lepton_jpeg/licenses/Lepton-LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "size": 11358
+    },
+    {
+      "path": "vendor/lepton_jpeg/licenses/Lepton-NOTICE.txt",
+      "sha256": "50d7f80a7af7807747f9571a334ad52e1b00f901e025cec4194bc8e557171c1d",
+      "size": 1528
+    },
+    {
+      "path": "vendor/lepton_jpeg/licenses/Rust-Crate-THIRD-PARTY-NOTICES.txt",
+      "sha256": "b9d7d2bf53a5ff0e9a0c570c7c4f94297107cd345c62bf3f946be378493b8c4c",
+      "size": 7711
+    },
+    {
+      "path": "vendor/lepton_jpeg/licenses/Rust-Standard-Library-COPYRIGHT.html",
+      "sha256": "90567e2718bf7fd65a71a3a43c5596488e80e5f51ed02bfea6fec54458b5f3d1",
+      "size": 425661
+    },
+    {
+      "path": "web/index.html",
+      "sha256": "e8d06342f84e83fca0d8d96adaf10039ecf6a531256582d83008861609772019",
+      "size": 1513
+    }
+  ],
+  "policy": {
+    "build_exception": "packages/pw_shared_viewer/web/vendor/three/build/",
+    "exact_files": [
+      "analysis_options.yaml",
+      "ios/Vendor/Zpaq/Zpaq-LICENSE.txt",
+      "l10n.yaml",
+      "pubspec.lock",
+      "pubspec.yaml",
+      "tool/community_build_features.py",
+      "tool/community_features.json",
+      "tool/pw_community_source_export.py",
+      "tool/pw_community_web_build.py",
+      "tool/pw_release_legacy_import_defines.py",
+      "tool/pw_release_regional_defines.py"
+    ],
+    "excluded_parts": [
+      ".dart_tool",
+      ".git",
+      ".pub",
+      ".pub-cache",
+      "__pycache__",
+      "artifacts",
+      "credentials",
+      "experiments",
+      "node_modules",
+      "private",
+      "secrets"
+    ],
+    "excluded_suffixes": [
+      ".log",
+      ".pyc",
+      ".pem",
+      ".key",
+      ".p12",
+      ".pfx",
+      ".keystore"
+    ],
+    "local_packages_pubspec_and_lib": [
+      "aether_capture_services",
+      "official_capture_services",
+      "pw_hevc"
+    ],
+    "shared_lib_suffixes": [
+      ".dart",
+      ".arb"
+    ],
+    "tree_prefixes": [
+      "web/",
+      "assets/",
+      "packages/pw_shared_viewer/",
+      "vendor/generated_avatar/licenses/",
+      "vendor/cloud_library/licenses/",
+      "vendor/lepton_jpeg/licenses/",
+      "third_party/libphonenumber/",
+      "ios/Vendor/JXL/licenses/",
+      "ios/Vendor/NativeCore/licenses/"
+    ]
+  },
+  "schema": "pw.community-source-export.v1",
+  "source_revision": "24b1fb1c88b673864ede0eb651e4da294c3a2298"
+}

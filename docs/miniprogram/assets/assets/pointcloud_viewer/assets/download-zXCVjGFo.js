@@ -1,0 +1,1 @@
+import{n as e}from"./safeText-RRXxPPLb.js";import{S as t}from"./index-D-4jWNRT.js";function n(t,n){let r=URL.createObjectURL(t),i=document.createElement(`a`);i.href=r,i.download=e(n,`download`),document.body.appendChild(i),i.click(),i.remove(),setTimeout(()=>URL.revokeObjectURL(r),1e3)}function r(e,r,i){n(new Blob([t(r)],{type:i}),e)}export{n,r as t};
