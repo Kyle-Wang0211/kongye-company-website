@@ -132,3 +132,19 @@ test('menu placement is clamped to viewport and outside click closes it', () => 
   page.document.emit('click');
   assert.equal(menu.hidden, true);
 });
+
+
+test('sidebar menu opens above Settings while language still opens to the right', () => {
+  const page = boot();
+  const opener = page.get('open-sidebar-settings');
+  opener.emit('pointerenter', {pointerType: 'mouse'});
+  const menu = page.get('site-settings-menu');
+  assert.equal(parseFloat(menu.style.left), opener.rect.left);
+  assert.equal(parseFloat(menu.style.top) + menu.offsetHeight, opener.rect.top - 4);
+  page.get('settings-language').emit('pointerenter', {pointerType: 'mouse'});
+  const language = page.get('site-language-menu');
+  assert.equal(parseFloat(language.style.left), page.get('settings-language').rect.right + 4);
+  opener.rect.top = 400;
+  page.window.emit('resize');
+  assert.equal(parseFloat(menu.style.top) + menu.offsetHeight, 396);
+});

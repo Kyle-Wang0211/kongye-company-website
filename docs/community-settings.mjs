@@ -88,7 +88,7 @@ contact.append(contactLabel, document.createTextNode(' '), email);
 helpContent.append(contact);
 dialog.append(helpContent);
 
-function place(panel, anchor, preferRight = true) {
+function place(panel, anchor, placement = 'right') {
   const bounds = anchor.getBoundingClientRect();
   const gap = 4;
   const margin = 8;
@@ -96,10 +96,11 @@ function place(panel, anchor, preferRight = true) {
   const height = panel.offsetHeight;
   const right = bounds.right + gap;
   const left = bounds.left - width - gap;
-  let x = preferRight ? right : bounds.right - width;
-  if (preferRight && x + width > window.innerWidth - margin) x = left;
+  let x = placement === 'above' ? bounds.left : placement === 'end' ? bounds.right - width : right;
+  if (placement === 'right' && x + width > window.innerWidth - margin) x = left;
   x = Math.max(margin, Math.min(x, window.innerWidth - width - margin));
-  const y = Math.max(margin, Math.min(bounds.top, window.innerHeight - height - margin));
+  const preferredY = placement === 'above' ? bounds.top - height - gap : bounds.top;
+  const y = Math.max(margin, Math.min(preferredY, window.innerHeight - height - margin));
   panel.style.left = `${x}px`;
   panel.style.top = `${y}px`;
 }
@@ -131,7 +132,7 @@ function openMenu(opener, focus = false) {
   for (const item of openers) item.setAttribute('aria-expanded', String(item === opener));
   settingsMenu.hidden = false;
   updateLanguage();
-  place(settingsMenu, returnFocus, opener === sidebarOpener);
+  place(settingsMenu, returnFocus, opener === sidebarOpener ? 'above' : 'end');
   if (focus) languageButton.focus();
 }
 function placeLanguage() {
@@ -228,7 +229,7 @@ document.addEventListener('keydown', event => {
 });
 window.addEventListener(localeEvent, updateLanguage);
 window.addEventListener('resize', () => {
-  if (!settingsMenu.hidden) place(settingsMenu, returnFocus, activeOpener === sidebarOpener);
+  if (!settingsMenu.hidden) place(settingsMenu, returnFocus, activeOpener === sidebarOpener ? 'above' : 'end');
   if (!languageMenu.hidden) placeLanguage();
 });
 window.addEventListener('scroll', event => {
