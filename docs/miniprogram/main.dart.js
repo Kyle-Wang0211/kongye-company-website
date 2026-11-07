@@ -133425,7 +133425,7 @@ p.f=new A.Cs(A.w(t.F7,t._9),t.VP)}o=A.b([p.f],t.tc)
 n=A.Dn(q,B.c7,A.m2(B.aj,B.dk,B.be,q,B.C,B.l5,B.C,q),B.c7,B.aAk,!0)
 m=p.a
 r=m.d.a
-return new A.wE(A.eX(m.c,new A.aT0(p),q),new A.aT1(p),o,new A.aT2(p),"PocketWorld",n,r,B.aaz,B.ag7,!1,s)},
+return new A.wE(A.eX(m.c,new A.aT0(p),q),new A.aT1(p),o,new A.aT2(p),"\u7a97\u540e\u57ce",n,r,B.aaz,B.ag7,!1,s)},
 $S:712}
 A.aT2.prototype={
 $2(a,b){var s=this.a.a.c

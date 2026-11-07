@@ -2002,8 +2002,8 @@
     },
     {
       "path": "lib/main_community_web.dart",
-      "sha256": "626c936caec248a9a9529d6464242d407c3c166cf8a5009d4265e585c1e0b577",
-      "size": 14075
+      "sha256": "5bdf2a4919199622c0df913c7f27490a7de3e6b0b58e78833a7ac605e7bed1fd",
+      "size": 14073
     },
     {
       "path": "lib/me/cloud_library.dart",
@@ -4947,8 +4947,8 @@
     },
     {
       "path": "web/index.html",
-      "sha256": "e8d06342f84e83fca0d8d96adaf10039ecf6a531256582d83008861609772019",
-      "size": 1513
+      "sha256": "fc16d52ec0076fba9a81c261acbb53150cc7fdc2bee5efacea9e08213910404c",
+      "size": 1509
     }
   ],
   "policy": {

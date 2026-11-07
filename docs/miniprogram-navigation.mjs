@@ -1,3 +1,7 @@
+export function miniProgramTitle(currentHref, defaultTitle) {
+  return new URL(currentHref).searchParams.get('mini') === '1' ? '窗后城' : defaultTitle;
+}
+
 // Keep the shared website pages inside the mini program's mobile community.
 export function miniProgramDestination(href, currentHref) {
   const current = new URL(currentHref);
@@ -16,6 +20,11 @@ export function miniProgramDestination(href, currentHref) {
 
 export function installMiniProgramNavigation() {
   if (new URL(location.href).searchParams.get('mini') !== '1') return;
+  const brand = document.querySelector('.brand [data-i18n="siteBrand"]');
+  if (brand) {
+    brand.removeAttribute('data-i18n');
+    brand.textContent = '窗后城';
+  }
   const adapt = anchor => {
     anchor.href = miniProgramDestination(anchor.getAttribute('href'), location.href);
   };

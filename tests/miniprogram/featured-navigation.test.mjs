@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {miniProgramDestination} from '../../docs/miniprogram-navigation.mjs';
+import {miniProgramDestination,miniProgramTitle} from '../../docs/miniprogram-navigation.mjs';
 const current='https://kongye.space/screen.html?screen=1&mini=1';
 test('all three covers preserve the mini program context',()=>{
  for(let screen=1;screen<=3;screen++){
@@ -39,4 +39,11 @@ test('featured markup is the exact shared website section',async()=>{
   const tag=index.split('\n').find(line=>line.includes(name)&&line.includes('<'));
   assert.ok(featured.includes(tag.trim()));
  }
+});
+
+test('mini program title remains Chinese on every activity page',()=>{
+ for(let screen=1;screen<=3;screen++){
+  assert.equal(miniProgramTitle(`https://kongye.space/screen.html?screen=${screen}&mini=1`,'English title'),'窗后城');
+ }
+ assert.equal(miniProgramTitle('https://kongye.space/screen.html?screen=1','Website title'),'Website title');
 });

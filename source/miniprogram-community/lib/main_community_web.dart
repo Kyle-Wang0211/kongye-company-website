@@ -216,7 +216,7 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
       builder: (context, _) => MaterialApp(
         key: _navigationKey(),
         navigatorObservers: [_routes],
-        title: 'PocketWorld',
+        title: '窗后城',
         debugShowCheckedModeBanner: false,
         theme: communityWebTheme(),
         locale: locale.locale,

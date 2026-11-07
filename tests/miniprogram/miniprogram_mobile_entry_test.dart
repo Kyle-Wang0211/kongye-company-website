@@ -56,6 +56,7 @@ void main() {
           3,
         );
       }
+      expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).title, '窗后城');
       expect(exits, 0);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
