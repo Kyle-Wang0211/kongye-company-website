@@ -3067,8 +3067,8 @@
     },
     {
       "path": "lib/ui/community/community_loading.dart",
-      "sha256": "052dcf44619223119390d4ce43fb9fa3f841a98c686a4782ef411629face0bac",
-      "size": 3125
+      "sha256": "5b866601f40037a11bd07a436338d72b8dcd5a15322c787316ff783ca0607b08",
+      "size": 1491
     },
     {
       "path": "lib/ui/community/first_pair_policy.dart",

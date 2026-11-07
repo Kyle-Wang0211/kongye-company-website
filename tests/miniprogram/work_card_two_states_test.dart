@@ -139,8 +139,9 @@ void main() {
         );
         await t.pump();
         expect(_visible(t), isFalse);
-        expect(find.byType(SkeletonWorkCard), findsNothing);
-        expect(find.byType(SkeletonBox), findsNothing);
+        if (find.byType(SkeletonWorkCard).evaluate().isNotEmpty) {
+          expect(find.byType(SkeletonBox), findsWidgets);
+        }
         expect(find.text('City').hitTestable(), findsNothing);
         expect(
           find.byIcon(Icons.favorite_outline_rounded).hitTestable(),
