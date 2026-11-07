@@ -50,6 +50,12 @@ void main() {
       );
       await tester.pump();
       expect(find.byType(VaultPage), ready ? findsOneWidget : findsNothing);
+      if (ready) {
+        expect(
+          tester.widget<VaultPage>(find.byType(VaultPage)).featuredHeader,
+          isNotNull,
+        );
+      }
       expect(exits, 0);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();

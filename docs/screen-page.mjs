@@ -1,3 +1,4 @@
+import {installMiniProgramNavigation} from './miniprogram-navigation.mjs?v=featured-20261107';
 import {initSiteLocale,t,localeEvent} from './site-l10n.mjs?v=account-library-20261106-v44';
 const keys=['siteScreenOne','siteScreenTwo','siteScreenThree'];
 const requested=Number(new URL(location.href).searchParams.get('screen'));
@@ -10,3 +11,5 @@ window.addEventListener(localeEvent,title);title();
 if(index===0){const {mountCeramicEvent}=await import('./ceramic-event.mjs?v=account-library-20261106-v44');mountCeramicEvent();}
 
 if(index===1){const [{mountCommunityResort},{resortConfig}]=await Promise.all([import('./community-resort.mjs?v=monochrome-20261106-v46'),import('./community-resort-data.mjs?v=resort-guide-20261106-v45')]);mountCommunityResort(resortConfig);}
+
+installMiniProgramNavigation();

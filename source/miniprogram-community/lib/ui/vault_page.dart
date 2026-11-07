@@ -32,11 +32,13 @@ class VaultPage extends StatefulWidget {
     super.key,
     this.service,
     this.isVisible = true,
+    this.featuredHeader,
     this.viewerHostBuilderForTesting,
   });
 
   final CommunityService? service;
   final bool isVisible;
+  final Widget? featuredHeader;
   // Forward the shared renderer's existing test seam.
   // ignore: invalid_use_of_visible_for_testing_member
   final ProductModelHostBuilder? viewerHostBuilderForTesting;
@@ -661,7 +663,9 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
 
   /// 主题卡只在**没有作者过滤**时出现 —— 「本周精选」是策展,
   /// 在"只看某个人"的视图里没有意义。
-  bool get _showTopicCard => kShowCommunityTopicCard && _authorFilterId == null;
+  bool get _showTopicCard =>
+      (widget.featuredHeader != null || kShowCommunityTopicCard) &&
+      _authorFilterId == null;
 
   Widget _buildFeed() {
     final sourceFeed = _feed;
@@ -922,7 +926,8 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
                     children: [
                       CommunityMasonry(
                         header: _showTopicCard
-                            ? TopicCard(autoPlay: _governor.liveAllowed)
+                            ? widget.featuredHeader ??
+                                  TopicCard(autoPlay: _governor.liveAllowed)
                             : null,
                         itemCount: readyWorks.length,
                         footer: _remounting.isEmpty ? footer : null,

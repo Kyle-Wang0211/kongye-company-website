@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/vault_page.dart';
+import 'ui/community/website_featured_screens_stub.dart'
+    if (dart.library.js_interop) 'ui/community/website_featured_screens_web.dart';
 import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
 import 'ui/community/public_work_exit_stub.dart'
@@ -255,7 +257,7 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
                     : query['publish'] == '1'
                     ? const _WebPublicationEntry()
                     : mobileFeed
-                    ? const VaultPage()
+                    ? const VaultPage(featuredHeader: WebsiteFeaturedScreens())
                     : _WebsiteHomeEntry(
                         routes: _routes,
                         onExit: widget.onExit,
@@ -267,7 +269,7 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
                     : mobileFeed &&
                           !query.containsKey('auth') &&
                           query['publish'] != '1'
-                    ? const VaultPage()
+                    ? const VaultPage(featuredHeader: WebsiteFeaturedScreens())
                     : AuthRootView(
                         currentUser: user,
                         initialSignUp: query['auth'] == 'signup',
