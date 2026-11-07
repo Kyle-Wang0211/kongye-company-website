@@ -4,9 +4,8 @@
 // Visual conventions identical to AuthRootView (top bar with back
 // chevron + wordmark + 中/EN, big caps heading, underline-only inputs,
 // caps text CTA). Differs only in copy and the post-submit handler:
-// when the strict-confirmation backend returns EmailVerificationPending,
-// we push OtpVerificationView (carrying the password forward so the
-// OTP page can signInWithPassword once the user is created).
+// when native Auth returns EmailVerificationPending, we push
+// OtpVerificationView. Native OTP verification establishes the session.
 //
 // Filename note: this used to also host the sign-IN form. Sign-in
 // moved to auth_root_view.dart in the 2026-04-29 redesign. Renaming
@@ -126,27 +125,41 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
         SignUpRequest.email(email: _normalizedEmail, password: _password.text),
       );
     } on EmailVerificationPending catch (e) {
-      // signup-start has emailed an OTP and stashed the request in
-      // pending_signups. The auth.users row doesn't exist yet — it
-      // gets created when OtpVerificationView calls verifySignupOtp
-      // (which then signInWithPasswords using e.password).
       if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => OtpVerificationView(
-            currentUser: widget.currentUser,
-            email: e.email,
-            password: e.password,
-            hasPolicyConsent: () =>
-                mounted &&
-                _policyAccepted &&
-                _normalizedEmail == e.email &&
-                _consentOwner == widget.currentUser.signedInUser?.id.rawValue,
-          ),
-          fullscreenDialog: true,
-        ),
-      );
+      _openSignupVerification(e.email);
     }
+  }
+
+  bool get _canContinueVerification =>
+      _policyAccepted && _normalizedEmail.isNotEmpty;
+
+  void _continueSignupVerification() {
+    if (!_canContinueVerification ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
+    // Resume only the existing registration verification screen. Opening it
+    // never signs up, resends a code, or starts a passwordless login flow.
+    _openSignupVerification(_normalizedEmail);
+  }
+
+  void _openSignupVerification(String email) {
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => OtpVerificationView(
+          currentUser: widget.currentUser,
+          email: email,
+          hasPolicyConsent: () =>
+              mounted &&
+              _policyAccepted &&
+              _normalizedEmail == email &&
+              _consentOwner == widget.currentUser.signedInUser?.id.rawValue,
+        ),
+        fullscreenDialog: true,
+      ),
+    );
   }
 
   @override
@@ -210,6 +223,17 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
                         enabled: _canSubmit && !working,
                         working: working,
                         onTap: _submit,
+                      ),
+                      const SizedBox(height: AetherSpacing.lg),
+                      MinimalLink(
+                        key: const ValueKey(
+                          'continue-email-signup-verification',
+                        ),
+                        title: l.otpVerifyTitle,
+                        emphasis: MinimalLinkEmphasis.medium,
+                        onTap: _canContinueVerification && !working
+                            ? _continueSignupVerification
+                            : null,
                       ),
                       const SizedBox(height: AetherSpacing.xxl),
                       MinimalLink(

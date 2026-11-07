@@ -35,17 +35,11 @@ enum AuthErrorKind {
 /// Raised by `signUp` when the OTP has been sent and the UI should
 /// transition to the 6-digit entry screen. Not a hard error.
 ///
-/// Carries the password the user just typed so the OTP screen can
-/// forward it to `verifyEmailSignupOtp`. We need it because in the
-/// strict-confirmation flow the *real* auth.users row is created
-/// server-side at OTP verification time; the client then has to
-/// `signInWithPassword` to obtain a session, and that requires the
-/// password again. Holding it on the OTP page (in memory only) avoids
-/// asking the user to retype it.
+/// Supabase has created an unconfirmed account and sent its native OTP.
+/// Verification establishes the session without retaining the signup password.
 class EmailVerificationPending implements Exception {
   final String email;
-  final String password;
-  const EmailVerificationPending(this.email, this.password);
+  const EmailVerificationPending(this.email);
 
   @override
   String toString() => 'EmailVerificationPending($email)';
@@ -81,5 +75,6 @@ class AuthException implements Exception {
   }
 
   @override
-  String toString() => 'AuthException($kind${detail == null ? '' : ': $detail'})';
+  String toString() =>
+      'AuthException($kind${detail == null ? '' : ': $detail'})';
 }

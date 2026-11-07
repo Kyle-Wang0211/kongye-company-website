@@ -6,12 +6,12 @@
 // across all three pages.
 //
 // Step 1 — collect the email, fire CurrentUser.sendPasswordReset which
-// hits the password-reset-start Edge Function. Email body renders
-// 6-digit OTP via Resend (zh / en chosen at server side).
+// calls native Auth resetPasswordForEmail. The configured SMTP
+// template renders the native 6-digit OTP.
 //
 // Step 2 — show six OTP boxes plus a new-password field on the same
 // page. Single submit calls resetPasswordWithOtp, which verifyOTPs +
-// updates the password atomically. On success the user is signed in
+// then updates the authenticated password. On success the user is signed in
 // and AuthGate routes to HomeScreen.
 //
 // Resend: tappable after a 60 s cooldown, identical to the signup OTP

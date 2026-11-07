@@ -39,16 +39,12 @@ class UnavailableAuthService implements AuthService {
   Future<void> sendEmailVerification() async => _unavailable();
 
   @override
-  Future<void> resendEmailOtp({
-    required String email,
-    required String password,
-  }) async => _unavailable();
+  Future<void> resendEmailOtp({required String email}) async => _unavailable();
 
   @override
   Future<AuthenticatedUser> verifyEmailSignupOtp({
     required String email,
     required String token,
-    required String password,
   }) async => _unavailable();
 
   @override

@@ -28,6 +28,7 @@ import 'auth_service.dart';
 
 class SupabaseAuthServiceImpl implements AuthService {
   final SupabaseClient _client;
+  final bool _nativeEmailReady;
   // When wired through main.dart, signUp passes the user's current UI
   // locale ('zh' or 'en') in user_metadata.locale so the Supabase email
   // template can branch on `{{ if eq .Data.locale "zh" }}`. Optional so
@@ -37,8 +38,13 @@ class SupabaseAuthServiceImpl implements AuthService {
   SupabaseAuthServiceImpl({
     SupabaseClient? client,
     LocaleNotifier? localeNotifier,
+    bool nativeEmailReady = const bool.fromEnvironment(
+      'PW_NATIVE_EMAIL_SMTP_READY',
+      defaultValue: false,
+    ),
   }) : _client = client ?? Supabase.instance.client,
-       _localeNotifier = localeNotifier;
+       _localeNotifier = localeNotifier,
+       _nativeEmailReady = nativeEmailReady;
 
   @override
   Future<AuthenticatedUser?> currentUser() async {
@@ -136,24 +142,21 @@ class SupabaseAuthServiceImpl implements AuthService {
           password: final pw,
           displayName: final name,
         ):
-          // Strict-confirmation flow. The signup-start Edge Function
-          // writes a row into pending_signups and emails an OTP — it
-          // does NOT touch auth.users. The real auth.users row is
-          // created server-side at OTP verification time
-          // (verifyEmailSignupOtp). The password is held in
-          // EmailVerificationPending so the OTP page can call
-          // signInWithPassword once the row exists; without it, we'd
-          // have to ask the user to retype their password.
-          await _client.functions.invoke(
-            'signup-start',
-            body: {
-              'email': email,
-              'password': pw,
+          _requireNativeEmail();
+          final res = await _client.auth.signUp(
+            email: email,
+            password: pw,
+            data: {
               'display_name': ?name,
               'locale': _localeNotifier?.locale.languageCode ?? 'en',
             },
           );
-          throw EmailVerificationPending(email, pw);
+          if (res.session == null) throw EmailVerificationPending(email);
+          final user = res.user;
+          if (user == null) {
+            throw const AuthException(AuthErrorKind.invalidCredentials);
+          }
+          return _wrap(user);
 
         case SignUpRequestPhone(
           phoneNumber: final phone,
@@ -161,8 +164,7 @@ class SupabaseAuthServiceImpl implements AuthService {
           displayName: final name,
         ):
           // Phone path unchanged — Supabase's native verifyOTP on a
-          // never-seen phone creates the user in one shot, no
-          // pending_signups detour needed.
+          // never-seen phone creates the user in one shot.
           final res = await _client.auth.verifyOTP(
             phone: phone,
             token: code,
@@ -179,8 +181,10 @@ class SupabaseAuthServiceImpl implements AuthService {
           }
           return _wrap(user);
       }
-    } on FunctionException catch (e) {
-      throw _mapFunctionException(e);
+    } on AuthRetryableFetchException catch (e) {
+      throw AuthException(AuthErrorKind.network, e.message);
+    } on AuthWeakPasswordException catch (e) {
+      throw AuthException(AuthErrorKind.weakPassword, e.message);
     } on AuthApiException catch (e) {
       throw AuthException(_mapAuthApi(e), e.message);
     } on AuthException {
@@ -226,6 +230,7 @@ class SupabaseAuthServiceImpl implements AuthService {
         'User has no email on file',
       );
     }
+    _requireNativeEmail();
     try {
       await _client.auth.resend(type: OtpType.signup, email: email);
     } on AuthApiException catch (e) {
@@ -235,24 +240,21 @@ class SupabaseAuthServiceImpl implements AuthService {
     }
   }
 
+  void _requireNativeEmail() {
+    if (!_nativeEmailReady) {
+      throw const AuthException(AuthErrorKind.providerUnavailable);
+    }
+  }
+
   @override
-  Future<void> resendEmailOtp({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> resendEmailOtp({required String email}) async {
+    _requireNativeEmail();
     try {
-      // signup-start is idempotent on email: upserts pending_signups,
-      // rotates the OTP, resets attempts to zero, sends a fresh email.
-      await _client.functions.invoke(
-        'signup-start',
-        body: {
-          'email': email,
-          'password': password,
-          'locale': _localeNotifier?.locale.languageCode ?? 'en',
-        },
-      );
-    } on FunctionException catch (e) {
-      throw _mapFunctionException(e);
+      await _client.auth.resend(type: OtpType.signup, email: email);
+    } on AuthRetryableFetchException catch (e) {
+      throw AuthException(AuthErrorKind.network, e.message);
+    } on AuthApiException catch (e) {
+      throw AuthException(_mapAuthApi(e), e.message);
     } catch (e) {
       throw AuthException(AuthErrorKind.unknown, e.toString());
     }
@@ -262,31 +264,20 @@ class SupabaseAuthServiceImpl implements AuthService {
   Future<AuthenticatedUser> verifyEmailSignupOtp({
     required String email,
     required String token,
-    required String password,
   }) async {
+    _requireNativeEmail();
     try {
-      await _client.functions.invoke(
-        'signup-verify',
-        body: {'email': email, 'otp': token},
-      );
-      // The Edge Function just created the auth.users row pre-confirmed
-      // (email_confirm: true). Sign in with the password the user
-      // typed at the start of signup — yields a real Supabase session
-      // identical to a normal email/password login.
-      final res = await _client.auth.signInWithPassword(
+      final res = await _client.auth.verifyOTP(
         email: email,
-        password: password,
+        token: token,
+        type: OtpType.email,
       );
-      final user = res.user;
-      if (user == null) {
-        throw const AuthException(
-          AuthErrorKind.unknown,
-          'signInWithPassword returned no user after signup-verify',
-        );
+      if (res.user == null || res.session == null) {
+        throw const AuthException(AuthErrorKind.invalidVerificationCode);
       }
-      return _wrap(user);
-    } on FunctionException catch (e) {
-      throw _mapFunctionException(e);
+      return _wrap(res.user!);
+    } on AuthRetryableFetchException catch (e) {
+      throw AuthException(AuthErrorKind.network, e.message);
     } on AuthApiException catch (e) {
       throw AuthException(_mapAuthApi(e), e.message);
     } on AuthException {
@@ -298,21 +289,13 @@ class SupabaseAuthServiceImpl implements AuthService {
 
   @override
   Future<void> sendPasswordReset(String email) async {
+    _requireNativeEmail();
     try {
-      // Strict-OTP reset, mirroring the signup flow. password-reset-start
-      // looks up the user, generates an OTP, stores hash in
-      // pending_password_resets, and emails the OTP via Resend with
-      // locale-aware copy. Existing-vs-nonexisting emails are
-      // indistinguishable to the caller (silent success either way).
-      await _client.functions.invoke(
-        'password-reset-start',
-        body: {
-          'email': email,
-          'locale': _localeNotifier?.locale.languageCode ?? 'en',
-        },
-      );
-    } on FunctionException catch (e) {
-      throw _mapFunctionException(e);
+      await _client.auth.resetPasswordForEmail(email);
+    } on AuthRetryableFetchException catch (e) {
+      throw AuthException(AuthErrorKind.network, e.message);
+    } on AuthApiException catch (e) {
+      throw AuthException(_mapAuthApi(e), e.message);
     } catch (e) {
       throw AuthException(AuthErrorKind.unknown, e.toString());
     }
@@ -324,29 +307,27 @@ class SupabaseAuthServiceImpl implements AuthService {
     required String token,
     required String newPassword,
   }) async {
+    _requireNativeEmail();
     try {
-      // 1. Have the Edge Function verify the OTP and rotate the
-      // password via admin.updateUserById (server-side, bypasses RLS).
-      await _client.functions.invoke(
-        'password-reset-verify',
-        body: {'email': email, 'otp': token, 'new_password': newPassword},
-      );
-      // 2. Sign in with the freshly-rotated password — yields a real
-      // Supabase session identical to a normal email/password login.
-      final res = await _client.auth.signInWithPassword(
+      final verified = await _client.auth.verifyOTP(
         email: email,
-        password: newPassword,
+        token: token,
+        type: OtpType.recovery,
       );
-      final user = res.user;
-      if (user == null) {
-        throw const AuthException(
-          AuthErrorKind.unknown,
-          'signInWithPassword returned no user after password-reset-verify',
-        );
+      if (verified.user == null || verified.session == null) {
+        throw const AuthException(AuthErrorKind.invalidVerificationCode);
       }
-      return _wrap(user);
-    } on FunctionException catch (e) {
-      throw _mapFunctionException(e);
+      final updated = await _client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      if (updated.user == null) {
+        throw const AuthException(AuthErrorKind.unknown);
+      }
+      return _wrap(updated.user!);
+    } on AuthRetryableFetchException catch (e) {
+      throw AuthException(AuthErrorKind.network, e.message);
+    } on AuthWeakPasswordException catch (e) {
+      throw AuthException(AuthErrorKind.weakPassword, e.message);
     } on AuthApiException catch (e) {
       throw AuthException(_mapAuthApi(e), e.message);
     } on AuthException {
@@ -556,47 +537,6 @@ class SupabaseAuthServiceImpl implements AuthService {
     );
   }
 
-  /// Maps a non-2xx response from our signup-start / signup-verify
-  /// Edge Functions onto the AuthException surface the UI already
-  /// understands. The Edge Functions return JSON like `{"error": "..."}`
-  /// — supabase-flutter parses it into `e.details` as a Map.
-  AuthException _mapFunctionException(FunctionException e) {
-    final details = e.details;
-    String code = '';
-    if (details is Map) {
-      code = (details['error']?.toString() ?? '').toLowerCase();
-    } else if (details is String) {
-      code = details.toLowerCase();
-    }
-    switch (e.status) {
-      case 400:
-        // password-reset-verify returns 400 weak_password for too-short
-        // new passwords; other 400s are validation errors that should
-        // never happen given client-side gating.
-        if (code == 'weak_password') {
-          return const AuthException(AuthErrorKind.weakPassword);
-        }
-        return AuthException(AuthErrorKind.unknown, 'bad_request: $code');
-      case 401:
-      case 404:
-      case 410:
-        // 401 = wrong code, 404 = no pending row (probably reaped),
-        // 410 = expired. UI message ("验证码错误或已过期") covers all.
-        return AuthException(AuthErrorKind.invalidVerificationCode, code);
-      case 409:
-        return const AuthException(AuthErrorKind.accountAlreadyExists);
-      case 429:
-        return const AuthException(AuthErrorKind.rateLimited);
-      case 502:
-        return AuthException(AuthErrorKind.providerUnavailable, code);
-      default:
-        return AuthException(
-          AuthErrorKind.unknown,
-          'edge function ${e.status}${code.isEmpty ? '' : ': $code'}',
-        );
-    }
-  }
-
   AuthErrorKind _mapAuthApi(AuthApiException e) {
     final code = e.code?.toLowerCase() ?? '';
     final msg = e.message.toLowerCase();
@@ -614,6 +554,7 @@ class SupabaseAuthServiceImpl implements AuthService {
       return AuthErrorKind.weakPassword;
     }
     if (code.contains('over_request_rate_limit') ||
+        code.contains('over_email_send_rate_limit') ||
         msg.contains('rate limit') ||
         msg.contains('too many')) {
       return AuthErrorKind.rateLimited;

@@ -33,17 +33,12 @@ import 'auth_policy_consent.dart';
 class OtpVerificationView extends StatefulWidget {
   final CurrentUser currentUser;
   final String email;
-  // Held in memory only; forwarded to verifySignupOtp so we can sign in
-  // immediately after the Edge Function creates the auth.users row.
-  // EmailSignUpView passes this through via EmailVerificationPending.
-  final String password;
   final bool Function()? hasPolicyConsent;
 
   const OtpVerificationView({
     super.key,
     required this.currentUser,
     required this.email,
-    required this.password,
     this.hasPolicyConsent,
   });
 
@@ -87,8 +82,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
       widget.currentUser.addListener(_onExternalChanged);
     }
     if (oldWidget.currentUser != widget.currentUser ||
-        oldWidget.email != widget.email ||
-        oldWidget.password != widget.password) {
+        oldWidget.email != widget.email) {
       _policyAccepted = false;
       _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
       _code.clear();
@@ -154,7 +148,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
     final ok = await widget.currentUser.verifySignupOtp(
       email: widget.email,
       token: _code.text.trim(),
-      password: widget.password,
     );
     if (!mounted) return;
     if (ok) {
@@ -184,10 +177,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
         widget.currentUser.isSignedIn) {
       return;
     }
-    final ok = await widget.currentUser.resendSignupOtp(
-      email: widget.email,
-      password: widget.password,
-    );
+    final ok = await widget.currentUser.resendSignupOtp(email: widget.email);
     if (!mounted) return;
     if (ok) {
       _startCooldown();

@@ -261,13 +261,8 @@ class CurrentUser extends ChangeNotifier {
   Future<bool> verifySignupOtp({
     required String email,
     required String token,
-    required String password,
   }) => _runUserAction(
-    (service) => service.verifyEmailSignupOtp(
-      email: email,
-      token: token,
-      password: password,
-    ),
+    (service) => service.verifyEmailSignupOtp(email: email, token: token),
   );
 
   Future<bool> resetPasswordWithOtp({
@@ -282,12 +277,9 @@ class CurrentUser extends ChangeNotifier {
     ),
   );
 
-  Future<bool> resendSignupOtp({
-    required String email,
-    required String password,
-  }) async =>
+  Future<bool> resendSignupOtp({required String email}) async =>
       await _runValueAction((service) async {
-        await service.resendEmailOtp(email: email, password: password);
+        await service.resendEmailOtp(email: email);
         return true;
       }) ??
       false;
