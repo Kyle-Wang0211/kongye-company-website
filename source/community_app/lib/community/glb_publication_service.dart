@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../dense/dense_work_state.dart';
+import 'web_publication_service.dart';
 
 class GlbPublicationException implements Exception {
   final String code;
@@ -115,18 +116,44 @@ class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
   }
 }
 
+/// Native source verification stays local; authenticated control requests share
+/// the exact same publication protocol as browser submissions.
+class _GlbPublicationControlPorts implements PublicationControlPorts {
+  final GlbPublicationPorts ports;
+  _GlbPublicationControlPorts(this.ports);
+  @override
+  String? get userId => ports.userId;
+  @override
+  Uri get apiOrigin => ports.apiOrigin;
+  @override
+  Future<Map<String, dynamic>> invoke(Map<String, dynamic> body) async {
+    try {
+      return await ports.invoke(body);
+    } on GlbPublicationException catch (e) {
+      throw WebPublicationException(
+        e.code,
+        submissionId: e.submissionId,
+        retryable: e.retryable,
+      );
+    }
+  }
+}
+
 class GlbPublicationService {
   static final _uuid = RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
   );
-  static const maxSourceBytes =
-      50000000; // Current fixed26 renderer policy, not a quota override.
+  static const maxSourceBytes = WebPublicationService.maxSourceBytes;
   final GlbPublicationPorts _ports;
   final Duration requestTimeout;
+  final WebPublicationService _core;
   GlbPublicationService.forTest(
     this._ports, {
     this.requestTimeout = const Duration(seconds: 30),
-  });
+  }) : _core = WebPublicationService.forTest(
+         _GlbPublicationControlPorts(_ports),
+         requestTimeout: requestTimeout,
+       );
   factory GlbPublicationService({SupabaseClient? client, Uri? apiOrigin}) {
     final c = client ?? Supabase.instance.client;
     final rest = Uri.parse(c.rest.url);
@@ -150,79 +177,24 @@ class GlbPublicationService {
     }
   }
 
-  Future<Map<String, dynamic>> _call(
-    Map<String, dynamic> body, {
-    String? submissionId,
-  }) async {
-    try {
-      return await _ports.invoke(body).timeout(requestTimeout);
-    } on GlbPublicationException {
-      rethrow;
-    } catch (_) {
-      throw GlbPublicationException(
-        'submission_unavailable',
-        submissionId: submissionId,
-        retryable: true,
+  GlbPublicationStatus _nativeStatus(WebPublicationStatus status) =>
+      GlbPublicationStatus(
+        submissionId: status.submissionId,
+        status: status.status,
+        workId: status.workId,
+        targetExceeded: status.targetExceeded,
       );
-    }
-  }
-
-  GlbPublicationStatus _status(
-    Map<String, dynamic> value, {
-    String? expectedId,
-  }) {
-    final id = value['submission_id'];
-    final state = value['status'];
-    const states = {
-      'uploading',
-      'queued',
-      'rendering',
-      'processing',
-      'awaiting_review',
-      'published',
-      'unpublished',
-      'rejected',
-      'cancelled',
-      'failed',
-      'not_qualified',
-    };
-    if (value['ok'] != true ||
-        id is! String ||
-        !_uuid.hasMatch(id) ||
-        (expectedId != null && id != expectedId) ||
-        state is! String ||
-        !states.contains(state)) {
-      throw GlbPublicationException(
-        'invalid_response',
-        submissionId: expectedId,
-      );
-    }
-    final workId = value['work_id'];
-    if (workId != null &&
-        (state != 'published' ||
-            workId is! String ||
-            !_uuid.hasMatch(workId))) {
-      throw GlbPublicationException('invalid_response', submissionId: id);
-    }
-    return GlbPublicationStatus(
-      submissionId: id,
-      status: state,
-      workId: workId as String?,
-      targetExceeded: value['target_exceeded'] == true,
-    );
-  }
 
   Future<GlbPublicationStatus> getStatus(String submissionId) async {
-    final uid = _ports.userId;
-    _signedIn(uid);
-    if (!_uuid.hasMatch(submissionId))
-      throw const GlbPublicationException('invalid_submission_id');
-    final result = await _call({
-      'action': 'status',
-      'submission_id': submissionId,
-    }, submissionId: submissionId);
-    _signedIn(uid);
-    return _status(result, expectedId: submissionId);
+    try {
+      return _nativeStatus(await _core.getStatus(submissionId));
+    } on WebPublicationException catch (e) {
+      throw GlbPublicationException(
+        e.code,
+        submissionId: e.submissionId,
+        retryable: e.retryable,
+      );
+    }
   }
 
   /// The caller persists idempotencyKey before this call and persists the server
@@ -251,6 +223,7 @@ class GlbPublicationService {
     File? snapshot;
     String? submissionId;
     bool uploadInFlight = false;
+    bool submissionReturned = false;
     try {
       onProgress?.call('reading', 0.02);
       final source = await _ports.verifySource(recordId, glbPath);
@@ -287,118 +260,67 @@ class GlbPublicationService {
       }
       final hash = (await sha256.bind(snapshot.openRead()).first).toString();
       _signedIn(uid);
-      final initiated = await _call({
-        'action': 'initiate',
-        'title': title.trim(),
-        'description': description.trim(),
-        'format': 'glb',
-        'byte_length': size,
-        'source_sha256': hash,
-        'idempotency_key': idempotencyKey,
-      });
-      final current = _status(initiated);
-      submissionId = current.submissionId;
-      await onSubmissionCreated(submissionId);
-      _signedIn(uid);
-      if (current.status != 'uploading') return current;
-      final upload = initiated['upload'];
-      if (upload is! Map ||
-          upload['path'] != '$uid/$submissionId/source.glb' ||
-          upload['token'] is! String ||
-          (upload['token'] as String).isEmpty ||
-          (upload['token'] as String).length > 8192 ||
-          upload['signed_url'] is! String) {
-        throw GlbPublicationException(
-          'invalid_upload_contract',
-          submissionId: submissionId,
-        );
-      }
-      final uri = Uri.tryParse(upload['signed_url'] as String);
-      final api = _ports.apiOrigin;
-      if (uri == null ||
-          api.scheme != 'https' ||
-          api.userInfo.isNotEmpty ||
-          uri.scheme != 'https' ||
-          uri.origin != api.origin ||
-          uri.userInfo.isNotEmpty ||
-          uri.hasFragment ||
-          uri.path !=
-              '/storage/v1/object/upload/sign/publication-staging/${upload['path']}' ||
-          uri.queryParametersAll.length != 1 ||
-          uri.queryParametersAll['token']?.length != 1 ||
-          uri.queryParameters['token'] != upload['token']) {
-        throw GlbPublicationException(
-          'invalid_upload_contract',
-          submissionId: submissionId,
-        );
-      }
-      onProgress?.call('uploading', 0.2);
-      uploadInFlight = true;
-      bool transferTimedOut = false;
       final frozenSnapshot = snapshot;
-      final transfer = _ports.upload(
-        path: upload['path'] as String,
-        token: upload['token'] as String,
-        file: snapshot,
-      );
-      // Future.timeout does not cancel an SDK transfer. Clean only our private
-      // snapshot after that transfer really settles, even if the caller timed out.
-      unawaited(
-        transfer.then<void>(
-          (_) async {
-            if (transferTimedOut) {
-              try {
-                await frozenSnapshot.parent.delete(recursive: true);
-              } catch (_) {}
-            }
-          },
-          onError: (Object _) async {
-            if (transferTimedOut) {
-              try {
-                await frozenSnapshot.parent.delete(recursive: true);
-              } catch (_) {}
-            }
-          },
-        ),
-      );
-      try {
-        await transfer.timeout(
-          requestTimeout,
-          onTimeout: () {
-            transferTimedOut = true;
-            throw GlbPublicationException(
-              'upload_outcome_unknown',
-              submissionId: submissionId,
-              retryable: true,
+      final result = await _core.submitPrepared(
+        byteLength: size,
+        sourceSha256: hash,
+        title: title,
+        description: description,
+        idempotencyKey: idempotencyKey,
+        onSubmissionCreated: (id) async {
+          submissionId = id;
+          try {
+            await onSubmissionCreated(id);
+          } on GlbPublicationException catch (e) {
+            throw WebPublicationException(
+              e.code,
+              submissionId: e.submissionId,
+              retryable: e.retryable,
             );
-          },
-        );
-        uploadInFlight = false;
-      } on StorageException catch (e) {
-        uploadInFlight = false;
-        // The server hashes the stored object before processing. A previous
-        // successful write with lost response can legitimately return409.
-        if (e.statusCode != '409') rethrow;
-      } catch (_) {
-        uploadInFlight = transferTimedOut;
-        rethrow;
-      }
-      _signedIn(uid);
-      onProgress?.call('sealing', 0.9);
-      final sealed = _status(
-        await _call({
-          'action': 'seal',
-          'submission_id': submissionId,
-        }, submissionId: submissionId),
-        expectedId: submissionId,
+          }
+        },
+        onProgress: onProgress,
+        upload:
+            ({
+              required path,
+              required token,
+              required bucket,
+              onBytesSent,
+            }) async {
+              // The shared core validates bucket/path/token before invoking this.
+              // Keep this private disk snapshot until the SDK actually settles;
+              // Future.timeout in the core cannot cancel its file transfer.
+              uploadInFlight = true;
+              try {
+                await _ports.upload(
+                  path: path,
+                  token: token,
+                  file: frozenSnapshot,
+                );
+                if (!submissionReturned) onBytesSent?.call(size, size);
+              } on GlbPublicationException catch (e) {
+                throw WebPublicationException(
+                  e.code,
+                  submissionId: e.submissionId,
+                  retryable: e.retryable,
+                );
+              } finally {
+                uploadInFlight = false;
+                if (submissionReturned) {
+                  try {
+                    await frozenSnapshot.parent.delete(recursive: true);
+                  } catch (_) {}
+                }
+              }
+            },
       );
-      if (sealed.status == 'uploading')
-        throw GlbPublicationException(
-          'invalid_response',
-          submissionId: submissionId,
-        );
-      onProgress?.call('submitted', 1);
-      return sealed;
+      return _nativeStatus(result);
+    } on WebPublicationException catch (e) {
+      throw GlbPublicationException(
+        e.code,
+        submissionId: e.submissionId,
+        retryable: e.retryable,
+      );
     } on GlbPublicationException {
       rethrow;
     } catch (_) {
@@ -408,6 +330,7 @@ class GlbPublicationService {
         retryable: true,
       );
     } finally {
+      submissionReturned = true;
       // A timed-out SDK transfer may still hold the private snapshot open.
       // Do not remove it while the request outcome is ambiguous; never delete source.
       if (snapshot != null && !uploadInFlight) {
