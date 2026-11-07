@@ -1,0 +1,33 @@
+{
+  "website_commit": "2d57da3a999c818bfc0a63fa38d886283af73837",
+  "pages_run": 42370974674,
+  "pages_result": "success",
+  "url": "https://kongye.space/community/",
+  "observed_main_js_sha256": "29f4ab475faed85829ed999574889173119c52ce7454095aa1a12e536c17abd3",
+  "app_content_commit": "c779a1341cb24e3f383d4efd3039c5ffb8caf850",
+  "backend_content_commit": "96a6002",
+  "api_runtime_sha256": "c1cebcd4797f35d5724ee08ec051ac7bb8068d60a484541b15de5f70eca2fa9f",
+  "sql_applied": true,
+  "phone_installed": false,
+  "status": "observed-deployed",
+  "large_processing_implemented": false,
+  "private_probe_result": {
+    "schema": "pw.publication-tus-probe.v3",
+    "publicWorkCreated": false,
+    "authBootstrap": "existing private QA account",
+    "initiateApiStatus": 200,
+    "createStatus": 201,
+    "locationOriginMatches": true,
+    "locationPathPrefixMatches": true,
+    "firstPartStatus": 204,
+    "firstPartOffset": 6291456,
+    "resumeHeadStatus": 200,
+    "resumeOffset": 6291456,
+    "finalPartStatus": 204,
+    "finalOffset": 7200165,
+    "bytes": 7200165,
+    "fullReadbackSHA256": "08f2c63166cc3ed2b9b3333b5ed430cd0d06d0890fcb50170c44714d06867ff7",
+    "status": "complete",
+    "cancelled": true
+  }
+}
