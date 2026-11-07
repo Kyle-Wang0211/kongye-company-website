@@ -33,6 +33,28 @@ class PublicWorkRepository {
         .maybeSingle()
         .timeout(const Duration(seconds: 15));
     if (row == null) throw StateError('分享的作品暂不可访问，可能已取消公开。');
+    Future<Map<String, dynamic>?> readLike(String userId) => client
+        .from('work_likes')
+        .select('work_id')
+        .eq('user_id', userId)
+        .eq('work_id', id)
+        .maybeSingle()
+        .timeout(const Duration(seconds: 15));
+
+    Object? likeError;
+    StackTrace? likeStack;
+    final likeFuture =
+        viewerId != null && client.auth.currentUser?.id == viewerId
+        ? readLike(viewerId).then<Map<String, dynamic>?>(
+            (value) => value,
+            onError: (Object error, StackTrace stack) {
+              // Preserve profile/auth error priority while this read overlaps.
+              likeError = error;
+              likeStack = stack;
+              return null;
+            },
+          )
+        : null;
     final profile = await client
         .from('community_author_profiles')
         .select('id,display_name,avatar_url,handle')
@@ -44,13 +66,10 @@ class PublicWorkRepository {
     }
     var likedByMe = false;
     if (viewerId != null) {
-      final like = await client
-          .from('work_likes')
-          .select('work_id')
-          .eq('user_id', viewerId)
-          .eq('work_id', id)
-          .maybeSingle()
-          .timeout(const Duration(seconds: 15));
+      final like = await (likeFuture ?? readLike(viewerId));
+      if (likeError != null) {
+        Error.throwWithStackTrace(likeError!, likeStack!);
+      }
       if (client.auth.currentUser?.id != viewerId) {
         throw StateError('Public work account changed during load');
       }

@@ -561,11 +561,11 @@ class CommunityService {
 
   /// Returns a URL the client can use to fetch the model file.
   ///
-  /// GLB publication artifacts use the guarded delivery endpoint. China also
+  /// GLB and PLY publication artifacts use the guarded delivery endpoint. China also
   /// supports legacy works paths through the same server-side resolver.
   String modelUrlFor(String path) {
     final origin = Uri.parse(_client.rest.url);
-    final modern = RegExp(r'^[a-f0-9]{64}/source[.]glb$').hasMatch(path);
+    final modern = RegExp(r'^[a-f0-9]{64}/source[.](glb|ply)$').hasMatch(path);
     final chinaLegacy =
         origin.origin == 'https://api.kongye.space' &&
         path.toLowerCase().endsWith('.glb');

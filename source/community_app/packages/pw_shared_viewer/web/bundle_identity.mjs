@@ -1,5 +1,5 @@
 // Content verification only; the engine and parsers are unchanged upstream files.
-export async function verifyBundle({ manifest, fetchResource, crypto = globalThis.crypto }) {
+async function canonicalManifest(manifest, crypto) {
   if (!crypto?.subtle) throw new Error('Secure content verification is unavailable');
   if (!manifest?.files || !/^[a-f0-9]{64}$/.test(manifest.bundle_sha256)) {
     throw new Error('Invalid viewer bundle manifest');
@@ -19,6 +19,14 @@ export async function verifyBundle({ manifest, fetchResource, crypto = globalThi
   if (await sha256(new TextEncoder().encode(JSON.stringify(canonical))) !== manifest.bundle_sha256) {
     throw new Error('Bundle manifest identity mismatch');
   }
+  return canonical;
+}
+
+export async function verifyBundle({ manifest, fetchResource, crypto = globalThis.crypto }) {
+  const canonical = await canonicalManifest(manifest, crypto);
+  const paths = Object.keys(canonical);
+  const sha256 = async bytes => [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
+    .map(byte => byte.toString(16).padStart(2, '0')).join('');
   // Four workers bound fetched buffers while overlapping network round trips.
   // A worker finishes hashing before taking another path. On failure, stop
   // dispatching and settle all in-flight fetches/hashes before rejecting.
@@ -50,4 +58,22 @@ export async function verifyLocalBundle(base = new URL('./', import.meta.url)) {
     if (!response.ok) throw new Error(`Viewer resource unavailable: ${path}`);
     return response.arrayBuffer();
   } });
+}
+
+// Website release identity only. Full artifact bytes are checked at build/export.
+// This does not attest runtime bytes or establish release freshness.
+export async function readReleaseIdentity(base = new URL('./', import.meta.url), {
+  fetch: fetchManifest = globalThis.fetch, crypto = globalThis.crypto,
+} = {}) {
+  const response = await fetchManifest(new URL('BUNDLE_MANIFEST.json', base), { cache: 'no-cache' });
+  if (!response.ok) throw new Error('Viewer bundle manifest is unavailable');
+  const manifest = await response.json();
+  if (manifest?.schema !== 'PW_SHARED_VIEWER_BUNDLE_V1' || manifest.engine !== 'three' ||
+      !manifest.files || typeof manifest.files !== 'object' || Array.isArray(manifest.files) ||
+      manifest.engine_version !== '0.186.1' ||
+      manifest.upstream_commit !== '9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8') {
+    throw new Error('Invalid viewer release manifest');
+  }
+  await canonicalManifest(manifest, crypto);
+  return manifest.bundle_sha256;
 }

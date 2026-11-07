@@ -1,4 +1,4 @@
-// Private GLB submission using the existing authenticated Supabase client.
+// Private model submission using the existing authenticated Supabase client.
 // A submission status never substitutes for server publication authorization.
 import 'dart:async';
 import 'dart:convert';
@@ -6,6 +6,12 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'publication_file_source.dart';
+import 'publication_resumable_upload.dart';
+
+import 'publication_source.dart';
 
 class WebPublicationException implements Exception {
   final String code;
@@ -97,11 +103,13 @@ class WebPublicationStatus {
   final String status;
   final String? workId;
   final bool targetExceeded;
+  final bool awaitingLargeSourceWorker;
   const WebPublicationStatus({
     required this.submissionId,
     required this.status,
     this.workId,
     this.targetExceeded = false,
+    this.awaitingLargeSourceWorker = false,
   });
   bool get isTerminal => const {
     'published',
@@ -113,10 +121,18 @@ class WebPublicationStatus {
   }.contains(status);
 }
 
-abstract class WebPublicationPorts {
+abstract class PublicationControlPorts {
   String? get userId;
   Uri get apiOrigin;
   Future<Map<String, dynamic>> invoke(Map<String, dynamic> body);
+}
+
+abstract interface class PublicationResumableCredentials {
+  String? get accessToken;
+  String? get apiKey;
+}
+
+abstract class WebPublicationPorts implements PublicationControlPorts {
   Future<void> upload({
     required String path,
     required String token,
@@ -126,13 +142,18 @@ abstract class WebPublicationPorts {
   });
 }
 
-class _SupabaseWebPublicationPorts implements WebPublicationPorts {
+class _SupabaseWebPublicationPorts
+    implements WebPublicationPorts, PublicationResumableCredentials {
   final SupabaseClient client;
   @override
   final Uri apiOrigin;
   _SupabaseWebPublicationPorts(this.client, this.apiOrigin);
   @override
   String? get userId => client.auth.currentUser?.id;
+  @override
+  String? get accessToken => client.auth.currentSession?.accessToken;
+  @override
+  String? get apiKey => client.headers['apikey'];
   @override
   Future<Map<String, dynamic>> invoke(Map<String, dynamic> body) async {
     final response = await client.functions.invoke(
@@ -158,7 +179,12 @@ class _SupabaseWebPublicationPorts implements WebPublicationPorts {
           path,
           token,
           bytes,
-          const FileOptions(contentType: 'model/gltf-binary', upsert: false),
+          FileOptions(
+            contentType: PublicationSourceFormat.fromFileName(
+              path,
+            )!.contentType,
+            upsert: false,
+          ),
         );
     onBytesSent?.call(bytes.length, bytes.length);
   }
@@ -168,9 +194,25 @@ class WebPublicationService {
   static final _uuid = RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
   );
-  static const maxSourceBytes =
-      50000000; // Current fixed26 renderer policy, not a quota override.
-  final WebPublicationPorts _ports;
+  // Exact integer representation on all targets, not a product upload quota.
+  // Deployed Storage capabilities and file-format semantics remain authoritative.
+  static const maxSourceBytes = 9007199254740991;
+  // This bounds only the legacy bytes adapter, not file/Blob upload admission.
+  static const maxBufferedSourceBytes = 50000000;
+  final _activeTransfers = <PublicationResumableUpload>{};
+  bool _disposed = false;
+  void pauseUploads() {
+    for (final transfer in _activeTransfers.toList()) {
+      transfer.pause();
+    }
+  }
+
+  void dispose() {
+    _disposed = true;
+    pauseUploads();
+  }
+
+  final PublicationControlPorts _ports;
   final String? _owner;
   final Duration requestTimeout;
   WebPublicationService.forTest(
@@ -193,7 +235,8 @@ class WebPublicationService {
     );
   }
   void _signedIn(String? expected) {
-    if (expected == null ||
+    if (_disposed ||
+        expected == null ||
         !_uuid.hasMatch(expected) ||
         _ports.userId != expected ||
         _owner != expected) {
@@ -261,6 +304,8 @@ class WebPublicationService {
       status: state,
       workId: workId as String?,
       targetExceeded: value['target_exceeded'] == true,
+      awaitingLargeSourceWorker:
+          value['processing_lane'] == 'large_source' && state == 'queued',
     );
   }
 
@@ -294,11 +339,61 @@ class WebPublicationService {
     return _status(result, expectedId: submissionId);
   }
 
+  Map<String, dynamic> _uploadContract(
+    Map<String, dynamic> initiated, {
+    required String uid,
+    required String submissionId,
+    required PublicationSourceFormat sourceFormat,
+    required Map<String, dynamic>? selectionBox,
+  }) {
+    final contract = initiated['upload'];
+    final bucket = contract is Map
+        ? (contract['bucket'] ?? 'publication-staging')
+        : null;
+    final expectedBucket = selectionBox == null
+        ? 'publication-staging'
+        : 'publication-selection-staging';
+    if (contract is! Map ||
+        bucket != expectedBucket ||
+        contract['path'] !=
+            '$uid/$submissionId/source.${sourceFormat.extension}' ||
+        contract['token'] is! String ||
+        (contract['token'] as String).isEmpty ||
+        (contract['token'] as String).length > 8192 ||
+        contract['signed_url'] is! String) {
+      throw WebPublicationException(
+        'invalid_upload_contract',
+        submissionId: submissionId,
+      );
+    }
+    final uri = Uri.tryParse(contract['signed_url'] as String);
+    final api = _ports.apiOrigin;
+    if (uri == null ||
+        api.scheme != 'https' ||
+        api.userInfo.isNotEmpty ||
+        uri.scheme != 'https' ||
+        uri.origin != api.origin ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasFragment ||
+        uri.path !=
+            '/storage/v1/object/upload/sign/$bucket/${contract['path']}' ||
+        uri.queryParametersAll.length != 1 ||
+        uri.queryParametersAll['token']?.length != 1 ||
+        uri.queryParameters['token'] != contract['token']) {
+      throw WebPublicationException(
+        'invalid_upload_contract',
+        submissionId: submissionId,
+      );
+    }
+    return {...Map<String, dynamic>.from(contract), 'bucket': bucket};
+  }
+
   /// The caller persists idempotencyKey before this call and persists the server
   /// submission ID in onSubmissionCreated before upload starts. Never silently
   /// falls back to sparse PLY or creates a new UUID after an ambiguous response.
   Future<WebPublicationStatus> submit({
     required Uint8List bytes,
+    PublicationSourceFormat sourceFormat = PublicationSourceFormat.glb,
     required String title,
     String description = '',
     required String idempotencyKey,
@@ -316,33 +411,273 @@ class WebPublicationService {
         description.runes.length > 30) {
       throw const WebPublicationException('invalid_submission');
     }
+    if (bytes.length > maxBufferedSourceBytes) {
+      throw const WebPublicationException('file_source_required');
+    }
     final snapshot = Uint8List.fromList(bytes).asUnmodifiableView();
-    String? submissionId;
     try {
       onProgress?.call('reading', 0);
       final size = snapshot.length;
+      final invalidSource = 'invalid_${sourceFormat.extension}_source';
       if (size < 20 || size > maxSourceBytes) {
-        throw const WebPublicationException('invalid_glb_source');
+        throw WebPublicationException(invalidSource);
       }
-      final header = snapshot.sublist(0, 12);
-      if (header.length != 12 ||
-          header[0] != 0x67 ||
-          header[1] != 0x6c ||
-          header[2] != 0x54 ||
-          header[3] != 0x46 ||
-          ByteData.sublistView(header).getUint32(4, Endian.little) != 2 ||
-          ByteData.sublistView(header).getUint32(8, Endian.little) != size) {
-        throw const WebPublicationException('invalid_glb_source');
+      if (sourceFormat == PublicationSourceFormat.glb) {
+        final header = ByteData.sublistView(snapshot, 0, 12);
+        if (header.getUint32(0, Endian.little) != 0x46546c67 ||
+            header.getUint32(4, Endian.little) != 2 ||
+            header.getUint32(8, Endian.little) != size) {
+          throw WebPublicationException(invalidSource);
+        }
+      } else {
+        // Cheap signature validation only; the authoritative parser validates
+        // geometry on the server. Never decode the binary payload as text.
+        if (snapshot[0] != 0x70 ||
+            snapshot[1] != 0x6c ||
+            snapshot[2] != 0x79 ||
+            (snapshot[3] != 0x0a && snapshot[3] != 0x0d)) {
+          throw WebPublicationException(invalidSource);
+        }
+        if (selectionBox != null) {
+          throw const WebPublicationException('ply_selection_unsupported');
+        }
       }
       final hash = sha256.convert(snapshot).toString();
       if (expectedSourceSha256 != null && hash != expectedSourceSha256) {
         throw const WebPublicationException('source_changed');
       }
+      final ports = _ports;
+      if (ports is! WebPublicationPorts) {
+        throw const WebPublicationException('byte_upload_unavailable');
+      }
+      return await submitPrepared(
+        byteLength: size,
+        sourceSha256: hash,
+        sourceFormat: sourceFormat,
+        title: title,
+        description: description,
+        idempotencyKey: idempotencyKey,
+        selectionBox: selectionBox,
+        initialView: initialView,
+        onSubmissionCreated: onSubmissionCreated,
+        onProgress: onProgress,
+        upload:
+            ({required path, required token, required bucket, onBytesSent}) =>
+                ports.upload(
+                  path: path,
+                  token: token,
+                  bucket: bucket,
+                  bytes: snapshot,
+                  onBytesSent: onBytesSent,
+                ),
+      );
+    } on WebPublicationException {
+      rethrow;
+    } catch (_) {
+      throw const WebPublicationException(
+        'submission_incomplete',
+        retryable: true,
+      );
+    }
+  }
+
+  /// File/Blob based transfer; only upstream TUS chunks enter memory.
+  Future<WebPublicationStatus> submitFile({
+    required PublicationFileSource source,
+    required String title,
+    String description = '',
+    required String idempotencyKey,
+    Map<String, dynamic>? selectionBox,
+    Map<String, dynamic>? initialView,
+    required FutureOr<void> Function(String submissionId) onSubmissionCreated,
+    void Function(String phase, double fraction)? onProgress,
+  }) async {
+    final uid = _ports.userId;
+    _signedIn(uid);
+    final credentials = _ports;
+    if (credentials is! PublicationResumableCredentials) {
+      // Older injected/control-only ports support only the bounded bytes API.
+      // Production ports always use TUS; never buffer a large file as fallback.
+      final bytes = await source.previewBytes(
+        memoryBudget: maxBufferedSourceBytes,
+      );
+      _signedIn(uid);
+      if (bytes == null) {
+        throw const WebPublicationException('resumable_upload_unavailable');
+      }
+      return submit(
+        bytes: bytes,
+        sourceFormat: source.format,
+        title: title,
+        description: description,
+        idempotencyKey: idempotencyKey,
+        selectionBox: selectionBox,
+        initialView: initialView,
+        expectedSourceSha256: source.sha256,
+        onSubmissionCreated: onSubmissionCreated,
+        onProgress: onProgress,
+      );
+    }
+    final authCredentials = credentials as PublicationResumableCredentials;
+    final prefs = await SharedPreferences.getInstance();
+    _signedIn(uid);
+    final frozenSelection = selectionBox == null
+        ? null
+        : Map<String, dynamic>.from(
+            jsonDecode(jsonEncode(selectionBox)) as Map,
+          );
+    final frozenView = initialView == null
+        ? null
+        : validatePublicationInitialView(
+            initialView,
+            sourceSha256: source.sha256,
+            selectionBox: frozenSelection,
+          );
+    final body = <String, dynamic>{
+      'action': 'initiate',
+      'title': title.trim(),
+      'description': description.trim(),
+      'format': source.format.extension,
+      'byte_length': source.byteLength,
+      'source_sha256': source.sha256,
+      'idempotency_key': idempotencyKey,
+      'selection_box': ?frozenSelection,
+      'initial_view': ?frozenView,
+    };
+    return submitPrepared(
+      byteLength: source.byteLength,
+      sourceSha256: source.sha256,
+      sourceFormat: source.format,
+      title: title,
+      description: description,
+      idempotencyKey: idempotencyKey,
+      selectionBox: frozenSelection,
+      initialView: frozenView,
+      onSubmissionCreated: onSubmissionCreated,
+      onProgress: onProgress,
+      resumableUpload: true,
+      upload:
+          ({
+            required path,
+            required token,
+            required bucket,
+            onBytesSent,
+          }) async {
+            final id = path.split('/')[1];
+            var signature = token;
+            var signedAt = DateTime.now();
+            final transfer = PublicationResumableUpload(
+              apiOrigin: _ports.apiOrigin,
+              owner: uid!,
+              bucket: bucket,
+              path: path,
+              source: source,
+              check: () => _signedIn(uid),
+              authorization: () async {
+                _signedIn(uid);
+                if (DateTime.now().difference(signedAt) >=
+                    const Duration(seconds: 30)) {
+                  final renewed = await _call(body, submissionId: id);
+                  _signedIn(uid);
+                  if (_status(renewed, expectedId: id).status != 'uploading') {
+                    throw WebPublicationException(
+                      'upload_no_longer_active',
+                      submissionId: id,
+                    );
+                  }
+                  final bound = _uploadContract(
+                    renewed,
+                    uid: uid,
+                    submissionId: id,
+                    sourceFormat: source.format,
+                    selectionBox: frozenSelection,
+                  );
+                  if (bound['bucket'] != bucket || bound['path'] != path) {
+                    throw WebPublicationException(
+                      'invalid_upload_contract',
+                      submissionId: id,
+                    );
+                  }
+                  signature = bound['token'] as String;
+                  signedAt = DateTime.now();
+                }
+                _signedIn(uid);
+                return PublicationTusAuthorization(
+                  signedToken: signature,
+                  accessToken: authCredentials.accessToken,
+                  apiKey: authCredentials.apiKey,
+                );
+              },
+              checkpoints: PublicationTusCheckpointStore(
+                read: (key) async => prefs.getString('pw.publication.tus.$key'),
+                write: (key, value) async {
+                  _signedIn(uid);
+                  if (!await prefs.setString(
+                    'pw.publication.tus.$key',
+                    value,
+                  )) {
+                    throw const WebPublicationException(
+                      'checkpoint_persistence_failed',
+                    );
+                  }
+                },
+                remove: (key) async {
+                  _signedIn(uid);
+                  await prefs.remove('pw.publication.tus.$key');
+                },
+              ),
+            );
+            _activeTransfers.add(transfer);
+            try {
+              await transfer.upload(onProgress: onBytesSent);
+            } finally {
+              _activeTransfers.remove(transfer);
+              transfer.dispose();
+            }
+          },
+    );
+  }
+
+  /// Uses a caller-verified immutable source without reading it into memory.
+  /// The caller owns source validation and must retain it until upload settles,
+  /// including when this method times out while the transfer is still running.
+  Future<WebPublicationStatus> submitPrepared({
+    required int byteLength,
+    required String sourceSha256,
+    PublicationSourceFormat sourceFormat = PublicationSourceFormat.glb,
+    required PublicationUpload upload,
+    bool resumableUpload = false,
+    required String title,
+    String description = '',
+    required String idempotencyKey,
+    Map<String, dynamic>? selectionBox,
+    Map<String, dynamic>? initialView,
+    required FutureOr<void> Function(String submissionId) onSubmissionCreated,
+    void Function(String phase, double fraction)? onProgress,
+  }) async {
+    final uid = _ports.userId;
+    _signedIn(uid);
+    if (!_uuid.hasMatch(idempotencyKey) ||
+        title.trim().isEmpty ||
+        title.runes.length > 100 ||
+        description.runes.length > 30) {
+      throw const WebPublicationException('invalid_submission');
+    }
+    if (byteLength < 20 ||
+        byteLength > maxSourceBytes ||
+        !RegExp(r'^[a-f0-9]{64}$').hasMatch(sourceSha256)) {
+      throw WebPublicationException('invalid_${sourceFormat.extension}_source');
+    }
+    if (sourceFormat == PublicationSourceFormat.ply && selectionBox != null) {
+      throw const WebPublicationException('ply_selection_unsupported');
+    }
+    String? submissionId;
+    try {
       final frozenView = initialView == null
           ? null
           : validatePublicationInitialView(
               initialView,
-              sourceSha256: hash,
+              sourceSha256: sourceSha256,
               selectionBox: selectionBox,
             );
       _signedIn(uid);
@@ -350,9 +685,9 @@ class WebPublicationService {
         'action': 'initiate',
         'title': title.trim(),
         'description': description.trim(),
-        'format': 'glb',
-        'byte_length': size,
-        'source_sha256': hash,
+        'format': sourceFormat.extension,
+        'byte_length': byteLength,
+        'source_sha256': sourceSha256,
         'idempotency_key': idempotencyKey,
         'selection_box': ?selectionBox,
         'initial_view': ?frozenView,
@@ -363,64 +698,37 @@ class WebPublicationService {
       await onSubmissionCreated(submissionId);
       _signedIn(uid);
       if (current.status != 'uploading') return current;
-      final upload = initiated['upload'];
-      final bucket = upload is Map
-          ? (upload['bucket'] ?? 'publication-staging')
-          : null;
-      final expectedBucket = selectionBox == null
-          ? 'publication-staging'
-          : 'publication-selection-staging';
-      if (upload is! Map ||
-          bucket != expectedBucket ||
-          upload['path'] != '$uid/$submissionId/source.glb' ||
-          upload['token'] is! String ||
-          (upload['token'] as String).isEmpty ||
-          (upload['token'] as String).length > 8192 ||
-          upload['signed_url'] is! String) {
-        throw WebPublicationException(
-          'invalid_upload_contract',
-          submissionId: submissionId,
-        );
-      }
-      final uri = Uri.tryParse(upload['signed_url'] as String);
-      final api = _ports.apiOrigin;
-      if (uri == null ||
-          api.scheme != 'https' ||
-          api.userInfo.isNotEmpty ||
-          uri.scheme != 'https' ||
-          uri.origin != api.origin ||
-          uri.userInfo.isNotEmpty ||
-          uri.hasFragment ||
-          uri.path !=
-              '/storage/v1/object/upload/sign/$bucket/${upload['path']}' ||
-          uri.queryParametersAll.length != 1 ||
-          uri.queryParametersAll['token']?.length != 1 ||
-          uri.queryParameters['token'] != upload['token']) {
-        throw WebPublicationException(
-          'invalid_upload_contract',
-          submissionId: submissionId,
-        );
-      }
+      final contract = _uploadContract(
+        initiated,
+        uid: uid!,
+        submissionId: submissionId,
+        sourceFormat: sourceFormat,
+        selectionBox: selectionBox,
+      );
+      final bucket = contract['bucket'] as String;
       onProgress?.call('uploading', 0);
-      final transfer = _ports.upload(
-        path: upload['path'] as String,
-        token: upload['token'] as String,
-        bytes: snapshot,
-        bucket: bucket as String,
+      final transfer = upload(
+        path: contract['path'] as String,
+        token: contract['token'] as String,
+        bucket: bucket,
         onBytesSent: (sent, total) =>
             onProgress?.call('uploading', sent / total),
       );
       try {
-        await transfer.timeout(
-          requestTimeout,
-          onTimeout: () {
-            throw WebPublicationException(
-              'upload_outcome_unknown',
-              submissionId: submissionId,
-              retryable: true,
-            );
-          },
-        );
+        if (resumableUpload) {
+          await transfer;
+        } else {
+          await transfer.timeout(
+            requestTimeout,
+            onTimeout: () {
+              throw WebPublicationException(
+                'upload_outcome_unknown',
+                submissionId: submissionId,
+                retryable: true,
+              );
+            },
+          );
+        }
       } on StorageException catch (e) {
         // The server hashes the stored object before processing. A previous
         // successful write with lost response can legitimately return409.
@@ -445,6 +753,15 @@ class WebPublicationService {
         );
       }
       onProgress?.call('submitted', 1);
+      if (sealed.status == 'queued' && byteLength > 50000000) {
+        return WebPublicationStatus(
+          submissionId: sealed.submissionId,
+          status: sealed.status,
+          workId: sealed.workId,
+          targetExceeded: sealed.targetExceeded,
+          awaitingLargeSourceWorker: true,
+        );
+      }
       return sealed;
     } on WebPublicationException {
       rethrow;

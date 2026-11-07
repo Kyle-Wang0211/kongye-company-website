@@ -294,3 +294,23 @@ test('explicit camera FOV survives resize without inventing interaction and clea
  f.viewer.resize(800,400);assert.equal(f.viewer.getCameraFraming().fov_y_degrees,45);
  assert.equal(f.viewer.getState().userHasInteracted,false);f.viewer.dispose();
 });
+
+test('release identity receipt does not claim full runtime byte verification', () => {
+  const f = fixture({bundleIdentity:'a'.repeat(64),bundleIdentityScope:'release-manifest',runtimeBundleBytesVerified:false});
+  assert.equal(f.viewer.getState().bundleIdentity, 'a'.repeat(64));
+  assert.equal(f.viewer.getState().bundleIdentityScope, 'release-manifest');
+  assert.equal(f.viewer.getState().runtimeBundleBytesVerified, false);
+  f.viewer.dispose();
+});
+
+
+test('full verification scope remains explicit and unspecified evidence stays unclaimed', () => {
+  const full = fixture({bundleIdentity:'a'.repeat(64),bundleIdentityScope:'runtime-bundle',runtimeBundleBytesVerified:true});
+  assert.equal(full.viewer.getState().bundleIdentityScope, 'runtime-bundle');
+  assert.equal(full.viewer.getState().runtimeBundleBytesVerified, true);
+  full.viewer.dispose();
+  const unspecified = fixture();
+  assert.equal(unspecified.viewer.getState().bundleIdentityScope, null);
+  assert.equal(unspecified.viewer.getState().runtimeBundleBytesVerified, false);
+  unspecified.viewer.dispose();
+});

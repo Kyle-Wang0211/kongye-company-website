@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
+import 'package:cross_file/cross_file.dart';
 
 import 'dart:typed_data';
 
@@ -13,6 +13,9 @@ import 'package:uuid/uuid.dart';
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 
 import '../../community/web_publication_service.dart';
+import '../../community/publication_source.dart';
+import '../../community/publication_file_source.dart';
+import '../../community/publication_file_picker.dart';
 import 'web_publication_selection_page.dart';
 
 /// Private drafts never enter the public feed. Reload resumes status, never
@@ -53,6 +56,13 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       ? widget.ownerForTesting!()
       : Supabase.instance.client.auth.currentUser?.id;
   Uint8List? _bytes;
+  PublicationFileSource? _fileSource;
+  int? _sourceByteLength;
+  bool _restoredDraft = false;
+  // Local preview capacity is independent from permission to upload a file.
+  static const _previewMemoryBudget = 16 * 1024 * 1024;
+  bool get _deferredPreview => (_sourceByteLength ?? 0) > _previewMemoryBudget;
+  PublicationSourceFormat _sourceFormat = PublicationSourceFormat.glb;
   SharedViewerController? _previewController;
   Map<String, dynamic>? _confirmedView;
   Uint8List? _coverPreview;
@@ -93,7 +103,12 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         background: 0,
       );
       if (!current()) return;
-      await controller.loadBytes(bytes, format: SharedModelFormat.glb);
+      await controller.loadBytes(
+        bytes,
+        format: _sourceFormat == PublicationSourceFormat.ply
+            ? SharedModelFormat.ply
+            : SharedModelFormat.glb,
+      );
       if (!current()) return;
       await controller.setSelectionPreview(_selection, decorations: false);
       if (!current()) return;
@@ -101,7 +116,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         await controller.setCameraFraming(_confirmedView!);
       if (current()) setState(() => _previewReady = true);
     } catch (_) {
-      if (current()) setState(() => _message = '3D 预览暂不可用，请重新选择 GLB');
+      if (current()) setState(() => _message = '3D 预览暂不可用，请重新选择 GLB / PLY');
     }
   }
 
@@ -206,10 +221,10 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _key = null;
         _submission = null;
         _status = null;
-        _selected = _bytes != null;
+        _selected = _fileSource != null;
         _coverEditing = true;
         _message = _bytes == null
-            ? '标题、描述和选区已保留。请选择同一 GLB 后重新确认封面。'
+            ? '标题、描述和选区已保留。请选择同一 GLB / PLY 后重新确认封面。'
             : '请调整 3D 取景并重新确认封面。';
       });
       _showPreview();
@@ -230,7 +245,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       if (_current && epoch == _previewEpoch)
         setState(() {
           _previewReady = false;
-          _message = '3D 预览暂不可用，请重新选择 GLB';
+          _message = '3D 预览暂不可用，请重新选择 GLB / PLY';
         });
     }
 
@@ -333,6 +348,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     _title.clear();
     _description.clear();
     _bytes = null;
+    _fileSource = null;
+    _service.pauseUploads();
     _resetPreview();
     _selection = null;
     _status = null;
@@ -370,16 +387,21 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _submission = editable ? null : draft['submission'] as String?;
         _coverEditing = editable;
         _sourceHash = draft['sha256'] as String?;
+        _restoredDraft = _sourceHash != null;
+        _sourceByteLength = draft['source_bytes'] as int?;
+        _sourceFormat = draft['format'] == null
+            ? PublicationSourceFormat.glb
+            : PublicationSourceFormat.values.byName(draft['format'] as String);
         _selection = (draft['selection'] as Map?)?.cast<String, dynamic>();
         _confirmedView = (draft['initial_view'] as Map?)
             ?.cast<String, dynamic>();
         _title.text = draft['title'] as String? ?? '';
         _description.text = draft['description'] as String? ?? '';
         if (editable) {
-          _message = '标题、描述和选区已保留。请选择同一 GLB 后重新确认封面。';
+          _message = '标题、描述和选区已保留。请选择同一 GLB / PLY 后重新确认封面。';
         } else {
           _message = _submission == null
-              ? '上次提交结果未确认。重新选择同一 GLB 可安全重试。'
+              ? '上次提交结果未确认。重新选择同一 GLB / PLY 可安全重试。'
               : '正在查询上次提交';
         }
       });
@@ -402,6 +424,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         'key': editable ? null : _key,
         'submission': editable ? null : _submission,
         'sha256': _sourceHash,
+        'source_bytes': _sourceByteLength,
+        'format': _sourceFormat.extension,
         'selection': _selection,
         'initial_view': _confirmedView,
         'title': _title.text,
@@ -422,6 +446,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       _submission = null;
       _sourceHash = null;
       _bytes = null;
+      _fileSource = null;
+      _sourceByteLength = null;
+      _restoredDraft = false;
       _resetPreview();
       _selection = null;
       _status = null;
@@ -436,32 +463,80 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     if (!_current || _busy) return;
     setState(() => _busy = true);
     try {
-      PlatformFile? file;
+      XFile? file;
       if (widget.pickFileForTesting != null) {
-        file = await widget.pickFileForTesting!();
+        final picked = await widget.pickFileForTesting!();
+        if (picked != null && picked.bytes != null) {
+          file = XFile.fromData(
+            picked.bytes!,
+            name: picked.name,
+            path: picked.name,
+          );
+        }
       } else {
-        final result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['glb'],
-          withData: true,
-          allowMultiple: false,
-        );
-        file = result?.files.single;
+        file = await pickPublicationFile();
       }
       if (!_current || file == null) return;
-      if (!file.name.toLowerCase().endsWith('.glb') ||
-          file.size > WebPublicationService.maxSourceBytes ||
-          file.bytes == null) {
-        throw const WebPublicationException('请选择不超过 50 MB 的 GLB');
-      }
-      final bytes = file.bytes!;
-      if (_key != null || (_bytes == null && _sourceHash != null)) {
-        if (sha256.convert(bytes).toString() != _sourceHash) {
+      final source = await PublicationFileSource.inspect(
+        file,
+        check: () {
+          if (!_current) {
+            throw const WebPublicationException(
+              'signed_out_or_account_changed',
+            );
+          }
+        },
+        onProgress: (read, total) {
+          if (_current)
+            setState(
+              () => _message = '正在读取文件 ${(100 * read / total).round()}%',
+            );
+        },
+      );
+      if (!_current) return;
+      final sourceFormat = source.format;
+      final bytes = await source.previewBytes(
+        memoryBudget: _previewMemoryBudget,
+      );
+      if (!_current) return;
+      if (_key != null || _restoredDraft) {
+        if (sourceFormat != _sourceFormat || source.sha256 != _sourceHash) {
           throw const WebPublicationException('source_changed');
         }
         setState(() {
           _bytes = bytes;
+          _fileSource = source;
+          _sourceByteLength = source.byteLength;
           _resetPreview(keepConfirmed: true);
+          _selected = true;
+        });
+        return;
+      }
+      if (bytes == null) {
+        setState(() {
+          _fileSource = source;
+          _sourceByteLength = source.byteLength;
+          _sourceFormat = sourceFormat;
+          _sourceHash = source.sha256;
+          _bytes = null;
+          _selection = null;
+          _resetPreview();
+          _selected = true;
+          _message = '文件已就绪。上传将分块进行，封面由云端处理。';
+        });
+        return;
+      }
+      // The existing selection editor clips GLB meshes. Point clouds retain
+      // their entire source and proceed to the same cover confirmation flow.
+      if (sourceFormat == PublicationSourceFormat.ply) {
+        setState(() {
+          _bytes = bytes;
+          _fileSource = source;
+          _sourceByteLength = source.byteLength;
+          _sourceFormat = sourceFormat;
+          _selection = null;
+          _sourceHash = source.sha256;
+          _resetPreview();
           _selected = true;
         });
         return;
@@ -478,13 +553,16 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       if (!_current || selection == null) return;
       setState(() {
         _bytes = bytes;
+        _fileSource = source;
+        _sourceByteLength = source.byteLength;
+        _sourceFormat = sourceFormat;
         _selection = selection.box?.toJson();
-        _sourceHash = sha256.convert(bytes).toString();
+        _sourceHash = source.sha256;
         _resetPreview();
         _selected = true;
       });
     } catch (_) {
-      if (_current) setState(() => _message = '文件或模型选区不可用，请选择有效 GLB');
+      if (_current) setState(() => _message = '文件或模型选区不可用，请选择有效 GLB / PLY');
     } finally {
       if (_current) setState(() => _busy = false);
     }
@@ -492,11 +570,13 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
 
   Future<void> _submit() async {
     if (!_current ||
-        _bytes == null ||
+        _fileSource == null ||
         !_selected ||
         _busy ||
         _confirming ||
-        (_key == null && (_confirmedView == null || _coverEditing)))
+        (_key == null &&
+            !_deferredPreview &&
+            (_confirmedView == null || _coverEditing)))
       return;
     if (_title.text.trim().isEmpty ||
         _title.text.runes.length > 100 ||
@@ -510,17 +590,16 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     });
     try {
       _key ??= const Uuid().v4();
-      _sourceHash ??= sha256.convert(_bytes!).toString();
+      _sourceHash ??= _fileSource!.sha256;
       await _persist();
       if (!_current) return;
-      final status = await _service.submit(
-        bytes: _bytes!,
+      final status = await _service.submitFile(
+        source: _fileSource!,
         title: _title.text,
         description: _description.text,
         idempotencyKey: _key!,
         selectionBox: _selection,
         initialView: _confirmedView,
-        expectedSourceSha256: _sourceHash,
         onSubmissionCreated: (id) async {
           if (!_current) return;
           _submission = id;
@@ -611,6 +690,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
 
   @override
   void dispose() {
+    _service.dispose();
     _poll?.cancel();
     _auth?.cancel();
     _previewController?.dispose();
@@ -622,7 +702,11 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   String get _statusText => switch (_status?.status) {
     'published' => '已发布',
     'uploading' => '等待上传完成',
-    'queued' => '已提交，等待处理',
+    'queued' =>
+      (_status?.awaitingLargeSourceWorker == true ||
+              (_sourceByteLength ?? 0) > 50000000)
+          ? '文件已上传，等待大文件处理服务；尚未发布'
+          : '已提交，等待处理',
     'rendering' || 'processing' => '正在处理',
     'awaiting_review' => '等待审核',
     'rejected' => '审核未通过',
@@ -651,7 +735,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                         ? null
                         : _pick,
                     icon: const Icon(Icons.upload_file),
-                    label: Text(_selected ? '重新选择 GLB / 调整选区' : '选择 GLB'),
+                    label: Text(
+                      _selected ? '重新选择 GLB / PLY / 调整选区' : '选择 GLB / PLY',
+                    ),
                   ),
                   if (_selected)
                     Text(_selection == null ? '保留整个模型' : '已确认模型选区'),
@@ -673,6 +759,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                             _selected &&
                             !_confirming &&
                             (_key != null ||
+                                _deferredPreview ||
                                 (_confirmedView != null && !_coverEditing)) &&
                             (_submission == null ||
                                 _status?.status == 'uploading' ||

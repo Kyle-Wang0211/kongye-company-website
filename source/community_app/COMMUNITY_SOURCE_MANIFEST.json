@@ -1702,8 +1702,8 @@
     },
     {
       "path": "lib/community/community_service.dart",
-      "sha256": "5580fc50c8bef6a5b047429859782bdbe99563264f4d4ce1b299e53b70e8ce55",
-      "size": 29061
+      "sha256": "3e753be07feffb83c8bbd6b736180bc5e27fb046a7ea8995c5a2d29ca326bf11",
+      "size": 29075
     },
     {
       "path": "lib/community/feed_models.dart",
@@ -1732,8 +1732,8 @@
     },
     {
       "path": "lib/community/glb_publication_service.dart",
-      "sha256": "d041fe8ec44f7986d9b153ae52a8b02e668fb93e4f6760ad26426421f2a430df",
-      "size": 13714
+      "sha256": "bbd8bfa2c6486f1ca2217bf5939b9c59b4e9d4d4a415a3f883a7bedda8ab695b",
+      "size": 12922
     },
     {
       "path": "lib/community/point_cloud_streaming_sources.dart",
@@ -1742,13 +1742,43 @@
     },
     {
       "path": "lib/community/public_work_repository.dart",
-      "sha256": "d09e3c54b81114ade9b18fed3c3f6e11e635c4ab4ece05ac292978129b664ff6",
-      "size": 3281
+      "sha256": "4901da3fe3f3b2bc00eb3cdb0ce251bc9bf2dcaa08f8232ee117660504bd42b1",
+      "size": 3964
     },
     {
       "path": "lib/community/publication_cover_url.dart",
       "sha256": "41359e4b8082f8a3bf0eaa0dd16beb5416bbee342ec90151b18f3cff575c1dc1",
       "size": 431
+    },
+    {
+      "path": "lib/community/publication_file_picker.dart",
+      "sha256": "6c74376ef65dec6b0274e08d860c5818c67759a4926b80284b5f937ca089a7cb",
+      "size": 114
+    },
+    {
+      "path": "lib/community/publication_file_picker_native.dart",
+      "sha256": "27de7ee696a9453c1ed722e6d766e0305cf8cee72cfddc3b83df80c34fe0e415",
+      "size": 675
+    },
+    {
+      "path": "lib/community/publication_file_picker_web.dart",
+      "sha256": "29e1324826241ed9e00cb51958d66da5d827166319c27218ef15082e36a507de",
+      "size": 2899
+    },
+    {
+      "path": "lib/community/publication_file_source.dart",
+      "sha256": "ad47d3f1da528a8391184c07d22c992837438a3e645d69d9a2706cb21bf90207",
+      "size": 3570
+    },
+    {
+      "path": "lib/community/publication_resumable_upload.dart",
+      "sha256": "b223422d554165b74515e4fd05607e61f54c1d7c92b51df3b2126fd83d9e58c1",
+      "size": 11584
+    },
+    {
+      "path": "lib/community/publication_source.dart",
+      "sha256": "7c703173333b8864dc55ab9fa3008b41cf2bd428815ab337e80337f2ebbd73d1",
+      "size": 960
     },
     {
       "path": "lib/community/publish_service.dart",
@@ -1797,8 +1827,8 @@
     },
     {
       "path": "lib/community/web_publication_service.dart",
-      "sha256": "17e8279fccf8b101084e6265b90fc15b2953af2b22725b940d947c80bb9c9a5c",
-      "size": 14849
+      "sha256": "29039b55e3c66ae4087748cd53adaff5a18b47da0b5a299141d57c568c1e1e15",
+      "size": 26147
     },
     {
       "path": "lib/community/web_social_api.dart",
@@ -3277,8 +3307,8 @@
     },
     {
       "path": "lib/ui/community/web_publication_page.dart",
-      "sha256": "8390e7b8c35e5613666767838a5086ab0d237057e5cdbeb6607e155cdd9b9329",
-      "size": 24153
+      "sha256": "22ed186bdf0b4f110edd344f72b744f70b4685b810809b6eb2020918e223180f",
+      "size": 27232
     },
     {
       "path": "lib/ui/community/web_publication_selection_page.dart",
@@ -3307,8 +3337,8 @@
     },
     {
       "path": "lib/ui/design_system.dart",
-      "sha256": "5a128db9e570bf235782d939ad74ed74f8bc692207f313d03128a3a952aa7db3",
-      "size": 17971
+      "sha256": "c37db61bced5b639abe1547b1ee19a27acecebc96647b38c5a2b106646f0d31d",
+      "size": 17748
     },
     {
       "path": "lib/ui/final_mesh_thumbnail.dart",
@@ -4047,8 +4077,8 @@
     },
     {
       "path": "packages/pw_shared_viewer/README.md",
-      "sha256": "ba6a1528197ff72feacd1328bab7f5e9d2be5d8574af043e3ac105dfbe54976a",
-      "size": 8343
+      "sha256": "d990efc4e15c6160bb026660fdbac8dd755b5473e321d47554fe89447eff3081",
+      "size": 8809
     },
     {
       "path": "packages/pw_shared_viewer/UPSTREAM.json",
@@ -4661,9 +4691,19 @@
       "size": 1964
     },
     {
+      "path": "packages/pw_shared_viewer/tests/browser_release_identity.test.mjs",
+      "sha256": "5224305dbf47e56f534f7d3d5d1727e5530d3ef7c3c1e1dc24b1e46b756f1ac8",
+      "size": 2009
+    },
+    {
+      "path": "packages/pw_shared_viewer/tests/browser_startup.test.mjs",
+      "sha256": "da589d11f2479ecf6fc649b8fd621cb6d6d2ab3ec02db96326f0c9009bac1f6c",
+      "size": 1719
+    },
+    {
       "path": "packages/pw_shared_viewer/tests/built_bundle_assets.test.mjs",
-      "sha256": "953a65576bb49bc237e7c32272d0580bf38c77df27eabb563a0ea98ea8993f0a",
-      "size": 970
+      "sha256": "bf92b573c0712b94a4900b8e5a7e360628f0f3d1c55911d98f10da69478ab699",
+      "size": 2366
     },
     {
       "path": "packages/pw_shared_viewer/tests/bundle_identity.test.mjs",
@@ -4732,8 +4772,8 @@
     },
     {
       "path": "packages/pw_shared_viewer/tests/runtime.test.mjs",
-      "sha256": "1214f4298d548d7808df25bec7c1e117e691b9e08c0a8bcdd52d9b4339d0fa79",
-      "size": 19457
+      "sha256": "b3120c73c73a8ea7da26ebeedf0f00be02071887d80a51c27d889ee54626e744",
+      "size": 20538
     },
     {
       "path": "packages/pw_shared_viewer/tests/shared_loading_ui.test.mjs",
@@ -4756,13 +4796,23 @@
       "size": 18469
     },
     {
+      "path": "packages/pw_shared_viewer/tool/browser_bundle.py",
+      "sha256": "0eb923b53b3d8654dba9ff3cffd329d65782620732ee3f27020aa991f1a2fa63",
+      "size": 3249
+    },
+    {
       "path": "packages/pw_shared_viewer/tool/bundle_manifest.py",
       "sha256": "190ccee23585e41306cfd2ef212aa65928dca915b7ec8a2b65d466df91863ab0",
       "size": 1034
     },
     {
+      "path": "packages/pw_shared_viewer/tool/test_browser_bundle.py",
+      "sha256": "84e1e6a17a411843d7c23c5011c77b51008c689c99711cb7d61b9455639fd684",
+      "size": 2363
+    },
+    {
       "path": "packages/pw_shared_viewer/web/BUNDLE_MANIFEST.json",
-      "sha256": "3d42f9eca6568305714dd4652b448db66fd6b9f07f78071913db2a2ee6709c21",
+      "sha256": "2589e7f18e40a091e7f9bfe7c211a90360ee508c78ee4077bec577f03fab3fe0",
       "size": 3297
     },
     {
@@ -4792,8 +4842,8 @@
     },
     {
       "path": "packages/pw_shared_viewer/web/bundle_identity.mjs",
-      "sha256": "07cb9352c34f7e6340c8b6805d1fb897c7d0d2b4cb571c715578586ba656c239",
-      "size": 2683
+      "sha256": "3f70c0ec7ff460466c92311d0405abee7ffa886cfb8c334cc1ea8a58d1af4d95",
+      "size": 4017
     },
     {
       "path": "packages/pw_shared_viewer/web/host_bridge.mjs",
@@ -4807,8 +4857,8 @@
     },
     {
       "path": "packages/pw_shared_viewer/web/index.html",
-      "sha256": "79495c03a47d78538bdd3f53cacbfb22ba43fded3c0432b07010f362f3a44392",
-      "size": 7781
+      "sha256": "f3bed913593312568e6603bbffd4ada1864e4c3f03dc9b47a1e4c9a777b01233",
+      "size": 7862
     },
     {
       "path": "packages/pw_shared_viewer/web/model_framing.mjs",
@@ -4902,18 +4952,18 @@
     },
     {
       "path": "packages/pw_shared_viewer/web/viewer.mjs",
-      "sha256": "f418bff69c74a97590c45b1ab58f786eb5681787da9d299bff5e303209fcd937",
-      "size": 29507
+      "sha256": "dd87bfe2fa78c6f09534bd38147c4c47a0dc5c9afe4c11c5be5c1287224381c1",
+      "size": 29646
     },
     {
       "path": "pubspec.lock",
-      "sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
-      "size": 40499
+      "sha256": "35de167c4f384dcb0e0b5e7014efb1a310ed3fc5538f5993d58b09952b5c594f",
+      "size": 40502
     },
     {
       "path": "pubspec.yaml",
-      "sha256": "bfaa205fa470ba10f4e9ed749bd5680d0f59885e6f4b037e66c1607392a495bf",
-      "size": 15150
+      "sha256": "d617e82863d68e4d1fa272222adf7dec4f945aa3f44a5349e541e4188f9f97f8",
+      "size": 15163
     },
     {
       "path": "third_party/libphonenumber/LICENSE",
@@ -4947,8 +4997,8 @@
     },
     {
       "path": "tool/pw_community_web_build.py",
-      "sha256": "ee4ee1de1e5e9d7d5804abccb0ccbf0cbef2d30fa6e8c22643182bd14f9a1e59",
-      "size": 3488
+      "sha256": "7c52f70ab32c99184d96211c78f2c8cb7cde02b776d252755468e125219602e9",
+      "size": 3675
     },
     {
       "path": "tool/pw_release_legacy_import_defines.py",
@@ -5016,6 +5066,11 @@
       "size": 425661
     },
     {
+      "path": "web/flutter_bootstrap.js",
+      "sha256": "18b8900a3d8f507775bb086ecd331797a5a3741f6fbe7243c27e95914bed7d6c",
+      "size": 243
+    },
+    {
       "path": "web/index.html",
       "sha256": "e8d06342f84e83fca0d8d96adaf10039ecf6a531256582d83008861609772019",
       "size": 1513
@@ -5080,5 +5135,5 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "de5dfcbbbdd84df0438784b137c24badff34e427"
+  "source_revision": "c779a1341cb24e3f383d4efd3039c5ffb8caf850"
 }

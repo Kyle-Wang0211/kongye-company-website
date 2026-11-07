@@ -1,0 +1,26 @@
+{
+  "entrypoint": "lib/main_community_web.dart",
+  "native_entrypoint": "lib/main.dart",
+  "capabilities": {
+    "PW_COMMUNITY_FAVORITES_ENABLED": "true",
+    "PW_COMMUNITY_MESSAGING_READY": "true",
+    "PW_COMMUNITY_PROFILES_ENABLED": "true"
+  },
+  "viewer_bundle_sha256": "400aa3d206f70b3afe62810f87d76873d368d33e7cb547ddf65d528a98b2bdae",
+  "main_js_sha256": "d42be231c044810a5cd571d94a4312d7ce06b2b49232c70be77e9819c0b1148e",
+  "status": "prepared-for-pages",
+  "source_revision": "0af8d782183d0e841905335df92f557f49cee8f7",
+  "source_manifest_sha256": "1ed96b0b2810db5d44ba1d8e0f49a62adba211afbae7e1a56f6ac2d64e3d57fe",
+  "release": "unified-publication-20261107-r1",
+  "source_content_commit": "0af8d782183d0e841905335df92f557f49cee8f7",
+  "backend_source_commit": "08545bd",
+  "backend_deployment": "unified-ply-publication-20261107-r1",
+  "normal_upload_formats": [
+    "glb",
+    "ply"
+  ],
+  "max_source_bytes": 50000000,
+  "pointcloud_archive": "OpenZL v0.3.0; byte-exact PLY; private OSS",
+  "glb_archive_changed": false,
+  "phone_installed": false
+}

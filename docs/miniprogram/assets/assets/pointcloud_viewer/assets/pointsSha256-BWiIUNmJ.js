@@ -1,0 +1,1 @@
+import{t as e}from"./incrementalSha256-CgWTQRZz.js";var t=65536;function n(n){let r=new e,i=new ArrayBuffer(Math.min(t,n.length)*4),a=new DataView(i),o=new Uint8Array(i);for(let e=0;e<n.length;e+=t){let i=Math.min(t,n.length-e);for(let t=0;t<i;t++)a.setFloat32(t*4,n[e+t],!0);r.update(i===t?o:o.subarray(0,i*4))}return r.digestHex()}export{n as t};

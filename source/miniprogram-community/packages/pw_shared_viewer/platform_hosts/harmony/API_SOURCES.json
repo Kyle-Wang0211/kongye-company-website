@@ -1,0 +1,32 @@
+{
+  "repository": "https://github.com/openharmony/docs",
+  "revision": "442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb",
+  "branch_observed": "OpenHarmony-6.0-Release",
+  "access_date": "2026-10-20",
+  "files": {
+    "events": {
+      "url": "https://raw.githubusercontent.com/openharmony/docs/442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb/en/application-dev/reference/apis-arkweb/arkts-basic-components-web-events.md",
+      "sha256": "a3c9b03d6ea646d51afd9df8080048ac5297f69fab17c48dbbb1083019a761cd"
+    },
+    "attributes": {
+      "url": "https://raw.githubusercontent.com/openharmony/docs/442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb/en/application-dev/reference/apis-arkweb/arkts-basic-components-web-attributes.md",
+      "sha256": "06cd7858d96914ab13be1b40b287213db997f8d41e13d9cf40b02b3e476d3682"
+    },
+    "response": {
+      "url": "https://raw.githubusercontent.com/openharmony/docs/442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb/en/application-dev/reference/apis-arkweb/arkts-basic-components-web-WebResourceResponse.md",
+      "sha256": "2e2514177ce9334a7eba65b27531f3b9dbbcea75f746cbbd81573946d388300e"
+    },
+    "resources": {
+      "url": "https://raw.githubusercontent.com/openharmony/docs/442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb/en/application-dev/reference/apis-localization-kit/js-apis-resource-manager.md",
+      "sha256": "d7d2843ce62f81c45463e4847b4a6f46422eb885d183c6093817c5445d90ac9a"
+    },
+    "controller": {
+      "url": "https://raw.githubusercontent.com/openharmony/docs/442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb/en/application-dev/reference/apis-arkweb/arkts-apis-webview-WebviewController.md",
+      "sha256": "15cda01dc8dc5a70ef452070dccf997d7d473f9027237322b0255f251fac2f07"
+    },
+    "request": {
+      "url": "https://raw.githubusercontent.com/openharmony/docs/442679e8594d9c9c9b2a4bdc9a25a47f1035d6cb/en/application-dev/reference/apis-arkweb/arkts-basic-components-web-WebResourceRequest.md",
+      "sha256": "6185bb689b4d103d71d5f30b90ec73fbe16dcbd474caad3cb2c77f421b7d0ea1"
+    }
+  }
+}

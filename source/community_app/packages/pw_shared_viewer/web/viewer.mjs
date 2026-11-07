@@ -144,6 +144,8 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
   const getState = () => ({
     engine: 'three', engineVersion: ENGINE_VERSION, engineRevision: THREE.REVISION,
     bundleIdentity: options.bundleIdentity ?? null,
+    bundleIdentityScope: options.bundleIdentityScope ?? null,
+    runtimeBundleBytesVerified: options.runtimeBundleBytesVerified === true,
     importInfo, idealAspect: framing?.idealAspect ?? null,
     status, error, url, format, width, height, pixelRatio, paused, disposed, userHasInteracted,
     surfaceCommentMode: surfaceComments.enabled,

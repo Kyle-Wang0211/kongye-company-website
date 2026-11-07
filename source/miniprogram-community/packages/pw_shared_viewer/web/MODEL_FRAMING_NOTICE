@@ -1,0 +1,16 @@
+Shared viewer model framing adaptation
+Copyright 2025 Google LLC. All Rights Reserved.
+Licensed under Apache License 2.0; see MODEL_FRAMING_LICENSE.
+Derived from google/model-viewer ModelScene.ts at commit
+626f7498f3b8bf1130d0ca0c7b7bb756d6fb89ee.
+Modified by PocketWorld: synchronous single-root static framing, explicit camera
+parameters, existing host center/orbit/lifecycle integration and input validation.
+No upstream NOTICE file exists at the pinned repository root (HTTP 404).
+
+SceneUtils.reduceVertices copied from Three.js 9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8.
+Copyright © 2010-2026 three.js authors. MIT License; see vendor/three/LICENSE.
+
+Selected product camera configuration: Google documents external FramingInfo
+fieldOfViewAspect=1.0 as a good default. The shared viewer uses this documented
+spherical framing default for camera FOV while preserving geometry-derived
+idealAspect as card layout metadata. See MODEL_FRAMING_UPSTREAM.json.
