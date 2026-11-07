@@ -15,6 +15,7 @@ import 'first_pair_policy.dart';
 import 'masonry_policy.dart';
 import 'generated_account_avatar.dart';
 import 'published_cover.dart';
+import 'community_loading.dart';
 
 class WorkCard extends StatefulWidget {
   const WorkCard({
@@ -87,15 +88,8 @@ class _WorkCardState extends State<WorkCard> {
   Timer? _coverDeadline;
   bool _coverFailed = false;
 
-  bool get _coverMissing => !hasCommunityPreviewSource(_work);
-
-  // A static missing-cover slot has its own ratio; it never infers geometry
-  // from, downloads, or renders the model.
-  double? get _coverAspectRatio => _coverMissing
-      ? kCommunityLoadingCoverAspectRatio
-      : masonryCoverAspectRatio(
-          _thumbnailAspectRatio ?? widget.coverAspectRatio,
-        );
+  double? get _coverAspectRatio =>
+      masonryCoverAspectRatio(_thumbnailAspectRatio ?? widget.coverAspectRatio);
 
   @override
   void initState() {
@@ -155,6 +149,7 @@ class _WorkCardState extends State<WorkCard> {
       final epoch = _thumbnailEpoch;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && epoch == _thumbnailEpoch) {
+          setState(() => _coverFailed = true);
           widget.onPreparationFailed?.call(
             StateError('Cover image is unavailable'),
           );
@@ -168,7 +163,7 @@ class _WorkCardState extends State<WorkCard> {
       if (!mounted || epoch != _thumbnailEpoch || _thumbReady || _coverFailed) {
         return;
       }
-      _coverFailed = true;
+      setState(() => _coverFailed = true);
       _coverDeadline?.cancel();
       unawaited(provider.evict());
       widget.onPreparationFailed?.call(error);
@@ -290,14 +285,12 @@ class _WorkCardState extends State<WorkCard> {
   Widget build(BuildContext context) {
     final ratio = _coverAspectRatio;
     final source = communityCoverSourceKey(_work);
-    final ready =
-        (_thumbReady || (widget.showMissingCover && _coverMissing)) &&
-        ratio != null;
+    final ready = _thumbReady && !_coverFailed && ratio != null;
     if (ready) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted ||
             source != communityCoverSourceKey(_work) ||
-            (!_thumbReady && !_coverMissing)) {
+            !_thumbReady) {
           return;
         }
         final size = _naturalCardKey.currentContext?.size;
@@ -325,55 +318,74 @@ class _WorkCardState extends State<WorkCard> {
       onVisibilityChanged: (info) {
         if (mounted) widget.onVisibilityChanged?.call(info.visibleFraction);
       },
-      child: Visibility(
-        visible: ready && widget.revealed,
-        maintainSize: true,
-        maintainAnimation: true,
-        maintainState: true,
-        child: GestureDetector(
-          onTap: widget.onTap,
-          behavior: HitTestBehavior.opaque,
-          child: ClipRRect(
-            key: _naturalCardKey,
-            borderRadius: BorderRadius.circular(kCommunityCardRadius),
-            child: ColoredBox(
-              color: AetherColors.bgCanvas,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AspectRatio(
-                    key: ValueKey('work-cover-${_work.id}'),
-                    aspectRatio: ratio ?? kCommunityLoadingCoverAspectRatio,
-                    child: ColoredBox(
-                      color: Colors.black,
-                      child: _thumbnailProvider == null
-                          ? Semantics(
-                              key: ValueKey(
-                                'work-cover-placeholder-${_work.id}',
-                              ),
-                              label: '暂无封面',
-                              child: const SizedBox.expand(),
-                            )
-                          : Image(
-                              image: _thumbnailProvider!,
-                              fit: BoxFit.contain,
-                              alignment: Alignment.center,
-                              gaplessPlayback: true,
-                              errorBuilder: (_, _, _) =>
-                                  const SizedBox.shrink(),
-                            ),
-                    ),
+      child: Stack(
+        children: [
+          Visibility(
+            visible: ready && widget.revealed && !widget.prepareWhileHidden,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: GestureDetector(
+              onTap: widget.onTap,
+              behavior: HitTestBehavior.opaque,
+              child: ClipRRect(
+                key: _naturalCardKey,
+                borderRadius: BorderRadius.circular(kCommunityCardRadius),
+                child: ColoredBox(
+                  color: AetherColors.bgCanvas,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AspectRatio(
+                        key: ValueKey('work-cover-${_work.id}'),
+                        aspectRatio: ratio ?? kCommunityLoadingCoverAspectRatio,
+                        child: ColoredBox(
+                          color: Colors.black,
+                          child: _thumbnailProvider == null
+                              ? Semantics(
+                                  key: ValueKey(
+                                    'work-cover-placeholder-${_work.id}',
+                                  ),
+                                  label: '暂无封面',
+                                  child: const SizedBox.expand(),
+                                )
+                              : Image(
+                                  image: _thumbnailProvider!,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                  gaplessPlayback: true,
+                                  errorBuilder: (_, _, _) =>
+                                      const SizedBox.shrink(),
+                                ),
+                        ),
+                      ),
+                      KeyedSubtree(
+                        key: ValueKey('work-info-${_work.id}'),
+                        child: _cardInformation(),
+                      ),
+                    ],
                   ),
-                  KeyedSubtree(
-                    key: ValueKey('work-info-${_work.id}'),
-                    child: _cardInformation(),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+          if (!ready &&
+              !_coverFailed &&
+              widget.revealed &&
+              !widget.prepareWhileHidden)
+            Positioned.fill(
+              child: LayoutBuilder(
+                builder: (context, constraints) => FittedBox(
+                  fit: BoxFit.fill,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: const CommunityCardSkeleton(),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

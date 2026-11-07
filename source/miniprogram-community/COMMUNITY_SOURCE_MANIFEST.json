@@ -3217,8 +3217,8 @@
     },
     {
       "path": "lib/ui/community/work_card.dart",
-      "sha256": "f56a6496242b0d08e9b5bddc30f74162cb5e898315a12d416dc6ff81e95c99cc",
-      "size": 17078
+      "sha256": "dedd5f96a5cd07b6b434a5ec466048cfcfa40d80e4ba0218a26e59816fd545a5",
+      "size": 17633
     },
     {
       "path": "lib/ui/community/work_detail_page.dart",
@@ -3642,8 +3642,8 @@
     },
     {
       "path": "lib/ui/vault_page.dart",
-      "sha256": "fd5ab9d8dde757479981a64ef008c8ac834ffd7736374be1d0a973a7be2f29f1",
-      "size": 58933
+      "sha256": "bb3152ce5f40e9a35999b8559ec5bea19db56e79a9f200120d1f87bb05189898",
+      "size": 56015
     },
     {
       "path": "lib/ui/viewer_social_contract.dart",

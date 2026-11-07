@@ -679,10 +679,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
           return const _LoadingState();
         }
         if (snap.hasError) {
-          return _ErrorState(
-            message: AppL10n.of(context).communityFeedLoadFailed,
-            onRetry: _refresh,
-          );
+          return const _LoadingState();
         }
         final rawWorks = snap.data ?? const <FeedWork>[];
         final fetchedWorks = prioritizeAuthorFeed(
@@ -729,13 +726,10 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
           return const _EmptyState();
         }
         if (_preparationError != null) {
-          return _ErrorState(message: _preparationError!, onRetry: _refresh);
+          return const _LoadingState();
         }
         if (_firstPairSources == null && _pageLoadFailed) {
-          return _ErrorState(
-            message: AppL10n.of(context).communityFeedLoadFailed,
-            onRetry: () => _maybeLoadMore(fetchedWorks),
-          );
+          return const _LoadingState();
         }
         if (_firstPairSources == null) {
           final staged = _forcedPreparationSources == null
@@ -828,70 +822,19 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
           for (final source in pairSources)
             ...works.where((w) => communityCoverSourceKey(w) == source),
           ...works.where(
-            (w) => !pairSources.contains(communityCoverSourceKey(w)),
+            (w) =>
+                !pairSources.contains(communityCoverSourceKey(w)) &&
+                !_failedPreparation.contains(communityCoverSourceKey(w)),
           ),
         ];
-        final readyWorks = <FeedWork>[];
-        for (final work in displayWorks) {
-          if (!_isPrepared(work)) break;
-          readyWorks.add(work);
-        }
-        final nextPending = readyWorks.length < displayWorks.length
-            ? communityCoverSourceKey(displayWorks[readyWorks.length])
-            : null;
-        final failedNext =
-            nextPending != null && _failedPreparation.contains(nextPending);
-        final pending = failedNext
-            ? <FeedWork>[]
-            : displayWorks
-                  .skip(readyWorks.length)
-                  .where(
-                    (w) =>
-                        !_isPrepared(w) &&
-                        !_failedPreparation.contains(
-                          communityCoverSourceKey(w),
-                        ),
-                  )
-                  .take(CardViewerRegistry.cap)
-                  .toList();
-        final held = displayWorks
-            .skip(readyWorks.length)
-            .where(_isPrepared)
-            .toList();
-        final showLoading =
-            _loadingMore ||
-            (!failedNext && readyWorks.length < displayWorks.length);
-        final remountFailed = _remounting.keys.any(_failedPreparation.contains);
-        final footer = _pageLoadFailed
-            ? Center(
-                child: TextButton(
-                  onPressed: () => unawaited(_maybeLoadMore(fetchedWorks)),
-                  child: Text(AppL10n.of(context).authRetry),
-                ),
-              )
-            : failedNext
-            ? SizedBox(
-                height: 64,
-                child: Center(
-                  child: TextButton(
-                    onPressed: _retryVisibleMedia,
-                    child: const Text('Retry'),
-                  ),
-                ),
-              )
-            : showLoading
-            ? const SizedBox(
-                height: 64,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : null;
         // 闸 5:滚动中不转,停下静止 300ms 才起转。判定放在这里而不是卡片里
         // —— 只有列表看得见滚动,卡片看不见。
         return NotificationListener<ScrollMetricsNotification>(
           onNotification: (n) {
             // Filtering can leave the initial page shorter than the viewport.
             // Layout metrics arrive even when there has been no scroll gesture.
-            if (!_pageLoadFailed &&
+            if (n.metrics.axis == Axis.vertical &&
+                !_pageLoadFailed &&
                 n.metrics.extentAfter < 1200 &&
                 snap.connectionState == ConnectionState.done &&
                 identical(_feed, sourceFeed)) {
@@ -905,7 +848,9 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
           },
           child: NotificationListener<ScrollNotification>(
             onNotification: (n) {
+              if (n.metrics.axis != Axis.vertical) return false;
               if (n is ScrollStartNotification) {
+                _pageLoadFailed = false;
                 _governor.onScrollStart();
               } else if (n is ScrollEndNotification) {
                 _governor.onScrollEnd();
@@ -920,42 +865,22 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
               }
               return false; // 别拦,RefreshIndicator 还要用这些通知
             },
-            child: Column(
-              children: [
-                Expanded(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CommunityMasonry(
-                        header: _showTopicCard
-                            ? TopicCard(
-                                autoPlay: _governor.liveAllowed,
-                                activities: widget.activities,
-                                onActivityTap: widget.onActivityTap,
-                              )
-                            : null,
-                        itemCount: readyWorks.length,
-                        footer: _remounting.isEmpty ? footer : null,
-                        itemBuilder: (context, index) =>
-                            _buildWorkCard(readyWorks[index], displayWorks),
+            child: CommunityMasonry(
+              header: _showTopicCard
+                  ? TopicCard(
+                      autoPlay: _governor.liveAllowed,
+                      activities: widget.activities,
+                      onActivityTap: widget.onActivityTap,
+                    )
+                  : null,
+              itemCount: displayWorks.length + (_loadingMore ? 2 : 0),
+              itemBuilder: (context, index) => index < displayWorks.length
+                  ? _buildWorkCard(displayWorks[index], displayWorks)
+                  : CommunityCardSkeleton(
+                      key: ValueKey(
+                        'community-page-loading-${index - displayWorks.length}',
                       ),
-                      _hiddenPreparation([...held, ...pending], displayWorks),
-                    ],
-                  ),
-                ),
-                if (_remounting.isNotEmpty)
-                  SizedBox(
-                    height: 48,
-                    child: Center(
-                      child: remountFailed
-                          ? TextButton(
-                              onPressed: _retryVisibleMedia,
-                              child: const Text('Retry'),
-                            )
-                          : const CircularProgressIndicator(),
                     ),
-                  ),
-              ],
             ),
           ),
         );
@@ -1013,18 +938,6 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
         },
       );
 
-  void _retryVisibleMedia() {
-    setState(() {
-      for (final source in _failedPreparation) {
-        _cardKeys.remove(source);
-        if (!_remounting.containsKey(source)) _prepared.remove(source);
-        _stillFrames.remove(source);
-        _remounting.remove(source);
-      }
-      _failedPreparation.clear();
-    });
-  }
-
   Widget _buildWorkCard(
     FeedWork work,
     List<FeedWork> works, {
@@ -1079,7 +992,10 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
             preparation != _preparationGeneration) {
           return;
         }
-        setState(() => _failedPreparation.add(source));
+        setState(() {
+          _failedPreparation.add(source);
+          _prepared.remove(source);
+        });
       },
       onPreparationStarted: (token) {
         if (mounted &&
@@ -1181,8 +1097,12 @@ class _LoadingState extends StatelessWidget {
   const _LoadingState();
 
   @override
-  Widget build(BuildContext context) =>
-      const Center(child: CircularProgressIndicator());
+  Widget build(BuildContext context) => CommunityMasonry(
+    itemCount: 6,
+    itemBuilder: (_, index) => CommunityCardSkeleton(
+      key: ValueKey('community-initial-loading-$index'),
+    ),
+  );
 }
 
 class _EmptyState extends StatelessWidget {
