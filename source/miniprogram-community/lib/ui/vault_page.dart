@@ -1351,20 +1351,50 @@ class _TopicSlide {
 }
 
 class _TopicCardState extends State<TopicCard> {
-  final PageController _pc = PageController();
+  late final PageController _pc;
   Timer? _auto;
   int _page = 0;
 
   @override
   void initState() {
     super.initState();
+    _pc = PageController(initialPage: _slideCount > 1 ? 1 : 0);
     _syncAutoPlay();
   }
+
+  int get _slideCount =>
+      widget.activities.isEmpty ? 3 : widget.activities.length;
 
   @override
   void didUpdateWidget(covariant TopicCard old) {
     super.didUpdateWidget(old);
     if (widget.autoPlay != old.autoPlay) _syncAutoPlay();
+    final oldCount = old.activities.isEmpty ? 3 : old.activities.length;
+    final modeChanged = old.activities.isEmpty != widget.activities.isEmpty;
+    if (oldCount != _slideCount || modeChanged) {
+      _page = modeChanged ? 0 : _page.clamp(0, _slideCount - 1);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_pc.hasClients) return;
+        _pc.jumpToPage(_slideCount > 1 ? _page + 1 : 0);
+      });
+    }
+  }
+
+  // Duplicate only the two edge slides. Reposition at rest so crossing an edge
+  // remains a one-page swipe in either direction, for any activity count.
+  void _normalizeLoop() {
+    if (_slideCount < 2 || !_pc.hasClients) return;
+    final position = _pc.page;
+    if (position != 0 && position != _slideCount + 1) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_pc.hasClients) return;
+      final current = _pc.page;
+      if (current == 0) {
+        _pc.jumpToPage(_slideCount);
+      } else if (current == _slideCount + 1) {
+        _pc.jumpToPage(1);
+      }
+    });
   }
 
   void _syncAutoPlay() {
@@ -1372,12 +1402,8 @@ class _TopicCardState extends State<TopicCard> {
     if (!widget.autoPlay) return;
     _auto = Timer.periodic(kTopicAutoPlayInterval, (_) {
       if (!mounted || !_pc.hasClients) return;
-      final n = widget.activities.isEmpty
-          ? _slides(context).length
-          : widget.activities.length;
-      if (n < 2) return;
-      _pc.animateToPage(
-        (_page + 1) % n,
+      if (_slideCount < 2 || _pc.position.isScrollingNotifier.value) return;
+      _pc.nextPage(
         duration: const Duration(milliseconds: 320),
         curve: Curves.easeOutCubic,
       );
@@ -1444,11 +1470,28 @@ class _TopicCardState extends State<TopicCard> {
           color: AetherColors.bgElevated,
           child: Stack(
             children: [
-              PageView.builder(
-                controller: _pc,
-                itemCount: slides.length,
-                onPageChanged: (i) => setState(() => _page = i),
-                itemBuilder: (_, i) => slides[i],
+              NotificationListener<ScrollEndNotification>(
+                onNotification: (notification) {
+                  if (notification.depth == 0 &&
+                      notification.metrics.axis == Axis.horizontal) {
+                    _normalizeLoop();
+                  }
+                  return false;
+                },
+                child: PageView.builder(
+                  controller: _pc,
+                  itemCount: slides.length > 1
+                      ? slides.length + 2
+                      : slides.length,
+                  onPageChanged: (i) {
+                    final index = slides.length > 1
+                        ? (i - 1) % slides.length
+                        : 0;
+                    if (index != _page) setState(() => _page = index);
+                  },
+                  itemBuilder: (_, i) =>
+                      slides[slides.length > 1 ? (i - 1) % slides.length : 0],
+                ),
               ),
               if (slides.length > 1)
                 Positioned(

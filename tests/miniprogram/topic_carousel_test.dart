@@ -268,6 +268,136 @@ void main() {
       expect(opened, [0, 1, 2]);
     },
   );
+  Future<void> pumpActivities(
+    WidgetTester t,
+    int count,
+    List<int> opened, {
+    bool autoPlay = false,
+  }) async {
+    final image = MemoryImage(
+      Uint8List.fromList(
+        base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        ),
+      ),
+    );
+    await t.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppL10n.localizationsDelegates,
+        supportedLocales: AppL10n.supportedLocales,
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: 361,
+              child: TopicCard(
+                autoPlay: autoPlay,
+                activities: [
+                  for (var i = 0; i < count; i++)
+                    TopicActivity(title: 'Activity $i', image: image),
+                ],
+                onActivityTap: opened.add,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.pumpAndSettle();
+  }
+
+  Future<void> expectActivity(
+    WidgetTester t,
+    List<int> opened,
+    int index,
+  ) async {
+    await t.tap(find.byType(PageView));
+    expect(opened.last, index);
+    final dots = t
+        .widgetList<AnimatedContainer>(
+          find.descendant(
+            of: find.byType(TopicCard),
+            matching: find.byType(AnimatedContainer),
+          ),
+        )
+        .toList();
+    if (dots.isNotEmpty) {
+      expect(dots[index].constraints!.maxWidth, 16);
+      expect(dots.where((dot) => dot.constraints!.maxWidth == 16).length, 1);
+    }
+  }
+
+  for (final count in [1, 2, 3, 5]) {
+    testWidgets(
+      '$count activities wrap both directions with correct links and dots',
+      (t) async {
+        final opened = <int>[];
+        await pumpActivities(t, count, opened);
+        await expectActivity(t, opened, 0);
+        await t.drag(find.byType(PageView), const Offset(400, 0));
+        await t.pumpAndSettle();
+        await expectActivity(t, opened, count - 1);
+        await t.drag(find.byType(PageView), const Offset(-400, 0));
+        await t.pumpAndSettle();
+        await expectActivity(t, opened, 0);
+        for (var i = 1; i <= count * 2; i++) {
+          await t.drag(find.byType(PageView), const Offset(-400, 0));
+          await t.pumpAndSettle();
+          await expectActivity(t, opened, i % count);
+        }
+      },
+    );
+  }
+
+  testWidgets('autoplay crosses last to first without scrolling backwards', (
+    t,
+  ) async {
+    final opened = <int>[];
+    await pumpActivities(t, 3, opened, autoPlay: true);
+    await t.drag(find.byType(PageView), const Offset(400, 0));
+    await t.pumpAndSettle();
+    await expectActivity(t, opened, 2);
+    final controller = t.widget<PageView>(find.byType(PageView)).controller!;
+    final previous = controller.page!;
+    await t.pump(kTopicAutoPlayInterval);
+    await t.pump(const Duration(milliseconds: 100));
+    expect(controller.page, greaterThan(previous));
+    await t.pump(const Duration(milliseconds: 400));
+    await t.pumpAndSettle();
+    await expectActivity(t, opened, 0);
+    await t.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('changing activity count preserves valid wrap and tap indices', (
+    t,
+  ) async {
+    final opened = <int>[];
+    await pumpActivities(t, 5, opened);
+    await t.drag(find.byType(PageView), const Offset(400, 0));
+    await t.pumpAndSettle();
+    await expectActivity(t, opened, 4);
+    await pumpActivities(t, 2, opened);
+    await expectActivity(t, opened, 1);
+    await t.drag(find.byType(PageView), const Offset(-400, 0));
+    await t.pumpAndSettle();
+    await expectActivity(t, opened, 0);
+    await pumpActivities(t, 1, opened);
+    await expectActivity(t, opened, 0);
+    await pumpActivities(t, 5, opened);
+    await t.drag(find.byType(PageView), const Offset(400, 0));
+    await t.pumpAndSettle();
+    await expectActivity(t, opened, 4);
+    await pumpActivities(t, 0, opened);
+    expect(find.text('本周精选'), findsOneWidget);
+    await pumpActivities(t, 3, opened);
+    await expectActivity(t, opened, 0);
+    await t.drag(find.byType(PageView), const Offset(400, 0));
+    await t.pumpAndSettle();
+    await expectActivity(t, opened, 2);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('vertical drag on an activity scrolls the shared feed', (
     t,
   ) async {
