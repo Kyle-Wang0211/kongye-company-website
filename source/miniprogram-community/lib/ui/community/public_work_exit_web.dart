@@ -3,6 +3,13 @@ import 'dart:js_interop';
 @JS('window.location.assign')
 external void _assignLocation(JSString value);
 
+void openCommunityActivity(int screen) {
+  final destination = Uri.base
+      .resolve('/screen.html')
+      .replace(queryParameters: {'screen': '$screen', 'mini': '1'});
+  _assignLocation(destination.toString().toJS);
+}
+
 /// Return a direct-linked detail to the same site's community homepage.
 /// Do not depend on browser history (the detail can be a new tab).
 void exitPublicWork() {

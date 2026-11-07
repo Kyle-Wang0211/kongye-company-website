@@ -5,8 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/vault_page.dart';
-import 'ui/community/website_featured_screens_stub.dart'
-    if (dart.library.js_interop) 'ui/community/website_featured_screens_web.dart';
 import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
 import 'ui/community/public_work_exit_stub.dart'
@@ -257,7 +255,7 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
                     : query['publish'] == '1'
                     ? const _WebPublicationEntry()
                     : mobileFeed
-                    ? const VaultPage(featuredHeader: WebsiteFeaturedScreens())
+                    ? _mobileCommunityFeed()
                     : _WebsiteHomeEntry(
                         routes: _routes,
                         onExit: widget.onExit,
@@ -269,7 +267,7 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
                     : mobileFeed &&
                           !query.containsKey('auth') &&
                           query['publish'] != '1'
-                    ? const VaultPage(featuredHeader: WebsiteFeaturedScreens())
+                    ? _mobileCommunityFeed()
                     : AuthRootView(
                         currentUser: user,
                         initialSignUp: query['auth'] == 'signup',
@@ -292,6 +290,30 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
     ),
   );
 }
+
+Widget _mobileCommunityFeed() => VaultPage(
+  activities: const [
+    TopicActivity(
+      title: '瓷影｜器物与日常',
+      image: NetworkImage(
+        'https://kongye.space/assets/events/porcelain-ink.png',
+      ),
+    ),
+    TopicActivity(
+      title: '云栖山庄',
+      image: NetworkImage(
+        'https://kongye.space/assets/events/landscape-ink.png',
+      ),
+    ),
+    TopicActivity(
+      title: '水墨庭院',
+      image: NetworkImage(
+        'https://kongye.space/assets/events/courtyard-ink.png',
+      ),
+    ),
+  ],
+  onActivityTap: (index) => openCommunityActivity(index + 1),
+);
 
 /// The website owns the homepage. This blank route is only a return target
 /// beneath direct-linked Flutter pages, never a second community feed.

@@ -32,13 +32,15 @@ class VaultPage extends StatefulWidget {
     super.key,
     this.service,
     this.isVisible = true,
-    this.featuredHeader,
+    this.activities = const [],
+    this.onActivityTap,
     this.viewerHostBuilderForTesting,
   });
 
   final CommunityService? service;
   final bool isVisible;
-  final Widget? featuredHeader;
+  final List<TopicActivity> activities;
+  final ValueChanged<int>? onActivityTap;
   // Forward the shared renderer's existing test seam.
   // ignore: invalid_use_of_visible_for_testing_member
   final ProductModelHostBuilder? viewerHostBuilderForTesting;
@@ -664,7 +666,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
   /// 主题卡只在**没有作者过滤**时出现 —— 「本周精选」是策展,
   /// 在"只看某个人"的视图里没有意义。
   bool get _showTopicCard =>
-      (widget.featuredHeader != null || kShowCommunityTopicCard) &&
+      (widget.activities.isNotEmpty || kShowCommunityTopicCard) &&
       _authorFilterId == null;
 
   Widget _buildFeed() {
@@ -926,8 +928,11 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
                     children: [
                       CommunityMasonry(
                         header: _showTopicCard
-                            ? widget.featuredHeader ??
-                                  TopicCard(autoPlay: _governor.liveAllowed)
+                            ? TopicCard(
+                                autoPlay: _governor.liveAllowed,
+                                activities: widget.activities,
+                                onActivityTap: widget.onActivityTap,
+                              )
                             : null,
                         itemCount: readyWorks.length,
                         footer: _remounting.isEmpty ? footer : null,
@@ -1296,6 +1301,13 @@ const double kTopicCardAspect = 2.5;
 /// 自动翻页间隔。网易云那类 banner 的常规节奏。
 const Duration kTopicAutoPlayInterval = Duration(seconds: 5);
 
+class TopicActivity {
+  const TopicActivity({required this.title, required this.image});
+
+  final String title;
+  final ImageProvider image;
+}
+
 /// 流内第一张卡:常青人工精选,**可翻页**。
 ///
 /// 与作品卡**同宽同层**,跟着一起滚、可以滑走 —— 这是 D5 的核心:
@@ -1314,8 +1326,15 @@ class TopicCard extends StatefulWidget {
   ///   ② 默认开会让所有直接 pump 这张卡的 widget 测试在 pumpAndSettle 上挂死
   ///     —— 周期性 Timer 永远 settle 不了。默认关就没有这个陷阱。
   final bool autoPlay;
+  final List<TopicActivity> activities;
+  final ValueChanged<int>? onActivityTap;
 
-  const TopicCard({super.key, this.autoPlay = false});
+  const TopicCard({
+    super.key,
+    this.autoPlay = false,
+    this.activities = const [],
+    this.onActivityTap,
+  });
 
   @override
   State<TopicCard> createState() => _TopicCardState();
@@ -1350,7 +1369,9 @@ class _TopicCardState extends State<TopicCard> {
     if (!widget.autoPlay) return;
     _auto = Timer.periodic(kTopicAutoPlayInterval, (_) {
       if (!mounted || !_pc.hasClients) return;
-      final n = _slides(context).length;
+      final n = widget.activities.isEmpty
+          ? _slides(context).length
+          : widget.activities.length;
       if (n < 2) return;
       _pc.animateToPage(
         (_page + 1) % n,
@@ -1390,7 +1411,25 @@ class _TopicCardState extends State<TopicCard> {
 
   @override
   Widget build(BuildContext context) {
-    final slides = _slides(context);
+    final slides = widget.activities.isEmpty
+        ? _slides(
+            context,
+          ).map((slide) => _TopicSlideView(slide: slide)).toList()
+        : [
+            for (var i = 0; i < widget.activities.length; i++)
+              InkWell(
+                onTap: widget.onActivityTap == null
+                    ? null
+                    : () => widget.onActivityTap!(i),
+                child: Image(
+                  image: widget.activities[i].image,
+                  semanticLabel: widget.activities[i].title,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+          ];
     return ClipRRect(
       borderRadius: BorderRadius.circular(kCommunityCardRadius),
       child: AspectRatio(
@@ -1403,7 +1442,7 @@ class _TopicCardState extends State<TopicCard> {
                 controller: _pc,
                 itemCount: slides.length,
                 onPageChanged: (i) => setState(() => _page = i),
-                itemBuilder: (_, i) => _TopicSlideView(slide: slides[i]),
+                itemBuilder: (_, i) => slides[i],
               ),
               if (slides.length > 1)
                 Positioned(

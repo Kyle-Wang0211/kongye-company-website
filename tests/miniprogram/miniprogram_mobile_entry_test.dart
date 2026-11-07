@@ -52,8 +52,8 @@ void main() {
       expect(find.byType(VaultPage), ready ? findsOneWidget : findsNothing);
       if (ready) {
         expect(
-          tester.widget<VaultPage>(find.byType(VaultPage)).featuredHeader,
-          isNotNull,
+          tester.widget<VaultPage>(find.byType(VaultPage)).activities.length,
+          3,
         );
       }
       expect(exits, 0);

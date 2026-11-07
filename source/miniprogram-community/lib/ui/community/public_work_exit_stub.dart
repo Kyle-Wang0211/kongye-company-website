@@ -2,3 +2,5 @@
 void exitPublicWork() {}
 
 void exitCommunityHome() {}
+
+void openCommunityActivity(int screen) {}
