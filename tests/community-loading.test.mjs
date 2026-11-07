@@ -27,7 +27,11 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
 const defer=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const response=value=>({ok:true,json:async()=>value});
 const work={id:'12345678-1234-4234-8234-123456789abc',user_id:'12345678-1234-4234-8234-123456789abd',title:'真实社区作品',format:'glb',file_size_bytes:100,model_storage_path:'owner/model.glb',published_at:'2026-11-02T04:00:00Z'};
-function boot(search='',{intersection=false,avatars=false}={}){
+function boot(search='',{intersection=false,avatars=false,storage=false}={}){
+ const saved=new Map();
+ const sessionStorage={getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)};
+ const accountReady=defer();let authListener,accountSession=null;
+ const accountClient={auth:{getSession:async()=>({data:{session:accountSession},error:null}),onAuthStateChange:callback=>{authListener=callback;return {data:{subscription:{unsubscribe(){}}}};}}};
  const grid=new Element(),status=new Element(),more=new Element(),dialog=new Element();dialog.parts={iframe:new Element(),h2:new Element(),button:new Element()};
  const elements={'#community-grid':grid,'#feed-status':status,'#feed-more':more,'#work-dialog':dialog,'#share-work':new Element(),'#share-status':new Element(),'#work-meta':new Element()};
  const docEvents=new Map(),document={visibilityState:"visible",addEventListener:(name,callback)=>docEvents.set(name,callback),querySelector:s=>elements[s],createElement:()=>new Element()};
@@ -35,8 +39,8 @@ function boot(search='',{intersection=false,avatars=false}={}){
  class Observer{constructor(callback){this.callback=callback;this.observations=0;observers.push(this);}observe(target){this.target=target;this.observations++;}disconnect(){this.target=null;}}
  const fetch=(url,options)=>{const gate=defer();pending.push({url:String(url),options,...gate});return gate.promise;};
  const source=readFileSync(new URL('../docs/community-feed.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
- vm.runInNewContext(source,{...(intersection?{IntersectionObserver:Observer}:{}),...data,createPublicAvatarReader:options=>avatars?createPublicAvatarReader(options):{read:async()=>null,clear:()=>{}},legacyWorkIds,workCovers,document,fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f,delay)=>{const id=++clock;f.delay=delay;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{scrollBy:(x,y)=>scrolls.push([x,y]),addEventListener:(name,callback)=>events.set(name,callback)}});
- return {grid,status,more,pending,dialog,elements,timers,navigations,scrolls,events,document,docEvents,observers,refresh:()=>{for(const [id,callback] of [...timers])if(callback.delay===100){timers.delete(id);callback();}},intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
+ vm.runInNewContext(source,{...(storage?{sessionStorage}:{}),accountClientReady:accountReady.promise,getAccountClient:async()=>accountClient,...(intersection?{IntersectionObserver:Observer}:{}),...data,createPublicAvatarReader:options=>avatars?createPublicAvatarReader(options):{read:async()=>null,clear:()=>{}},legacyWorkIds,workCovers,document,fetch,URL,AbortSignal,location:{href:'https://kongye.space/'+search,assign:url=>navigations.push(url)},navigator:{},setTimeout:(f,delay)=>{const id=++clock;f.delay=delay;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id),window:{scrollBy:(x,y)=>scrolls.push([x,y]),addEventListener:(name,callback)=>events.set(name,callback)}});
+ return {saved,connectAccount:async id=>{accountSession=id?{user:{id}}:null;accountReady.resolve(accountClient);await settle();},auth:id=>{accountSession=id?{user:{id}}:null;authListener(id?'SIGNED_IN':'SIGNED_OUT',accountSession);},grid,status,more,pending,dialog,elements,timers,navigations,scrolls,events,document,docEvents,observers,refresh:()=>{for(const [id,callback] of [...timers])if(callback.delay===100){timers.delete(id);callback();}},intersect:target=>{for(const observer of observers)if(observer.target===target)observer.callback([{isIntersecting:true}]);}};
 }
 async function configure(page){page.pending.shift().resolve(response({origin:'https://api.kongye.space',anonKey:'public'}));await settle();}
 async function completeFeed(page,rows=[work]){page.pending.shift().resolve(response(rows));await settle();if(rows.length){page.pending.shift().resolve(response([{id:work.user_id,display_name:'窗后城'}]));await settle();}}
@@ -349,4 +353,93 @@ test('confirmed publication covers use their stored aspect without cropping and 
  assert.equal(oldPicture.style.aspectRatio,undefined);
  assert.equal(oldPicture.children[0].style.objectFit,undefined);
  assert.equal(oldPicture.children[0].src,'https://api.kongye.space/storage/v1/object/public/thumbnails/owner/legacy.png');
+});
+
+const authorA='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const authorB='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const authorOther='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const publishedWork=(n,owner,day)=>({...work,id:`dddddddd-dddd-4ddd-8ddd-${String(n).padStart(12,'0')}`,user_id:owner,title:'public-'+n,published_at:`2026-11-${String(day).padStart(2,'0')}T10:00:00Z`,visibility:'public',moderation_status:'ok',deleted_at:null});
+const globalAuthorRows=[publishedWork(1,authorA,7),publishedWork(2,authorB,6),publishedWork(3,authorOther,5)];
+const visibleTitles=page=>realCards(page).map(card=>card.children[0].children[0].children.at(-1).textContent);
+function takeOwn(page,owner){
+ const index=page.pending.findIndex(request=>new URL(request.url).searchParams.get('user_id')==='eq.'+owner);
+ assert(index>=0,'own public metadata request exists');return page.pending.splice(index,1)[0];
+}
+async function authorPage(){const page=boot();await configure(page);await completeFeed(page,globalAuthorRows);return page;}
+test('author-specific root feed prioritizes only current B public works and keeps other authors in global order',async()=>{
+ const page=await authorPage();assert.deepEqual(visibleTitles(page),['public-1','public-2','public-3']);
+ await page.connectAccount(authorB);
+ const request=takeOwn(page,authorB),url=new URL(request.url);
+ assert.equal(url.searchParams.get('visibility'),'eq.public');assert.equal(url.searchParams.get('moderation_status'),'eq.ok');
+ assert.equal(url.searchParams.get('published_at'),'not.is.null');assert.equal(url.searchParams.get('deleted_at'),'is.null');
+ assert.equal(request.options.headers.Authorization,'Bearer public','own lookup remains a public-access query');
+ request.resolve(response([globalAuthorRows[1],publishedWork(4,authorB,4),{...publishedWork(5,authorB,3),visibility:'private'},
+   {...publishedWork(6,authorB,3),moderation_status:'pending'},{...publishedWork(7,authorB,3),deleted_at:'2026-11-07T00:00:00Z'},
+   {...publishedWork(8,authorB,3),published_at:null},publishedWork(9,authorA,3)]));await settle();
+ assert.deepEqual(visibleTitles(page),['public-2','public-4','public-1','public-3']);
+ assert(realCards(page).every(card=>card.children[1].children[2].dataset.i18nAria==='commentLikeCount'));
+});
+test('author-specific root feed A B guest transitions drop old author extras and ignore late owner responses',async()=>{
+ const page=await authorPage();await page.connectAccount(authorA);const staleA=takeOwn(page,authorA);
+ page.auth(authorB);const currentB=takeOwn(page,authorB);currentB.resolve(response([publishedWork(4,authorB,4)]));await settle();
+ assert.deepEqual(visibleTitles(page),['public-2','public-4','public-1','public-3']);
+ staleA.resolve(response([publishedWork(8,authorA,2)]));await settle();assert(!visibleTitles(page).includes('public-8'));
+ page.auth(null);assert.deepEqual(visibleTitles(page),['public-1','public-2','public-3']);
+ assert(realCards(page).every(card=>card.children[1].children[2].dataset.i18nAria==='siteLikeSignIn'));
+ page.auth(authorA);takeOwn(page,authorA).resolve(response([publishedWork(8,authorA,2)]));await settle();
+ assert.deepEqual(visibleTitles(page),['public-1','public-8','public-2','public-3']);
+});
+test('author-specific root feed independent own cursor does not replace the global pagination cursor',async()=>{
+ const page=await authorPage();await page.connectAccount(authorB);
+ const first=Array.from({length:12},(_,i)=>publishedWork(20+i,authorB,20-i));
+ takeOwn(page,authorB).resolve(response(first));await settle();
+ const second=takeOwn(page,authorB),url=new URL(second.url);
+ assert(url.searchParams.get('or').includes(first.at(-1).id));
+ second.resolve(response([publishedWork(50,authorB,1)]));await settle();
+ assert.equal(visibleTitles(page).length,16);
+ const more=page.more.listeners.get('click')();const request=page.pending.find(r=>new URL(r.url).pathname==='/rest/v1/works'&&!new URL(r.url).searchParams.has('user_id'));
+ assert(new URL(request.url).searchParams.get('or').includes(globalAuthorRows.at(-1).id));
+ page.pending.splice(page.pending.indexOf(request),1);request.resolve(response([globalAuthorRows[1]]));await more;
+ assert.equal(visibleTitles(page).filter(title=>title==='public-2').length,1);
+ assert.deepEqual(visibleTitles(page).slice(-2),['public-1','public-3']);
+});
+test('author-specific root feed signout invalidates in-flight own pages without changing public ordering',async()=>{
+ const page=await authorPage();await page.connectAccount(authorB);const pending=takeOwn(page,authorB);
+ page.auth(null);pending.resolve(response([publishedWork(4,authorB,4)]));await settle();
+ assert.deepEqual(visibleTitles(page),['public-1','public-2','public-3']);
+ assert.equal(page.pending.filter(r=>new URL(r.url).searchParams.has('user_id')).length,0);
+});
+test('author-specific root feed failed own query preserves global cards and authenticated labels',async()=>{
+ const page=await authorPage();await page.connectAccount(authorB);takeOwn(page,authorB).reject(Error('bounded outage'));await settle();
+ assert.deepEqual(visibleTitles(page),['public-2','public-1','public-3']);assert.equal(page.status.dataset.i18n,'siteFeedHint');
+ assert(realCards(page).every(card=>card.children[1].children[2].dataset.i18nAria==='commentLikeCount'));
+});
+test('author-specific own-only card refresh updates metadata and retains author hydration across foreground refresh',async()=>{
+ const page=boot('',{storage:true});await configure(page);
+ const globalRows=[globalAuthorRows[0],globalAuthorRows[2]];
+ await completeFeed(page,globalRows);await page.connectAccount(authorB);
+ const original={...publishedWork(70,authorB,1),thumbnail_storage_path:'/functions/v1/publication-cover?work_id=dddddddd-dddd-4ddd-8ddd-000000000070',
+   likes_count:2,initial_view:{schema:'pw.camera-framing.v1',aspect:1.25}};
+ takeOwn(page,authorB).resolve(response([original]));await settle();
+ const oldCard=realCards(page)[0];assert.equal(visibleTitles(page)[0],original.title);
+ const authorIndex=page.pending.findIndex(request=>new URL(request.url).pathname==='/rest/v1/community_author_profiles'&&new URL(request.url).searchParams.get('id').includes(authorB));
+ assert(authorIndex>=0);const authorRequest=page.pending.splice(authorIndex,1)[0];
+ page.events.get('pw-community-feed-invalidated')();page.refresh();
+ const globalIndex=page.pending.findIndex(request=>new URL(request.url).pathname==='/rest/v1/works'&&!new URL(request.url).searchParams.has('user_id'));
+ assert(globalIndex>=0);page.pending.splice(globalIndex,1)[0].resolve(response(globalRows));await settle();
+ const refreshedOwn=takeOwn(page,authorB);
+ authorRequest.resolve(response([{id:authorB,display_name:'Author after refresh'}]));await settle();
+ assert.equal(realCards(page)[0].children[1].children[1].textContent,'Author after refresh');
+ const updated={...original,title:'Updated outside global page',likes_count:37,initial_view:{schema:'pw.camera-framing.v1',aspect:2,position:[1,2,3]},
+   thumbnail_storage_path:'owner/revised-cover.png'};
+ refreshedOwn.resolve(response([updated]));await settle();
+ const current=realCards(page)[0];assert.equal(current,oldCard,'outer card identity is retained');
+ assert.equal(visibleTitles(page)[0],updated.title);
+ assert.equal(current.children[0].children[0].children[0].src,'https://api.kongye.space/storage/v1/object/public/thumbnails/owner/revised-cover.png');
+ assert.equal(current.children[1].children[2].children[1].textContent,'37');
+ await current.children[0].listeners.get('click')();
+ const opening=JSON.parse(page.saved.get('pw-opening-work-v1'));
+ assert.deepEqual(opening.work,updated,'new click listener captures refreshed work including initial_view');
+ assert.equal(current.children[1].children[1].textContent,'Author after refresh');
+ assert.deepEqual(visibleTitles(page).slice(1),globalRows.map(work=>work.title));
 });
