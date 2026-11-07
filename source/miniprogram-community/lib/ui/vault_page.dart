@@ -1298,6 +1298,9 @@ const bool kShowCommunityTopicCard = true;
 /// 原来是内容自适应高度(361pt 宽下约 99pt),2.5:1 给到 144pt。
 const double kTopicCardAspect = 2.5;
 
+/// Activity artwork uses the 16:9 frame selected in the full-phone comparison.
+const double kTopicActivityAspect = 16 / 9;
+
 /// 自动翻页间隔。网易云那类 banner 的常规节奏。
 const Duration kTopicAutoPlayInterval = Duration(seconds: 5);
 
@@ -1424,7 +1427,8 @@ class _TopicCardState extends State<TopicCard> {
                 child: Image(
                   image: widget.activities[i].image,
                   semanticLabel: widget.activities[i].title,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
                   width: double.infinity,
                   height: double.infinity,
                 ),
@@ -1433,7 +1437,9 @@ class _TopicCardState extends State<TopicCard> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(kCommunityCardRadius),
       child: AspectRatio(
-        aspectRatio: kTopicCardAspect,
+        aspectRatio: widget.activities.isEmpty
+            ? kTopicCardAspect
+            : kTopicActivityAspect,
         child: ColoredBox(
           color: AetherColors.bgElevated,
           child: Stack(
@@ -1448,7 +1454,9 @@ class _TopicCardState extends State<TopicCard> {
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: AetherSpacing.lg,
+                  bottom: widget.activities.isEmpty
+                      ? AetherSpacing.lg
+                      : AetherSpacing.md,
                   child: _TopicDots(count: slides.length, index: _page),
                 ),
             ],

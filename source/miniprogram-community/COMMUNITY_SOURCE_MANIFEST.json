@@ -3642,8 +3642,8 @@
     },
     {
       "path": "lib/ui/vault_page.dart",
-      "sha256": "458b340d67dd57ff563be89b7a006fbb8c149388b2a54ccbfa24323875ac0efe",
-      "size": 56762
+      "sha256": "18c2a06c19e1dd832af1668bb0fb8689112073f629ef18202ac317ea340dce8d",
+      "size": 57106
     },
     {
       "path": "lib/ui/viewer_social_contract.dart",

@@ -246,7 +246,7 @@ void main() {
       );
       await t.pumpAndSettle();
       final carousel = find.byType(TopicCard);
-      expect(t.getSize(carousel), const Size(361, 144.4));
+      expect(t.getSize(carousel), const Size(361, 203.0625));
       expect(
         t.widget<PageView>(find.byType(PageView)).controller!.viewportFraction,
         1,
@@ -255,7 +255,8 @@ void main() {
         final cover = find.byWidgetPredicate(
           (w) => w is Image && w.semanticLabel == 'Activity $i',
         );
-        expect(t.widget<Image>(cover).fit, BoxFit.cover);
+        expect(t.widget<Image>(cover).fit, BoxFit.fitWidth);
+        expect(t.widget<Image>(cover).alignment, Alignment.topCenter);
         expect(t.getSize(cover), t.getSize(carousel));
         await t.tap(cover);
         expect(opened.last, i);
