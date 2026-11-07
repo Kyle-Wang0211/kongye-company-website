@@ -1,8 +1,101 @@
+import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-library-20261106-v44';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
 let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let viewerId = null, viewerGeneration = 0, authRevision = 0;
+let accountBound = false, accountConnecting;
+let publicOrder = [], ownPublicWorks = [], ownRequest;
+function orderVisibleCards() {
+  const allowed = new Set([...publicOrder, ...ownPublicWorks.map(work => work.id)]);
+  for (const [id, entry] of cards) {
+    if (!allowed.has(id)) {
+      entry.card.remove();
+      cards.delete(id);
+      seen.delete(id);
+    }
+  }
+  const own = viewerId ? [...cards.values()].filter(entry => entry.work.user_id === viewerId) : [];
+  own.sort((a, b) => Date.parse(b.work.published_at) - Date.parse(a.work.published_at) ||
+    b.work.id.localeCompare(a.work.id));
+  const others = publicOrder.map(id => cards.get(id))
+    .filter(entry => entry && (!viewerId || entry.work.user_id !== viewerId));
+  seen.clear();
+  for (const entry of [...own, ...others]) {
+    seen.add(entry.work.id);
+    grid.append(entry.card);
+    localizeElement(entry.like, viewerId ? 'commentLikeCount' : 'siteLikeSignIn',
+      {count: formatCount(entry.work.likes_count || 0)}, 'aria-label');
+  }
+}
+async function refreshOwnPublicWorks() {
+  if (!viewerId || !config) return;
+  const owner = viewerId, generation = viewerGeneration;
+  if (ownRequest?.generation === generation) return ownRequest.promise;
+  const request = {generation};
+  request.promise = (async () => {
+    const own = [];
+    let after;
+    do {
+      const url = feedUrl(config.origin, after);
+      url.searchParams.set('user_id', 'eq.' + owner);
+      url.searchParams.set('deleted_at', 'is.null');
+      url.searchParams.set('select', url.searchParams.get('select') + ',visibility,moderation_status,deleted_at');
+      const page = await read(url);
+      if (generation !== viewerGeneration) return;
+      own.push(...page.filter(work => work.user_id === owner && work.visibility === 'public' &&
+        work.moderation_status === 'ok' && work.deleted_at === null && Number.isFinite(Date.parse(work.published_at))));
+      if (page.length < 12) break;
+      const next = page.at(-1);
+      if (next.id === after?.id) throw translatedError('siteFeedFormat');
+      after = next;
+    } while (true);
+    if (generation !== viewerGeneration) return;
+    ownPublicWorks = [...new Map(own.map(work => [work.id, work])).values()];
+    for (const work of ownPublicWorks) {
+      if (!cards.has(work.id)) {
+        cardFor(work);
+        seen.add(work.id);
+      }
+    }
+    orderVisibleCards();
+    for (let i = 0; i < own.length; i += 12) void readAuthors(own.slice(i, i + 12));
+  })().catch(() => {
+    // Public pagination stays available when an author query fails.
+  }).finally(() => {
+    if (ownRequest === request) ownRequest = null;
+  });
+  ownRequest = request;
+  return request.promise;
+}
+function setViewer(id) {
+  const next = typeof id === 'string' && /^[a-f0-9-]{36}$/i.test(id) ? id : null;
+  if (next === viewerId) return;
+  viewerId = next;
+  viewerGeneration++;
+  ownPublicWorks = [];
+  orderVisibleCards();
+  void refreshOwnPublicWorks();
+}
+async function bindAccount(client) {
+  if (accountBound) return;
+  accountBound = true;
+  client.auth.onAuthStateChange((_event, session) => {
+    authRevision++;
+    setViewer(session?.user?.id);
+  });
+  const revision = authRevision;
+  const {data, error} = await client.auth.getSession();
+  if (!error && revision === authRevision) setViewer(data.session?.user?.id);
+}
+function recoverAccount() {
+  if (accountBound || accountConnecting) return;
+  accountConnecting = getAccountClient().then(bindAccount).catch(() => {})
+    .finally(() => { accountConnecting = null; });
+}
+accountConnecting = accountClientReady.then(bindAccount).catch(() => {})
+  .finally(() => { accountConnecting = null; });
 const authorFreshness=new Map(),authorLifetime=300000;
 try{const saved=JSON.parse(sessionStorage.getItem('pw-public-authors-v1')||'[]');for(const [id,row] of saved)if(row.until>Date.now()&&row.until<=Date.now()+authorLifetime&&typeof row.profile?.display_name==='string'&&row.profile.id===id){authors.set(id,row.profile);authorFreshness.set(id,row.until);}}catch{}
 function saveAuthors(){try{sessionStorage.setItem('pw-public-authors-v1',JSON.stringify([...authors].slice(-256).map(([id,profile])=>[id,{profile,until:authorFreshness.get(id)||0}])));}catch{}}
@@ -123,11 +216,11 @@ function cardFor(work){
  const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
  if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
  authorNodes.get(work.user_id).add({author,avatar});renderAuthor(work.user_id,author,avatar);
- const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=streaming-profiles-20261103-v14';localizeElement(like,'siteLikeSignIn',{},'aria-label');
+ const like=document.createElement('a');like.className='community-like';like.href='community/?work='+encodeURIComponent(work.id)+'&release=streaming-profiles-20261103-v14';localizeElement(like,viewerId?'commentLikeCount':'siteLikeSignIn',{count:formatCount(work.likes_count||0)},'aria-label');
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  const count=document.createElement('span');count.textContent=formatCount(Number.isSafeInteger(work.likes_count)&&work.likes_count>0?work.likes_count:0);like.append(count);
  row.append(avatar,author,like);card.append(open,row);
- cards.set(work.id,{card,work,author,avatar});return card;
+ cards.set(work.id,{card,work,author,avatar,like});return card;
 }
 function loadingShells(){
  const shells=[];
@@ -147,7 +240,8 @@ async function load(){
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
  const rows=await read(feedUrl(config.origin,cursor));lastFeedRead=Date.now();
  for(const shell of shells)shell.remove();
- for(const work of rows){if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
+ for(const work of rows){if(!publicOrder.includes(work.id))publicOrder.push(work.id);if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
+ orderVisibleCards();void refreshOwnPublicWorks();
  void readAuthors(rows);
  cursor=rows.at(-1)||cursor;localizeElement(more,'siteLoadMore');localizeElement(status,seen.size?'siteFeedHint':'siteFeedEmpty');more.hidden=rows.length<12;
  await openSharedWork();
@@ -167,16 +261,17 @@ async function refreshLoaded(){
  if(!config){void load();return;}
  busy=true;more.disabled=true;
  try{
-  const target=Math.max(12,seen.size),rows=[];let nextCursor,hasMore=true;
+  const target=Math.max(12,publicOrder.length),rows=[];let nextCursor,hasMore=true;
   while(rows.length<target&&hasMore){
    const page=await read(feedUrl(config.origin,nextCursor));
    rows.push(...page);nextCursor=page.at(-1)||nextCursor;hasMore=page.length===12;
   }
   // Retain the visible card's screen position when new works precede it.
-  const keep=new Set(rows.map(work=>work.id));
+  const keep=new Set([...rows,...ownPublicWorks].map(work=>work.id));
   const anchor=[...cards.entries()].filter(([id])=>keep.has(id)).map(([,entry])=>entry.card).find(card=>card.getBoundingClientRect?.().bottom>0);
   const before=anchor?.getBoundingClientRect?.().top;
   for(const [id,entry] of cards)if(!keep.has(id)){entry.card.remove();cards.delete(id);}
+  publicOrder=[...new Set(rows.map(work=>work.id))];
   // Browser back/forward restoration keeps decoded covers and existing author pixels.
   authorFailures.clear();authorNodes.clear();seen.clear();
   for(const work of rows){
@@ -190,6 +285,7 @@ async function refreshLoaded(){
    const nodes=authorNodes.get(work.user_id);if(![...nodes].some(node=>node.author===entry.author))nodes.add({author:entry.author,avatar:entry.avatar});
    grid.append(entry.card);seen.add(work.id);
   }
+  orderVisibleCards();void refreshOwnPublicWorks();
   lastFeedRead=Date.now();cursor=nextCursor;more.hidden=!hasMore;pageFailed=false;refreshFailed=false;localizeElement(more,'siteLoadMore');localizeElement(status,rows.length?'siteFeedHint':'siteFeedEmpty');
   if(anchor?.isConnected&&Number.isFinite(before))window.scrollBy?.(0,anchor.getBoundingClientRect().top-before);
   // Author endpoint accepts at most twelve IDs; each batch is independent.
@@ -198,7 +294,7 @@ async function refreshLoaded(){
  }catch(e){pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{busy=false;more.disabled=false;drainRefresh();syncPaging();}
 }
-window.addEventListener('focus',()=>requestRefresh());
+window.addEventListener('focus',()=>{recoverAccount();requestRefresh();});
 window.addEventListener('pageshow',()=>requestRefresh());
 document.addEventListener?.('visibilitychange',()=>{if(document.visibilityState==='visible')requestRefresh();});
 // Pure invalidation hook; does not claim a backend subscription is connected.
