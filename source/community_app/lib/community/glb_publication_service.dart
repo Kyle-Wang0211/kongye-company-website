@@ -5,6 +5,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:cross_file/cross_file.dart';
+import 'publication_file_source.dart';
+import 'publication_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../dense/dense_work_state.dart';
@@ -28,11 +31,13 @@ class GlbPublicationStatus {
   final String status;
   final String? workId;
   final bool targetExceeded;
+  final bool awaitingLargeSourceWorker;
   const GlbPublicationStatus({
     required this.submissionId,
     required this.status,
     this.workId,
     this.targetExceeded = false,
+    this.awaitingLargeSourceWorker = false,
   });
   bool get isTerminal => const {
     'published',
@@ -118,11 +123,24 @@ class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
 
 /// Native source verification stays local; authenticated control requests share
 /// the exact same publication protocol as browser submissions.
-class _GlbPublicationControlPorts implements PublicationControlPorts {
+class _GlbPublicationControlPorts
+    implements PublicationControlPorts, PublicationResumableCredentials {
   final GlbPublicationPorts ports;
   _GlbPublicationControlPorts(this.ports);
   @override
   String? get userId => ports.userId;
+  @override
+  String? get accessToken => ports is _SupabaseGlbPublicationPorts
+      ? (ports as _SupabaseGlbPublicationPorts)
+            .client
+            .auth
+            .currentSession
+            ?.accessToken
+      : null;
+  @override
+  String? get apiKey => ports is _SupabaseGlbPublicationPorts
+      ? (ports as _SupabaseGlbPublicationPorts).client.headers['apikey']
+      : null;
   @override
   Uri get apiOrigin => ports.apiOrigin;
   @override
@@ -169,6 +187,9 @@ class GlbPublicationService {
       _SupabaseGlbPublicationPorts(c, origin),
     );
   }
+  void pauseUploads() => _core.pauseUploads();
+  void dispose() => _core.dispose();
+
   void _signedIn(String? expected) {
     if (expected == null ||
         !_uuid.hasMatch(expected) ||
@@ -183,6 +204,7 @@ class GlbPublicationService {
         status: status.status,
         workId: status.workId,
         targetExceeded: status.targetExceeded,
+        awaitingLargeSourceWorker: status.awaitingLargeSourceWorker,
       );
 
   Future<GlbPublicationStatus> getStatus(String submissionId) async {
@@ -261,6 +283,25 @@ class GlbPublicationService {
       final hash = (await sha256.bind(snapshot.openRead()).first).toString();
       _signedIn(uid);
       final frozenSnapshot = snapshot;
+      if (_ports is _SupabaseGlbPublicationPorts) {
+        final result = await _core.submitFile(
+          source: PublicationFileSource(
+            file: XFile(frozenSnapshot.path),
+            format: PublicationSourceFormat.glb,
+            byteLength: size,
+            sha256: hash,
+          ),
+          title: title,
+          description: description,
+          idempotencyKey: idempotencyKey,
+          onSubmissionCreated: (id) async {
+            submissionId = id;
+            await onSubmissionCreated(id);
+          },
+          onProgress: onProgress,
+        );
+        return _nativeStatus(result);
+      }
       final result = await _core.submitPrepared(
         byteLength: size,
         sourceSha256: hash,

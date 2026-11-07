@@ -1732,8 +1732,8 @@
     },
     {
       "path": "lib/community/glb_publication_service.dart",
-      "sha256": "642ca3e99a2cabe13ec2286d29d6754b34cacbc309c9a68d2c2ab5a3be4be66b",
-      "size": 11507
+      "sha256": "bbd8bfa2c6486f1ca2217bf5939b9c59b4e9d4d4a415a3f883a7bedda8ab695b",
+      "size": 12922
     },
     {
       "path": "lib/community/point_cloud_streaming_sources.dart",
@@ -1749,6 +1749,31 @@
       "path": "lib/community/publication_cover_url.dart",
       "sha256": "41359e4b8082f8a3bf0eaa0dd16beb5416bbee342ec90151b18f3cff575c1dc1",
       "size": 431
+    },
+    {
+      "path": "lib/community/publication_file_picker.dart",
+      "sha256": "6c74376ef65dec6b0274e08d860c5818c67759a4926b80284b5f937ca089a7cb",
+      "size": 114
+    },
+    {
+      "path": "lib/community/publication_file_picker_native.dart",
+      "sha256": "27de7ee696a9453c1ed722e6d766e0305cf8cee72cfddc3b83df80c34fe0e415",
+      "size": 675
+    },
+    {
+      "path": "lib/community/publication_file_picker_web.dart",
+      "sha256": "29e1324826241ed9e00cb51958d66da5d827166319c27218ef15082e36a507de",
+      "size": 2899
+    },
+    {
+      "path": "lib/community/publication_file_source.dart",
+      "sha256": "ad47d3f1da528a8391184c07d22c992837438a3e645d69d9a2706cb21bf90207",
+      "size": 3570
+    },
+    {
+      "path": "lib/community/publication_resumable_upload.dart",
+      "sha256": "b223422d554165b74515e4fd05607e61f54c1d7c92b51df3b2126fd83d9e58c1",
+      "size": 11584
     },
     {
       "path": "lib/community/publication_source.dart",
@@ -1802,8 +1827,8 @@
     },
     {
       "path": "lib/community/web_publication_service.dart",
-      "sha256": "d877fd1f990d8c96c79fdd1d030f61e46a5d20c6d960109ea473271034fdb792",
-      "size": 18211
+      "sha256": "29039b55e3c66ae4087748cd53adaff5a18b47da0b5a299141d57c568c1e1e15",
+      "size": 26147
     },
     {
       "path": "lib/community/web_social_api.dart",
@@ -3282,8 +3307,8 @@
     },
     {
       "path": "lib/ui/community/web_publication_page.dart",
-      "sha256": "cc5be30bd46b156b69e38bfbc2359d2f38bafcd0589552d87740b3dfa0606e4d",
-      "size": 25366
+      "sha256": "22ed186bdf0b4f110edd344f72b744f70b4685b810809b6eb2020918e223180f",
+      "size": 27232
     },
     {
       "path": "lib/ui/community/web_publication_selection_page.dart",
@@ -4932,13 +4957,13 @@
     },
     {
       "path": "pubspec.lock",
-      "sha256": "074e33611e7ef79c78d6b9d3c04b38401b4192864486e81acd70b09372b3b428",
-      "size": 40499
+      "sha256": "35de167c4f384dcb0e0b5e7014efb1a310ed3fc5538f5993d58b09952b5c594f",
+      "size": 40502
     },
     {
       "path": "pubspec.yaml",
-      "sha256": "bfaa205fa470ba10f4e9ed749bd5680d0f59885e6f4b037e66c1607392a495bf",
-      "size": 15150
+      "sha256": "d617e82863d68e4d1fa272222adf7dec4f945aa3f44a5349e541e4188f9f97f8",
+      "size": 15163
     },
     {
       "path": "third_party/libphonenumber/LICENSE",
@@ -5110,5 +5135,5 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "0af8d782183d0e841905335df92f557f49cee8f7"
+  "source_revision": "c779a1341cb24e3f383d4efd3039c5ffb8caf850"
 }
