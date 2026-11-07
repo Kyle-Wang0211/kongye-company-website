@@ -29,6 +29,24 @@ function orderVisibleCards() {
       {count: formatCount(entry.work.likes_count || 0)}, 'aria-label');
   }
 }
+function reconcileCard(work) {
+  let entry = cards.get(work.id);
+  if (!entry || JSON.stringify(entry.work) !== JSON.stringify(work)) {
+    const existingCard = entry?.card;
+    const replacement = cardFor(work);
+    entry = cards.get(work.id);
+    if (existingCard) {
+      existingCard.replaceChildren(...replacement.children);
+      entry.card = existingCard;
+    }
+  }
+  if (!authorNodes.has(work.user_id)) authorNodes.set(work.user_id, new Set());
+  const nodes = authorNodes.get(work.user_id);
+  if (![...nodes].some(node => node.author === entry.author)) {
+    nodes.add({author: entry.author, avatar: entry.avatar});
+  }
+  return entry;
+}
 async function refreshOwnPublicWorks() {
   if (!viewerId || !config) return;
   const owner = viewerId, generation = viewerGeneration;
@@ -53,12 +71,7 @@ async function refreshOwnPublicWorks() {
     } while (true);
     if (generation !== viewerGeneration) return;
     ownPublicWorks = [...new Map(own.map(work => [work.id, work])).values()];
-    for (const work of ownPublicWorks) {
-      if (!cards.has(work.id)) {
-        cardFor(work);
-        seen.add(work.id);
-      }
-    }
+    for (const work of ownPublicWorks) reconcileCard(work);
     orderVisibleCards();
     for (let i = 0; i < own.length; i += 12) void readAuthors(own.slice(i, i + 12));
   })().catch(() => {
@@ -274,15 +287,9 @@ async function refreshLoaded(){
   publicOrder=[...new Set(rows.map(work=>work.id))];
   // Browser back/forward restoration keeps decoded covers and existing author pixels.
   authorFailures.clear();authorNodes.clear();seen.clear();
-  for(const work of rows){
+  for(const work of [...rows,...ownPublicWorks]){
    if(seen.has(work.id))continue;
-   let entry=cards.get(work.id);
-   if(!entry||JSON.stringify(entry.work)!==JSON.stringify(work)){
-    const old=entry?.card;const card=cardFor(work);
-    if(old){old.replaceChildren(...card.children);entry=cards.get(work.id);entry.card=old;}else entry=cards.get(work.id);
-   }
-   if(!authorNodes.has(work.user_id))authorNodes.set(work.user_id,new Set());
-   const nodes=authorNodes.get(work.user_id);if(![...nodes].some(node=>node.author===entry.author))nodes.add({author:entry.author,avatar:entry.avatar});
+   const entry=reconcileCard(work);
    grid.append(entry.card);seen.add(work.id);
   }
   orderVisibleCards();void refreshOwnPublicWorks();
