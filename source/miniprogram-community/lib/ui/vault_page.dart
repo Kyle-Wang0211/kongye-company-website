@@ -22,6 +22,7 @@ import 'community/work_card.dart';
 import 'community/masonry_layout.dart';
 import 'community/masonry_policy.dart';
 import 'community/community_loading.dart';
+import 'community/skeleton_shimmer.dart';
 import 'community/work_detail_page.dart';
 import 'design_system.dart';
 import 'startup_splash_gate.dart';
@@ -671,15 +672,16 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
 
   Widget _buildFeed() {
     final sourceFeed = _feed;
+    final showActivityHeader = _showTopicCard && widget.activities.isNotEmpty;
     return FutureBuilder<List<FeedWork>>(
       future: sourceFeed,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done &&
             !(_retainFeedWhileAppending && snap.hasData)) {
-          return const _LoadingState();
+          return _LoadingState(showActivityHeader: showActivityHeader);
         }
         if (snap.hasError) {
-          return const _LoadingState();
+          return _LoadingState(showActivityHeader: showActivityHeader);
         }
         final rawWorks = snap.data ?? const <FeedWork>[];
         final fetchedWorks = prioritizeAuthorFeed(
@@ -721,15 +723,15 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
                 unawaited(_maybeLoadMore(fetchedWorks));
               }
             });
-            return const _LoadingState();
+            return _LoadingState(showActivityHeader: showActivityHeader);
           }
           return const _EmptyState();
         }
         if (_preparationError != null) {
-          return const _LoadingState();
+          return _LoadingState(showActivityHeader: showActivityHeader);
         }
         if (_firstPairSources == null && _pageLoadFailed) {
-          return const _LoadingState();
+          return _LoadingState(showActivityHeader: showActivityHeader);
         }
         if (_firstPairSources == null) {
           final staged = _forcedPreparationSources == null
@@ -812,7 +814,9 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
               fit: StackFit.expand,
               children: [
                 _hiddenPreparation(staged, works),
-                const Positioned.fill(child: _LoadingState()),
+                Positioned.fill(
+                  child: _LoadingState(showActivityHeader: showActivityHeader),
+                ),
               ],
             );
           }
@@ -1094,10 +1098,23 @@ class _SearchBar extends StatelessWidget {
 }
 
 class _LoadingState extends StatelessWidget {
-  const _LoadingState();
+  const _LoadingState({this.showActivityHeader = false});
+
+  final bool showActivityHeader;
 
   @override
   Widget build(BuildContext context) => CommunityMasonry(
+    header: showActivityHeader
+        ? const ClipRRect(
+            borderRadius: BorderRadius.all(
+              Radius.circular(kCommunityCardRadius),
+            ),
+            child: AspectRatio(
+              aspectRatio: kTopicActivityAspect,
+              child: _TopicActivityPlaceholder(),
+            ),
+          )
+        : null,
     itemCount: 6,
     itemBuilder: (_, index) => CommunityCardSkeleton(
       key: ValueKey('community-initial-loading-$index'),
@@ -1377,6 +1394,11 @@ class _TopicCardState extends State<TopicCard> {
                   alignment: Alignment.topCenter,
                   width: double.infinity,
                   height: double.infinity,
+                  frameBuilder:
+                      (context, child, frame, wasSynchronouslyLoaded) =>
+                          wasSynchronouslyLoaded || frame != null
+                          ? child
+                          : const _TopicActivityPlaceholder(),
                 ),
               ),
           ];
@@ -1428,6 +1450,22 @@ class _TopicCardState extends State<TopicCard> {
       ),
     );
   }
+}
+
+class _TopicActivityPlaceholder extends StatelessWidget {
+  const _TopicActivityPlaceholder();
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: IgnorePointer(
+      child: SkeletonBox(
+        animate:
+            !MediaQuery.disableAnimationsOf(context) &&
+            !MediaQuery.accessibleNavigationOf(context),
+        borderRadius: BorderRadius.zero,
+      ),
+    ),
+  );
 }
 
 class _TopicSlideView extends StatelessWidget {

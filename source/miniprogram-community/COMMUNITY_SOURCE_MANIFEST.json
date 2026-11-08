@@ -3657,8 +3657,8 @@
     },
     {
       "path": "lib/ui/vault_page.dart",
-      "sha256": "bb3152ce5f40e9a35999b8559ec5bea19db56e79a9f200120d1f87bb05189898",
-      "size": 56015
+      "sha256": "d6750b478f3e80b56c028dd676b29ab7d602bb1212e38d68575df5cdcc8b6067",
+      "size": 57457
     },
     {
       "path": "lib/ui/viewer_social_contract.dart",

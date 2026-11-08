@@ -244,6 +244,9 @@ void main() {
           ),
         ),
       );
+      await t.runAsync(
+        () => precacheImage(image, t.element(find.byType(TopicCard))),
+      );
       await t.pumpAndSettle();
       final carousel = find.byType(TopicCard);
       expect(t.getSize(carousel), const Size(361, 203.0625));
@@ -303,6 +306,9 @@ void main() {
           ),
         ),
       ),
+    );
+    await t.runAsync(
+      () => precacheImage(image, t.element(find.byType(TopicCard))),
     );
     await t.pumpAndSettle();
   }
@@ -420,6 +426,9 @@ void main() {
           ),
         ),
       ),
+    );
+    await t.runAsync(
+      () => precacheImage(image, t.element(find.byType(TopicCard))),
     );
     await t.pumpAndSettle();
     await t.drag(find.byType(TopicCard), const Offset(0, -100));
