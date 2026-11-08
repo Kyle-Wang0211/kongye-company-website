@@ -92,7 +92,7 @@ class _AuthRootViewState extends State<AuthRootView> {
       _policyAccepted = false;
     }
     final err = widget.currentUser.lastError;
-    if (err != null && mounted) {
+    if (err != null && mounted && ModalRoute.of(context)?.isCurrent != false) {
       _showErrorDialog(err);
     }
     if (mounted) setState(() {});
@@ -278,6 +278,7 @@ class _AuthRootViewState extends State<AuthRootView> {
                       ),
                       const SizedBox(height: AetherSpacing.xl),
                       MinimalLink(
+                        key: const ValueKey('auth-forgot-password'),
                         title: l.authForgotPassword,
                         emphasis: MinimalLinkEmphasis.faint,
                         onTap: working ? null : _pushReset,

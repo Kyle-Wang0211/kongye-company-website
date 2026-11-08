@@ -91,18 +91,17 @@ class MockAuthServiceImpl implements AuthService {
   Future<void> sendPasswordReset(String email) async {}
 
   @override
-  Future<AuthenticatedUser> resetPasswordWithOtp({
+  Future<String> verifyPasswordResetCode({
     required String email,
     required String token,
+  }) async => 'mock-password-recovery';
+
+  @override
+  Future<void> completePasswordReset({
+    required String email,
+    required String resetToken,
     required String newPassword,
-  }) async {
-    final user = AuthenticatedUser(
-      id: InternalUserID('mock_${_slug(email)}'),
-      email: email,
-    );
-    _cached = user;
-    return user;
-  }
+  }) async {}
 
   @override
   Future<void> signOut() async {

@@ -50,15 +50,17 @@ abstract class AuthService {
   /// this sends a 6-digit OTP rather than a clickable link.
   Future<void> sendPasswordReset(String email);
 
-  /// Verify the password-reset OTP and atomically set a new password.
-  /// On success the user is signed in (Supabase verifyOTP for type
-  /// `recovery` issues a session, which we then use to call
-  /// `auth.updateUser` and rotate the password). Returns the now-signed-
-  /// in user. Throws AuthException(invalidVerificationCode) on bad /
-  /// expired OTP, weakPassword for too-short new password.
-  Future<AuthenticatedUser> resetPasswordWithOtp({
+  /// Validate the recovery code without creating a login session. Returns a
+  /// short-lived, single-use credential restricted to completing this reset.
+  Future<String> verifyPasswordResetCode({
     required String email,
     required String token,
+  });
+
+  /// Set a password using the verified recovery credential. Does not sign in.
+  Future<void> completePasswordReset({
+    required String email,
+    required String resetToken,
     required String newPassword,
   });
 

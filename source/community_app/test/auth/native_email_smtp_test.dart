@@ -84,11 +84,8 @@ void main() {
       () => svc.resendEmailOtp(email: email),
       () => svc.verifyEmailSignupOtp(email: email, token: '123456'),
       () => svc.sendPasswordReset(email),
-      () => svc.resetPasswordWithOtp(
-        email: email,
-        token: '123456',
-        newPassword: password,
-      ),
+      () => svc.verifyPasswordResetCode(email: email, token: '123456'),
+      () => svc.completePasswordReset(email: email, resetToken: 'synthetic-capability', newPassword: password),
     ];
     for (final action in actions) {
       await expectLater(
@@ -164,60 +161,31 @@ void main() {
     await svc.sendPasswordReset(email);
     expect(paths, ['/auth/v1/resend', '/auth/v1/recover']);
   });
-  test(
-    'recovery verifies then updates authenticated password without login',
-    () async {
-      final paths = <String>[];
-      final svc = service((request) async {
-        paths.add(request.url.path);
-        if (request.url.path.endsWith('/verify')) {
-          expect((jsonDecode(request.body) as Map)['email'], email);
-          expect((jsonDecode(request.body) as Map)['token'], '123456');
-          expect((jsonDecode(request.body) as Map)['type'], 'recovery');
-          return response(session());
-        }
-        expect(request.url.path, '/auth/v1/user');
-        expect(request.method, 'PUT');
-        expect(request.headers['Authorization'], startsWith('Bearer ey'));
-        expect((jsonDecode(request.body) as Map)['password'], password);
-        return response(user);
-      });
-      final result = await svc.resetPasswordWithOtp(
-        email: email,
-        token: '123456',
-        newPassword: password,
-      );
-      expect(result.id.rawValue, userId);
-      expect(paths, ['/auth/v1/verify', '/auth/v1/user']);
-    },
-  );
-  test(
-    'password update failure is surfaced after native recovery session',
-    () async {
-      final paths = <String>[];
-      final svc = service((request) async {
-        paths.add(request.url.path);
-        if (request.url.path.endsWith('/verify')) return response(session());
-        expect(request.url.path, '/auth/v1/user');
-        return response({
-          'code': 'weak_password',
-          'msg': 'Password is too weak',
-        }, 422);
-      });
-      await expectLater(
-        svc.resetPasswordWithOtp(
-          email: email,
-          token: '123456',
-          newPassword: 'weak',
-        ),
-        throwsA(error(AuthErrorKind.weakPassword)),
-      );
-      expect(paths, ['/auth/v1/verify', '/auth/v1/user']);
-      // The two official operations are not atomic. Verification already issued
-      // its recovery session, while updateUser rejected the replacement password.
-      expect((await svc.currentUser())?.id.rawValue, userId);
-    },
-  );
+  test('recovery verification and completion do not create a login', () async {
+    final paths = <String>[];
+    final svc = service((request) async {
+      paths.add(request.url.path);
+      if (request.url.path.endsWith('password-recovery-verify')) {
+        expect(jsonDecode(request.body), {'email': email, 'otp': '123456'});
+        return response({'ok': true, 'reset_token': 'synthetic-capability', 'expires_in': 600});
+      }
+      expect(request.url.path, '/functions/v1/password-recovery-complete');
+      expect(jsonDecode(request.body), {'email': email, 'reset_token': 'synthetic-capability', 'new_password': password});
+      return response({'ok': true});
+    });
+    final capability = await svc.verifyPasswordResetCode(email: email, token: '123456');
+    await svc.completePasswordReset(email: email, resetToken: capability, newPassword: password);
+    expect(paths, ['/functions/v1/password-recovery-verify', '/functions/v1/password-recovery-complete']);
+    expect(await svc.currentUser(), isNull);
+  });
+  test('password update failure remains signed out', () async {
+    final svc = service((request) async {
+      expect(request.url.path, '/functions/v1/password-recovery-complete');
+      return response({'error': 'weak_password'}, 400);
+    });
+    await expectLater(svc.completePasswordReset(email: email, resetToken: 'synthetic-capability', newPassword: 'weak'), throwsA(error(AuthErrorKind.weakPassword)));
+    expect(await svc.currentUser(), isNull);
+  });
   test('signup honors an explicitly returned native session', () async {
     final svc = service((request) async {
       expect(request.url.path, '/auth/v1/signup');
@@ -231,44 +199,27 @@ void main() {
     );
   });
   for (final kind in ['email', 'recovery']) {
-    test(
-      'wrong/expired $kind OTP cannot update password or establish session',
-      () async {
-        final svc = service((request) async {
-          expect(request.url.path, '/auth/v1/verify');
-          return response({
-            'code': 'otp_expired',
-            'msg': 'Token has expired or is invalid',
-          }, 403);
-        });
-        final action = kind == 'email'
-            ? svc.verifyEmailSignupOtp(email: email, token: '000000')
-            : svc.resetPasswordWithOtp(
-                email: email,
-                token: '000000',
-                newPassword: password,
-              );
-        await expectLater(
-          action,
-          throwsA(error(AuthErrorKind.invalidVerificationCode)),
-        );
-        expect(await svc.currentUser(), isNull);
-      },
-    );
-  }
-  test('verification missing session cannot change password', () async {
-    final svc = service((request) async {
-      expect(request.url.path, '/auth/v1/verify');
-      return response({'user': user});
+    test('wrong/expired $kind code cannot establish a session', () async {
+      final svc = service((request) async {
+        expect(request.url.path, kind == 'email' ? '/auth/v1/verify' : '/functions/v1/password-recovery-verify');
+        return kind == 'email'
+          ? response({'code': 'otp_expired', 'msg': 'Token has expired or is invalid'}, 403)
+          : response({'error': 'invalid_code'}, 401);
+      });
+      final action = kind == 'email'
+          ? svc.verifyEmailSignupOtp(email: email, token: '000000')
+          : svc.verifyPasswordResetCode(email: email, token: '000000');
+      await expectLater(action, throwsA(error(AuthErrorKind.invalidVerificationCode)));
+      expect(await svc.currentUser(), isNull);
     });
-    await expectLater(
-      svc.resetPasswordWithOtp(
-        email: email,
-        token: '123456',
-        newPassword: password,
-      ),
-      throwsA(error(AuthErrorKind.unknown)),
-    );
+  }
+  test('verification missing a reset capability cannot advance', () async {
+    final svc = service((request) async {
+      expect(request.url.path, '/functions/v1/password-recovery-verify');
+      return response({'ok': true});
+    });
+    await expectLater(svc.verifyPasswordResetCode(email: email, token: '123456'), throwsA(error(AuthErrorKind.providerUnavailable)));
+    expect(await svc.currentUser(), isNull);
   });
   for (final entry in [
     (429, 'over_email_send_rate_limit', AuthErrorKind.rateLimited),

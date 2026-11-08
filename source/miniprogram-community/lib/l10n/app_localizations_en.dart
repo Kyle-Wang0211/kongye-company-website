@@ -314,7 +314,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String resetSubtitleEnterCode(String email) {
-    return 'We sent a 6-digit code to $email. Enter it together with your new password.';
+    return 'We sent a 6-digit code to $email. Enter the code to continue.';
   }
 
   @override
@@ -3778,4 +3778,40 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get webAccountHistory => 'Viewing history';
+
+  @override
+  String get resetVerifyCode => 'Verify code';
+
+  @override
+  String get resetSubtitleNewPassword =>
+      'Choose a new password, then return to sign in.';
+
+  @override
+  String get resetConfirmPasswordHint => 'Confirm new password';
+
+  @override
+  String get resetPasswordTooShort =>
+      'Use at least 8 characters for your new password.';
+
+  @override
+  String get resetPasswordMismatch => 'The passwords do not match.';
+
+  @override
+  String get resetInvalidCode =>
+      'The code is incorrect or has expired. Please try again.';
+
+  @override
+  String get resetRequestFailed =>
+      'Unable to reset your password. Please try again.';
+
+  @override
+  String get resetRateLimited => 'Too many requests. Please try again later.';
+
+  @override
+  String get resetNetworkError =>
+      'The request timed out or could not connect. Please try again.';
+
+  @override
+  String get resetSessionExpired =>
+      'Your recovery session has expired. Return to sign in and request a new code.';
 }

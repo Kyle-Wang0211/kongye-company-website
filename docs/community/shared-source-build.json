@@ -7,10 +7,10 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "400aa3d206f70b3afe62810f87d76873d368d33e7cb547ddf65d528a98b2bdae",
-  "main_js_sha256": "e271cb2f449b16c32ae539bcc905b54cd02888a0338443e65f91cac755d91ad6",
+  "main_js_sha256": "9ca2947612d4cfd7223e380778f754c794f548b18cc95a3494e0ceb3b40c1228",
   "status": "built-local-not-deployed",
-  "source_revision": "f7d71652f0d80de89e1dc71e1e8f0e7217e9ee00",
-  "source_manifest_sha256": "0b59b0fe04c5f3f361d3481809cf48056b10c35e7fab4cb48f4ec3a21b231576",
-  "scoped_native_email_patch_sha256": "832b1b4dbce04130c03acf0602dfeec376a05f782624b0e8d0802ecc5814a886",
+  "source_revision": "9d314c57030b4199aa0205cdb6eb3da81a7065c6",
+  "source_manifest_sha256": "795fa2b9da2611d54fd494176ccf2c45da2db7296a2793ea360ce80d7dc3d863",
+  "scoped_native_email_patch_sha256": "6d11d734ab00c34e3ec8065cf58fbc5a409fd8fd64dda8f22caf3e3a64646164",
   "native_email_ready_define": true
 }

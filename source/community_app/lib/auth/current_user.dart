@@ -265,18 +265,6 @@ class CurrentUser extends ChangeNotifier {
     (service) => service.verifyEmailSignupOtp(email: email, token: token),
   );
 
-  Future<bool> resetPasswordWithOtp({
-    required String email,
-    required String token,
-    required String newPassword,
-  }) => _runUserAction(
-    (service) => service.resetPasswordWithOtp(
-      email: email,
-      token: token,
-      newPassword: newPassword,
-    ),
-  );
-
   Future<bool> resendSignupOtp({required String email}) async =>
       await _runValueAction((service) async {
         await service.resendEmailOtp(email: email);
@@ -293,6 +281,44 @@ class CurrentUser extends ChangeNotifier {
         return true;
       }) ??
       false;
+
+  Future<String?> verifyPasswordResetCode({
+    required String email,
+    required String token,
+  }) => _runValueAction(
+    (service) => service.verifyPasswordResetCode(email: email, token: token),
+  );
+
+  Future<bool> completePasswordReset({
+    required String email,
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    final generation = _beginAction();
+    if (!_isCurrent(generation)) return false;
+    try {
+      await _queueProvider((service) async {
+        await service.completePasswordReset(
+          email: email,
+          resetToken: resetToken,
+          newPassword: newPassword,
+        );
+        // Reserve local revocation before any newer explicit sign-in queued
+        // behind this operation. Recovery itself must never accept an identity.
+        await _revokeProviderSession(service);
+      });
+      if (!_isCurrent(generation)) return false;
+      _publishSignedOut('password reset completed', performing: true);
+      if (!_isCurrent(generation)) return false;
+      await _detachIdentity(generation);
+      return _isCurrent(generation);
+    } catch (error) {
+      if (_isCurrent(generation)) _recordError(error);
+      return false;
+    } finally {
+      _finishAction(generation);
+    }
+  }
 
   Future<void> signOut() async {
     _identityIntent++;

@@ -1367,8 +1367,8 @@
     },
     {
       "path": "lib/auth/auth_service.dart",
-      "sha256": "993d880aee7160981264d85543ebf501ed3671fe29f5ab5df2ee434d6d22efb4",
-      "size": 4053
+      "sha256": "af225c7e2b1a2edabe1da0bc6aab27bfea0645d6943cac4ca4b23b06b15adea4",
+      "size": 3980
     },
     {
       "path": "lib/auth/cold_start_session_gate.dart",
@@ -1382,8 +1382,8 @@
     },
     {
       "path": "lib/auth/current_user.dart",
-      "sha256": "34de32ddd186e7aedb42845d4674dad35807448106e0030c18bfaf37e6ddc4b8",
-      "size": 22097
+      "sha256": "733c09f42abb4180c2e7b23bfbf74e47255f747ed5f1dc5d3275bb9df0d98784",
+      "size": 23077
     },
     {
       "path": "lib/auth/data_api_readiness_gate.dart",
@@ -1392,8 +1392,8 @@
     },
     {
       "path": "lib/auth/mock_auth_service.dart",
-      "sha256": "19eb3b1b61884cb410210864c74b4e398500986abfe4a2d8c419f4a91fc68475",
-      "size": 4409
+      "sha256": "280ff416f777faae14aca4c34bf0920109fc601a4b9e345e51899d8d761a0e23",
+      "size": 4399
     },
     {
       "path": "lib/auth/password_sign_in.dart",
@@ -1417,13 +1417,13 @@
     },
     {
       "path": "lib/auth/supabase_auth_service.dart",
-      "sha256": "bf29ff4fc7bfa26077870bff2d7e5e36408df55782301f2325a8efb05524e6ce",
-      "size": 25898
+      "sha256": "3d9348c308c8cbf706825f8f4c68ea3d696b70fe639ce66670c5101dbdea527a",
+      "size": 26537
     },
     {
       "path": "lib/auth/unavailable_auth_service.dart",
-      "sha256": "b102f885545b62cd11fb566299d78c152a23536f321c1df55f5500bcbf1f886e",
-      "size": 2345
+      "sha256": "d7509af12ad607a87ba36bc9d7569a83ff8c7998c71b790fe3e2f9b8eae5a4ea",
+      "size": 2478
     },
     {
       "path": "lib/auth/wechat_binding.dart",
@@ -1967,28 +1967,28 @@
     },
     {
       "path": "lib/l10n/app_en.arb",
-      "sha256": "46c8b58b7148090da09c0aa59b172d069e973b6008d7a7fc0370adf1c5d309f4",
-      "size": 113532
+      "sha256": "67cdd6d6fca7ccf42569d401c688eec62d575f9498c7aa743e391a7455f7ea06",
+      "size": 114243
     },
     {
       "path": "lib/l10n/app_localizations.dart",
-      "sha256": "a6d925caa21badfbfd6ebc02d02c7413859f79cab633d6c111b64baab75bdbd7",
-      "size": 245621
+      "sha256": "470324df0fadb46924d1e014ae00870d659aa6cd7df8fd8719754e32d3d3621a",
+      "size": 247553
     },
     {
       "path": "lib/l10n/app_localizations_en.dart",
-      "sha256": "13cb3680b78841d385dbc412e22e1db3539941d5f1942ad8432ae284c51273be",
-      "size": 137608
+      "sha256": "8eaffc65117b792635741f2f6719631ee829e71be6466fc5691923932e9b17ee",
+      "size": 138595
     },
     {
       "path": "lib/l10n/app_localizations_zh.dart",
-      "sha256": "5c88c185efef6cbb13bedf4ef58bad4d5ed4609155e8b0cffce90372859b0775",
-      "size": 125515
+      "sha256": "432b2aa960c436d380aa9baa625f19e322305da545491b4b1b4b2911f53b6a4e",
+      "size": 126394
     },
     {
       "path": "lib/l10n/app_zh.arb",
-      "sha256": "dce70a75244a43e6d872b1737d7d4d2b5234c61a10de373c6eaa3d481b38eb06",
-      "size": 98419
+      "sha256": "67383bd1c74a2ace805a01129f0ef9d8c832785a2bc2af1593df1024b1d85cac",
+      "size": 99058
     },
     {
       "path": "lib/l10n/phone_country_names.dart",
@@ -2967,8 +2967,8 @@
     },
     {
       "path": "lib/ui/auth/auth_minimal_widgets.dart",
-      "sha256": "6704cefe44e88cf0210194d8664b2eefa67b1a1784025a9ffecfd8de714e94ee",
-      "size": 13568
+      "sha256": "77242abf71bc48937cb399a959e3994d6e4adb85e4f44068dc64ceae8722f044",
+      "size": 13738
     },
     {
       "path": "lib/ui/auth/auth_policy_consent.dart",
@@ -2977,8 +2977,8 @@
     },
     {
       "path": "lib/ui/auth/auth_root_view.dart",
-      "sha256": "6511558ea1f353454b39aa7dcc915161f771c6864ae66b0eb2be92f6fbdc18a4",
-      "size": 12244
+      "sha256": "a61847ce7aaaed64691a3acd806a4e6776b7e182538e39157494bf6a438805bb",
+      "size": 12359
     },
     {
       "path": "lib/ui/auth/auth_shared_widgets.dart",
@@ -3007,8 +3007,8 @@
     },
     {
       "path": "lib/ui/auth/reset_password_view.dart",
-      "sha256": "a4bad16e6910ad74b52409b9c929d3ac95c5c0eea5b7c3d1e202e471d12b00ef",
-      "size": 8973
+      "sha256": "87cc5e49d70dc95c9ebecbfe8852fa413ab7763b1a29405e0849befbe38e5fd1",
+      "size": 13832
     },
     {
       "path": "lib/ui/capture/ar_album_page.dart",
@@ -5045,5 +5045,7 @@
     ]
   },
   "schema": "pw.community-source-export.v1",
-  "source_revision": "24b1fb1c88b673864ede0eb651e4da294c3a2298"
+  "source_revision": "24b1fb1c88b673864ede0eb651e4da294c3a2298",
+  "website_adaptation": "Split recovery: verify code before password entry; completion returns signed out.",
+  "website_integration_base": "9c0ac3e715b75f8dba22d3d5718997850f6d21b2"
 }

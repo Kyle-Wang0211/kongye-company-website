@@ -640,7 +640,7 @@ abstract class AppL10n {
   /// No description provided for @resetSubtitleEnterCode.
   ///
   /// In en, this message translates to:
-  /// **'We sent a 6-digit code to {email}. Enter it together with your new password.'**
+  /// **'We sent a 6-digit code to {email}. Enter the code to continue.'**
   String resetSubtitleEnterCode(String email);
 
   /// No description provided for @resetSendCode.
@@ -6756,6 +6756,66 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Viewing history'**
   String get webAccountHistory;
+
+  /// No description provided for @resetVerifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get resetVerifyCode;
+
+  /// No description provided for @resetSubtitleNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password, then return to sign in.'**
+  String get resetSubtitleNewPassword;
+
+  /// No description provided for @resetConfirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get resetConfirmPasswordHint;
+
+  /// No description provided for @resetPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters for your new password.'**
+  String get resetPasswordTooShort;
+
+  /// No description provided for @resetPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get resetPasswordMismatch;
+
+  /// No description provided for @resetInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is incorrect or has expired. Please try again.'**
+  String get resetInvalidCode;
+
+  /// No description provided for @resetRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to reset your password. Please try again.'**
+  String get resetRequestFailed;
+
+  /// No description provided for @resetRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please try again later.'**
+  String get resetRateLimited;
+
+  /// No description provided for @resetNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'The request timed out or could not connect. Please try again.'**
+  String get resetNetworkError;
+
+  /// No description provided for @resetSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recovery session has expired. Return to sign in and request a new code.'**
+  String get resetSessionExpired;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

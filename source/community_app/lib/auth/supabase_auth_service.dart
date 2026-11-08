@@ -18,6 +18,9 @@
 // the only one that compiles into call sites. We catch the underlying
 // Supabase errors via AuthApiException (still imported below) and
 // re-throw as the app type with a typed AuthErrorKind.
+import 'dart:async';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
@@ -291,49 +294,82 @@ class SupabaseAuthServiceImpl implements AuthService {
   Future<void> sendPasswordReset(String email) async {
     _requireNativeEmail();
     try {
-      await _client.auth.resetPasswordForEmail(email);
-    } on AuthRetryableFetchException catch (e) {
-      throw AuthException(AuthErrorKind.network, e.message);
+      await _client.auth
+          .resetPasswordForEmail(email.trim().toLowerCase())
+          .timeout(const Duration(seconds: 30));
     } on AuthApiException catch (e) {
-      throw AuthException(_mapAuthApi(e), e.message);
+      throw AuthException(_mapAuthApi(e));
+    } on TimeoutException {
+      throw const AuthException(AuthErrorKind.network);
+    } on http.ClientException {
+      throw const AuthException(AuthErrorKind.network);
     } catch (e) {
-      throw AuthException(AuthErrorKind.unknown, e.toString());
+      throw const AuthException(AuthErrorKind.providerUnavailable);
     }
   }
 
   @override
-  Future<AuthenticatedUser> resetPasswordWithOtp({
+  Future<String> verifyPasswordResetCode({
     required String email,
     required String token,
+  }) async {
+    final data = await _invokePasswordRecovery(
+      'password-recovery-verify',
+      {'email': email.trim().toLowerCase(), 'otp': token},
+    );
+    final resetToken = data['reset_token'];
+    if (resetToken is! String || resetToken.isEmpty) {
+      throw const AuthException(AuthErrorKind.providerUnavailable);
+    }
+    return resetToken;
+  }
+
+  @override
+  Future<void> completePasswordReset({
+    required String email,
+    required String resetToken,
     required String newPassword,
+  }) async {
+    await _invokePasswordRecovery(
+      'password-recovery-complete',
+      {
+        'email': email.trim().toLowerCase(),
+        'reset_token': resetToken,
+        'new_password': newPassword,
+      },
+      completing: true,
+    );
+  }
+
+  Future<Map<dynamic, dynamic>> _invokePasswordRecovery(
+    String function,
+    Map<String, String> body, {
+    bool completing = false,
   }) async {
     _requireNativeEmail();
     try {
-      final verified = await _client.auth.verifyOTP(
-        email: email,
-        token: token,
-        type: OtpType.recovery,
-      );
-      if (verified.user == null || verified.session == null) {
-        throw const AuthException(AuthErrorKind.invalidVerificationCode);
+      final response = await _client.functions
+          .invoke(function, body: body)
+          .timeout(const Duration(seconds: 30));
+      final data = response.data;
+      if (data is! Map || data['ok'] != true) {
+        throw const AuthException(AuthErrorKind.providerUnavailable);
       }
-      final updated = await _client.auth.updateUser(
-        UserAttributes(password: newPassword),
-      );
-      if (updated.user == null) {
-        throw const AuthException(AuthErrorKind.unknown);
+      return data;
+    } on FunctionException catch (e) {
+      if (completing && (e.status == 401 || e.status == 410)) {
+        throw const AuthException(AuthErrorKind.notSignedIn);
       }
-      return _wrap(updated.user!);
-    } on AuthRetryableFetchException catch (e) {
-      throw AuthException(AuthErrorKind.network, e.message);
-    } on AuthWeakPasswordException catch (e) {
-      throw AuthException(AuthErrorKind.weakPassword, e.message);
-    } on AuthApiException catch (e) {
-      throw AuthException(_mapAuthApi(e), e.message);
+      throw _mapFunctionException(e);
     } on AuthException {
       rethrow;
-    } catch (e) {
-      throw AuthException(AuthErrorKind.unknown, e.toString());
+    } on TimeoutException {
+      throw const AuthException(AuthErrorKind.network);
+    } on http.ClientException {
+      throw const AuthException(AuthErrorKind.network);
+    } catch (_) {
+      // Do not log server response bodies, recovery credentials or passwords.
+      throw const AuthException(AuthErrorKind.providerUnavailable);
     }
   }
 
@@ -535,6 +571,44 @@ class SupabaseAuthServiceImpl implements AuthService {
       phone: user.phone,
       displayName: display,
     );
+  }
+
+  AuthException _mapFunctionException(FunctionException e) {
+    final details = e.details;
+    String code = '';
+    if (details is Map) {
+      code = (details['error']?.toString() ?? '').toLowerCase();
+    } else if (details is String) {
+      code = details.toLowerCase();
+    }
+    switch (e.status) {
+      case 400:
+        // password-reset-verify returns 400 weak_password for too-short
+        // new passwords; other 400s are validation errors that should
+        // never happen given client-side gating.
+        if (code == 'weak_password') {
+          return const AuthException(AuthErrorKind.weakPassword);
+        }
+        return AuthException(AuthErrorKind.unknown, 'bad_request: $code');
+      case 401:
+      case 404:
+      case 410:
+        // 401 = wrong code, 404 = no pending row (probably reaped),
+        // 410 = expired. UI message ("验证码错误或已过期") covers all.
+        return AuthException(AuthErrorKind.invalidVerificationCode, code);
+      case 409:
+        return const AuthException(AuthErrorKind.accountAlreadyExists);
+      case 429:
+        return const AuthException(AuthErrorKind.rateLimited);
+      case 502:
+      case 503:
+        return AuthException(AuthErrorKind.providerUnavailable, code);
+      default:
+        return AuthException(
+          AuthErrorKind.unknown,
+          'edge function ${e.status}${code.isEmpty ? '' : ': $code'}',
+        );
+    }
   }
 
   AuthErrorKind _mapAuthApi(AuthApiException e) {

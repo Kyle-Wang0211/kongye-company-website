@@ -167,7 +167,13 @@ class CompactLanguageToggle extends StatelessWidget {
 class AuthHeading extends StatelessWidget {
   final String title;
   final String? subtitle;
-  const AuthHeading({super.key, required this.title, this.subtitle});
+  final bool uppercaseSubtitle;
+  const AuthHeading({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.uppercaseSubtitle = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +194,7 @@ class AuthHeading extends StatelessWidget {
         if (subtitle != null) ...[
           const SizedBox(height: AetherSpacing.sm),
           Text(
-            subtitle!.toUpperCase(),
+            uppercaseSubtitle ? subtitle!.toUpperCase() : subtitle!,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 12,
@@ -213,6 +219,7 @@ class AuthHeading extends StatelessWidget {
 // =====================================================================
 class LabeledField extends StatelessWidget {
   final String label;
+  final bool enabled;
   final Widget? leading;
   final Widget? trailing;
   final bool? obscureText;
@@ -228,6 +235,7 @@ class LabeledField extends StatelessWidget {
   const LabeledField({
     super.key,
     required this.label,
+    this.enabled = true,
     this.leading,
     this.trailing,
     this.obscureText,
@@ -259,6 +267,7 @@ class LabeledField extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         TextField(
+          enabled: enabled,
           controller: controller,
           focusNode: focusNode,
           obscureText: obscureText ?? isSecure,

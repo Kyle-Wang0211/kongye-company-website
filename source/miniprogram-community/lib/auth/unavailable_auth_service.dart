@@ -55,9 +55,15 @@ class UnavailableAuthService implements AuthService {
   Future<void> sendPasswordReset(String email) async => _unavailable();
 
   @override
-  Future<AuthenticatedUser> resetPasswordWithOtp({
+  Future<String> verifyPasswordResetCode({
     required String email,
     required String token,
+  }) async => _unavailable();
+
+  @override
+  Future<void> completePasswordReset({
+    required String email,
+    required String resetToken,
     required String newPassword,
   }) async => _unavailable();
 

@@ -304,7 +304,7 @@ class AppL10nZh extends AppL10n {
 
   @override
   String resetSubtitleEnterCode(String email) {
-    return '我们已向 $email 发送 6 位验证码，请连同新密码一起输入';
+    return '我们已向 $email 发送 6 位验证码，请输入验证码继续';
   }
 
   @override
@@ -3612,4 +3612,34 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get webAccountHistory => '观看历史';
+
+  @override
+  String get resetVerifyCode => '验证验证码';
+
+  @override
+  String get resetSubtitleNewPassword => '请设置新密码，完成后返回登录';
+
+  @override
+  String get resetConfirmPasswordHint => '再次输入新密码';
+
+  @override
+  String get resetPasswordTooShort => '新密码至少需要 8 位';
+
+  @override
+  String get resetPasswordMismatch => '两次输入的密码不一致';
+
+  @override
+  String get resetInvalidCode => '验证码错误或已过期，请重试';
+
+  @override
+  String get resetRequestFailed => '暂时无法重置密码，请重试';
+
+  @override
+  String get resetRateLimited => '请求过于频繁，请稍后再试';
+
+  @override
+  String get resetNetworkError => '请求超时或网络连接失败，请重试';
+
+  @override
+  String get resetSessionExpired => '重置凭证已过期，请返回登录后重新获取验证码';
 }

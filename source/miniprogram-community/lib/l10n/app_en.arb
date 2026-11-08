@@ -177,7 +177,7 @@
   "otpResendSent": "Code re-sent",
   "otpUseAnotherEmail": "Use a different email",
   "resetTitle": "Reset password",
-  "resetSubtitleEnterCode": "We sent a 6-digit code to {email}. Enter it together with your new password.",
+  "resetSubtitleEnterCode": "We sent a 6-digit code to {email}. Enter the code to continue.",
   "@resetSubtitleEnterCode": {
     "placeholders": {
       "email": {
@@ -1507,5 +1507,15 @@
   "webHelpContactLabel": "Contact support",
   "webAccountLikes": "My likes",
   "webAccountFavorites": "My favorites",
-  "webAccountHistory": "Viewing history"
+  "webAccountHistory": "Viewing history",
+  "resetVerifyCode": "Verify code",
+  "resetSubtitleNewPassword": "Choose a new password, then return to sign in.",
+  "resetConfirmPasswordHint": "Confirm new password",
+  "resetPasswordTooShort": "Use at least 8 characters for your new password.",
+  "resetPasswordMismatch": "The passwords do not match.",
+  "resetInvalidCode": "The code is incorrect or has expired. Please try again.",
+  "resetRequestFailed": "Unable to reset your password. Please try again.",
+  "resetRateLimited": "Too many requests. Please try again later.",
+  "resetNetworkError": "The request timed out or could not connect. Please try again.",
+  "resetSessionExpired": "Your recovery session has expired. Return to sign in and request a new code."
 }

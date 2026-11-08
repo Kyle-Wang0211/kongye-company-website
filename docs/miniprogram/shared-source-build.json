@@ -1,6 +1,5 @@
 {
   "entrypoint": "lib/main_community_web.dart",
-  "base_href": "/miniprogram/",
   "native_entrypoint": "lib/main.dart",
   "capabilities": {
     "PW_COMMUNITY_FAVORITES_ENABLED": "true",
@@ -8,8 +7,10 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "f1febe9621497af35ed03c87145ef87d04c44253afadc416d43c618716d45d62",
+  "main_js_sha256": "f2b0d07a652122556bbf7f1741c6a4b10d9469c9306177e3c60379bf71e548d8",
   "status": "built-local-not-deployed",
-  "source_revision": "24b1fb1c88b673864ede0eb651e4da294c3a2298",
-  "source_manifest_sha256": "346033e67d96e150960d4454f70b7ede9db5f58998be966e96e1023e8610e726"
+  "source_revision": "9c0ac3e715b75f8dba22d3d5718997850f6d21b2",
+  "source_manifest_sha256": "4199968e01593ee538adfd53bb3b39246a6ac43fa9573f0300117dcab62e5d04",
+  "scoped_native_email_patch_sha256": "152dcdb732364f18820a1861ec0a5703f7821a6d05e33bef9b6f57bbcfeff998",
+  "native_email_ready_define": true
 }

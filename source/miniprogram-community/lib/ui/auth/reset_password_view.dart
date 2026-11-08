@@ -1,27 +1,12 @@
-// Two-step password reset, OTP-based, Ultra-Minimal style.
-//
-// Replaces the legacy "click the link in your email" flow which doesn't
-// survive on a mobile-only app. Mirrors the visual conventions of
-// AuthRootView and EmailSignUpPage so the auth surface feels cohesive
-// across all three pages.
-//
-// Step 1 — collect the email, fire CurrentUser.sendPasswordReset which
-// hits the password-reset-start Edge Function. Email body renders
-// 6-digit OTP via Resend (zh / en chosen at server side).
-//
-// Step 2 — show six OTP boxes plus a new-password field on the same
-// page. Single submit calls resetPasswordWithOtp, which verifyOTPs +
-// updates the password atomically. On success the user is signed in
-// and AuthGate routes to HomeScreen.
-//
-// Resend: tappable after a 60 s cooldown, identical to the signup OTP
-// page's behavior.
+// Password recovery: email, server-verified code, then a new password.
+// Recovery never creates a signed-in session.
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../auth/auth_error.dart';
 import '../../auth/current_user.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
@@ -37,17 +22,31 @@ class ResetPasswordView extends StatefulWidget {
   State<ResetPasswordView> createState() => _ResetPasswordViewState();
 }
 
-enum _Step { enterEmail, enterOtpAndPassword }
+enum _Step { enterEmail, enterOtp, enterPassword }
+
+enum _ResetError {
+  invalidCode,
+  requestFailed,
+  rateLimited,
+  network,
+  weakPassword,
+  mismatch,
+  expired,
+}
 
 class _ResetPasswordViewState extends State<ResetPasswordView>
     with SingleTickerProviderStateMixin {
   _Step _step = _Step.enterEmail;
   String _email = '';
+  String? _resetToken;
+  bool _requestInFlight = false;
+  _ResetError? _error;
 
   final _emailController = TextEditingController();
   final _otpController = TextEditingController();
   final _otpFocusNode = FocusNode();
   final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   late final AnimationController _shake;
 
   Timer? _cooldownTimer;
@@ -77,6 +76,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
     _otpController.dispose();
     _otpFocusNode.dispose();
     _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     _shake.dispose();
     super.dispose();
   }
@@ -86,13 +86,48 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
     setState(() {});
   }
 
-  String get _normalizedEmail =>
-      _emailController.text.trim().toLowerCase();
+  String get _normalizedEmail => _emailController.text.trim().toLowerCase();
 
   bool get _step1CanSubmit => _normalizedEmail.contains('@');
-  bool get _step2CanSubmit =>
-      _otpController.text.length == _otpLength &&
-      _newPasswordController.text.length >= _minPasswordLength;
+  bool get _working =>
+      _requestInFlight || widget.currentUser.isPerformingAuthAction;
+  bool get _step2CanSubmit => _otpController.text.length == _otpLength;
+  bool get _passwordCanSubmit =>
+      _newPasswordController.text.length >= _minPasswordLength &&
+      _newPasswordController.text == _confirmPasswordController.text;
+
+  _ResetError _serviceError() => switch (widget.currentUser.lastError?.kind) {
+    AuthErrorKind.invalidVerificationCode => _ResetError.invalidCode,
+    AuthErrorKind.weakPassword => _ResetError.weakPassword,
+    AuthErrorKind.rateLimited => _ResetError.rateLimited,
+    AuthErrorKind.network => _ResetError.network,
+    AuthErrorKind.notSignedIn => _ResetError.expired,
+    _ => _ResetError.requestFailed,
+  };
+
+  String? _errorText(AppL10n l) => switch (_error) {
+    _ResetError.invalidCode => l.resetInvalidCode,
+    _ResetError.requestFailed => l.resetRequestFailed,
+    _ResetError.rateLimited => l.resetRateLimited,
+    _ResetError.network => l.resetNetworkError,
+    _ResetError.weakPassword => l.resetPasswordTooShort,
+    _ResetError.mismatch => l.resetPasswordMismatch,
+    _ResetError.expired => l.resetSessionExpired,
+    null => null,
+  };
+
+  Widget _buildError(AppL10n l) {
+    final text = _errorText(l);
+    return text == null
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              text,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          );
+  }
 
   void _startCooldown() {
     _cooldownTimer?.cancel();
@@ -113,66 +148,143 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
   }
 
   Future<void> _sendOtp() async {
-    if (!_step1CanSubmit) return;
-    final ok = await widget.currentUser.sendPasswordReset(_normalizedEmail);
-    if (!mounted) return;
-    if (ok) {
-      setState(() {
-        _email = _normalizedEmail;
-        _step = _Step.enterOtpAndPassword;
-      });
-      _startCooldown();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _otpFocusNode.requestFocus();
-      });
+    if (!_step1CanSubmit || _working) return;
+    final email = _normalizedEmail;
+    setState(() {
+      _requestInFlight = true;
+      _error = null;
+    });
+    try {
+      final ok = await widget.currentUser
+          .sendPasswordReset(email)
+          .timeout(const Duration(seconds: 30));
+      if (!mounted) return;
+      if (ok) {
+        setState(() {
+          _email = email;
+          _step = _Step.enterOtp;
+        });
+        _startCooldown();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _otpFocusNode.requestFocus();
+        });
+      } else {
+        setState(() => _error = _serviceError());
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = _ResetError.network);
+    } finally {
+      if (mounted) setState(() => _requestInFlight = false);
     }
   }
 
   Future<void> _resendOtp() async {
-    if (_resendCooldownSec > 0 || _email.isEmpty) return;
-    final ok = await widget.currentUser.sendPasswordReset(_email);
-    if (!mounted) return;
-    if (ok) {
-      _startCooldown();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppL10n.of(context).otpResendSent),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+    if (_resendCooldownSec > 0 || _email.isEmpty || _working) return;
+    setState(() {
+      _requestInFlight = true;
+      _error = null;
+    });
+    try {
+      final ok = await widget.currentUser
+          .sendPasswordReset(_email)
+          .timeout(const Duration(seconds: 30));
+      if (!mounted) return;
+      if (ok) {
+        _startCooldown();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppL10n.of(context).otpResendSent),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        setState(() => _error = _serviceError());
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = _ResetError.network);
+    } finally {
+      if (mounted) setState(() => _requestInFlight = false);
+    }
+  }
+
+  Future<void> _verifyCode() async {
+    if (!_step2CanSubmit || _working || _step != _Step.enterOtp) return;
+    setState(() {
+      _requestInFlight = true;
+      _error = null;
+    });
+    try {
+      final token = await widget.currentUser
+          .verifyPasswordResetCode(
+            email: _email,
+            token: _otpController.text.trim(),
+          )
+          .timeout(const Duration(seconds: 30));
+      if (!mounted) return;
+      if (token != null && token.isNotEmpty) {
+        _otpFocusNode.unfocus();
+        _otpController.clear();
+        setState(() {
+          _resetToken = token;
+          _step = _Step.enterPassword;
+        });
+      } else {
+        _otpController.clear();
+        _otpFocusNode.requestFocus();
+        _shake.forward(from: 0);
+        setState(() => _error = _serviceError());
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = _ResetError.network);
+    } finally {
+      if (mounted) setState(() => _requestInFlight = false);
     }
   }
 
   Future<void> _confirmReset() async {
-    if (!_step2CanSubmit ||
-        widget.currentUser.isPerformingAuthAction) {
+    if (_working || _step != _Step.enterPassword) return;
+    if (!_passwordCanSubmit) {
+      setState(
+        () => _error = _newPasswordController.text.length < _minPasswordLength
+            ? _ResetError.weakPassword
+            : _ResetError.mismatch,
+      );
       return;
     }
-    final ok = await widget.currentUser.resetPasswordWithOtp(
-      email: _email,
-      token: _otpController.text.trim(),
-      newPassword: _newPasswordController.text,
-    );
-    if (!mounted) return;
-    if (ok) {
-      // Tell iOS the new credential is committed so it offers to
-      // update the Keychain entry for this email.
-      TextInput.finishAutofillContext();
-      Navigator.of(context).popUntil((r) => r.isFirst);
-      return;
+    final resetToken = _resetToken;
+    if (resetToken == null || resetToken.isEmpty) return;
+    setState(() {
+      _requestInFlight = true;
+      _error = null;
+    });
+    try {
+      final ok = await widget.currentUser
+          .completePasswordReset(
+            email: _email,
+            resetToken: resetToken,
+            newPassword: _newPasswordController.text,
+          )
+          .timeout(const Duration(seconds: 30));
+      if (!mounted) return;
+      if (ok) {
+        _resetToken = null;
+        TextInput.finishAutofillContext();
+        Navigator.of(context).popUntil((r) => r.isFirst);
+      } else {
+        setState(() => _error = _serviceError());
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = _ResetError.network);
+    } finally {
+      if (mounted) setState(() => _requestInFlight = false);
     }
-    // Wrong OTP / weak password / etc — clear OTP, refocus, shake.
-    _otpController.clear();
-    _otpFocusNode.requestFocus();
-    _shake.forward(from: 0);
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
-    final working = widget.currentUser.isPerformingAuthAction;
+    final working = _working;
     return Scaffold(
       backgroundColor: AetherColors.bgCanvas,
       body: SafeArea(
@@ -189,7 +301,9 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
                   ),
                   child: _step == _Step.enterEmail
                       ? _buildStep1(l, working)
-                      : _buildStep2(l, working),
+                      : _step == _Step.enterOtp
+                      ? _buildStep2(l, working)
+                      : _buildPasswordStep(l, working),
                 ),
               ),
             ],
@@ -214,6 +328,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
         LabeledField(
           label: l.authEmailHint,
           controller: _emailController,
+          enabled: !working,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.username],
@@ -222,6 +337,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
             if (_step1CanSubmit && !working) _sendOtp();
           },
         ),
+        _buildError(l),
         const SizedBox(height: 56),
         MinimalCta(
           title: l.resetSendCode,
@@ -242,6 +358,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
         AuthHeading(
           title: l.resetTitle,
           subtitle: l.resetSubtitleEnterCode(_email),
+          uppercaseSubtitle: false,
         ),
         const SizedBox(height: 48),
         OtpBoxRow(
@@ -252,23 +369,13 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AetherSpacing.xl),
-        LabeledField(
-          label: l.resetNewPasswordHint,
-          controller: _newPasswordController,
-          isSecure: true,
-          textInputAction: TextInputAction.done,
-          autofillHints: const [AutofillHints.newPassword],
-          onChanged: (_) => setState(() {}),
-          onSubmitted: (_) {
-            if (_step2CanSubmit && !working) _confirmReset();
-          },
-        ),
+        _buildError(l),
         const SizedBox(height: 56),
         MinimalCta(
-          title: l.resetConfirm,
+          title: l.resetVerifyCode,
           enabled: _step2CanSubmit && !working,
           working: working,
-          onTap: _confirmReset,
+          onTap: _verifyCode,
         ),
         const SizedBox(height: AetherSpacing.xxl),
         MinimalLink(
@@ -277,6 +384,60 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
               : l.otpResend,
           emphasis: MinimalLinkEmphasis.faint,
           onTap: (_resendCooldownSec > 0 || working) ? null : _resendOtp,
+        ),
+        const SizedBox(height: AetherSpacing.xl),
+      ],
+    );
+  }
+
+  Widget _buildPasswordStep(AppL10n l, bool working) {
+    void passwordChanged(String _) => setState(() {
+      _error =
+          _confirmPasswordController.text.isNotEmpty &&
+              _newPasswordController.text != _confirmPasswordController.text
+          ? _ResetError.mismatch
+          : _newPasswordController.text.isNotEmpty &&
+                _newPasswordController.text.length < _minPasswordLength
+          ? _ResetError.weakPassword
+          : null;
+    });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 56),
+        AuthHeading(
+          title: l.resetTitle,
+          subtitle: l.resetSubtitleNewPassword,
+          uppercaseSubtitle: false,
+        ),
+        const SizedBox(height: 48),
+        LabeledField(
+          label: l.resetNewPasswordHint,
+          controller: _newPasswordController,
+          isSecure: true,
+          enabled: !working,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.newPassword],
+          onChanged: passwordChanged,
+        ),
+        const SizedBox(height: AetherSpacing.xl),
+        LabeledField(
+          label: l.resetConfirmPasswordHint,
+          controller: _confirmPasswordController,
+          isSecure: true,
+          enabled: !working,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.newPassword],
+          onChanged: passwordChanged,
+          onSubmitted: (_) => _confirmReset(),
+        ),
+        _buildError(l),
+        const SizedBox(height: 56),
+        MinimalCta(
+          title: l.resetConfirm,
+          enabled: _passwordCanSubmit && !working,
+          working: working,
+          onTap: _confirmReset,
         ),
         const SizedBox(height: AetherSpacing.xl),
       ],

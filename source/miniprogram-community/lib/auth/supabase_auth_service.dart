@@ -18,6 +18,9 @@
 // the only one that compiles into call sites. We catch the underlying
 // Supabase errors via AuthApiException (still imported below) and
 // re-throw as the app type with a typed AuthErrorKind.
+import 'dart:async';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
@@ -344,60 +347,84 @@ class SupabaseAuthServiceImpl implements AuthService {
   @override
   Future<void> sendPasswordReset(String email) async {
     try {
-      // Strict-OTP reset, mirroring the signup flow. password-reset-start
-      // looks up the user, generates an OTP, stores hash in
-      // pending_password_resets, and emails the OTP via Resend with
-      // locale-aware copy. Existing-vs-nonexisting emails are
-      // indistinguishable to the caller (silent success either way).
-      await _client.functions.invoke(
-        'password-reset-start',
-        body: {
-          'email': email,
-          'locale': _localeNotifier?.locale.languageCode ?? 'en',
-        },
-      );
-    } on FunctionException catch (e) {
-      throw _mapFunctionException(e);
+      await _client.auth
+          .resetPasswordForEmail(email.trim().toLowerCase())
+          .timeout(const Duration(seconds: 30));
+    } on AuthApiException catch (e) {
+      throw AuthException(_mapAuthApi(e));
+    } on TimeoutException {
+      throw const AuthException(AuthErrorKind.network);
+    } on http.ClientException {
+      throw const AuthException(AuthErrorKind.network);
     } catch (e) {
-      throw AuthException(AuthErrorKind.unknown, e.toString());
+      throw const AuthException(AuthErrorKind.providerUnavailable);
     }
   }
 
   @override
-  Future<AuthenticatedUser> resetPasswordWithOtp({
+  Future<String> verifyPasswordResetCode({
     required String email,
     required String token,
+  }) async {
+    final data = await _invokePasswordRecovery(
+      'password-recovery-verify',
+      {'email': email.trim().toLowerCase(), 'otp': token},
+    );
+    final resetToken = data['reset_token'];
+    if (resetToken is! String || resetToken.isEmpty) {
+      throw const AuthException(AuthErrorKind.providerUnavailable);
+    }
+    return resetToken;
+  }
+
+  @override
+  Future<void> completePasswordReset({
+    required String email,
+    required String resetToken,
     required String newPassword,
   }) async {
+    await _invokePasswordRecovery(
+      'password-recovery-complete',
+      {
+        'email': email.trim().toLowerCase(),
+        'reset_token': resetToken,
+        'new_password': newPassword,
+      },
+      completing: true,
+    );
+  }
+
+  Future<Map<dynamic, dynamic>> _invokePasswordRecovery(
+    String function,
+    Map<String, String> body, {
+    bool completing = false,
+  }) async {
     try {
-      // 1. Have the Edge Function verify the OTP and rotate the
-      // password via admin.updateUserById (server-side, bypasses RLS).
-      await _client.functions.invoke(
-        'password-reset-verify',
-        body: {'email': email, 'otp': token, 'new_password': newPassword},
-      );
-      // 2. Sign in with the freshly-rotated password — yields a real
-      // Supabase session identical to a normal email/password login.
-      final res = await _client.auth.signInWithPassword(
-        email: email,
-        password: newPassword,
-      );
-      final user = res.user;
-      if (user == null) {
-        throw const AuthException(
-          AuthErrorKind.unknown,
-          'signInWithPassword returned no user after password-reset-verify',
-        );
+      final response = await _client.functions
+          .invoke(function, body: body)
+          .timeout(const Duration(seconds: 30));
+      final data = response.data;
+      if (data is! Map || data['ok'] != true) {
+        throw const AuthException(AuthErrorKind.providerUnavailable);
       }
-      return _wrap(user);
+      return data;
     } on FunctionException catch (e) {
+      if (completing && (e.status == 401 || e.status == 410)) {
+        throw const AuthException(AuthErrorKind.notSignedIn);
+      }
+      if (e.status == 502 || e.status == 503) {
+        throw const AuthException(AuthErrorKind.providerUnavailable);
+      }
       throw _mapFunctionException(e);
-    } on AuthApiException catch (e) {
-      throw AuthException(_mapAuthApi(e), e.message);
     } on AuthException {
       rethrow;
-    } catch (e) {
-      throw AuthException(AuthErrorKind.unknown, e.toString());
+    } on TimeoutException {
+      throw const AuthException(AuthErrorKind.network);
+    } on http.ClientException {
+      throw const AuthException(AuthErrorKind.network);
+    } catch (_) {
+      // Do not log server response bodies, recovery credentials or passwords.
+      throw const AuthException(AuthErrorKind.providerUnavailable);
     }
   }
 
