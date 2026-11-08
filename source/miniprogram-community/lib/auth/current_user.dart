@@ -9,6 +9,7 @@ import '../analytics/pw_analytics.dart';
 import '../config/backend_deployment.dart';
 import '../util/device_log.dart';
 import 'auth_error.dart';
+import 'wechat_sign_in.dart';
 import 'auth_models.dart';
 import 'auth_service.dart';
 import 'connection_backoff.dart';
@@ -248,6 +249,10 @@ class CurrentUser extends ChangeNotifier {
   }
 
   Future<void> signIn(SignInRequest request) async {
+    wechatSignInFlow.cancel();
+    if (request is SignInRequestWechat && _state is! CurrentUserSignedOut) {
+      return;
+    }
     await _runUserAction((service) => service.signIn(request));
   }
 
@@ -303,6 +308,7 @@ class CurrentUser extends ChangeNotifier {
       false;
 
   Future<void> signOut() async {
+    wechatSignInFlow.cancel();
     _identityIntent++;
     final generation = _beginAction(performing: false, notify: false);
     // A listener can synchronously request another login. Reserve the logout's
@@ -318,6 +324,7 @@ class CurrentUser extends ChangeNotifier {
 
   /// Revoke local access for provider events without calling signOut again.
   Future<void> handleProviderSignedOut() async {
+    wechatSignInFlow.cancel();
     if (_providerRevocationInProgress || _disposed) return;
     if (_service is UnavailableAuthService &&
         _state is! CurrentUserServiceUnavailable) {

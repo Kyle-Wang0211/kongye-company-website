@@ -1357,8 +1357,8 @@
     },
     {
       "path": "lib/auth/auth_models.dart",
-      "sha256": "9c2e9697402bcd9a3db2a5ecf45b1a844d5a6b8f850f832f20b17182859d0b79",
-      "size": 4825
+      "sha256": "e82ec9c9aa8f414d2b6cbaf52969602cd209292d19facca1040e5e6bf2403ee8",
+      "size": 5114
     },
     {
       "path": "lib/auth/auth_scope.dart",
@@ -1382,8 +1382,8 @@
     },
     {
       "path": "lib/auth/current_user.dart",
-      "sha256": "fb98b216e00b2f8aec368f086d47de93d4ccfc34b2c241620d97b7510593d7e3",
-      "size": 21877
+      "sha256": "34de32ddd186e7aedb42845d4674dad35807448106e0030c18bfaf37e6ddc4b8",
+      "size": 22097
     },
     {
       "path": "lib/auth/data_api_readiness_gate.dart",
@@ -1392,8 +1392,8 @@
     },
     {
       "path": "lib/auth/mock_auth_service.dart",
-      "sha256": "650e6700e95f90a8195add3f665c145fb21f09e3c92cd84af0ed2f2a6f7da852",
-      "size": 4315
+      "sha256": "19eb3b1b61884cb410210864c74b4e398500986abfe4a2d8c419f4a91fc68475",
+      "size": 4409
     },
     {
       "path": "lib/auth/password_sign_in.dart",
@@ -1417,13 +1417,28 @@
     },
     {
       "path": "lib/auth/supabase_auth_service.dart",
-      "sha256": "56da52d05b4ae8f4fa929ad9f7032949dbe19d849669d3e7f503759ded02b8e5",
-      "size": 23310
+      "sha256": "bf29ff4fc7bfa26077870bff2d7e5e36408df55782301f2325a8efb05524e6ce",
+      "size": 25898
     },
     {
       "path": "lib/auth/unavailable_auth_service.dart",
       "sha256": "b102f885545b62cd11fb566299d78c152a23536f321c1df55f5500bcbf1f886e",
       "size": 2345
+    },
+    {
+      "path": "lib/auth/wechat_binding.dart",
+      "sha256": "d6923ed82e6aca06e201a8f3438ff7997c2a7584e37afe43a35346ef31b75ff0",
+      "size": 7158
+    },
+    {
+      "path": "lib/auth/wechat_sign_in.dart",
+      "sha256": "c49f4f96781de9dfef611382dc08c4b12e6673bbade44e90dd291f4ac38640ac",
+      "size": 3575
+    },
+    {
+      "path": "lib/auth/wechat_sign_in_port.dart",
+      "sha256": "1c0e6cd4b4bfc137a1ffc8296ac6a5288793fdce6d2be6cb387cd7b7eec71609",
+      "size": 369
     },
     {
       "path": "lib/capture/capture_coverage_cloud.dart",
@@ -2002,8 +2017,8 @@
     },
     {
       "path": "lib/main_community_web.dart",
-      "sha256": "5bdf2a4919199622c0df913c7f27490a7de3e6b0b58e78833a7ac605e7bed1fd",
-      "size": 14073
+      "sha256": "a43599f1c35e3495315700262ecc60d0adac2dff4aeadf45bf7afe310a167709",
+      "size": 14427
     },
     {
       "path": "lib/me/cloud_library.dart",
@@ -2962,8 +2977,8 @@
     },
     {
       "path": "lib/ui/auth/auth_root_view.dart",
-      "sha256": "1a3133e3d5d53506dad1b8ab147046324d9e045ce3bfe08594f5c634bbfd7e82",
-      "size": 11038
+      "sha256": "6511558ea1f353454b39aa7dcc915161f771c6864ae66b0eb2be92f6fbdc18a4",
+      "size": 12244
     },
     {
       "path": "lib/ui/auth/auth_shared_widgets.dart",
@@ -3664,6 +3679,21 @@
       "path": "lib/util/image_sanitize.dart",
       "sha256": "17e81f44028f9fb73244f95fb3254fe1171157964ce0c74fe1c448fea3fa2910",
       "size": 2294
+    },
+    {
+      "path": "lib/util/wechat_sign_in_platform.dart",
+      "sha256": "aa88472977d8b1554fd06b284c11cbd9188837a45f9582cf0c280958cc46813a",
+      "size": 94
+    },
+    {
+      "path": "lib/util/wechat_sign_in_stub.dart",
+      "sha256": "4f423b6fc92a5020e7ab8eb899487d78ce7945b06f96b3880f8fea209f26388c",
+      "size": 426
+    },
+    {
+      "path": "lib/util/wechat_sign_in_web.dart",
+      "sha256": "b034b5c2f2f2b011443bb632f0b7e2df993fa235b7f440320a654667880a63bc",
+      "size": 1738
     },
     {
       "path": "lib/vio/capability/android_capability_adapter.dart",
@@ -4947,8 +4977,13 @@
     },
     {
       "path": "web/index.html",
-      "sha256": "fc16d52ec0076fba9a81c261acbb53150cc7fdc2bee5efacea9e08213910404c",
-      "size": 1509
+      "sha256": "fbd36cc378d78d4130c5c0b1798e3ca8b6b0a0ba89fca1edf4ba3c962a908da5",
+      "size": 1626
+    },
+    {
+      "path": "web/wechat_sign_in.js",
+      "sha256": "4bd15cc1c253aca839d52ef963b0c66a3b35027222eee2dbf38b6342a113dd59",
+      "size": 559
     }
   ],
   "policy": {

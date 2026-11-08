@@ -20,6 +20,8 @@ class MockAuthServiceImpl implements AuthService {
   Future<AuthenticatedUser> signIn(SignInRequest request) async {
     final AuthenticatedUser user;
     switch (request) {
+      case SignInRequestWechat():
+        throw const AuthException(AuthErrorKind.providerUnavailable);
       case SignInRequestEmail(:final email):
         user = AuthenticatedUser(
           id: InternalUserID('mock_${_slug(email)}'),
@@ -147,8 +149,7 @@ class MockAuthServiceImpl implements AuthService {
   static String _slug(String input) {
     final buf = StringBuffer();
     for (final c in input.toLowerCase().runes) {
-      final isAlphaNum = (c >= 48 && c <= 57) ||
-          (c >= 97 && c <= 122);
+      final isAlphaNum = (c >= 48 && c <= 57) || (c >= 97 && c <= 122);
       buf.writeCharCode(isAlphaNum ? c : 95 /* '_' */);
     }
     return buf.toString();

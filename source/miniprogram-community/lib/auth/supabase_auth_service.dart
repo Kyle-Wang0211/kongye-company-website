@@ -53,6 +53,51 @@ class SupabaseAuthServiceImpl implements AuthService {
   Future<AuthenticatedUser> signIn(SignInRequest request) async {
     try {
       switch (request) {
+        case SignInRequestWechat(:final code, :final nonce):
+          if (code.trim().isEmpty ||
+              code.length > 1024 ||
+              !RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(nonce) ||
+              _client.auth.currentUser != null) {
+            throw const AuthException(AuthErrorKind.invalidCredentials);
+          }
+          // The nonce protects the local mini-program callback only. The
+          // server derives identity from wx.login's one-use code.
+          final proof = await _client.functions.invoke(
+            'wechat-login',
+            body: {'code': code},
+          );
+          final data = proof.data;
+          if (proof.status != 200 ||
+              data is! Map ||
+              data.length != 3 ||
+              data['type'] != 'magiclink' ||
+              data['token_hash'] is! String ||
+              (data['token_hash'] as String).trim().isEmpty ||
+              (data['token_hash'] as String).length > 1024 ||
+              data['user_id'] is! String ||
+              !RegExp(
+                r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+              ).hasMatch(data['user_id'] as String)) {
+            throw const AuthException(AuthErrorKind.providerUnavailable);
+          }
+          final res = await _client.auth.verifyOTP(
+            tokenHash: data['token_hash'] as String,
+            type: OtpType.magiclink,
+          );
+          if (res.user == null ||
+              res.session == null ||
+              res.user!.id != data['user_id']) {
+            // verifyOTP installs a session before returning. Discard only this
+            // new local session; never change or link a managed Auth identity.
+            try {
+              await _client.auth.signOut(scope: SignOutScope.local);
+            } catch (_) {
+              // The SDK clears local state before attempting server logout.
+            }
+            throw const AuthException(AuthErrorKind.invalidCredentials);
+          }
+          return _wrap(res.user!);
+
         case SignInRequestEmail(email: final email, password: final pw):
           final res = await _signInWithPasswordWithWarmRetry(
             email: email,
@@ -494,15 +539,9 @@ class SupabaseAuthServiceImpl implements AuthService {
       case 'cooldown':
         final ms = (d is Map ? d['retry_after_ms'] : null);
         final days = ms is num ? (ms / 86400000).ceil() : 3;
-        return AuthException(
-          AuthErrorKind.rateLimited,
-          '改名太频繁,请 $days 天后再试',
-        );
+        return AuthException(AuthErrorKind.rateLimited, '改名太频繁,请 $days 天后再试');
       case 'rate_limited':
-        return const AuthException(
-          AuthErrorKind.rateLimited,
-          '操作过于频繁,请稍后再试',
-        );
+        return const AuthException(AuthErrorKind.rateLimited, '操作过于频繁,请稍后再试');
       case 'reserved_name':
         final kind = (d is Map ? d['kind']?.toString() : null) ?? '';
         return AuthException(
@@ -544,13 +583,24 @@ class SupabaseAuthServiceImpl implements AuthService {
 
   AuthenticatedUser _wrap(User user) {
     final meta = user.userMetadata ?? const {};
+    // app_metadata is managed by Auth; user_metadata cannot establish this
+    // identity. Keep the provider's internal alias out of the public profile.
+    final wechat = user.appMetadata['wechat_miniprogram'];
+    final isWechatAlias =
+        wechat is Map &&
+        wechat['app_id'] is String &&
+        RegExp(r'^wx[0-9a-fA-F]{16}$').hasMatch(wechat['app_id'] as String) &&
+        wechat['open_id'] is String &&
+        RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(wechat['open_id'] as String) &&
+        user.email != null &&
+        RegExp(r'^[0-9a-f]{64}@wx[.]local$').hasMatch(user.email!);
     final display =
         meta['display_name'] as String? ??
         meta['full_name'] as String? ??
         meta['name'] as String?;
     return AuthenticatedUser(
       id: InternalUserID(user.id),
-      email: user.email,
+      email: isWechatAlias ? null : user.email,
       phone: user.phone,
       displayName: display,
     );

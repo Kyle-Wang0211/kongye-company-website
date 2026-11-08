@@ -12,6 +12,7 @@ import 'ui/community/public_work_exit_stub.dart'
 import 'auth/current_user.dart';
 import 'auth/unavailable_auth_service.dart';
 import 'auth/supabase_auth_service.dart';
+import 'auth/wechat_sign_in.dart';
 import 'auth/cold_start_session_gate.dart';
 import 'auth/data_api_readiness_gate.dart';
 import 'config/backend_deployment.dart';
@@ -28,6 +29,8 @@ import 'util/device_log.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Consume and remove the native callback before Auth inspects the URL.
+  wechatSignInFlow.captureCallback();
   final deployment = BackendDeployment.chinaFromBuild();
   final locale = LocaleNotifier();
   final user = CurrentUser(
@@ -148,6 +151,10 @@ Future<void> _initialize(
         SupabaseAuthServiceImpl(localeNotifier: localeNotifier),
       );
       await currentUser.bootstrap();
+      final wechatRequest = wechatSignInFlow.consumeCallback(
+        signedOut: currentUser.state is CurrentUserSignedOut,
+      );
+      if (wechatRequest != null) await currentUser.signIn(wechatRequest);
     }
   } catch (e, st) {
     DeviceLog.log('AuthStartup', 'init failed: $e\n$st');

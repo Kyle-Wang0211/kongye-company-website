@@ -23,6 +23,7 @@ import '../../auth/auth_error.dart';
 import '../../auth/auth_models.dart';
 import '../../auth/current_user.dart';
 import '../../auth/password_sign_in.dart';
+import '../../auth/wechat_sign_in.dart';
 import '../../config/backend_deployment.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
@@ -50,6 +51,7 @@ class _AuthRootViewState extends State<AuthRootView> {
   final _account = TextEditingController();
   final _password = TextEditingController();
   bool _passwordVisible = false;
+  bool _wechatWorking = false;
 
   bool _policyAccepted = false;
   String? _consentOwner;
@@ -147,6 +149,22 @@ class _AuthRootViewState extends State<AuthRootView> {
     if (widget.currentUser.isSignedIn) TextInput.finishAutofillContext();
   }
 
+  Future<void> _beginWechat() async {
+    if (!_policyAccepted ||
+        _wechatWorking ||
+        widget.currentUser.isSignedIn ||
+        widget.currentUser.isPerformingAuthAction)
+      return;
+    setState(() => _wechatWorking = true);
+    final started = wechatSignInFlow.begin();
+    if (mounted) setState(() => _wechatWorking = false);
+    if (!started && mounted) {
+      await _showErrorDialog(
+        const AuthException(AuthErrorKind.providerUnavailable),
+      );
+    }
+  }
+
   void _pushSignUp() {
     setState(() => _policyAccepted = false);
     Navigator.of(context).push(
@@ -172,7 +190,7 @@ class _AuthRootViewState extends State<AuthRootView> {
   @override
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
-    final working = widget.currentUser.isPerformingAuthAction;
+    final working = widget.currentUser.isPerformingAuthAction || _wechatWorking;
     return Scaffold(
       backgroundColor: AetherColors.bgCanvas,
       body: SafeArea(
@@ -251,6 +269,19 @@ class _AuthRootViewState extends State<AuthRootView> {
                         working: working,
                         onTap: _submit,
                       ),
+                      if (wechatSignInFlow.available) ...[
+                        const SizedBox(height: AetherSpacing.xl),
+                        MinimalCta(
+                          title:
+                              Localizations.localeOf(context).languageCode ==
+                                  'zh'
+                              ? '微信登录'
+                              : 'SIGN IN WITH WECHAT',
+                          enabled: _policyAccepted && !working,
+                          working: _wechatWorking,
+                          onTap: _beginWechat,
+                        ),
+                      ],
                       const SizedBox(height: AetherSpacing.xxl),
                       MinimalLink(
                         title: l.authSignUp,

@@ -64,11 +64,22 @@ sealed class SignInRequest {
     required String password,
   }) = SignInRequestPhonePassword;
 
+  const factory SignInRequest.wechat({
+    required String code,
+    required String nonce,
+  }) = SignInRequestWechat;
+
   const factory SignInRequest.phone({
     required String phoneNumber,
     required String verificationID,
     required String code,
   }) = SignInRequestPhone;
+}
+
+class SignInRequestWechat extends SignInRequest {
+  final String code;
+  final String nonce;
+  const SignInRequestWechat({required this.code, required this.nonce});
 }
 
 class SignInRequestEmail extends SignInRequest {
