@@ -13,9 +13,11 @@ class CommunityProfileShell extends StatelessWidget {
     required this.onMessages,
     this.onPublish,
     this.onOpenFiling,
+    this.visible = true,
     this.selectedDestination = 'profile',
   });
   final Widget child;
+  final bool visible;
   final VoidCallback onHome, onFollowing, onMyProfile, onSettings, onMessages;
   // Retained for source compatibility; publishing is a header/account action.
   final VoidCallback? onPublish, onOpenFiling;
@@ -63,169 +65,179 @@ class CommunityProfileShell extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              key: const Key('profile-community-sidebar'),
-              width: width,
-              padding: EdgeInsets.fromLTRB(
-                inset,
-                compact ? 18 : 26,
-                inset,
-                compact ? 18 : 20,
-              ),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(right: BorderSide(color: Color(0xffeeeeee))),
-              ),
-              child: LayoutBuilder(
-                builder: (context, bounds) => SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: bounds.maxHeight),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: rail ? 0 : 8,
-                            ),
-                            child: InkWell(
-                              onTap: onHome,
-                              child: SizedBox(
-                                height: logoSize,
-                                child: Row(
-                                  mainAxisAlignment: rail
-                                      ? MainAxisAlignment.center
-                                      : MainAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      key: const Key('sidebar-brand-image'),
-                                      width: logoSize,
-                                      height: logoSize,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: const Color(0xffeeeeee),
+            Offstage(
+              offstage: !visible,
+              child: Container(
+                key: const Key('profile-community-sidebar'),
+                width: width,
+                padding: EdgeInsets.fromLTRB(
+                  inset,
+                  compact ? 18 : 26,
+                  inset,
+                  compact ? 18 : 20,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(right: BorderSide(color: Color(0xffeeeeee))),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, bounds) => SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: bounds.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: rail ? 0 : 8,
+                              ),
+                              child: InkWell(
+                                onTap: onHome,
+                                child: SizedBox(
+                                  height: logoSize,
+                                  child: Row(
+                                    mainAxisAlignment: rail
+                                        ? MainAxisAlignment.center
+                                        : MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        key: const Key('sidebar-brand-image'),
+                                        width: logoSize,
+                                        height: logoSize,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(0xffeeeeee),
+                                          ),
                                         ),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(7),
-                                        child: Image.network(
-                                          Uri.base
-                                              .resolve('../assets/app-icon.png')
-                                              .toString(),
-                                          width: logoSize,
-                                          height: logoSize,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, _, _) =>
-                                              SizedBox.square(
-                                                dimension: logoSize,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                    if (!rail) ...[
-                                      SizedBox(width: zh ? 11 : 9),
-                                      Flexible(
-                                        child: Text(
-                                          zh ? '窗后城' : 'WorldsWithin',
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                            fontSize: zh ? 21 : 15,
-                                            letterSpacing: zh ? 1.26 : 0,
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.35,
-                                            color: const Color(0xff161616),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            7,
+                                          ),
+                                          child: Image.network(
+                                            Uri.base
+                                                .resolve(
+                                                  '../assets/app-icon.png',
+                                                )
+                                                .toString(),
+                                            width: logoSize,
+                                            height: logoSize,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, _, _) =>
+                                                SizedBox.square(
+                                                  dimension: logoSize,
+                                                ),
                                           ),
                                         ),
                                       ),
+                                      if (!rail) ...[
+                                        SizedBox(width: zh ? 11 : 9),
+                                        Flexible(
+                                          child: Text(
+                                            zh ? '窗后城' : 'WorldsWithin',
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                              fontSize: zh ? 21 : 15,
+                                              letterSpacing: zh ? 1.26 : 0,
+                                              fontWeight: FontWeight.w400,
+                                              height: 1.35,
+                                              color: const Color(0xff161616),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ],
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: compact
-                                ? 28
-                                : rail
-                                ? 32
-                                : 40,
-                          ),
-                          Column(
-                            key: const Key('sidebar-primary'),
-                            children: [
-                              item('hot', zh ? '热门' : 'Hot', onHome),
-                              SizedBox(height: navGap),
-                              item(
-                                'following',
-                                zh ? '关注' : 'Following',
-                                onFollowing,
-                              ),
-                              SizedBox(height: navGap),
-                              item('profile', zh ? '我的' : 'Me', onMyProfile),
-                              SizedBox(height: navGap),
-                              item(
-                                'messages',
-                                zh ? '消息' : 'Messages',
-                                onMessages,
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Padding(
-                            padding: EdgeInsets.only(top: rail ? 30 : 50),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                            SizedBox(
+                              height: compact
+                                  ? 28
+                                  : rail
+                                  ? 32
+                                  : 40,
+                            ),
+                            Column(
+                              key: const Key('sidebar-primary'),
                               children: [
+                                item('hot', zh ? '热门' : 'Hot', onHome),
+                                SizedBox(height: navGap),
                                 item(
-                                  'settings',
-                                  zh ? '设置' : 'Settings',
-                                  onSettings,
-                                  footer: true,
+                                  'following',
+                                  zh ? '关注' : 'Following',
+                                  onFollowing,
                                 ),
-                                if (!rail) ...[
-                                  const SizedBox(height: 12),
-                                  const SizedBox(height: 14),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    child: Text(
-                                      zh
-                                          ? '© 2026 北京空也科技有限公司'
-                                          : '© 2026 Beijing Kongye Technology Co., Ltd',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        letterSpacing: 0,
-                                        height: 1.7,
-                                        color: Color(0xff999999),
-                                      ),
-                                    ),
+                                SizedBox(height: navGap),
+                                item('profile', zh ? '我的' : 'Me', onMyProfile),
+                                SizedBox(height: navGap),
+                                item(
+                                  'messages',
+                                  zh ? '消息' : 'Messages',
+                                  onMessages,
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            Padding(
+                              padding: EdgeInsets.only(top: rail ? 30 : 50),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  item(
+                                    'settings',
+                                    zh ? '设置' : 'Settings',
+                                    onSettings,
+                                    footer: true,
                                   ),
-                                  const SizedBox(height: 3),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    child: InkWell(
-                                      onTap: onOpenFiling,
-                                      child: const Text(
-                                        '京ICP备2026067702号-1',
-                                        style: TextStyle(
+                                  if (!rail) ...[
+                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 14),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: Text(
+                                        zh
+                                            ? '© 2026 北京空也科技有限公司'
+                                            : '© 2026 Beijing Kongye Technology Co., Ltd',
+                                        style: const TextStyle(
                                           fontSize: 10,
                                           letterSpacing: 0,
                                           height: 1.7,
                                           color: Color(0xff999999),
-                                          decoration: TextDecoration.underline,
                                         ),
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(height: 3),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: InkWell(
+                                        onTap: onOpenFiling,
+                                        child: const Text(
+                                          '京ICP备2026067702号-1',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            letterSpacing: 0,
+                                            height: 1.7,
+                                            color: Color(0xff999999),
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -309,19 +321,16 @@ class _SidebarItemState extends State<_SidebarItem> {
       button: true,
       selected: widget.selected,
       label: widget.label,
-      child: Tooltip(
-        message: widget.rail ? widget.label : '',
-        child: MouseRegion(
-          onEnter: (_) => setState(() => _hover = true),
-          onExit: (_) => setState(() => _hover = false),
-          child: Material(
-            color: active ? const Color(0xfff3f3f3) : Colors.transparent,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: Material(
+          color: active ? const Color(0xfff3f3f3) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            onTap: widget.onTap,
             borderRadius: BorderRadius.circular(8),
-            child: InkWell(
-              onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(8),
-              child: content,
-            ),
+            child: content,
           ),
         ),
       ),

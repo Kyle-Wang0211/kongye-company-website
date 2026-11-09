@@ -6,6 +6,7 @@ import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
+import 'ui/community/community_navigation_frame.dart';
 import 'ui/community/public_work_exit_stub.dart'
     if (dart.library.js_interop) 'ui/community/public_work_exit_web.dart';
 import 'auth/current_user.dart';
@@ -195,14 +196,74 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
   // a fresh Navigator and must not reuse an observer still attached to the old one.
   Key? _navigatorKey;
   RouteObserver<ModalRoute<void>> _routes = RouteObserver<ModalRoute<void>>();
+  CommunitySidebarRouteObserver _sidebarRoutes =
+      CommunitySidebarRouteObserver();
+  GlobalKey<NavigatorState> _communityNavigator = GlobalKey<NavigatorState>();
+  CommunityNavigationController _navigationController =
+      CommunityNavigationController();
+  late final Uri _entryUri = Uri.base;
 
   Key _navigationKey() {
     final key = _navigationIdentity.keyFor(user);
     if (_navigatorKey != key) {
       _navigatorKey = key;
       _routes = RouteObserver<ModalRoute<void>>();
+      _sidebarRoutes.dispose();
+      _sidebarRoutes = CommunitySidebarRouteObserver();
+      _communityNavigator = GlobalKey<NavigatorState>();
+      _navigationController = CommunityNavigationController();
     }
     return key;
+  }
+
+  Future<void> _exitDocument(VoidCallback action) async {
+    final controller = _navigationController;
+    if (await controller.confirmDocumentExit() &&
+        mounted &&
+        identical(controller, _navigationController)) {
+      action();
+    }
+  }
+
+  void _openMyProfile() {
+    final navigator = _communityNavigator.currentState;
+    if (navigator == null) return;
+    final owner = user.signedInUser?.id.rawValue;
+    if (owner == null) {
+      unawaited(
+        navigator.push<void>(
+          MaterialPageRoute(builder: (_) => PublicWorkSignIn(user: user)),
+        ),
+      );
+      return;
+    }
+    if (communityOwnProfileIsTop(
+      _entryUri,
+      _sidebarRoutes.currentRouteObject?.settings,
+      owner,
+    )) {
+      return;
+    }
+    unawaited(
+      navigator.push<void>(
+        MaterialPageRoute(
+          settings: const RouteSettings(name: '/profile'),
+          builder: (_) => PublicProfileEntry(user: user, userId: owner),
+        ),
+      ),
+    );
+  }
+
+  void _openMessages() {
+    if (!communityInboxIsTop(_sidebarRoutes.currentRouteObject?.settings)) {
+      unawaited(_communityNavigator.currentState?.pushNamed<void>('/messages'));
+    }
+  }
+
+  @override
+  void dispose() {
+    _sidebarRoutes.dispose();
+    super.dispose();
   }
 
   @override
@@ -212,15 +273,41 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
       animation: Listenable.merge([locale, user]),
       builder: (context, _) => MaterialApp(
         key: _navigationKey(),
-        navigatorObservers: [_routes],
+        navigatorKey: _communityNavigator,
+        navigatorObservers: [_routes, _sidebarRoutes],
         title: 'PocketWorld',
         debugShowCheckedModeBanner: false,
         theme: communityWebTheme(),
         locale: locale.locale,
         localizationsDelegates: AppL10n.localizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
-        builder: (context, child) =>
-            AuthScope(currentUser: user, child: child!),
+        builder: (context, child) => AuthScope(
+          currentUser: user,
+          child: AnimatedBuilder(
+            animation: _sidebarRoutes,
+            child: child,
+            builder: (context, navigator) => CommunityNavigationFrame(
+              controller: _navigationController,
+              visible: communitySidebarVisible(
+                _entryUri,
+                _sidebarRoutes.currentRoute,
+              ),
+              selectedDestination: communitySidebarDestination(
+                _entryUri,
+                _sidebarRoutes.currentRoute,
+                ownerId: user.signedInUser?.id.rawValue,
+              ),
+              onHome: () => unawaited(_exitDocument(exitPublicWork)),
+              onFollowing: () =>
+                  unawaited(_exitDocument(openCommunityFollowing)),
+              onMyProfile: _openMyProfile,
+              onMessages: _openMessages,
+              onSettings: () => unawaited(_exitDocument(openCommunitySettings)),
+              onOpenFiling: () => unawaited(_exitDocument(openCommunityFiling)),
+              child: navigator!,
+            ),
+          ),
+        ),
         onGenerateRoute: (settings) =>
             communityFavoritesRoute(settings, user) ??
             communityMessagingRoute(settings, user) ??

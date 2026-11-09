@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../design_system.dart';
+import '../community/community_navigation_frame.dart';
 
 class WebProfileDraft {
   final String displayName;
@@ -64,6 +65,8 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
   bool _allowPop = false;
   WebProfileSaveResult? _result;
   String? _error;
+  CommunityNavigationController? _navigation;
+  Future<bool>? _discardPending;
 
   @override
   void initState() {
@@ -73,6 +76,16 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
     _name = TextEditingController(text: _saved.displayName)
       ..addListener(_changed);
     _bio = TextEditingController(text: _saved.bio)..addListener(_changed);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final navigation = CommunityNavigationScope.maybeOf(context)?.controller;
+    if (identical(_navigation, navigation)) return;
+    _navigation?.unregisterExitGuard(this);
+    _navigation = navigation;
+    _navigation?.registerExitGuard(this, _confirmDiscard);
   }
 
   @override
@@ -100,37 +113,47 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
 
   @override
   void dispose() {
+    _navigation?.unregisterExitGuard(this);
     _name.dispose();
     _bio.dispose();
     super.dispose();
   }
 
-  Future<void> _exit() async {
-    if (_saving) return;
-    if (_dirty) {
-      final discard = await showDialog<bool>(
-        context: context,
-        builder: (context) => Theme(
-          data: _theme(context),
-          child: AlertDialog(
-            title: const Text('放弃未保存的修改？'),
-            content: const Text('离开后，本次未保存的昵称和简介将丢失。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('继续编辑'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('放弃修改'),
-              ),
-            ],
-          ),
+  Future<bool> _confirmDiscard() {
+    if (!mounted || _saving) return Future.value(false);
+    if (!_dirty) return Future.value(true);
+    // Sidebar actions and route Back share one outstanding confirmation.
+    return _discardPending ??= _showDiscardConfirmation().whenComplete(() {
+      _discardPending = null;
+    });
+  }
+
+  Future<bool> _showDiscardConfirmation() async {
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => Theme(
+        data: _theme(context),
+        child: AlertDialog(
+          title: const Text('放弃未保存的修改？'),
+          content: const Text('离开后，本次未保存的昵称和简介将丢失。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('继续编辑'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('放弃修改'),
+            ),
+          ],
         ),
-      );
-      if (discard != true || !mounted) return;
-    }
-    if (!mounted) return;
+      ),
+    );
+    return mounted && discard == true;
+  }
+
+  Future<void> _exit() async {
+    if (!await _confirmDiscard() || !mounted) return;
     setState(() => _allowPop = true);
     // PopScope must rebuild its route permission before the programmatic pop.
     WidgetsBinding.instance.addPostFrameCallback((_) {

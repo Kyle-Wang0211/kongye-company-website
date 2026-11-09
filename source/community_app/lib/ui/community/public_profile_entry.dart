@@ -12,6 +12,7 @@ import 'public_work_exit_stub.dart'
     if (dart.library.js_interop) 'public_work_exit_web.dart';
 import 'user_profile_page.dart';
 import 'community_profile_shell.dart';
+import 'community_navigation_frame.dart';
 import '../social/community_account_routes.dart' show WebFavoritesAccountEntry;
 import '../../community/account_work_library_repository.dart';
 import '../../me/profile_likes_repository.dart';
@@ -228,7 +229,9 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
       },
       onWorkTap: _openWork,
     );
-    if (!kIsWeb) return profile;
+    if (!kIsWeb || CommunityNavigationScope.maybeOf(context) != null) {
+      return profile;
+    }
     return CommunityProfileShell(
       onHome: exitPublicWork,
       onMyProfile: () {
