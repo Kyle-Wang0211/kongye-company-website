@@ -1,16 +1,15 @@
 {
   "entrypoint": "lib/main_community_web.dart",
-  "native_entrypoint": "lib/main.dart",
+  "base_href": "/miniprogram/",
+  "source_revision": "692ec685713cf6614fb263aaa7584572f43a3e4c",
+  "source_manifest_sha256": "635c7c50f6cca90502ac10d405a229636d6c4a459500dbf6894c49a8b8c889db",
+  "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
+  "main_js_sha256": "23f52321bfa955b8589b73f99b854a0688ef676a8cb1eb6e387b7b1b6f561244",
+  "native_email_ready_define": true,
+  "status": "built-local-not-deployed",
   "capabilities": {
     "PW_COMMUNITY_FAVORITES_ENABLED": "true",
     "PW_COMMUNITY_MESSAGING_READY": "true",
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
-  },
-  "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "f2b0d07a652122556bbf7f1741c6a4b10d9469c9306177e3c60379bf71e548d8",
-  "status": "built-local-not-deployed",
-  "source_revision": "9c0ac3e715b75f8dba22d3d5718997850f6d21b2",
-  "source_manifest_sha256": "4199968e01593ee538adfd53bb3b39246a6ac43fa9573f0300117dcab62e5d04",
-  "scoped_native_email_patch_sha256": "152dcdb732364f18820a1861ec0a5703f7821a6d05e33bef9b6f57bbcfeff998",
-  "native_email_ready_define": true
+  }
 }
