@@ -44,6 +44,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     if (value && !supported()) throw new Error('Surface comments require a loaded GLB or PLY');
     enabled = value; down = null; pointers.clear();
     if (enabled) controls.autoRotate = false;
+    update();
   }
   function setMarkers(values) {
     if (!Array.isArray(values) || values.length > 256) throw new Error('Too many surface markers');
@@ -97,11 +98,11 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
         ], {duration:2400,iterations:Infinity,easing:'ease-in-out'});
       }
       const stopRotation = () => { controls.autoRotate = false; onMarkerInteraction?.(); };
-      button.addEventListener('pointerdown', event => { event.stopPropagation(); stopRotation(); });
+      button.addEventListener('pointerdown', event => { event.stopPropagation(); if (!enabled) stopRotation(); });
       // The pin is above the canvas. Preserve OrbitControls' wheel handling
       // there, while leaving scrolling inside a comment card to the browser.
       button.addEventListener('wheel', event => {
-        if (marker.content?.contains?.(event.target)) return;
+        if (enabled || marker.content?.contains?.(event.target)) return;
         const Wheel = document.defaultView?.WheelEvent;
         if (!Wheel) return;
         event.preventDefault(); event.stopPropagation();
@@ -115,7 +116,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       }, {passive:false});
       button.addEventListener('click', event => {
         event.stopPropagation();
-        if (marker.occluded || marker.content?.contains?.(event.target)) return;
+        if (enabled || marker.occluded || marker.content?.contains?.(event.target)) return;
         stopRotation();
         // Native click/keyboard activation must show feedback locally, without
         // waiting for an asynchronous Flutter bridge echo.
@@ -235,7 +236,13 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
   for (const [name,handler] of Object.entries(handlers)) canvas.addEventListener?.(name,handler);
   function update() {
     const root = getModel();
-    if (!overlay || !root || disposed) { publishLayout(null); return; }
+    // Picking presents the unannotated asset. Keep saved marker state intact
+    // so cancellation/selection can restore it without a reload or DOM churn.
+    if (overlay) {
+      overlay.style.display = enabled ? 'none' : 'block';
+      overlay.setAttribute('aria-hidden', String(enabled));
+    }
+    if (!overlay || !root || disposed || enabled) { publishLayout(null); return; }
     root.updateWorldMatrix(true,true);camera.updateMatrixWorld();
     const rect = canvas.getBoundingClientRect();
     const layouts = [];

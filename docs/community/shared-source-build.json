@@ -1,10 +1,10 @@
 {
   "entrypoint": "lib/main_community_web.dart",
   "base_href": "/community/",
-  "source_revision": "8234efd9464c47855d328de4511139d466fa5554",
-  "source_manifest_sha256": "e64e5283dd7df37bab56543e8ff73da7041cc1d52addfac5e21fa5b8633fd297",
-  "viewer_bundle_sha256": "400aa3d206f70b3afe62810f87d76873d368d33e7cb547ddf65d528a98b2bdae",
-  "main_js_sha256": "e1e59d601de414d523b23a54dd25fd880ed2c003473eb0f577181338e0bcff27",
+  "source_revision": "a6728180160fe0b44939f28d89f01c59c53c3b70",
+  "source_manifest_sha256": "39ade570f241defbbf3b81c25310bd778fb45964a0791e1944f5870b8fcfef94",
+  "viewer_bundle_sha256": "d11f0f820b18850ee6385f9656d3baabc0268d7b86046d9fa3063152d5f5a150",
+  "main_js_sha256": "cb03aa6535bb2af13d874293811dab654c67ef3223366069a15f272427f595a6",
   "native_email_ready_define": true,
   "status": "built-local-not-deployed",
   "capabilities": {
