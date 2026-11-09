@@ -12,3 +12,5 @@ Homepage uses official persisted Supabase session. Initial restoration is not a 
 
 ## Full profile navigation
 Own likes/favorites/history render through existing account-library entries embedded beneath the profile header and tab strip. The sidebar remains mounted; work selection returns to the works list. Compact screens use the same hierarchy with horizontal tabs and an overflow settings menu. Owner changes dispose private slots immediately; stale requests cannot repopulate a different account. Existing standalone library routes retain their navigation behavior. Retain prior content-versioned font assets across releases so already-open clients can resolve immutable URLs.
+
+Homepage account entry and both static consumers must reference the identical versioned ESM account-module URL; distinct query strings execute multiple SDK owners and compete for the same header/session. Regression checks bind all three references to one module identity.

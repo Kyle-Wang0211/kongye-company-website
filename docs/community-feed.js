@@ -1,4 +1,4 @@
-import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-library-20261106-v44';
+import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';

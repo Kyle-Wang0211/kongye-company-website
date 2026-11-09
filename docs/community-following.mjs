@@ -1,4 +1,4 @@
-import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-library-20261106-v44';
+import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
 import {localizeElement,localeEvent} from './site-l10n.mjs?v=account-library-20261106-v44';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 
