@@ -12,6 +12,8 @@ import 'public_work_exit_stub.dart'
     if (dart.library.js_interop) 'public_work_exit_web.dart';
 import 'user_profile_page.dart';
 import 'community_profile_shell.dart';
+import '../social/community_account_routes.dart' show WebFavoritesAccountEntry;
+import '../../community/account_work_library_repository.dart';
 import 'following_list_page.dart';
 import '../../me/profile_likes_repository.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -151,10 +153,39 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
       Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: widget.user,
+    builder: (context, _) => _buildProfile(context),
+  );
+
+  Widget _buildProfile(BuildContext context) {
+    final owner = widget.user.signedInUser?.id.rawValue;
+    final target = widget.userId ?? Uri.base.queryParameters['profile'] ?? '';
     final profile = UserProfilePage(
-      key: ValueKey('${widget.userId}:$_profileRevision'),
-      userId: widget.userId ?? Uri.base.queryParameters['profile'] ?? '',
+      key: ValueKey('$target:$owner:$_profileRevision'),
+      userId: target,
+      libraryTabs: {
+        if (owner != null && owner == target) ...{
+          'likes': (_) => WebFavoritesAccountEntry(
+            user: widget.user,
+            ownerId: owner,
+            kind: AccountWorkLibraryKind.likes,
+            embedded: true,
+          ),
+          'history': (_) => WebFavoritesAccountEntry(
+            user: widget.user,
+            ownerId: owner,
+            kind: AccountWorkLibraryKind.history,
+            embedded: true,
+          ),
+          if (CommunityCapabilities.favorites)
+            'favorites': (_) => WebFavoritesAccountEntry(
+              user: widget.user,
+              ownerId: owner,
+              embedded: true,
+            ),
+        },
+      },
       seedWork: widget.seedWork,
       repository: widget.repository,
       communityService: _service,

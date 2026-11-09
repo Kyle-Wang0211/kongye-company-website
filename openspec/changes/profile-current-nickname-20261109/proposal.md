@@ -9,3 +9,6 @@ Acceptance: injected synthetic profile/refresh fixtures, wide/narrow widget chec
 Observed immutable icon font URL retained an obsolete browser-cached subset while the font manifest revalidated. Build postprocessing now gives subset fonts content-hash filenames, preserves old paths and leaves compiled JS unchanged.
 
 Homepage uses official persisted Supabase session. Initial restoration is not a signed-out state; focus/return must not erase known account presentation. Cached name/avatar are hints only after SDK owner matching, never authentication or permission authority. Server revocation/signout/switch still clear old presentation; transport failure preserves it.
+
+## Full profile navigation
+Own likes/favorites/history render through existing account-library entries embedded beneath the profile header and tab strip. The sidebar remains mounted; work selection returns to the works list. Compact screens use the same hierarchy with horizontal tabs and an overflow settings menu. Owner changes dispose private slots immediately; stale requests cannot repopulate a different account. Existing standalone library routes retain their navigation behavior. Retain prior content-versioned font assets across releases so already-open clients can resolve immutable URLs.

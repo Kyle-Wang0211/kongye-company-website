@@ -32,6 +32,7 @@ class UserProfilePage extends StatefulWidget {
   final VoidCallback? onOpenHistory;
   final Future<int> Function(String userId)? receivedLikesLoader;
   final Map<String, VoidCallback> accountActions;
+  final Map<String, WidgetBuilder> libraryTabs;
   final ValueChanged<SocialProfile>? onMessage;
 
   const UserProfilePage({
@@ -52,6 +53,7 @@ class UserProfilePage extends StatefulWidget {
     this.onOpenHistory,
     this.receivedLikesLoader,
     this.accountActions = const {},
+    this.libraryTabs = const {},
     this.onMessage,
   });
 
@@ -70,6 +72,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
   bool _relationshipInFlight = false;
   int? _receivedLikes;
   int _likesRequest = 0;
+  int _profileRequest = 0;
+  String _selectedTab = 'works';
+  String? _tabOwner;
 
   bool get _isMine => _repository.currentUserId == widget.userId;
 
@@ -92,23 +97,41 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _load();
   }
 
+  @override
+  void didUpdateWidget(covariant UserProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) {
+      _selectedTab = 'works';
+      _tabOwner = null;
+      _profile = null;
+      _works = const [];
+      _load();
+    }
+  }
+
   Future<void> _loadReceivedLikes() async {
     final request = ++_likesRequest;
+    final userId = widget.userId;
     final loader = widget.receivedLikesLoader;
     if (!_isMine || loader == null) return;
     int? count;
     try {
-      final value = await loader(widget.userId);
+      final value = await loader(userId);
       if (value >= 0) count = value;
     } catch (_) {
       // A failed count must remain unknown, never look like a real zero.
     }
-    if (mounted && request == _likesRequest && _isMine) {
+    if (mounted &&
+        request == _likesRequest &&
+        userId == widget.userId &&
+        _isMine) {
       setState(() => _receivedLikes = count);
     }
   }
 
   Future<void> _load() async {
+    final request = ++_profileRequest;
+    final userId = widget.userId;
     setState(() {
       _loadError = null;
       _receivedLikes = null;
@@ -116,16 +139,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _loadReceivedLikes();
     try {
       final results = await Future.wait<Object>([
-        _repository.fetchProfile(widget.userId),
-        _worksLoader(widget.userId),
+        _repository.fetchProfile(userId),
+        _worksLoader(userId),
       ]);
-      if (!mounted) return;
+      if (!mounted || request != _profileRequest || userId != widget.userId) {
+        return;
+      }
       setState(() {
         _profile = results[0] as SocialProfile;
         _works = results[1] as List<FeedWork>;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || request != _profileRequest || userId != widget.userId) {
+        return;
+      }
       setState(() => _loadError = error);
     }
   }
@@ -286,8 +313,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ],
       ),
       body: LayoutBuilder(
-        builder: (context, constraints) =>
-            constraints.maxWidth >= 760 ? _buildDesktopBody(l) : _buildBody(l),
+        builder: (context, constraints) {
+          if (!_isMine ||
+              _tabOwner != widget.userId ||
+              (_selectedTab != 'works' &&
+                  !widget.libraryTabs.containsKey(_selectedTab))) {
+            _selectedTab = 'works';
+          }
+          return _buildProfileBody(
+            l,
+            compact: constraints.maxWidth < 760,
+            viewportHeight: constraints.maxHeight,
+          );
+        },
       ),
     );
   }
@@ -310,159 +348,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _load,
-      color: AetherColors.primary,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    GeneratedAccountAvatar(
-                      userId: profile.id,
-                      readPublic: true,
-                      radius: 48,
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _nickname(profile),
-                          const SizedBox(height: 8),
-                          Text(
-                            _identityLine(profile),
-                            style: AetherTextStyles.bodySm,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (profile.bio != null) ...[
-                  const SizedBox(height: 24),
-                  Text(profile.bio!, style: AetherTextStyles.body),
-                ],
-                if (_isMine && widget.onOpenFavorites != null) ...[
-                  const SizedBox(height: 20),
-                  OutlinedButton.icon(
-                    key: const ValueKey('profile-favorites-button'),
-                    onPressed: widget.onOpenFavorites,
-                    icon: const Icon(Icons.bookmark_border),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'zh'
-                          ? '我的收藏'
-                          : 'Favorites',
-                    ),
-                  ),
-                ],
-                if (_isMine && widget.onOpenMessages != null) ...[
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    key: const ValueKey('profile-messages-button'),
-                    onPressed: widget.onOpenMessages,
-                    icon: const Icon(Icons.chat_bubble_outline),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'zh'
-                          ? '我的私信'
-                          : 'Messages',
-                    ),
-                  ),
-                ],
-                if (_isMine)
-                  for (final action in widget.accountActions.entries) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: action.value,
-                      child: Text(action.key),
-                    ),
-                  ],
-                if (!_isMine && widget.onMessage != null) ...[
-                  const SizedBox(height: 20),
-                  OutlinedButton.icon(
-                    key: const ValueKey('profile-message-peer-button'),
-                    onPressed: _messageProfile,
-                    icon: const Icon(Icons.chat_bubble_outline),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'zh'
-                          ? '私信'
-                          : 'Message',
-                    ),
-                  ),
-                ],
-                if (!_isMine) ...[
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: profile.isFollowing
-                        ? OutlinedButton(
-                            key: const Key('profile-follow-button'),
-                            onPressed: _relationshipInFlight
-                                ? null
-                                : _toggleFollow,
-                            child: Text(l.socialFollowing),
-                          )
-                        : FilledButton(
-                            key: const Key('profile-follow-button'),
-                            onPressed: _relationshipInFlight
-                                ? null
-                                : _toggleFollow,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AetherColors.primary,
-                              foregroundColor: Colors.white,
-                            ),
-                            child: Text(l.socialFollow),
-                          ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: AetherColors.border),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Row(
-              children: [
-                _ProfileCount(
-                  value: profile.publicWorksCount,
-                  label: l.socialWorks,
-                ),
-                _ProfileCount(
-                  value: profile.followersCount,
-                  label: l.socialFollowers,
-                ),
-                _ProfileCount(
-                  value: profile.followingCount,
-                  label: l.socialFollow,
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: AetherColors.border),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
-            child: ProfileWorkGrid(
-              works: _works,
-              service: _communityService,
-              onWorkTap: widget.onWorkTap,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
-  Widget _nickname(SocialProfile profile) => Row(
+  Widget _nickname(SocialProfile profile, {bool compact = false}) => Row(
     children: [
-      Flexible(child: Text(profile.displayName, style: AetherTextStyles.h1)),
+      Flexible(
+        child: Text(
+          profile.displayName,
+          style: compact ? AetherTextStyles.h2 : AetherTextStyles.h1,
+        ),
+      ),
       if (_isMine && widget.onEditNickname != null)
         IconButton(
           key: const ValueKey('profile-edit-nickname'),
@@ -485,17 +381,37 @@ class _UserProfilePageState extends State<UserProfilePage> {
     ),
   );
 
-  Widget _buildDesktopBody(AppL10n l) {
+  void _selectLibrary(String tab, VoidCallback? fallback) {
+    if (!_isMine) return;
+    if (widget.libraryTabs.containsKey(tab)) {
+      setState(() {
+        _tabOwner = widget.userId;
+        _selectedTab = tab;
+      });
+    } else {
+      fallback?.call();
+    }
+  }
+
+  Widget _buildProfileBody(
+    AppL10n l, {
+    required bool compact,
+    required double viewportHeight,
+  }) {
     final profile = _profile;
     if (profile == null) return _buildBody(l);
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        key: const ValueKey('profile-desktop-content'),
+        key: ValueKey(
+          compact ? 'profile-compact-content' : 'profile-desktop-content',
+        ),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(36, 32, 36, 36),
+            padding: compact
+                ? const EdgeInsets.all(20)
+                : const EdgeInsets.fromLTRB(36, 32, 36, 36),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xfff1f2f4), Color(0xfffafafa)],
@@ -509,14 +425,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 GeneratedAccountAvatar(
                   userId: profile.id,
                   readPublic: true,
-                  radius: 64,
+                  radius: compact ? 40 : 64,
                 ),
-                const SizedBox(width: 32),
+                SizedBox(width: compact ? 16 : 32),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _nickname(profile),
+                      _nickname(profile, compact: compact),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 28,
@@ -597,49 +513,59 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
+            padding: EdgeInsets.symmetric(horizontal: compact ? 20 : 36),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  Container(
+                  TextButton(
                     key: const ValueKey('profile-works-tab'),
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(width: 3)),
+                    onPressed: () => setState(() => _selectedTab = 'works'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 4,
+                      ),
+                      shape: const RoundedRectangleBorder(),
+                      side: _selectedTab == 'works'
+                          ? const BorderSide()
+                          : BorderSide.none,
                     ),
                     child: Text(
                       '${l.socialWorks} ${profile.publicWorksCount}',
                       style: AetherTextStyles.body,
                     ),
                   ),
-                  if (_isMine && widget.onOpenLikes != null) ...[
-                    const SizedBox(width: 28),
-                    TextButton.icon(
-                      key: const ValueKey('profile-likes-button'),
-                      onPressed: widget.onOpenLikes,
-                      icon: const Icon(Icons.lock_outline, size: 16),
-                      label: Text(_label('喜欢', 'Likes')),
+                  for (final tab in [
+                    ('likes', _label('喜欢', 'Likes'), widget.onOpenLikes),
+                    (
+                      'favorites',
+                      _label('收藏', 'Favorites'),
+                      widget.onOpenFavorites,
                     ),
-                  ],
-                  if (_isMine && widget.onOpenFavorites != null) ...[
-                    const SizedBox(width: 28),
-                    TextButton.icon(
-                      key: const ValueKey('profile-favorites-button'),
-                      onPressed: widget.onOpenFavorites,
-                      icon: const Icon(Icons.lock_outline, size: 16),
-                      label: Text(_label('收藏', 'Favorites')),
+                    (
+                      'history',
+                      _label('观看历史', 'History'),
+                      widget.onOpenHistory,
                     ),
-                  ],
-                  if (_isMine && widget.onOpenHistory != null) ...[
-                    const SizedBox(width: 28),
-                    TextButton.icon(
-                      key: const ValueKey('profile-history-button'),
-                      onPressed: widget.onOpenHistory,
-                      icon: const Icon(Icons.lock_outline, size: 16),
-                      label: Text(_label('观看历史', 'History')),
-                    ),
-                  ],
+                  ])
+                    if (_isMine &&
+                        (widget.libraryTabs.containsKey(tab.$1) ||
+                            tab.$3 != null)) ...[
+                      const SizedBox(width: 28),
+                      TextButton.icon(
+                        key: ValueKey('profile-${tab.$1}-button'),
+                        onPressed: () => _selectLibrary(tab.$1, tab.$3),
+                        style: TextButton.styleFrom(
+                          shape: const RoundedRectangleBorder(),
+                          side: _selectedTab == tab.$1
+                              ? const BorderSide()
+                              : BorderSide.none,
+                        ),
+                        icon: const Icon(Icons.lock_outline, size: 16),
+                        label: Text(tab.$2),
+                      ),
+                    ],
                   if (_isMine && widget.onOpenMessages != null) ...[
                     const SizedBox(width: 28),
                     TextButton(
@@ -653,7 +579,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           ),
           const Divider(height: 1, color: AetherColors.border),
-          if (_works.isEmpty)
+          if (_selectedTab != 'works' &&
+              _isMine &&
+              widget.libraryTabs.containsKey(_selectedTab))
+            SizedBox(
+              key: ValueKey('profile-library-$_selectedTab'),
+              height: (viewportHeight - (compact ? 260 : 280)).clamp(
+                300,
+                double.infinity,
+              ),
+              child: KeyedSubtree(
+                key: ValueKey('${widget.userId}:$_selectedTab'),
+                child: Builder(builder: widget.libraryTabs[_selectedTab]!),
+              ),
+            )
+          else if (_works.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 100,
@@ -702,25 +642,5 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (profile.lastRegion != null) profile.lastRegion!,
     ];
     return parts.join(' · ');
-  }
-}
-
-class _ProfileCount extends StatelessWidget {
-  const _ProfileCount({required this.value, required this.label});
-
-  final int value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text('$value', style: AetherTextStyles.h2),
-          const SizedBox(height: 8),
-          Text(label, style: AetherTextStyles.bodySm),
-        ],
-      ),
-    );
   }
 }

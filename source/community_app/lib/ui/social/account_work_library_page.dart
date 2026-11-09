@@ -7,12 +7,14 @@ import '../design_system.dart';
 class AccountWorkLibraryPage extends StatefulWidget {
   const AccountWorkLibraryPage({
     super.key,
+    this.embedded = false,
     required this.accountId,
     required this.kind,
     required this.loadPage,
     required this.onOpen,
     this.thumbnailUrlFor,
   });
+  final bool embedded;
   final String accountId;
   final AccountWorkLibraryKind kind;
   final Future<AccountWorkLibraryPageResult> Function(AccountWorkLibraryCursor?)
@@ -138,6 +140,7 @@ class _AccountWorkLibraryPageState extends State<AccountWorkLibraryPage> {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AetherColors.bgCanvas,
     appBar: AppBar(
+      automaticallyImplyLeading: !widget.embedded,
       backgroundColor: AetherColors.bgCanvas,
       foregroundColor: AetherColors.primary,
       title: Text(

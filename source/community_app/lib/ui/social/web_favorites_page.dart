@@ -24,12 +24,14 @@ class WebFavoriteItem {
 class WebFavoritesPage extends StatefulWidget {
   const WebFavoritesPage({
     super.key,
+    this.embedded = false,
     required this.loadFavorites,
     this.accountId,
     required this.onOpen,
     required this.onSetFavorite,
   });
 
+  final bool embedded;
   final String? accountId;
   final Future<List<WebFavoriteItem>> Function() loadFavorites;
   final FutureOr<void> Function(String id) onOpen;
@@ -162,6 +164,7 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
       child: Scaffold(
         backgroundColor: AetherColors.bg,
         appBar: AppBar(
+          automaticallyImplyLeading: !widget.embedded,
           backgroundColor: AetherColors.bgCanvas,
           foregroundColor: AetherColors.primary,
           title: Text(_text('我的收藏', 'Favorites')),

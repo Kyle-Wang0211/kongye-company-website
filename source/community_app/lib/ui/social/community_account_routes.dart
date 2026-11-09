@@ -377,11 +377,13 @@ class CommunityServiceUnavailableView extends StatelessWidget {
 class WebFavoritesAccountEntry extends StatefulWidget {
   const WebFavoritesAccountEntry({
     super.key,
+    this.embedded = false,
     required this.user,
     required this.ownerId,
     this.api,
     this.kind,
   });
+  final bool embedded;
   final AccountWorkLibraryKind? kind;
   final CurrentUser user;
   final String ownerId;
@@ -529,6 +531,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
   @override
   Widget build(BuildContext context) => widget.kind != null
       ? AccountWorkLibraryPage(
+          embedded: widget.embedded,
           accountId: widget.ownerId,
           kind: widget.kind!,
           loadPage: (cursor) => _guard(
@@ -541,6 +544,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
           onOpen: _open,
         )
       : WebFavoritesPage(
+          embedded: widget.embedded,
           accountId: widget.ownerId,
           loadFavorites: _load,
           onOpen: _open,

@@ -7,7 +7,7 @@ import 'package:pocketworld_flutter/ui/community/user_profile_page.dart';
 
 class _Profiles implements SocialProfileRepository {
   _Profiles({this.viewer = 'owner'});
-  final String? viewer;
+  String? viewer;
   @override
   String? get currentUserId => viewer;
   @override
@@ -39,6 +39,10 @@ void main() {
     VoidCallback? likes,
     VoidCallback? history,
     Future<int> Function(String)? receivedLikesLoader,
+    Map<String, WidgetBuilder> libraryTabs = const {},
+    double textScale = 1,
+    Key? pageKey,
+    _Profiles? repository,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
@@ -49,15 +53,23 @@ void main() {
         locale: const Locale('zh'),
         localizationsDelegates: AppL10n.localizationsDelegates,
         supportedLocales: AppL10n.supportedLocales,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: UserProfilePage(
+          key: pageKey,
           userId: 'owner',
-          repository: _Profiles(viewer: viewer),
+          repository: repository ?? _Profiles(viewer: viewer),
           worksLoader: (_) async => [],
           onEditNickname: edit,
           onOpenFavorites: favorites,
           onOpenLikes: likes,
           onOpenHistory: history,
           receivedLikesLoader: receivedLikesLoader,
+          libraryTabs: libraryTabs,
           accountActions: settings == null ? const {} : {'账号与隐私': settings},
         ),
       ),
@@ -186,6 +198,145 @@ void main() {
         find.byKey(const ValueKey('profile-history-button')),
         findsNothing,
       );
+    },
+  );
+  testWidgets(
+    'inline library switches preserve header and works tab returns to grid',
+    (tester) async {
+      var fallback = 0;
+      await show(
+        tester,
+        1100,
+        favorites: () => fallback++,
+        libraryTabs: {
+          'favorites': (_) =>
+              Scaffold(body: ListView(children: const [Text('收藏示例')])),
+          'likes': (_) => const Center(child: Text('喜欢示例')),
+          'history': (_) => const Center(child: Text('历史示例')),
+        },
+      );
+      await tester.tap(find.byKey(const ValueKey('profile-favorites-button')));
+      await tester.pumpAndSettle();
+      expect(fallback, 0);
+      expect(find.text('收藏示例'), findsOneWidget);
+      expect(find.text('示例昵称'), findsOneWidget);
+      expect(find.byKey(const ValueKey('profile-works-tab')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('profile-likes-button')));
+      await tester.pumpAndSettle();
+      expect(find.text('喜欢示例'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('profile-history-button')));
+      await tester.pumpAndSettle();
+      expect(find.text('历史示例'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('profile-works-tab')));
+      await tester.pumpAndSettle();
+      expect(find.text('暂无公开作品'), findsOneWidget);
+      expect(find.text('历史示例'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'narrow enlarged text uses tabs and account menu without overflow',
+    (tester) async {
+      await show(
+        tester,
+        390,
+        textScale: 1.3,
+        edit: () {},
+        settings: () {},
+        libraryTabs: {
+          'likes': (_) => const Center(child: Text('喜欢示例')),
+          'favorites': (_) => const Center(child: Text('收藏示例')),
+          'history': (_) => const Center(child: Text('历史示例')),
+        },
+      );
+      expect(
+        find.byKey(const ValueKey('profile-compact-content')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('profile-account-menu')),
+        findsOneWidget,
+      );
+      expect(find.text('账号与隐私'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('profile-likes-button')));
+      await tester.pumpAndSettle();
+      expect(find.text('喜欢示例'), findsOneWidget);
+      expect(find.text('示例昵称'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets('private slots are not constructed for visitors', (tester) async {
+    var builds = 0;
+    await show(
+      tester,
+      1100,
+      viewer: 'visitor',
+      libraryTabs: {
+        'favorites': (_) {
+          builds++;
+          return const Text('私密内容');
+        },
+      },
+    );
+    expect(builds, 0);
+    expect(
+      find.byKey(const ValueKey('profile-favorites-button')),
+      findsNothing,
+    );
+    expect(find.text('私密内容'), findsNothing);
+  });
+  testWidgets('removing selected slot resets to works', (tester) async {
+    const pageKey = ValueKey('same-page');
+    await show(
+      tester,
+      1100,
+      pageKey: pageKey,
+      libraryTabs: {'likes': (_) => const Center(child: Text('喜欢示例'))},
+    );
+    await tester.tap(find.byKey(const ValueKey('profile-likes-button')));
+    await tester.pumpAndSettle();
+    expect(find.text('喜欢示例'), findsOneWidget);
+    await show(tester, 1100, pageKey: pageKey);
+    expect(find.text('喜欢示例'), findsNothing);
+    expect(find.text('暂无公开作品'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets(
+    'losing ownership removes mounted private content and resets selected tab',
+    (tester) async {
+      final repository = _Profiles();
+      const pageKey = ValueKey('same-owner-page');
+      final slots = <String, WidgetBuilder>{'likes': (_) => const Text('私密内容')};
+      await show(
+        tester,
+        1100,
+        pageKey: pageKey,
+        repository: repository,
+        libraryTabs: slots,
+      );
+      await tester.tap(find.byKey(const ValueKey('profile-likes-button')));
+      await tester.pumpAndSettle();
+      expect(find.text('私密内容'), findsOneWidget);
+      repository.viewer = 'visitor';
+      await show(
+        tester,
+        1100,
+        pageKey: pageKey,
+        repository: repository,
+        libraryTabs: slots,
+      );
+      expect(find.text('私密内容'), findsNothing);
+      expect(find.byKey(const ValueKey('profile-likes-button')), findsNothing);
+      repository.viewer = 'owner';
+      await show(
+        tester,
+        1100,
+        pageKey: pageKey,
+        repository: repository,
+        libraryTabs: slots,
+      );
+      expect(find.text('私密内容'), findsNothing);
+      expect(find.text('暂无公开作品'), findsOneWidget);
     },
   );
 }
