@@ -1,10 +1,10 @@
 {
   "entrypoint": "lib/main_community_web.dart",
   "base_href": "/community/",
-  "source_revision": "bff5915460cc36dc80e0c56c55843d0a342ece86",
-  "source_manifest_sha256": "d5e9ac0ddcc432db81f51848a1cec37fa2f359a3f9e88958eccec25dfbda5596",
+  "source_revision": "fcd1b1254c7fbaa64beffc50220b299ff5c95b05",
+  "source_manifest_sha256": "2c22a0bb2f0150abed092a1ca7d21795eec3edcbc3a6747bd9e43b63f1c21414",
   "viewer_bundle_sha256": "400aa3d206f70b3afe62810f87d76873d368d33e7cb547ddf65d528a98b2bdae",
-  "main_js_sha256": "a7ef95769295989a1abe2ae303260c3484a7938c2dc421f2c607aad0f20ce5a3",
+  "main_js_sha256": "b3f6c5b4c4f1d777f744aa754cabba675f18229f37c64cca46b58b0d36bfa253",
   "native_email_ready_define": true,
   "status": "built-local-not-deployed",
   "capabilities": {
@@ -12,20 +12,16 @@
     "PW_COMMUNITY_MESSAGING_READY": "true",
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
-  "postprocessing": {
-    "tool": "source/community_app/tool/pw_version_web_fonts.py",
-    "tool_sha256": "59ac3a71bef95b463d2cffd73c37f39249c66227e5e674d6dabecfc0085e56fe",
-    "fonts": [
-      {
-        "original": "fonts/MaterialIcons-Regular.otf",
-        "asset": "fonts/MaterialIcons-Regular.2e733d0f98921263.otf",
-        "sha256": "2e733d0f98921263717dc1b9a161c318cebd1f6a9470e2e05fd8034e0696b789"
-      },
-      {
-        "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
-        "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
-        "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
-      }
-    ]
-  }
+  "font_cache_identity": [
+    {
+      "original": "fonts/MaterialIcons-Regular.otf",
+      "asset": "fonts/MaterialIcons-Regular.2e733d0f98921263.otf",
+      "sha256": "2e733d0f98921263717dc1b9a161c318cebd1f6a9470e2e05fd8034e0696b789"
+    },
+    {
+      "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
+      "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+      "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
+    }
+  ]
 }

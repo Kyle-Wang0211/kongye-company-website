@@ -1,10 +1,10 @@
 {
   "entrypoint": "lib/main_community_web.dart",
   "base_href": "/miniprogram/",
-  "source_revision": "bff5915460cc36dc80e0c56c55843d0a342ece86",
-  "source_manifest_sha256": "5f6c82d893672f9f762453d5ed8eb73599302cda5386823dd7d66ea97e7aaa75",
+  "source_revision": "fcd1b1254c7fbaa64beffc50220b299ff5c95b05",
+  "source_manifest_sha256": "ef9892254ae84d292aa9f5cb8ccf3d3cca0ef83472fce029143dda99b13d3628",
   "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "5238204af9e7cefb15dc6bf36ba449426fe7026e28c87698a196fabd1a4abf4a",
+  "main_js_sha256": "48a64a538e15a4168155c23fdce341b6fea82dd28f1a147b04024ae3418951b5",
   "native_email_ready_define": true,
   "status": "built-local-not-deployed",
   "capabilities": {
@@ -12,20 +12,16 @@
     "PW_COMMUNITY_MESSAGING_READY": "true",
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
-  "postprocessing": {
-    "tool": "source/miniprogram-community/tool/pw_version_web_fonts.py",
-    "tool_sha256": "59ac3a71bef95b463d2cffd73c37f39249c66227e5e674d6dabecfc0085e56fe",
-    "fonts": [
-      {
-        "original": "fonts/MaterialIcons-Regular.otf",
-        "asset": "fonts/MaterialIcons-Regular.c6c75fb7fd365bb8.otf",
-        "sha256": "c6c75fb7fd365bb8657468d7586c72e4dcd6d707bc901461adc86e06c83e246a"
-      },
-      {
-        "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
-        "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
-        "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
-      }
-    ]
-  }
+  "font_cache_identity": [
+    {
+      "original": "fonts/MaterialIcons-Regular.otf",
+      "asset": "fonts/MaterialIcons-Regular.c6c75fb7fd365bb8.otf",
+      "sha256": "c6c75fb7fd365bb8657468d7586c72e4dcd6d707bc901461adc86e06c83e246a"
+    },
+    {
+      "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
+      "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+      "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
+    }
+  ]
 }
