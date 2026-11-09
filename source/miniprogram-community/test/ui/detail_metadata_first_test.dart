@@ -94,7 +94,7 @@ void main() {
         expect(client.requested, isTrue);
         expect(client.pendingRequest.isCompleted, isFalse);
         expect(find.text('Known author'), findsOneWidget);
-        expect(find.text('0%'), findsOneWidget);
+        expect(find.text('0%'), findsNothing);
         expect(find.byType(SkeletonBox), findsOneWidget);
         final size = tester.getSize(find.byType(SkeletonBox));
         expect(size.width, greaterThan(500));
@@ -108,7 +108,7 @@ void main() {
     },
   );
   testWidgets(
-    'unknown metadata has complete shimmering shell and numeric loader',
+    'unknown metadata has complete shimmering shell and indeterminate loader',
     (tester) async {
       await tester.pumpWidget(_app(PublicWorkOpening()));
       for (final field in [
@@ -120,8 +120,16 @@ void main() {
       ]) {
         expect(find.byKey(ValueKey('work-opening-$field')), findsOneWidget);
       }
+      expect(
+        tester
+            .widget<CircularProgressIndicator>(
+              find.byType(CircularProgressIndicator),
+            )
+            .value,
+        isNull,
+      );
       expect(find.byType(SkeletonBox), findsNWidgets(6));
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('0%'), findsNothing);
       await tester.pumpWidget(const SizedBox());
     },
   );

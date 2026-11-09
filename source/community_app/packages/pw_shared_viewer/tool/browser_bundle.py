@@ -36,11 +36,11 @@ def browser_html(source):
             raise ValueError('Expected default viewer startup declaration is missing or ambiguous')
         source = source.replace(old, new)
     source, count = re.subn(r"import \{ create \} from './viewer\.mjs(?:\?[^']*)?';",
-                            "import { create } from './viewer.mjs?v=web-release-startup-20261107-v1';", source)
+                            "import { create } from './viewer.mjs?v=web-release-ui-20261109-v1';", source)
     if count != 1:
         raise ValueError('Expected viewer module import is missing or ambiguous')
     return source.replace("from './bundle_identity.mjs';",
-                          "from './bundle_identity.mjs?v=web-release-startup-20261107-v1';")
+                          "from './bundle_identity.mjs?v=web-release-ui-20261109-v1';")
 
 
 def stage(root):

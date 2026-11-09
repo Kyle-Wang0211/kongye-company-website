@@ -29,11 +29,11 @@
 <body>
   <canvas id="viewer" aria-label="3D作品"></canvas>
   <div id="status" role="status" aria-live="polite"></div>
-  <div id="download" role="status" aria-live="polite">
-    <div id="download-ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle id="download-track" cx="32" cy="32" r="30"/><circle id="download-value" cx="32" cy="32" r="30"/></svg><span id="download-number">0%</span></div>
+  <div id="download" class="indeterminate" role="status" aria-live="polite">
+    <div id="download-ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle id="download-track" cx="32" cy="32" r="30"/><circle id="download-value" cx="32" cy="32" r="30"/></svg><span id="download-number"></span></div>
   </div>
   <script type="module">
-    import { create } from './viewer.mjs?v=unified-viewer-20261106-v1';
+    import { create } from './viewer.mjs?v=viewer-ui-20261109-v1';
     import { installHostBridge } from './host_bridge.mjs?v=unified-viewer-20261106-v1';
     import { verifyLocalBundle } from './bundle_identity.mjs';
     const canvas = document.querySelector('#viewer');
@@ -65,7 +65,7 @@
       download.hidden = false;
       download.classList.toggle('indeterminate', ratio === null);
       downloadValue.style.strokeDashoffset = String(188.496 * (1 - (ratio ?? 0)));
-      downloadNumber.textContent = ratio === null ? '—' : `${Math.floor(ratio * 100)}%`;
+      downloadNumber.textContent = ratio === null ? (receivedBytes > 0 ? '—' : '') : `${Math.floor(ratio * 100)}%`;
     }
     window.pwSharedViewerDownloadProgress = updateDownloadProgress;
     function onUiLocalization(event) {
@@ -93,7 +93,7 @@
     function stateChanged(state) {
       if (state.status === 'loading' && downloadClosed) {
         downloadClosed = false;
-        updateDownloadProgress({receivedBytes: 0, totalBytes: 1});
+        updateDownloadProgress({receivedBytes: 0, totalBytes: null});
       }
       if (state.status === 'ready' || state.status === 'error' || state.disposed) {
         download.hidden = true;

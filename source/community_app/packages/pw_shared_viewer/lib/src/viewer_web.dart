@@ -58,7 +58,7 @@ class _SharedViewerState extends State<SharedViewer>
     _viewType = 'pw-shared-viewer-${_nextView++}';
     final entry = widget.webEntryUri ??
         Uri.parse(web.document.baseURI).resolve(
-            'assets/packages/pw_shared_viewer/web/index.html?v=unified-viewer-20261106-v1');
+            'assets/packages/pw_shared_viewer/web/index.html?v=viewer-ui-20261109-v1');
     _origin = web.window.location.origin;
     if (entry.origin != _origin) {
       _error = ArgumentError(

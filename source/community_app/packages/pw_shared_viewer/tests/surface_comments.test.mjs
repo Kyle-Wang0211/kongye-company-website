@@ -12,16 +12,16 @@ function fixture(withDom = false, format = 'glb') {
    elements.push(node);return node;
  }
  const document=withDom ? {body:element('body'),createElement:element} : undefined;
- const events = new Map(), emitted = [];
+ const events = new Map(), emitted = [], interactions = [];
  const canvas = {ownerDocument:document,addEventListener:(k,f)=>events.set(k,f), removeEventListener:k=>events.delete(k),
    getBoundingClientRect:()=>({left:0,top:0,width:200,height:200})};
  const root = new THREE.Group(); root.position.set(2,0,0); root.scale.set(2,1,1);
  const mesh = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), new THREE.MeshBasicMaterial()); root.add(mesh);
  const camera = new THREE.PerspectiveCamera(45,1,0.01,100); camera.position.set(2,0,5);camera.lookAt(2,0,0);camera.updateMatrixWorld();
  const controls={target:new THREE.Vector3(2,0,0),autoRotate:true,update(){camera.lookAt(this.target);camera.updateMatrixWorld();}};
- const surface=createSurfaceComments({THREE,canvas,camera,controls,getModel:()=>root,getFormat:()=> format,getOverviewDistance:()=>5,emit:(type,detail)=>emitted.push({type,...detail})});
+ const surface=createSurfaceComments({THREE,canvas,camera,controls,getModel:()=>root,getFormat:()=> format,getOverviewDistance:()=>5,onMarkerInteraction:()=>interactions.push(true),emit:(type,detail)=>emitted.push({type,...detail})});
  const pointer=(type,x=100,y=100,id=1)=>events.get(type)?.({clientX:x,clientY:y,pointerId:id,button:0,isPrimary:id===1});
- return {surface,pointer,emitted,root,camera,controls,events,elements,document,canvas};
+ return {surface,pointer,emitted,root,camera,controls,events,elements,document,canvas,interactions};
 }
 test('actual raycast returns root-local point/normal and scene camera only in explicit mode',()=>{
  const f=fixture();f.pointer('pointerdown');f.pointer('pointerup');assert.equal(f.emitted.length,0);
@@ -182,6 +182,7 @@ test('PLY tap stores actual indexed vertex in root coordinates, not closest ray 
  assert.ok(Math.abs(picked.anchor.position[0]-.025)<1e-7);assert.ok(Math.abs(picked.anchor.position[1]-.01)<1e-7);
  assert.equal(picked.anchor.position[2],0);assert.equal(picked.anchor.normal,undefined);
  assert.deepEqual(picked.anchor.cameraPosition,[2,0,5]);
+ f.surface.setMode(false); // The host exits picking once it accepts the anchor.
  f.surface.setMarkers([{id:'ply',number:1,selected:true,anchor:picked.anchor}]);
  const button=f.document.body.children[0].children[0];assert.equal(button.style.display,'block');
  f.camera.position.set(5,3,4);f.controls.update();f.surface.focus(picked.anchor);
@@ -267,3 +268,65 @@ test('draft and saved selected or unselected points remain white without rendere
  assert.equal(point.textContent,'');
  f.surface.dispose();
 });
+
+
+for (const format of ['glb', 'ply']) {
+ test(`${format}: picking hides existing comments immediately and restores them on exit`, () => {
+  const f=fixture(true,format);
+  const saved={id:'existing',number:1,selected:true,anchor:{position:[0,0,1]},previewText:'existing comment'};
+  f.surface.setMarkers([saved]);
+  const overlay=f.document.body.children[0],button=overlay.children[0];
+  const content=f.elements.find(e=>e.attributes['data-comment-content']==='existing');
+  assert.equal(content.style.display,'block');
+  assert.equal(f.emitted.at(-1).layout.id,'existing');
+  const camera=f.camera.position.toArray();
+  f.surface.setMode(true);
+  const forwarded=[];
+  f.document.defaultView={WheelEvent:class {constructor(type,options){this.type=type;Object.assign(this,options);}}};
+  f.canvas.dispatchEvent=event=>forwarded.push(event);
+  button.listeners.get('pointerdown')({stopPropagation(){}});
+  button.listeners.get('wheel')({target:button,preventDefault(){},stopPropagation(){}});
+  assert.equal(f.interactions.length,0,'hidden saved pins cannot intercept marker interaction');
+  assert.equal(forwarded.length,0,'hidden saved pins cannot forward a stale wheel');
+  assert.equal(overlay.style.display,'none','saved pins, halos and cards must disappear before the first pick');
+  assert.equal(overlay.attributes['aria-hidden'],'true');
+  assert.equal(f.emitted.at(-1).layout,null,'host comment card layout must also clear');
+  const before=f.emitted.length;
+  button.listeners.get('click')({target:button,stopPropagation(){}});
+  assert.equal(f.emitted.length,before,'a stale pin click must not select a saved comment while picking');
+  f.camera.position.x+=.1;f.controls.update();f.surface.update();
+  assert.equal(overlay.style.display,'none','camera updates must not show old pins');
+  f.camera.position.fromArray(camera);f.controls.update();
+  f.pointer('pointerdown');f.pointer('pointerup');
+  assert.ok(f.emitted.find(e=>e.type==='pw-viewer-surface-picked'),'the real surface is still pickable');
+  f.surface.setMode(false);
+  assert.equal(overlay.style.display,'block');
+  assert.equal(overlay.attributes['aria-hidden'],'false');
+  assert.equal(overlay.children[0],button,'restore without deleting or recreating saved markers');
+  assert.equal(button.attributes['aria-pressed'],'true');
+  assert.equal(content.style.display,'block');
+  assert.deepEqual(f.camera.position.toArray(),camera,'comment visibility must not move the camera');
+  f.surface.dispose();
+ });
+ test(`${format}: marker refresh stays hidden during picking and the new draft stays white after exit`, () => {
+  const f=fixture(true,format),overlay=f.document.body.children[0];
+  f.surface.setMode(true);
+  f.surface.setMarkers([{id:'refreshed',number:1,selected:true,anchor:{position:[0,0,1]},
+   previewText:'new remote comment',previewImages:['https://media.example/unopened.png']}]);
+  assert.equal(overlay.style.display,'none');
+  assert.equal(f.elements.find(e=>e.tag==='img').src,undefined,'hidden old content should not request an image');
+  f.surface.setMarkers([{id:'pw-draft-comment-point',number:1,selected:true,anchor:{position:[0,0,1]}}]);
+  assert.equal(overlay.style.display,'none');
+  f.surface.setMode(false);
+  assert.equal(overlay.style.display,'block');
+  const draft=overlay.children[0];
+  assert.equal(draft.textContent,'');
+  assert.equal(draft.children[1].style.background,'#fff');
+  assert.equal(draft.style.display,'block');
+  f.surface.clear();
+  assert.equal(overlay.children.length,0);
+  f.surface.setMarkers([{id:'next-work',number:1,anchor:{position:[0,0,1]}}]);
+  assert.equal(overlay.style.display,'block','clear must not leave later assets hidden');
+  f.surface.dispose();
+ });
+}

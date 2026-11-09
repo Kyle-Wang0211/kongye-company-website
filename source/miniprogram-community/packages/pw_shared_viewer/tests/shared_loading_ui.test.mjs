@@ -7,8 +7,10 @@ const html = fs.readFileSync(new URL('../web/index.html', import.meta.url), 'utf
 function fixture() {
   const elements = new Map();
   for (const id of ['viewer', 'status', 'download', 'download-value', 'download-number']) {
-    const classes = new Set();
-    elements.set(`#${id}`, {hidden:false, textContent:id === 'download-number' ? '0%' : '',
+    const classes = new Set(id === 'download' ?
+      (html.match(/<div id="download"[^>]*class="([^"]*)"/)?.[1] ?? '').split(' ').filter(Boolean) : []);
+    elements.set(`#${id}`, {hidden:false, textContent:id === 'download-number' ?
+      html.match(/<span id="download-number">([^<]*)<\/span>/)[1] : '',
       style:{}, setAttribute(){}, classList:{toggle(name, enabled){ enabled ? classes.add(name) : classes.delete(name); }, contains:name=>classes.has(name)}});
   }
   const window = {location:{origin:'https://viewer.example'},addEventListener(){},dispatchEvent(){}};
@@ -24,12 +26,13 @@ function fixture() {
     state:value=>vm.runInContext(`stateChanged(${JSON.stringify(value)})`,context)};
 }
 
-test('shared iframe first HTML displays centered ring and zero without phase text',()=>{
-  assert.match(html, /id="download-number">0%/);
+test('shared iframe starts with indeterminate ring and no unmeasured percentage',()=>{
+  assert.match(html, /id="download-number"><\/span>/);
   assert.doesNotMatch(html, /正在初始化|正在加载/);
   const f=fixture();
   assert.equal(f.elements.get('#download').hidden,false);
-  assert.equal(f.elements.get('#download-number').textContent,'0%');
+  assert.equal(f.elements.get('#download-number').textContent,'');
+  assert.equal(f.elements.get('#download').classList.contains('indeterminate'),true);
 });
 
 test('actual byte progress survives decoding and only ready/error removes ring',()=>{
@@ -43,7 +46,8 @@ test('actual byte progress survives decoding and only ready/error removes ring',
   f.state({status:'ready'});
   assert.equal(f.elements.get('#download').hidden,true);
   f.state({status:'loading'});
-  assert.equal(f.elements.get('#download-number').textContent,'0%');
+  assert.equal(f.elements.get('#download-number').textContent,'');
+  assert.equal(f.elements.get('#download').classList.contains('indeterminate'),true);
   f.progress({receivedBytes:8,totalBytes:8});
   assert.equal(f.elements.get('#download-number').textContent,'100%');
   f.state({status:'error'});
@@ -80,7 +84,8 @@ test('explicit next loading reopens progress after ready or error without accept
     f.progress({receivedBytes:0,totalBytes:1});
     f.state({status:'loading'});
     assert.equal(f.elements.get('#download').hidden,false);
-    assert.equal(f.elements.get('#download-number').textContent,'0%');
+    assert.equal(f.elements.get('#download-number').textContent,'');
+  assert.equal(f.elements.get('#download').classList.contains('indeterminate'),true);
     f.progress({receivedBytes:2,totalBytes:8});
     assert.equal(f.elements.get('#download-number').textContent,'25%');
     f.progress({receivedBytes:7,totalBytes:8});
@@ -94,4 +99,16 @@ test('late host progress cannot reopen initialization failure',async()=>{
   assert.equal(f.elements.get('#download').hidden,true);
   f.progress({receivedBytes:0,totalBytes:1});
   assert.equal(f.elements.get('#download').hidden,true);
+});
+
+test('zero without a denominator stays blank until real byte denominator arrives',()=>{
+  const f=fixture();
+  f.progress({receivedBytes:0,totalBytes:null});
+  assert.equal(f.elements.get('#download-number').textContent,'');
+  assert.equal(f.elements.get('#download').classList.contains('indeterminate'),true);
+  f.progress({receivedBytes:0,totalBytes:8});
+  assert.equal(f.elements.get('#download-number').textContent,'0%');
+  assert.equal(f.elements.get('#download').classList.contains('indeterminate'),false);
+  f.progress({receivedBytes:2,totalBytes:8});
+  assert.equal(f.elements.get('#download-number').textContent,'25%');
 });
