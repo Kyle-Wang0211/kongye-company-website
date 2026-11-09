@@ -9,7 +9,7 @@ import 'package:pocketworld_flutter/ui/community/skeleton_shimmer.dart';
 
 void main() {
   testWidgets(
-    'unknown progress retains numeric label and never completes early',
+    'unknown progress shows observed bytes and never completes early',
     (tester) async {
       late SharedViewerController controller;
       String? loadId;
@@ -54,16 +54,17 @@ void main() {
         'totalBytes': total,
       });
       expect(find.byType(SkeletonBox), findsOneWidget);
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('0%'), findsNothing);
       progress(1, null);
       await tester.pump();
-      expect(find.text('0%'), findsOneWidget);
+      expect(find.text('1 B'), findsOneWidget);
       progress(40, 100);
       await tester.pump();
       expect(find.text('40%'), findsOneWidget);
       progress(50, null);
       await tester.pump();
-      expect(find.text('40%'), findsOneWidget);
+      expect(find.text('50 B'), findsOneWidget);
+      expect(find.text('40%'), findsNothing);
       final ring = tester.widget<CircularProgressIndicator>(
         find.byType(CircularProgressIndicator),
       );

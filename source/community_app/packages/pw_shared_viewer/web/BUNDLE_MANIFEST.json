@@ -3,7 +3,7 @@
   "engine": "three",
   "engine_version": "0.186.1",
   "upstream_commit": "9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
-  "bundle_sha256": "ec1c1c84f4aa1ff6083f779371426b473490a435ca51042b0047d66e0171c893",
+  "bundle_sha256": "92a2d608728b022f2ca101051160a8a5fb4e3d0fa8d2a3671202180d87f030b4",
   "identity_rule": "SHA-256 of canonical UTF-8 JSON files object, keys sorted and separators comma/colon; manifest excludes itself",
   "files": {
     "MODEL_FRAMING_LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
@@ -14,7 +14,7 @@
     "bundle_identity.mjs": "3f70c0ec7ff460466c92311d0405abee7ffa886cfb8c334cc1ea8a58d1af4d95",
     "host_bridge.mjs": "591de29a628680a3c183965d2f28e1c68fce6a9c6032ff678c1198b6fa4cd00e",
     "image_loader_lifecycle.mjs": "97a6149a09667d515e496304ed03b1b8137530828fc1602bc74f9fe89de7fcff",
-    "index.html": "f3bed913593312568e6603bbffd4ada1864e4c3f03dc9b47a1e4c9a777b01233",
+    "index.html": "11f17adba1b44090ae2ea4fd490241b4cff2eeb2c6be73a36dfffb3f72eea370",
     "model_framing.mjs": "22bc2551b22d52cd0fef089ec5c644028c5ef4866e0da000357a8f04a855b41f",
     "publication_selection.mjs": "ac141f182dede5b5272204c9eea4964756ce019cf6777c0aa338d6c287d5b61c",
     "skp_import.mjs": "fe32bcdc1880b14aef2bb2a7ce6e8040888bcef12fca585d1a3a233db90ece05",

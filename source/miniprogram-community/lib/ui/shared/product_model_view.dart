@@ -195,12 +195,28 @@ class _ProductModelViewState extends State<ProductModelView>
   MemoryImage? _frame;
   Future<void> _captureQueue = Future<void>.value();
   Object? _error;
-  double? _downloadProgress = 0;
-  double _lastKnownDownloadProgress = 0;
+  double? _downloadProgress;
+  int _receivedDownloadBytes = 0;
 
-  void _setDownloadProgress(double? progress) {
+  void _setDownloadProgress(double? progress, {int? receivedBytes}) {
     _downloadProgress = progress;
-    if (progress != null) _lastKnownDownloadProgress = progress;
+    if (receivedBytes != null) _receivedDownloadBytes = receivedBytes;
+  }
+
+  String get _downloadLabel {
+    final progress = _downloadProgress;
+    // A missing denominator cannot produce a meaningful percentage. Report
+    // observed body bytes while the ring remains indeterminate instead.
+    if (progress == null) {
+      final bytes = _receivedDownloadBytes;
+      if (bytes == 0) return '';
+      if (bytes >= 1000000) return '${(bytes / 1000000).toStringAsFixed(1)} MB';
+      if (bytes >= 1000) return '${(bytes / 1000).toStringAsFixed(1)} KB';
+      return '$bytes B';
+    }
+    // Download completion precedes renderer readiness; the overlay owns that
+    // later boundary and never claims 100% before leaving.
+    return '${(progress * 100).floor().clamp(0, 99)}%';
   }
 
   Timer? _captureTimer;
@@ -409,8 +425,8 @@ class _ProductModelViewState extends State<ProductModelView>
         _prepareController();
       }
       _epoch++;
-      _downloadProgress = 0;
-      _lastKnownDownloadProgress = 0;
+      _downloadProgress = null;
+      _receivedDownloadBytes = 0;
       _loadClock = Stopwatch()..start();
       _rotationArmed = false;
       _userTookControl = false;
@@ -470,6 +486,7 @@ class _ProductModelViewState extends State<ProductModelView>
             total == null
                 ? null
                 : (_controller.downloadedBytes / total).clamp(0.0, 1.0),
+            receivedBytes: _controller.downloadedBytes,
           ),
         );
       }
@@ -586,8 +603,8 @@ class _ProductModelViewState extends State<ProductModelView>
       // never try to load through the invalidated controller/presentation.
       _communityRecoveryUsed = true;
       _epoch++;
-      _downloadProgress = 0;
-      _lastKnownDownloadProgress = 0;
+      _downloadProgress = null;
+      _receivedDownloadBytes = 0;
       _hostReady = false;
       _loadedEpoch = -1;
       _loadingEpoch = null;
@@ -756,8 +773,11 @@ class _ProductModelViewState extends State<ProductModelView>
                   if (current()) _fail(error);
                 }),
               );
-              if (_downloadProgress != progress) {
-                setState(() => _setDownloadProgress(progress));
+              if (_downloadProgress != progress ||
+                  _receivedDownloadBytes != received) {
+                setState(
+                  () => _setDownloadProgress(progress, receivedBytes: received),
+                );
               }
             },
             load: (bytes) => controller.loadBytes(bytes, format: format),
@@ -1081,11 +1101,12 @@ class _ProductModelViewState extends State<ProductModelView>
                   strokeWidth: 3,
                 ),
                 Center(
-                  child: Text(
-                    // Download completion is not render readiness. Keep the
-                    // visible loading label below 100 until this overlay leaves.
-                    '${(_lastKnownDownloadProgress * 100).floor().clamp(0, 99)}%',
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _downloadLabel,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ),
                 ),
               ],

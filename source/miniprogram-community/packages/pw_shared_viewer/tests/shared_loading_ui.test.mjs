@@ -13,12 +13,14 @@ function fixture() {
   }
   const window = {location:{origin:'https://viewer.example'},addEventListener(){},dispatchEvent(){}};
   window.parent=window;
+  let rejectReady;
   const context=vm.createContext({window, document:{querySelector:id=>elements.get(id),documentElement:{}},
-    verifyLocalBundle:()=>new Promise(()=>{}),installHostBridge(){},CustomEvent:class{},URLSearchParams,
+    verifyLocalBundle:()=>new Promise((_,reject)=>{rejectReady=reject;}),installHostBridge(){},CustomEvent:class{},URLSearchParams,
     location:{search:''}});
   const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^\s*import .*;$/gm,'');
   vm.runInContext(script,context);
   return {elements,context,progress:window.pwSharedViewerDownloadProgress,
+    initializationFailed:async()=>{rejectReady(new Error('initialization failed'));await window.pwSharedViewerReady.catch(()=>{});},
     state:value=>vm.runInContext(`stateChanged(${JSON.stringify(value)})`,context)};
 }
 
@@ -40,9 +42,9 @@ test('actual byte progress survives decoding and only ready/error removes ring',
   assert.equal(f.elements.get('#download').hidden,false);
   f.state({status:'ready'});
   assert.equal(f.elements.get('#download').hidden,true);
-  f.progress({receivedBytes:0,totalBytes:8});
-  f.progress({receivedBytes:8,totalBytes:8});
   f.state({status:'loading'});
+  assert.equal(f.elements.get('#download-number').textContent,'0%');
+  f.progress({receivedBytes:8,totalBytes:8});
   assert.equal(f.elements.get('#download-number').textContent,'100%');
   f.state({status:'error'});
   assert.equal(f.elements.get('#download').hidden,true);
@@ -52,4 +54,44 @@ test('unknown total shows honest indeterminate ring',()=>{
   const f=fixture();f.progress({receivedBytes:300,totalBytes:null});
   assert.equal(f.elements.get('#download-number').textContent,'—');
   assert.equal(f.elements.get('#download').classList.contains('indeterminate'),true);
+});
+
+for (const terminal of [{status:'ready'}, {status:'error'}, {status:'disposed',disposed:true}]) {
+  test(`late progress after ${terminal.status} cannot cover the completed scene`,()=>{
+    const f=fixture();
+    f.state({status:'loading'});
+    f.progress({receivedBytes:8,totalBytes:8});
+    f.state(terminal);
+    assert.equal(f.elements.get('#download').hidden,true);
+    for (const progress of [{receivedBytes:0,totalBytes:1},
+      {receivedBytes:300,totalBytes:null}, {receivedBytes:8,totalBytes:8}]) {
+      f.progress(progress);
+      assert.equal(f.elements.get('#download').hidden,true);
+      assert.equal(f.elements.get('#download-number').textContent,'100%');
+    }
+  });
+}
+
+test('explicit next loading reopens progress after ready or error without accepting terminal late events',()=>{
+  const f=fixture();
+  for (const terminal of [{status:'ready'},{status:'error'}]) {
+    f.progress({receivedBytes:3,totalBytes:8});
+    f.state(terminal);
+    f.progress({receivedBytes:0,totalBytes:1});
+    f.state({status:'loading'});
+    assert.equal(f.elements.get('#download').hidden,false);
+    assert.equal(f.elements.get('#download-number').textContent,'0%');
+    f.progress({receivedBytes:2,totalBytes:8});
+    assert.equal(f.elements.get('#download-number').textContent,'25%');
+    f.progress({receivedBytes:7,totalBytes:8});
+    assert.equal(f.elements.get('#download-number').textContent,'87%');
+  }
+});
+
+test('late host progress cannot reopen initialization failure',async()=>{
+  const f=fixture();
+  await f.initializationFailed();
+  assert.equal(f.elements.get('#download').hidden,true);
+  f.progress({receivedBytes:0,totalBytes:1});
+  assert.equal(f.elements.get('#download').hidden,true);
 });

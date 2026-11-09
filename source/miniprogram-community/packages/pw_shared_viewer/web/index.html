@@ -56,11 +56,13 @@
     const download = document.querySelector('#download');
     const downloadValue = document.querySelector('#download-value');
     const downloadNumber = document.querySelector('#download-number');
-    let downloading = true;
+    let downloadClosed = false;
     function updateDownloadProgress({receivedBytes, totalBytes}) {
+      // A late host progress packet cannot reopen a finished model's overlay.
+      // Only the renderer's explicit next loading state opens a new UI phase.
+      if (downloadClosed) return;
       const ratio = totalBytes > 0 ? Math.min(1, Math.max(0, receivedBytes / totalBytes)) : null;
       download.hidden = false;
-      downloading = true;
       download.classList.toggle('indeterminate', ratio === null);
       downloadValue.style.strokeDashoffset = String(188.496 * (1 - (ratio ?? 0)));
       downloadNumber.textContent = ratio === null ? '—' : `${Math.floor(ratio * 100)}%`;
@@ -89,12 +91,13 @@
       window.parent.postMessage(localizationReady, window.location.origin);
     }
     function stateChanged(state) {
-      if (state.status === 'loading' && lastState.status === 'ready' && !downloading) {
+      if (state.status === 'loading' && downloadClosed) {
+        downloadClosed = false;
         updateDownloadProgress({receivedBytes: 0, totalBytes: 1});
       }
       if (state.status === 'ready' || state.status === 'error' || state.disposed) {
         download.hidden = true;
-        downloading = false;
+        downloadClosed = true;
       }
       lastState = state;
       renderUi();
@@ -136,6 +139,7 @@
     });
     window.pwSharedViewerReady.catch(error => {
       download.hidden = true;
+      downloadClosed = true;
       const diagnostic = error instanceof Error ? error.message : String(error);
       lastState = { status: 'error', error: diagnostic };
       renderUi();
