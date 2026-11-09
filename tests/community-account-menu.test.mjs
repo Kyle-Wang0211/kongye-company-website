@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {readAccount} from '../docs/community-account-data.mjs';
 
-function boot() {
+function boot(options={}) {
   const elements = new Map(), timers = new Map();
   let timerId = 0;
   class Element {
@@ -32,21 +32,23 @@ function boot() {
   const document = new Element('document');
   document.createElement = tag => new Element(tag);
   document.querySelector = selector => elements.get(selector) || null;
-  for (const id of ['account-nav','account-summary','account-actions','account-menu']) elements.set('#'+id, new Element(id === 'account-menu' ? 'details' : 'div'));
+  for (const id of ['account-nav','account-summary','account-actions','account-menu','my-profile-link']) elements.set('#'+id, new Element(id === 'account-menu' ? 'details' : 'div'));
   const menu = elements.get('#account-menu'); menu.append(elements.get('#account-summary'), elements.get('#account-actions'));
   const window = new Element('window');
-  const storage = new Map();
+  const storage = options.storage||new Map(), persistent=options.persistent||new Map();
   const source = readFileSync(new URL('../docs/community-account.mjs', import.meta.url), 'utf8')
     .replace(/^import .*;\n/gm, '').replace(/^export /gm, '')
     .replace('const accountClientReady=start();\nvoid accountClientReady.catch(retry);','') +
-    '\nglobalThis.hooks={render,guest,refresh,setClient:value=>client=value};';
+    '\nglobalThis.hooks={render,guest,refresh,start,retry,owner:()=>displayedId,setClient:value=>client=value};';
   const localizeElement = (node,key) => { node.dataset.i18n=key; node.textContent=key; };
   const context = {document,window,localizeElement,localeReady:Promise.resolve(),localeEvent:'pw:localechange',
     sessionStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},
+    localStorage:{getItem:key=>persistent.get(key),setItem:(key,value)=>persistent.set(key,value),removeItem:key=>persistent.delete(key)},
+    fetch:options.fetch, supabase:options.supabase,AbortSignal,location:{assign(){}},
     setTimeout:callback=>{timers.set(++timerId,callback);return timerId;},clearTimeout:id=>timers.delete(id),
-    readAccount:async()=>{throw Error('presentation cache was not reused');}, avatarDataUrl:async()=>null};
+    readAccount:options.readAccount||async function(){throw Error('offline');}, avatarDataUrl:async()=>null};
   vm.runInNewContext(source,context);
-  return {document,window,menu,storage,get:id=>elements.get('#'+id),hooks:context.hooks,
+  return {document,window,menu,storage,persistent,context,get:id=>elements.get('#'+id),hooks:context.hooks,
     flush(){for(const [id,callback] of [...timers]){timers.delete(id);callback();}}};
 }
 const settle = () => new Promise(resolve=>setImmediate(resolve));
@@ -125,7 +127,7 @@ test('same-account refresh keeps both decoded avatars and existing menu nodes',(
   assert.equal(profile.querySelector('img'),menuAvatar);
   assert.equal(profile.querySelector('.account-card-name').textContent,'Updated name');
 });
-test('valid five-minute presentation cache bypasses account and avatar transport',async()=>{
+test('valid presentation cache stays visible during failed canonical transport',async()=>{
   const page=boot();connect(page,async()=>({data:null}));
   page.storage.set('pw-current-account-presentation-rds-v1',JSON.stringify({account,until:Date.now()+299000}));
   await page.hooks.refresh();
@@ -149,4 +151,82 @@ test('session switch while RPC is pending discards the response even before anot
   page.menu.open=true;page.menu.emit('toggle');await settle();session.user.id='actor-b';
   resolve({data:{likes_count:55,favorites_count:55,history_count:55}});await settle();
   assert.equal(page.get('account-actions').querySelector('.account-likes-count').textContent,'—');
+});
+
+const cacheKey='pw-current-account-presentation-rds-v1';
+const defer=()=>{let resolve;const promise=new Promise(done=>resolve=done);return {promise,resolve};};
+const sessionFor=id=>({data:{session:id?{user:{id,user_metadata:{display_name:'Session '+id}}}:null}});
+function sdk(page,id,read=()=>sessionFor(id)) {
+  page.hooks.setClient({auth:{getSession:async()=>read()},functions:{invoke:async()=>({error:Error('avatar offline')})}});
+}
+
+test('SDK restoration is neutral and cannot open a false login path',async()=>{
+  const pending=defer(),page=boot();
+  sdk(page,account.id,()=>pending.promise);
+  const request=page.hooks.refresh();await settle();
+  assert.equal(page.get('account-actions').children.length,0);
+  assert.equal(page.get('account-summary').emit('click').prevented,true);
+  assert.equal(page.get('my-profile-link').emit('click').prevented,true);
+  pending.resolve(sessionFor(account.id));await request;
+  assert.equal(page.hooks.owner(),account.id);
+  assert.equal(page.get('account-summary').querySelector('.community-account-name').textContent,'Session '+account.id);
+  assert(!page.get('account-actions').children.some(node=>node.href==='community/?auth=signin'));
+});
+
+test('same-owner persistent presentation appears before delayed server revalidation and updates canonically',async()=>{
+  const pending=defer();let calls=0;
+  const page=boot({readAccount:()=>{calls++;return pending.promise;}});
+  page.persistent.set(cacheKey,JSON.stringify({account,until:Date.now()+60000}));
+  sdk(page,account.id);
+  const request=page.hooks.refresh();await settle();
+  assert.equal(page.hooks.owner(),account.id);
+  assert.equal(page.get('account-summary').querySelector('.community-account-name').textContent,account.name);
+  assert.equal(calls,1,'cache must not suppress canonical revalidation');
+  pending.resolve({...account,name:'Canonical rename'});await request;
+  assert.equal(page.get('account-summary').querySelector('.community-account-name').textContent,'Canonical rename');
+  assert.equal(JSON.parse(page.persistent.get(cacheKey)).account.name,'Canonical rename');
+});
+
+test('closing and reopening keeps presentation only when official SDK restores its owner',async()=>{
+  const persistent=new Map();
+  const first=boot({persistent,readAccount:async()=>account});sdk(first,account.id);await first.hooks.refresh();
+  assert(persistent.has(cacheKey));
+  const next=boot({persistent});sdk(next,account.id);await next.hooks.refresh();
+  assert.equal(next.get('account-summary').querySelector('.community-account-name').textContent,account.name);
+  const signedOut=boot({persistent});sdk(signedOut,null);await signedOut.hooks.refresh();
+  assert.equal(signedOut.hooks.owner(),null);
+  assert.equal(persistent.has(cacheKey),false,'presentation never creates a session');
+});
+
+test('a cached different owner is never presented and revoked verification clears both stores',async()=>{
+  const page=boot({readAccount:async()=>null});
+  const saved=JSON.stringify({account,until:Date.now()+60000});page.storage.set(cacheKey,saved);page.persistent.set(cacheKey,saved);
+  const pending=defer();page.context.readAccount=()=>pending.promise;sdk(page,'actor-b');
+  const request=page.hooks.refresh();await settle();
+  assert.equal(page.hooks.owner(),'actor-b');
+  assert.equal(page.get('account-summary').querySelector('.community-account-name').textContent,'Session actor-b');
+  pending.resolve(null);await request;
+  assert.equal(page.hooks.owner(),null);assert.equal(page.storage.has(cacheKey),false);assert.equal(page.persistent.has(cacheKey),false);
+});
+
+test('transient SDK read failure exposes retry without claiming signed out',async()=>{
+  const page=boot();sdk(page,account.id,()=>({error:Error('restore offline')}));
+  await page.hooks.refresh();
+  assert(!page.get('account-actions').children.some(node=>node.href==='community/?auth=signin'));
+  assert.equal(page.get('account-actions').children[0].dataset.i18n,'siteAccountRetry');
+});
+
+test('startup is single-flight and focus revalidates without blanking cached account',async()=>{
+  const pending=defer();let creations=0,fetches=0,listener;
+  const client={auth:{getSession:async()=>sessionFor(account.id),onAuthStateChange:fn=>listener=fn},functions:{invoke:async()=>({data:{}})}};
+  const page=boot({fetch:async()=>{fetches++;return {ok:true,json:async()=>({origin:'https://api.kongye.space',anonKey:'synthetic'})};},supabase:{createClient:()=>{creations++;return client;}},readAccount:()=>pending.promise});
+  page.persistent.set(cacheKey,JSON.stringify({account,until:Date.now()+60000}));
+  const first=page.hooks.start(),second=page.hooks.start();await settle();
+  assert.equal(creations,1);assert.equal(fetches,1);
+  assert.equal(page.hooks.owner(),account.id);
+  page.window.emit('focus');
+  assert.equal(page.persistent.has(cacheKey),true);assert.equal(page.hooks.owner(),account.id);
+  pending.resolve(account);await Promise.all([first,second]);
+  listener('SIGNED_OUT',null);
+  assert.equal(page.hooks.owner(),null);assert.equal(page.persistent.has(cacheKey),false);
 });
