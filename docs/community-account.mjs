@@ -1,9 +1,9 @@
 import {localizeElement,localeReady} from './site-l10n.mjs?v=account-library-20261106-v44';
-import {avatarDataUrl,readAccount} from './community-account-data.mjs?v=account-library-20261106-v44';
+import {avatarDataUrl,readAccount} from './community-account-data.mjs?v=account-restore-20261109-v2';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
-const lifetime=300000,storageKey='pw-current-account-presentation-rds-v1';
+const lifetime=86400000,storageKey='pw-current-account-presentation-rds-v1';
 let publishLink,signingOut=false;
-let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false;
+let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false,startPending,sessionResolved=false,restorationFailed=false;
 const cache=new Map();
 const accountMenu=document.querySelector('#account-menu');
 const libraryLifetime=60000;
@@ -36,6 +36,7 @@ async function loadLibraryCounts(){
  libraryPending=request;return request.promise;
 }
 function openAccountMenu(focus=false){
+ if(!sessionResolved&&!restorationFailed)return;
  clearTimeout(closeTimer);accountMenu.open=true;summary.setAttribute('aria-expanded','true');
  void loadLibraryCounts();
  if(focus)actions.querySelector('a')?.focus();
@@ -62,6 +63,7 @@ if(accountMenu){
   },0);
  });
  summary.addEventListener('click',event=>{
+  if(!sessionResolved){event.preventDefault();if(restorationFailed)openAccountMenu();return;}
   if(displayedId){event.preventDefault();location.assign('community/?profile='+encodeURIComponent(displayedId));}
  });
  summary.addEventListener('keydown',event=>{
@@ -77,8 +79,13 @@ if(accountMenu){
  document.addEventListener('click',event=>{if(!accountMenu.contains(event.target))closeAccountMenu();});
 }
 
-function forget(){cache.clear();libraryCache=null;try{sessionStorage.removeItem(storageKey);}catch{}}
+document.querySelector('#my-profile-link')?.addEventListener('click',event=>{if(!sessionResolved)event.preventDefault();});
+
+function forget(){cache.clear();libraryCache=null;for(const storage of presentationStores())try{storage.removeItem(storageKey);}catch{}}
+function presentationStores(){const stores=[];try{stores.push(sessionStorage);}catch{}try{stores.push(localStorage);}catch{}return stores;}
+function remember(row){for(const storage of presentationStores())try{storage.setItem(storageKey,JSON.stringify(row));}catch{}}
 function guest(){
+ sessionResolved=true;restorationFailed=false;
  publishLink?.remove();publishLink=null;
  const profile=document.querySelector('#my-profile-link');if(profile)profile.href='community/?auth=signin';
  menuGeneration++;libraryCache=null;countNodes={};displayedId=null;summary.replaceChildren();const avatar=document.createElement('span');avatar.className='account-avatar-pending account-guest-avatar';avatar.setAttribute('aria-hidden','true');const label=document.createElement('span');label.className='community-account-name';localizeElement(label,document.querySelector('#upload-work')?'siteLogin':'siteGuest');summary.append(avatar,label);actions.replaceChildren();
@@ -86,8 +93,9 @@ function guest(){
  nav.setAttribute('aria-busy','false');
 }
 function retry(){
+ restorationFailed=true;
  if(displayedId)return; // A transient refresh failure keeps the current presentation.
- guest();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);
+ nav.setAttribute('aria-busy','false');actions.replaceChildren();const a=document.createElement('button');a.type='button';a.style.cssText='border:0;background:none;color:inherit;cursor:pointer;font:inherit';localizeElement(a,'siteAccountRetry');a.addEventListener('click',()=>void (client?refresh():start().catch(retry)));actions.append(a);
 }
 async function signOutAccount(owner,button){
  if(signingOut||displayedId!==owner||!client)return;
@@ -103,6 +111,7 @@ async function signOutAccount(owner,button){
  }finally{signingOut=false;if(displayedId===owner)button.disabled=false;}
 }
 function render(account,src){
+ sessionResolved=true;restorationFailed=false;
  const profile=document.querySelector('#my-profile-link');if(profile)profile.href='community/?profile='+encodeURIComponent(account.id);
  if(!document.querySelector('#upload-work')&&!publishLink){publishLink=document.createElement('a');publishLink.href='community/?publish=1';publishLink.textContent='+';publishLink.setAttribute('aria-label','发布作品');publishLink.title='发布作品';publishLink.style.cssText='font-size:28px;line-height:1;text-decoration:none';nav.append(publishLink);}
  if(displayedId!==account.id){
@@ -147,12 +156,13 @@ function render(account,src){
 }
 async function cachedPresentation(id){
  const memory=cache.get(id);if(memory?.until>Date.now())return memory;
- try{
-  const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');
-  if(saved?.account?.id!==id||typeof saved.account.name!=='string'||!Number.isFinite(saved.until)||saved.until<=Date.now()||saved.until>Date.now()+lifetime)return null;
+ for(const storage of presentationStores())try{
+  const saved=JSON.parse(storage.getItem(storageKey)||'null');
+  if(saved?.account?.id!==id||typeof saved.account.name!=='string'||!Number.isFinite(saved.until)||saved.until<=Date.now()||saved.until>Date.now()+lifetime)continue;
   const src=saved.avatar?await avatarDataUrl(saved.avatar):null;
   const row={...saved,src};cache.set(id,row);return row;
- }catch{return null;}
+ }catch{}
+ return null;
 }
 async function update(){
  const current=revision;
@@ -161,24 +171,39 @@ async function update(){
   if(current!==revision)return;
   const id=data.session?.user.id;
   if(!id){forget();guest();return;}
-  if(displayedId&&displayedId!==id)guest();
+  if(displayedId&&displayedId!==id){forget();guest();}
   const saved=await cachedPresentation(id);if(current!==revision)return;
-  if(saved){
-   render(saved.account,saved.src);
-   if(Number.isSafeInteger(saved.account.following_count)&&Number.isSafeInteger(saved.account.followers_count))return;
+  const {data:confirmed,error:confirmationError}=await client.auth.getSession();
+  if(confirmationError)throw confirmationError;
+  if(current!==revision)return;
+  if(confirmed.session?.user.id!==id){schedule();return;}
+  if(saved)render(saved.account,saved.src);
+  else if(!displayedId){
+   const meta=data.session.user.user_metadata||{};
+   render({id,name:meta.display_name||meta.full_name||meta.name||''});
   }
   const account=await readAccount(client);if(current!==revision)return;
+  const {data:verified,error:verificationError}=await client.auth.getSession();
+  if(verificationError)throw verificationError;
+  if(current!==revision)return;
+  if(verified.session?.user.id!==id){schedule();return;}
   if(!account){forget();guest();return;}
+  if(account.id!==id){schedule();return;}
   render(account);
+  // Persist approved presentation before the independent avatar request.
+  const prior=cache.get(id);
+  const presentation={account,avatar:prior?.avatar||null,src:prior?.src||null,until:Date.now()+lifetime};
+  cache.clear();cache.set(id,presentation);
+  remember({account,avatar:presentation.avatar,until:presentation.until});
   // Keep existing pixels while refreshing; failed avatar transport never signs out a user.
   const {data:result,error:avatarError}=await client.functions.invoke('ensure-generated-avatar',{body:{}});
-  const avatar=avatarError?null:result?.avatar;
-  const src=avatar?await avatarDataUrl(avatar):null;
+  const avatar=(avatarError?null:result?.avatar)||presentation.avatar;
+  const src=(avatar?await avatarDataUrl(avatar):null)||presentation.src;
   const {data:latest}=await client.auth.getSession();
   if(current!==revision||latest.session?.user.id!==account.id)return;
   render(account,src);
-  const row={account,avatar:src?avatar:null,src,until:Date.now()+(src?lifetime:30000)};cache.clear();cache.set(id,row);
-  try{sessionStorage.setItem(storageKey,JSON.stringify({account,avatar:row.avatar,until:row.until}));}catch{}
+  const row={account,avatar:src?avatar:null,src,until:Date.now()+lifetime};cache.clear();cache.set(id,row);
+  remember({account,avatar:row.avatar,until:row.until});
  }catch{if(current===revision)retry();}
 }
 function refresh(){
@@ -186,7 +211,7 @@ function refresh(){
  pending=update().finally(()=>{pending=null;if(rerun){rerun=false;schedule();}});return pending;
 }
 function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;void refresh();},0);}
-async function start(){
+async function startAccount(){
  await localeReady;
  const response=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('Configuration unavailable');
  const config=await response.json();if(config.origin!=='https://api.kongye.space')throw Error('Invalid deployment');
@@ -196,10 +221,10 @@ async function start(){
  });
  client.auth.onAuthStateChange((event,session)=>{
   if(event==='SIGNED_OUT'||(displayedId&&displayedId!==session?.user.id)){revision++;forget();guest();}
-  else if(event==='USER_UPDATED'){revision++;forget();}
+  else if(event==='USER_UPDATED'){revision++;libraryCache=null;}
   schedule();
  });
- const revalidate=()=>{revision++;forget();schedule();};
+ const revalidate=()=>{revision++;schedule();};
  window.addEventListener('pageshow',revalidate);window.addEventListener('focus',revalidate);
  window.addEventListener('storage',event=>{if(event.key==='pw-profile-presentation-changed-v1')revalidate();});
  window.addEventListener('storage',event=>{
@@ -210,6 +235,12 @@ async function start(){
  });
  await refresh();
  return client;
+}
+// A single startup owns the SDK client and auth listeners, including retries.
+function start(){
+ if(startPending)return startPending;
+ startPending=startAccount().catch(error=>{startPending=null;throw error;});
+ return startPending;
 }
 // Following can recover through the same account startup path after a network failure.
 export function getAccountClient(){return client?Promise.resolve(client):start();}

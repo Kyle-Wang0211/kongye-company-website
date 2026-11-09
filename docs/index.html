@@ -15,7 +15,7 @@
   <script src="community-screens.mjs?v=account-library-20261106-v44" type="module"></script>
   <script defer src="vendor/supabase/supabase-2.112.0.js"></script>
   <script src="community-settings.mjs?v=settings-above-20261106-v42" type="module"></script>
-  <script src="community-account.mjs?v=profile-nickname-20261109-v1" type="module"></script>
+  <script src="community-account.mjs?v=account-restore-20261109-v2" type="module"></script>
   <script src="community-following.mjs?v=account-library-20261106-v44" type="module"></script>
   <script src="community-feed.js?v=profile-nickname-20261109-v1" type="module"></script>
 </head>
@@ -40,7 +40,7 @@
     <a id="upload-work" data-i18n-aria="navUpload" aria-label="上传作品" class="header-action" href="community/?publish=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6"/></svg><span data-i18n="navUpload">上传作品</span></a>
     <nav id="account-nav" aria-label="账号" aria-busy="true">
       <details id="account-menu">
-        <summary id="account-summary" class="community-account" data-i18n-aria="siteAccountMenu" aria-label="账号菜单"><span class="account-avatar-pending account-guest-avatar" aria-hidden="true"></span><span class="community-account-name" data-i18n="siteLogin">登录</span></summary>
+        <summary id="account-summary" class="community-account" data-i18n-aria="siteAccountMenu" aria-label="账号菜单"><span class="account-avatar-pending account-guest-avatar" aria-hidden="true"></span><span class="community-account-name" data-i18n="siteAccount">账号</span></summary>
         <div class="account-dropdown"><div id="account-actions"><a href="community/?auth=signin" data-i18n="siteLogin">登录</a><a href="community/?auth=signup" data-i18n="siteRegister">注册</a></div><button id="open-settings" type="button" data-i18n="siteSettings">设置</button></div>
       </details>
     </nav>

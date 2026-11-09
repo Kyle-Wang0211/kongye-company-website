@@ -7,7 +7,8 @@ test('guest never requests authenticated data',async()=>{assert.equal(await read
 test('server profile hydrates verified identity, revoked tokens become guest',async()=>{assert.deepEqual(await readAccount(client()),{id:'A',name:'真实用户名',following_count:null,followers_count:null});assert.equal(await readAccount(client(401)),null);assert.equal(await readAccount(client(403)),null);});
 test('network errors stay errors and cannot masquerade as signed out',async()=>{await assert.rejects(readAccount(client(503)));});
 test('account switching discards stale asynchronous profile result',async()=>{const c=client();let count=0;c.auth.getSession=async()=>session(++count===1?'A':'B');assert.equal(await readAccount(c),null);});
-test('missing profile uses existing account metadata without invented username',async()=>{const c=client();c.rpc=async()=>({error:Error('offline')});assert.equal((await readAccount(c)).name,'metadata');});
+test('canonical profile failure cannot replace approved nickname with stale metadata',async()=>{const c=client();c.rpc=async()=>({error:Error('offline')});await assert.rejects(readAccount(c),/offline/);});
+test('missing profile retains existing account metadata without invented username',async()=>{const c=client();c.rpc=async()=>({data:[]});assert.equal((await readAccount(c)).name,'metadata');});
 test('avatar parser preserves official PNG size and digest validation',async()=>{
  const png=new Uint8Array(100);png.set([137,80,78,71,13,10,26,10]);const view=new DataView(png.buffer);view.setUint32(16,128);view.setUint32(20,128);
  const sha=Buffer.from(await crypto.subtle.digest('SHA-256',png)).toString('hex');

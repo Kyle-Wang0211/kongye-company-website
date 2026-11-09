@@ -18,6 +18,7 @@ MANIFEST = 'COMMUNITY_SOURCE_MANIFEST.json'
 EXACT_FILES = frozenset({
     'pubspec.yaml', 'pubspec.lock', 'analysis_options.yaml', 'l10n.yaml',
     'tool/pw_community_source_export.py', 'tool/pw_community_web_build.py',
+    'tool/pw_version_web_fonts.py',
     'tool/community_build_features.py', 'tool/community_features.json',
     'tool/pw_release_regional_defines.py', 'tool/pw_release_legacy_import_defines.py',
     'ios/Vendor/Zpaq/Zpaq-LICENSE.txt',

@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 
 from community_build_features import community_defines
+from pw_version_web_fonts import version_font_assets
 from pw_release_regional_defines import load_config
 from pw_community_source_export import encoded, manifest
 
@@ -64,7 +65,9 @@ def main():
     if source != manifest(root):
         raise SystemExit("Source changed during the web build")
     build = root / "build/web"
+    font_cache_identity = version_font_assets(build)
     receipt = {
+        "font_cache_identity": font_cache_identity,
         "entrypoint": "lib/main_community_web.dart",
         "base_href": args.base_href,
         "native_entrypoint": "lib/main.dart",

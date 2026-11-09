@@ -9,7 +9,8 @@ export async function readAccount(client){
  const {data:profile,error:profileError}=await client.rpc('get_social_profile',{p_user_id:id});
  const {data:latest}=await client.auth.getSession();if(latest.session?.user.id!==id)return null;
  const meta=data.user.user_metadata||{};
- const social=profileError?null:profile?.[0];
+ if(profileError)throw profileError;
+ const social=profile?.[0];
  const count=value=>Number.isSafeInteger(value)&&value>=0?value:null;
  return {id,name:social?.display_name||meta.display_name||meta.full_name||meta.name||'',
   following_count:count(social?.following_count),followers_count:count(social?.followers_count)};
