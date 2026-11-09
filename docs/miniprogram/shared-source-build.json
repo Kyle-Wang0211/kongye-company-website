@@ -1,10 +1,10 @@
 {
   "entrypoint": "lib/main_community_web.dart",
   "base_href": "/miniprogram/",
-  "source_revision": "fcd1b1254c7fbaa64beffc50220b299ff5c95b05",
-  "source_manifest_sha256": "ef9892254ae84d292aa9f5cb8ccf3d3cca0ef83472fce029143dda99b13d3628",
+  "source_revision": "5da677f2a4f20536feb13e14a4f3d05979e61c9f",
+  "source_manifest_sha256": "9fe33921cfbb700fdd464ede4fec846bfcda636774cc430948c111c6fcde011d",
   "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "48a64a538e15a4168155c23fdce341b6fea82dd28f1a147b04024ae3418951b5",
+  "main_js_sha256": "d184dccb1eb2ef8f3004bdc12e044d3c0268334e0536a2ae485e1195bd9c8ddc",
   "native_email_ready_define": true,
   "status": "built-local-not-deployed",
   "capabilities": {
@@ -15,8 +15,8 @@
   "font_cache_identity": [
     {
       "original": "fonts/MaterialIcons-Regular.otf",
-      "asset": "fonts/MaterialIcons-Regular.c6c75fb7fd365bb8.otf",
-      "sha256": "c6c75fb7fd365bb8657468d7586c72e4dcd6d707bc901461adc86e06c83e246a"
+      "asset": "fonts/MaterialIcons-Regular.7a88d4d8cb7d836b.otf",
+      "sha256": "7a88d4d8cb7d836b6a8113e6c350b4d79b1afcfe863882f56f89cc13882e21af"
     },
     {
       "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
