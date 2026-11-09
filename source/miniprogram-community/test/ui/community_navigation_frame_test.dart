@@ -1,5 +1,8 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pocketworld_flutter/l10n/app_localizations.dart';
 import 'package:pocketworld_flutter/ui/community/community_navigation_frame.dart';
 
 class _DraftPage extends StatefulWidget {
@@ -40,7 +43,11 @@ Widget _app({
   required ValueNotifier<bool> visible,
   GlobalKey<_DraftPageState>? homeKey,
   String? initialRoute,
+  Locale locale = const Locale('en'),
 }) => MaterialApp(
+  locale: locale,
+  localizationsDelegates: AppL10n.localizationsDelegates,
+  supportedLocales: AppL10n.supportedLocales,
   navigatorKey: navigator,
   navigatorObservers: [observer],
   initialRoute: initialRoute,
@@ -376,6 +383,79 @@ void main() {
     observer.dispose();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'sidebar destinations stay in route semantics and remain actionable',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        tester.view.physicalSize = const Size(1280, 900);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final navigator = GlobalKey<NavigatorState>();
+        final observer = CommunitySidebarRouteObserver();
+        final visible = ValueNotifier(true);
+        await tester.pumpWidget(
+          _app(
+            navigator: navigator,
+            observer: observer,
+            controller: CommunityNavigationController(),
+            visible: visible,
+            locale: const Locale('zh'),
+            initialRoute: '/messages',
+          ),
+        );
+        await tester.pumpAndSettle();
+        void expectDestinations() {
+          for (final label in ['热门', '关注', '我的', '消息']) {
+            final finder = find.bySemanticsLabel(
+              RegExp('^${RegExp.escape(label)}\$'),
+            );
+            expect(
+              finder,
+              findsOneWidget,
+              reason:
+                  '$label must remain in the actual semantics tree above Navigator',
+            );
+            final data = tester.getSemantics(finder).getSemanticsData();
+            expect(
+              data.flagsCollection.isButton,
+              true,
+              reason: '$label must be a button',
+            );
+            expect(
+              data.hasAction(SemanticsAction.tap),
+              true,
+              reason: '$label must remain actionable',
+            );
+          }
+        }
+
+        expectDestinations();
+        await tester.tap(find.bySemanticsLabel('我的'));
+        await tester.pumpAndSettle();
+        expect(find.text('/profile'), findsOneWidget);
+        expectDestinations();
+        tester.view.physicalSize = const Size(800, 900);
+        await tester.pumpAndSettle();
+        expectDestinations();
+        await tester.tap(find.bySemanticsLabel('消息'));
+        await tester.pumpAndSettle();
+        expect(find.text('/messages'), findsOneWidget);
+        expectDestinations();
+        navigator.currentState!.pop();
+        await tester.pumpAndSettle();
+        expectDestinations();
+        await tester.pumpWidget(const SizedBox());
+        observer.dispose();
+        visible.dispose();
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
 
   test('route visibility preserves standalone auth and full work entry', () {
     final messages = Uri.parse('https://example.invalid/community/#/messages');

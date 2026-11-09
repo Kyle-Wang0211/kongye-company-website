@@ -66,7 +66,8 @@ class CommunityNavigationFrame extends StatelessWidget {
       onMessages: onMessages,
       onSettings: onSettings,
       onOpenFiling: onOpenFiling,
-      child: child,
+      // Scope route BlockSemantics to the content so it cannot hide navigation.
+      child: Semantics(container: true, explicitChildNodes: true, child: child),
     ),
   );
 }
