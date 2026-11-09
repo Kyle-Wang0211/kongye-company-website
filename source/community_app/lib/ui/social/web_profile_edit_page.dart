@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../design_system.dart';
 
@@ -177,6 +178,40 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
     }
   }
 
+  InputDecoration _fieldDecoration(
+    String label,
+    TextEditingController controller,
+    int maxLength, {
+    String? hintText,
+  }) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    );
+    return InputDecoration(
+      labelText: label,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      hintText: hintText,
+      filled: true,
+      fillColor: AetherColors.bgElevated,
+      contentPadding: const EdgeInsets.all(16),
+      border: border,
+      enabledBorder: border,
+      disabledBorder: border,
+      focusedBorder: border.copyWith(
+        borderSide: const BorderSide(color: AetherColors.primary),
+      ),
+      errorBorder: border.copyWith(
+        borderSide: const BorderSide(color: AetherColors.danger),
+      ),
+      focusedErrorBorder: border.copyWith(
+        borderSide: const BorderSide(color: AetherColors.danger),
+      ),
+      helperText: '最多 $maxLength 个字符',
+      counterText: '${controller.text.characters.length}/$maxLength',
+    );
+  }
+
   ThemeData _theme(BuildContext context) {
     final theme = Theme.of(context);
     final colors = ColorScheme.fromSeed(
@@ -268,7 +303,10 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
                           key: const Key('profile-name'),
                           controller: _name,
                           enabled: !_saving,
-                          decoration: const InputDecoration(labelText: '昵称'),
+                          maxLength: 20,
+                          maxLengthEnforcement:
+                              MaxLengthEnforcement.truncateAfterCompositionEnds,
+                          decoration: _fieldDecoration('昵称', _name, 20),
                           textInputAction: TextInputAction.next,
                           validator: (value) => (value?.trim().isEmpty ?? true)
                               ? '请输入昵称'
@@ -281,9 +319,17 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
                           key: const Key('profile-bio'),
                           controller: _bio,
                           enabled: !_saving,
-                          minLines: 3,
-                          maxLines: 6,
-                          decoration: const InputDecoration(labelText: '个人简介'),
+                          minLines: 5,
+                          maxLines: 5,
+                          maxLength: 160,
+                          maxLengthEnforcement:
+                              MaxLengthEnforcement.truncateAfterCompositionEnds,
+                          decoration: _fieldDecoration(
+                            '个人简介',
+                            _bio,
+                            160,
+                            hintText: '介绍一下你自己',
+                          ),
                           validator: (value) =>
                               (value?.characters.length ?? 0) > 160
                               ? '个人简介最多 160 个字符'

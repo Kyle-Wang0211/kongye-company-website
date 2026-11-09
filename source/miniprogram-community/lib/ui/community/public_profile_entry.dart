@@ -14,7 +14,6 @@ import 'user_profile_page.dart';
 import 'community_profile_shell.dart';
 import '../social/community_account_routes.dart' show WebFavoritesAccountEntry;
 import '../../community/account_work_library_repository.dart';
-import 'following_list_page.dart';
 import '../../me/profile_likes_repository.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../social/web_messaging_entry.dart';
@@ -249,25 +248,9 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
           ),
         );
       },
-      onFollowing: () async {
-        if (widget.user.signedInUser == null) await _signIn();
-        if (!mounted || !context.mounted) return;
-        final owner = widget.user.signedInUser?.id.rawValue;
-        if (owner == null) return;
-        Navigator.of(context).push<void>(
-          MaterialPageRoute(
-            builder: (_) => FollowingListPage(
-              userId: owner,
-              repository:
-                  widget.repository ??
-                  SupabaseSocialProfileRepository(
-                    client: Supabase.instance.client,
-                  ),
-            ),
-          ),
-        );
-      },
-      onSettings: () => _openAccount('/privacy'),
+      onFollowing: openCommunityFollowing,
+      onSettings: openCommunitySettings,
+      onOpenFiling: openCommunityFiling,
       onMessages: () => _openAccount('/messages'),
       onPublish: () => _openAccount('/publish'),
       child: profile,

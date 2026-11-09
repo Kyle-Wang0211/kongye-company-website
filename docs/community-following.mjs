@@ -168,3 +168,13 @@ more.addEventListener('click',()=>{
 document.querySelector('#close-following').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('close',()=>{clear();opener.focus();});
 window.addEventListener(localeEvent,updateControls);
+
+// Direct navigation reuses this page's existing panel and session lifecycle.
+if (typeof location !== 'undefined' && location.href) {
+  const handoff = new URL(location.href);
+  if (handoff.searchParams.get('panel') === 'following') {
+    opener.click();
+    handoff.searchParams.delete('panel');
+    history.replaceState(history.state, '', handoff);
+  }
+}

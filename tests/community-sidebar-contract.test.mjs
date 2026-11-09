@@ -1,0 +1,33 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const text=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
+test('primary community navigation has exactly the four persistent destinations',()=>{
+ const sidebar=text('docs/index.html').match(/<aside class="community-sidebar"[\s\S]*?<\/aside>/)[0];
+ const primary=sidebar.match(/<nav class="sidebar-primary">([\s\S]*?)<\/nav>/)[1];
+ assert.deepEqual([...primary.matchAll(/<span data-i18n="([^"]+)"/g)].map(m=>m[1]),['communityTabHot','navFollowing','navMyProfile','navMessages']);
+ assert.match(primary,/id="sidebar-messages-link"[^>]*href="community\/#\/messages"/);
+ assert.doesNotMatch(primary,/navUpload|Publish|账号与隐私/);
+ assert.match(sidebar,/data-i18n="navMyProfile">我的<\/span>/);
+ assert.equal(JSON.parse(text('docs/i18n/zh.json')).navMyProfile,'我的');
+ assert.equal(JSON.parse(text('docs/i18n/en.json')).navMyProfile,'Me');
+ assert.match(sidebar,/id="open-sidebar-settings"/);
+ assert.match(sidebar,/京ICP备2026067702号-1/);
+});
+test('canonical community geometry and both profile implementations stay aligned',()=>{
+ const css=text('docs/community-shell.css');
+ assert.match(css,/--sidebar-width:204px/);
+ assert.match(css,/@media\(max-width:1000px\).*?--sidebar-width:80px/s);
+ assert.match(css,/@media\(max-width:600px\).*?--sidebar-width:56px/s);
+ assert.match(css,/font:15px\/1\.5/);
+ assert.match(css,/stroke-width:1\.7/);
+ const a=text('source/community_app/lib/ui/community/community_profile_shell.dart');
+ const b=text('source/miniprogram-community/lib/ui/community/community_profile_shell.dart');
+ assert.equal(a,b,'shared sidebar implementations must have identical source');
+ for(const width of ['204.0','80.0','56.0'])assert.ok(a.includes(width));
+ for(const color of ['0xff737373','0xff161616','0xfff3f3f3'])assert.ok(a.includes(color));
+ assert.ok(a.includes('22, 22'));
+ assert.match(a,/fontSize: 15/);
+ assert.match(a,/height: 1\.5/);
+ assert.match(a,/strokeWidth = 1\.7/);
+});

@@ -35,3 +35,11 @@ void exitCommunityHome() {
         .toJS,
   );
 }
+
+/// Only the two existing community panels are valid cross-page destinations.
+void openCommunitySettings() =>
+    _assignLocation(Uri.base.resolve('../?panel=settings').toString().toJS);
+void openCommunityFollowing() =>
+    _assignLocation(Uri.base.resolve('../?panel=following').toString().toJS);
+void openCommunityFiling() =>
+    _assignLocation('https://beian.miit.gov.cn/'.toJS);

@@ -235,3 +235,13 @@ window.addEventListener('resize', () => {
 window.addEventListener('scroll', event => {
   if (!settingsMenu.contains(event.target) && !languageMenu.contains(event.target)) closeMenu();
 }, {capture: true, passive: true});
+
+// Direct navigation reuses this page's existing panel and session lifecycle.
+if (typeof location !== 'undefined' && location.href) {
+  const handoff = new URL(location.href);
+  if (handoff.searchParams.get('panel') === 'settings') {
+    if (sidebarOpener) openMenu(sidebarOpener, true);
+    handoff.searchParams.delete('panel');
+    history.replaceState(history.state, '', handoff);
+  }
+}

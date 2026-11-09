@@ -4,3 +4,7 @@ void exitPublicWork() {}
 void exitCommunityHome() {}
 
 void openCommunityActivity(int screen) {}
+
+void openCommunitySettings() {}
+void openCommunityFollowing() {}
+void openCommunityFiling() {}

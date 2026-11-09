@@ -2,3 +2,7 @@
 void exitPublicWork() {}
 
 void exitCommunityHome() {}
+
+void openCommunitySettings() {}
+void openCommunityFollowing() {}
+void openCommunityFiling() {}
