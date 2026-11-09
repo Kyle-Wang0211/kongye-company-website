@@ -4,7 +4,7 @@ import {avatarDataUrl,readAccount} from '../docs/community-account-data.mjs';
 const session=id=>({data:{session:id?{user:{id}}:null}});
 const client=(status=200)=>({auth:{getSession:async()=>session('A'),getUser:async()=>status===200?{data:{user:{id:'A',user_metadata:{display_name:'metadata'}}}}:{error:{status}}},rpc:async()=>({data:[{display_name:'真实用户名'}]})});
 test('guest never requests authenticated data',async()=>{assert.equal(await readAccount({auth:{getSession:async()=>session(null)}}),null);});
-test('server profile hydrates verified identity, revoked tokens become guest',async()=>{assert.deepEqual(await readAccount(client()),{id:'A',name:'真实用户名'});assert.equal(await readAccount(client(401)),null);assert.equal(await readAccount(client(403)),null);});
+test('server profile hydrates verified identity, revoked tokens become guest',async()=>{assert.deepEqual(await readAccount(client()),{id:'A',name:'真实用户名',following_count:null,followers_count:null});assert.equal(await readAccount(client(401)),null);assert.equal(await readAccount(client(403)),null);});
 test('network errors stay errors and cannot masquerade as signed out',async()=>{await assert.rejects(readAccount(client(503)));});
 test('account switching discards stale asynchronous profile result',async()=>{const c=client();let count=0;c.auth.getSession=async()=>session(++count===1?'A':'B');assert.equal(await readAccount(c),null);});
 test('missing profile uses existing account metadata without invented username',async()=>{const c=client();c.rpc=async()=>({error:Error('offline')});assert.equal((await readAccount(c)).name,'metadata');});

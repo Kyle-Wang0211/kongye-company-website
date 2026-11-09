@@ -102,3 +102,9 @@ abstract class AuthService {
   /// decide: handle already taken, reserved name, rename cooldown.
   Future<void> updateHandle(String handle);
 }
+
+/// Optional capability for presentation refreshes that must never use cached
+/// provider metadata as a substitute for a canonical profile read.
+abstract interface class CanonicalProfileReader {
+  Future<AuthenticatedUser?> currentCanonicalProfile();
+}

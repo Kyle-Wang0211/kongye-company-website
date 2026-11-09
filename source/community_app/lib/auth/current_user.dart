@@ -62,6 +62,7 @@ class CurrentUser extends ChangeNotifier {
   AuthException? _lastError;
   bool _isPerformingAuthAction = false;
   int _generation = 0;
+  int _profileRefreshRevision = 0;
   int? _pendingSignInGeneration;
 
   int? get pendingSignInToken => _pendingSignInGeneration;
@@ -428,6 +429,35 @@ class CurrentUser extends ChangeNotifier {
         _accountDeletionGeneration = null;
       }
       _finishAction(generation);
+    }
+  }
+
+  /// Re-read approved profile presentation without changing the login lifecycle.
+  /// Missing/offline reads leave the current identity and attached data intact.
+  Future<bool> refreshProfile() async {
+    final owner = signedInUser?.id;
+    if (_disposed || owner == null || isPerformingAuthAction) return false;
+    final generation = _generation;
+    final service = _service;
+    if (service is! CanonicalProfileReader) return false;
+    final revision = ++_profileRefreshRevision;
+    try {
+      final profile = await (service as CanonicalProfileReader)
+          .currentCanonicalProfile();
+      if (!_isCurrent(generation) ||
+          revision != _profileRefreshRevision ||
+          !identical(service, _service) ||
+          isPerformingAuthAction ||
+          signedInUser?.id != owner ||
+          profile == null ||
+          profile.id != owner) {
+        return false;
+      }
+      _state = CurrentUserSignedIn(profile);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

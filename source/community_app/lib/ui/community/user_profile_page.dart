@@ -27,6 +27,10 @@ class UserProfilePage extends StatefulWidget {
   final ValueChanged<FeedWork>? onWorkTap;
   final VoidCallback? onOpenFavorites;
   final VoidCallback? onOpenMessages;
+  final VoidCallback? onEditNickname;
+  final VoidCallback? onOpenLikes;
+  final VoidCallback? onOpenHistory;
+  final Future<int> Function(String userId)? receivedLikesLoader;
   final Map<String, VoidCallback> accountActions;
   final ValueChanged<SocialProfile>? onMessage;
 
@@ -43,6 +47,10 @@ class UserProfilePage extends StatefulWidget {
     this.onWorkTap,
     this.onOpenFavorites,
     this.onOpenMessages,
+    this.onEditNickname,
+    this.onOpenLikes,
+    this.onOpenHistory,
+    this.receivedLikesLoader,
     this.accountActions = const {},
     this.onMessage,
   });
@@ -60,6 +68,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   List<FeedWork> _works = const [];
   Object? _loadError;
   bool _relationshipInFlight = false;
+  int? _receivedLikes;
+  int _likesRequest = 0;
 
   bool get _isMine => _repository.currentUserId == widget.userId;
 
@@ -82,8 +92,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _load();
   }
 
+  Future<void> _loadReceivedLikes() async {
+    final request = ++_likesRequest;
+    final loader = widget.receivedLikesLoader;
+    if (!_isMine || loader == null) return;
+    int? count;
+    try {
+      final value = await loader(widget.userId);
+      if (value >= 0) count = value;
+    } catch (_) {
+      // A failed count must remain unknown, never look like a real zero.
+    }
+    if (mounted && request == _likesRequest && _isMine) {
+      setState(() => _receivedLikes = count);
+    }
+  }
+
   Future<void> _load() async {
-    setState(() => _loadError = null);
+    setState(() {
+      _loadError = null;
+      _receivedLikes = null;
+    });
+    _loadReceivedLikes();
     try {
       final results = await Future.wait<Object>([
         _repository.fetchProfile(widget.userId),
@@ -255,7 +285,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _buildBody(l),
+      body: LayoutBuilder(
+        builder: (context, constraints) =>
+            constraints.maxWidth >= 760 ? _buildDesktopBody(l) : _buildBody(l),
+      ),
     );
   }
 
@@ -302,7 +335,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(profile.displayName, style: AetherTextStyles.h1),
+                          _nickname(profile),
                           const SizedBox(height: 8),
                           Text(
                             _identityLine(profile),
@@ -422,6 +455,242 @@ class _UserProfilePageState extends State<UserProfilePage> {
               onWorkTap: widget.onWorkTap,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _nickname(SocialProfile profile) => Row(
+    children: [
+      Flexible(child: Text(profile.displayName, style: AetherTextStyles.h1)),
+      if (_isMine && widget.onEditNickname != null)
+        IconButton(
+          key: const ValueKey('profile-edit-nickname'),
+          tooltip: _label('修改昵称', 'Edit nickname'),
+          onPressed: widget.onEditNickname,
+          icon: const Icon(Icons.edit_outlined, size: 20),
+        ),
+    ],
+  );
+
+  String _label(String zh, String en) =>
+      Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
+
+  Widget _desktopStat(Object count, String label) => Text.rich(
+    TextSpan(
+      children: [
+        TextSpan(text: '$label  ', style: AetherTextStyles.bodySm),
+        TextSpan(text: '$count', style: AetherTextStyles.body),
+      ],
+    ),
+  );
+
+  Widget _buildDesktopBody(AppL10n l) {
+    final profile = _profile;
+    if (profile == null) return _buildBody(l);
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        key: const ValueKey('profile-desktop-content'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(36, 32, 36, 36),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xfff1f2f4), Color(0xfffafafa)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GeneratedAccountAvatar(
+                  userId: profile.id,
+                  readPublic: true,
+                  radius: 64,
+                ),
+                const SizedBox(width: 32),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _nickname(profile),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 28,
+                        runSpacing: 10,
+                        children: [
+                          _desktopStat(profile.followingCount, l.socialFollow),
+                          _desktopStat(
+                            profile.followersCount,
+                            l.socialFollowers,
+                          ),
+                          if (_isMine && widget.receivedLikesLoader != null)
+                            _desktopStat(
+                              _receivedLikes ?? '—',
+                              _label('获赞', 'Likes received'),
+                            ),
+                        ],
+                      ),
+                      if (_identityLine(profile).isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          _identityLine(profile),
+                          style: AetherTextStyles.bodySm,
+                        ),
+                      ],
+                      if (profile.bio?.isNotEmpty == true) ...[
+                        const SizedBox(height: 12),
+                        Text(profile.bio!, style: AetherTextStyles.body),
+                      ],
+                      if (!_isMine) ...[
+                        const SizedBox(height: 20),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            FilledButton(
+                              key: const Key('profile-follow-button'),
+                              onPressed: _relationshipInFlight
+                                  ? null
+                                  : _toggleFollow,
+                              child: Text(
+                                profile.isFollowing
+                                    ? l.socialFollowing
+                                    : l.socialFollow,
+                              ),
+                            ),
+                            if (widget.onMessage != null)
+                              OutlinedButton.icon(
+                                key: const ValueKey(
+                                  'profile-message-peer-button',
+                                ),
+                                onPressed: _messageProfile,
+                                icon: const Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 18,
+                                ),
+                                label: Text(_label('私信', 'Message')),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (_isMine && widget.accountActions.isNotEmpty)
+                  PopupMenuButton<String>(
+                    key: const ValueKey('profile-account-menu'),
+                    tooltip: _label('更多设置', 'More settings'),
+                    icon: const Icon(Icons.more_horiz),
+                    onSelected: (label) => widget.accountActions[label]?.call(),
+                    itemBuilder: (_) => widget.accountActions.keys
+                        .map(
+                          (label) =>
+                              PopupMenuItem(value: label, child: Text(label)),
+                        )
+                        .toList(),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 36),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Container(
+                    key: const ValueKey('profile-works-tab'),
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 3)),
+                    ),
+                    child: Text(
+                      '${l.socialWorks} ${profile.publicWorksCount}',
+                      style: AetherTextStyles.body,
+                    ),
+                  ),
+                  if (_isMine && widget.onOpenLikes != null) ...[
+                    const SizedBox(width: 28),
+                    TextButton.icon(
+                      key: const ValueKey('profile-likes-button'),
+                      onPressed: widget.onOpenLikes,
+                      icon: const Icon(Icons.lock_outline, size: 16),
+                      label: Text(_label('喜欢', 'Likes')),
+                    ),
+                  ],
+                  if (_isMine && widget.onOpenFavorites != null) ...[
+                    const SizedBox(width: 28),
+                    TextButton.icon(
+                      key: const ValueKey('profile-favorites-button'),
+                      onPressed: widget.onOpenFavorites,
+                      icon: const Icon(Icons.lock_outline, size: 16),
+                      label: Text(_label('收藏', 'Favorites')),
+                    ),
+                  ],
+                  if (_isMine && widget.onOpenHistory != null) ...[
+                    const SizedBox(width: 28),
+                    TextButton.icon(
+                      key: const ValueKey('profile-history-button'),
+                      onPressed: widget.onOpenHistory,
+                      icon: const Icon(Icons.lock_outline, size: 16),
+                      label: Text(_label('观看历史', 'History')),
+                    ),
+                  ],
+                  if (_isMine && widget.onOpenMessages != null) ...[
+                    const SizedBox(width: 28),
+                    TextButton(
+                      key: const ValueKey('profile-messages-button'),
+                      onPressed: widget.onOpenMessages,
+                      child: Text(_label('私信', 'Messages')),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 1, color: AetherColors.border),
+          if (_works.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 100,
+                horizontal: 24,
+              ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.view_in_ar_outlined,
+                    size: 56,
+                    color: AetherColors.textTertiary,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _label('暂无公开作品', 'No public works yet'),
+                    style: AetherTextStyles.h2,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _label(
+                      '发布的公开作品会显示在这里',
+                      'Published public works appear here',
+                    ),
+                    style: AetherTextStyles.bodySm,
+                  ),
+                ],
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(36, 24, 36, 80),
+              child: ProfileWorkGrid(
+                works: _works,
+                service: _communityService,
+                onWorkTap: widget.onWorkTap,
+              ),
+            ),
         ],
       ),
     );

@@ -1,4 +1,6 @@
 import 'community_capabilities.dart';
+import '../community/profile_presentation_stub.dart'
+    if (dart.library.js_interop) '../community/profile_presentation_web.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -155,6 +157,12 @@ class _WebProfileEditEntryState extends State<WebProfileEditEntry> {
           }
         }
       });
+      if (_result == WebProfileSaveResult.approved) {
+        final refreshed = await widget.user.refreshProfile();
+        if (refreshed && _valid(generation)) {
+          notifyProfilePresentationChanged(widget.ownerId);
+        }
+      }
     } catch (_) {
       if (_valid(generation)) setState(() => _error = '资料或审核状态暂时无法读取，请稍后刷新。');
     } finally {

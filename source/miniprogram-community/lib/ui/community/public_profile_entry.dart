@@ -1,3 +1,4 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../social/community_capabilities.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,10 @@ import 'public_work_entry.dart' show PublicWorkSignIn;
 import 'public_work_exit_stub.dart'
     if (dart.library.js_interop) 'public_work_exit_web.dart';
 import 'user_profile_page.dart';
+import 'community_profile_shell.dart';
+import 'following_list_page.dart';
+import '../../me/profile_likes_repository.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../social/web_messaging_entry.dart';
 import 'work_detail_page.dart';
 
@@ -94,6 +99,8 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
   }
 
   Future<void> _openAccount(String route) async {
+    if (widget.user.signedInUser == null) await _signIn();
+    if (!mounted) return;
     final owner = widget.user.signedInUser?.id.rawValue;
     if (owner == null) return;
     await Navigator.of(context).pushNamed(route);
@@ -144,38 +151,95 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
       Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
 
   @override
-  Widget build(BuildContext context) => UserProfilePage(
-    key: ValueKey('${widget.userId}:$_profileRevision'),
-    userId: widget.userId ?? Uri.base.queryParameters['profile'] ?? '',
-    seedWork: widget.seedWork,
-    repository: widget.repository,
-    communityService: _service,
-    onSignIn: _signIn,
-    onExit: _exit,
-    onOpenFavorites: CommunityCapabilities.favorites
-        ? () => Navigator.of(context).pushNamed('/favorites')
-        : null,
-    onOpenMessages: () => Navigator.of(context).pushNamed('/messages'),
-    onMessage: (profile) => Navigator.of(context).pushNamed(
-      '/messages',
-      arguments: WebMessagingPeer(
-        id: profile.id,
-        displayName: profile.displayName,
+  Widget build(BuildContext context) {
+    final profile = UserProfilePage(
+      key: ValueKey('${widget.userId}:$_profileRevision'),
+      userId: widget.userId ?? Uri.base.queryParameters['profile'] ?? '',
+      seedWork: widget.seedWork,
+      repository: widget.repository,
+      communityService: _service,
+      onSignIn: _signIn,
+      onEditNickname: CommunityCapabilities.profiles
+          ? () => _openAccount('/profile-edit')
+          : null,
+      onExit: _exit,
+      onOpenFavorites: CommunityCapabilities.favorites
+          ? () => Navigator.of(context).pushNamed('/favorites')
+          : null,
+      onOpenMessages: () => _openAccount('/messages'),
+      onOpenLikes: () => _openAccount('/likes'),
+      onOpenHistory: () => _openAccount('/history'),
+      receivedLikesLoader:
+          widget.user.signedInUser?.id.rawValue ==
+              (widget.userId ?? Uri.base.queryParameters['profile'])
+          ? SupabaseProfileLikesRepository(
+              client: Supabase.instance.client,
+            ).fetchReceivedLikes
+          : null,
+      onMessage: (profile) => Navigator.of(context).pushNamed(
+        '/messages',
+        arguments: WebMessagingPeer(
+          id: profile.id,
+          displayName: profile.displayName,
+        ),
       ),
-    ),
-    accountActions: {
-      if (CommunityCapabilities.profiles)
-        _label(context, '编辑资料', 'Edit profile'): () =>
-            _openAccount('/profile-edit'),
-      _label(context, '发布记录', 'Publications'): () =>
-          _openAccount('/publications'),
-      _label(context, '我的举报', 'My reports'): () => _openAccount('/reports'),
-      _label(context, '账号与隐私', 'Account and privacy'): () =>
-          _openAccount('/privacy'),
-      _label(context, '举报审核', 'Report review'): () =>
-          _openAccount('/report-review'),
-      _label(context, '退出登录', 'Sign out'): _signOut,
-    },
-    onWorkTap: _openWork,
-  );
+      accountActions: {
+        if (CommunityCapabilities.profiles)
+          _label(context, '编辑资料', 'Edit profile'): () =>
+              _openAccount('/profile-edit'),
+        _label(context, '发布记录', 'Publications'): () =>
+            _openAccount('/publications'),
+        _label(context, '我的举报', 'My reports'): () => _openAccount('/reports'),
+        _label(context, '账号与隐私', 'Account and privacy'): () =>
+            _openAccount('/privacy'),
+        _label(context, '举报审核', 'Report review'): () =>
+            _openAccount('/report-review'),
+        _label(context, '退出登录', 'Sign out'): _signOut,
+      },
+      onWorkTap: _openWork,
+    );
+    if (!kIsWeb) return profile;
+    return CommunityProfileShell(
+      onHome: exitPublicWork,
+      onMyProfile: () {
+        final owner = widget.user.signedInUser?.id.rawValue;
+        if (owner == null) {
+          _signIn();
+          return;
+        }
+        if (owner == widget.userId) {
+          setState(() => _profileRevision++);
+          return;
+        }
+        Navigator.of(context).push<void>(
+          MaterialPageRoute(
+            builder: (_) =>
+                PublicProfileEntry(user: widget.user, userId: owner),
+          ),
+        );
+      },
+      onFollowing: () async {
+        if (widget.user.signedInUser == null) await _signIn();
+        if (!mounted || !context.mounted) return;
+        final owner = widget.user.signedInUser?.id.rawValue;
+        if (owner == null) return;
+        Navigator.of(context).push<void>(
+          MaterialPageRoute(
+            builder: (_) => FollowingListPage(
+              userId: owner,
+              repository:
+                  widget.repository ??
+                  SupabaseSocialProfileRepository(
+                    client: Supabase.instance.client,
+                  ),
+            ),
+          ),
+        );
+      },
+      onSettings: () => _openAccount('/privacy'),
+      onMessages: () => _openAccount('/messages'),
+      onPublish: () => _openAccount('/publish'),
+      child: profile,
+    );
+  }
 }

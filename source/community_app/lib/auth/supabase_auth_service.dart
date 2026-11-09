@@ -29,7 +29,7 @@ import 'auth_error.dart';
 import 'auth_models.dart';
 import 'auth_service.dart';
 
-class SupabaseAuthServiceImpl implements AuthService {
+class SupabaseAuthServiceImpl implements AuthService, CanonicalProfileReader {
   final SupabaseClient _client;
   final bool _nativeEmailReady;
   // When wired through main.dart, signUp passes the user's current UI
@@ -56,6 +56,13 @@ class SupabaseAuthServiceImpl implements AuthService {
     // the cache intact so a later recovery can still succeed while offline.
     if (session == null || session.isExpired) return null;
     return _hydrateProfile(session.user);
+  }
+
+  @override
+  Future<AuthenticatedUser?> currentCanonicalProfile() async {
+    final session = _client.auth.currentSession;
+    if (session == null || session.isExpired) return null;
+    return _hydrateProfile(session.user, requireName: true);
   }
 
   @override
@@ -643,7 +650,7 @@ class SupabaseAuthServiceImpl implements AuthService {
         throw const AuthException(AuthErrorKind.unknown, 'Profile unavailable');
       }
       displayName = row['display_name'] as String?;
-      if (requireName && (displayName == null || displayName.isEmpty)) {
+      if (requireName && (displayName == null || displayName.trim().isEmpty)) {
         throw const AuthException(
           AuthErrorKind.unknown,
           'Profile name unavailable',

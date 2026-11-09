@@ -1,3 +1,4 @@
+import 'current_author_name.dart';
 // WorkDetailPage — full-screen viewer for a single community work.
 //
 // Pushed when the user taps a card in the community feed.
@@ -1202,10 +1203,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     // Keep comments readable on large displays and reserve a usable viewer.
     final maxWidth = math.min(
       480.0,
-      math.min(
-        viewport.maxWidth * .4,
-        viewport.maxWidth - dividerWidth - 320,
-      ),
+      math.min(viewport.maxWidth * .4, viewport.maxWidth - dividerWidth - 320),
     );
     final width = wide
         ? _commentSidebarWidth.clamp(280.0, maxWidth)
@@ -1336,7 +1334,11 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                   liked: _liked,
                   likeBusy: _likeInFlight || pending.contains(widget.work.id),
                   onLike: _beginToggleLike,
-                  author: widget.work.authorDisplayName,
+                  author: currentAuthorName(
+                    context,
+                    widget.work.userId,
+                    widget.work.authorDisplayName,
+                  ),
                   authorUserId: widget.work.userId,
                   onAuthorTap:
                       widget.onAuthorTap ??

@@ -61,6 +61,9 @@ if(accountMenu){
    if(!accountMenu.contains(document.activeElement))closeAccountMenu();
   },0);
  });
+ summary.addEventListener('click',event=>{
+  if(displayedId){event.preventDefault();location.assign('community/?profile='+encodeURIComponent(displayedId));}
+ });
  summary.addEventListener('keydown',event=>{
   if(event.key==='ArrowDown'){event.preventDefault();openAccountMenu(true);}
  });
@@ -196,7 +199,9 @@ async function start(){
   else if(event==='USER_UPDATED'){revision++;forget();}
   schedule();
  });
- window.addEventListener('pageshow',schedule);window.addEventListener('focus',schedule);
+ const revalidate=()=>{revision++;forget();schedule();};
+ window.addEventListener('pageshow',revalidate);window.addEventListener('focus',revalidate);
+ window.addEventListener('storage',event=>{if(event.key==='pw-profile-presentation-changed-v1')revalidate();});
  window.addEventListener('storage',event=>{
   if(event.key!=='sb-api-rds20261104-auth-token'&&event.key!==null)return;
   revision++;let nextId;try{nextId=event.newValue?JSON.parse(event.newValue)?.user?.id:null;}catch{}

@@ -1,3 +1,4 @@
+import 'current_author_name.dart';
 // PostCard — 1:1 square community card.
 //
 // Visual structure (bottom-up):
@@ -583,7 +584,11 @@ class _GlassInfoPlate extends StatelessWidget {
                       // 昵称可重复,handle 唯一)。没设 handle 就只显示昵称。
                       work.authorHandle != null
                           ? '@${work.authorHandle}'
-                          : work.authorDisplayName,
+                          : currentAuthorName(
+                              context,
+                              work.userId,
+                              work.authorDisplayName,
+                            ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

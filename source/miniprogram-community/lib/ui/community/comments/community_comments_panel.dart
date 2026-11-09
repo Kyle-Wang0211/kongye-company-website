@@ -1,3 +1,4 @@
+import '../current_author_name.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -1249,7 +1250,11 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   children: [
                     Flexible(
                       child: Text(
-                        comment.authorName,
+                        currentAuthorName(
+                          context,
+                          comment.userId,
+                          comment.authorName,
+                        ),
                         style: AetherTextStyles.bodySm.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -1305,7 +1310,13 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                     padding: const EdgeInsets.only(top: 3),
                     child: Text(
                       _l.commentReplyTo(
-                        parent?.authorName ?? _l.commentReplyFallback,
+                        parent == null
+                            ? _l.commentReplyFallback
+                            : currentAuthorName(
+                                context,
+                                parent.userId,
+                                parent.authorName,
+                              ),
                       ),
                       style: AetherTextStyles.caption,
                       maxLines: 1,
@@ -1647,7 +1658,13 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 children: [
                   if (_reply != null)
                     _chip(
-                      _l.commentReplyTo(_reply!.authorName),
+                      _l.commentReplyTo(
+                        currentAuthorName(
+                          context,
+                          _reply!.userId,
+                          _reply!.authorName,
+                        ),
+                      ),
                       _l.commentCancelReply,
                       () => _changed(() => _reply = null),
                       Icons.reply_rounded,

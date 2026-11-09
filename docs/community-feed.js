@@ -3,7 +3,7 @@ import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,for
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
-let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,authorReadRevision=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 let viewerId = null, viewerGeneration = 0, authRevision = 0;
 let accountBound = false, accountConnecting;
 let publicOrder = [], ownPublicWorks = [], ownRequest;
@@ -179,18 +179,18 @@ async function readAuthors(rows){
  const ids=[...new Set(rows.map(w=>w.user_id).filter(Boolean))].filter(id=>(!authors.has(id)||(authorFreshness.get(id)||0)<=Date.now())&&!authorRequests.has(id));
  if(!ids.length)return;
  for(const id of ids){authorFailures.delete(id);refreshAuthor(id);}
- const epoch=authorEpoch;
+ const epoch=authorReadRevision;
  const request=Promise.resolve().then(()=>read(authorUrl(config.origin,ids)));
  for(const id of ids)authorRequests.set(id,request);
  try{
-  const profiles=await request;if(epoch!==authorEpoch)return;
+  const profiles=await request;if(epoch!==authorReadRevision)return;
   for(const profile of profiles){
    if(ids.includes(profile?.id)&&typeof profile.display_name==='string'&&profile.display_name.trim()){authors.set(profile.id,profile);authorFreshness.set(profile.id,Date.now()+authorLifetime);}
   }
   saveAuthors();
  }catch{/* Author lookup cannot invalidate already loaded works or pagination. */}
  finally{
-  for(const id of epoch===authorEpoch?ids:[]){
+  for(const id of epoch===authorReadRevision?ids:[]){
    if(authorRequests.get(id)===request)authorRequests.delete(id);
    if(!authors.has(id))authorFailures.add(id);
    refreshAuthor(id);
@@ -301,8 +301,16 @@ async function refreshLoaded(){
  }catch(e){pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{busy=false;more.disabled=false;drainRefresh();syncPaging();}
 }
-window.addEventListener('focus',()=>{recoverAccount();requestRefresh();});
-window.addEventListener('pageshow',()=>requestRefresh());
+function revalidateAuthorNames(){
+ authorReadRevision++;authorRequests.clear();authorFreshness.clear();
+ if(!config)return;
+ // The card map can preserve DOM without retaining transport rows.
+ const ids=[...authorNodes.keys()];
+ for(let i=0;i<ids.length;i+=12)void readAuthors(ids.slice(i,i+12).map(user_id=>({user_id})));
+}
+window.addEventListener('focus',()=>{recoverAccount();revalidateAuthorNames();requestRefresh();});
+window.addEventListener('storage',event=>{if(event.key==='pw-profile-presentation-changed-v1')revalidateAuthorNames();});
+window.addEventListener('pageshow',()=>{revalidateAuthorNames();requestRefresh();});
 document.addEventListener?.('visibilitychange',()=>{if(document.visibilityState==='visible')requestRefresh();});
 // Pure invalidation hook; does not claim a backend subscription is connected.
 window.addEventListener('pw-community-feed-invalidated',()=>requestRefresh(true));

@@ -1,3 +1,4 @@
+import 'current_author_name.dart';
 // Community cards display only the publisher-selected cover. Model downloads
 // and the shared 3D renderer belong to the detail page opened by onTap.
 import 'dart:async';
@@ -426,7 +427,11 @@ class _WorkCardState extends State<WorkCard> {
               Expanded(
                 child: Text.rich(
                   TextSpan(
-                    text: _work.authorDisplayName,
+                    text: currentAuthorName(
+                      context,
+                      _work.userId,
+                      _work.authorDisplayName,
+                    ),
                     recognizer: _authorTapRecognizer,
                   ),
                   maxLines: 1,
