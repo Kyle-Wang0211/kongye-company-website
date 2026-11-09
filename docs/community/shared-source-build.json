@@ -11,5 +11,21 @@
     "PW_COMMUNITY_FAVORITES_ENABLED": "true",
     "PW_COMMUNITY_MESSAGING_READY": "true",
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
+  },
+  "postprocessing": {
+    "tool": "source/community_app/tool/pw_version_web_fonts.py",
+    "tool_sha256": "59ac3a71bef95b463d2cffd73c37f39249c66227e5e674d6dabecfc0085e56fe",
+    "fonts": [
+      {
+        "original": "fonts/MaterialIcons-Regular.otf",
+        "asset": "fonts/MaterialIcons-Regular.2e733d0f98921263.otf",
+        "sha256": "2e733d0f98921263717dc1b9a161c318cebd1f6a9470e2e05fd8034e0696b789"
+      },
+      {
+        "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
+        "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+        "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
+      }
+    ]
   }
 }
