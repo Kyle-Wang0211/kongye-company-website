@@ -28,12 +28,52 @@
   <!-- Favicon -->
 
   <title>窗后城</title>
+  <!-- Only the work-detail startup shell uses these styles. -->
+  <style>
+    #pw-work-startup[hidden] { display: none; }
+    #pw-work-startup { position: fixed; inset: 0; z-index: 2147483647; display: flex; flex-direction: column; background: #000; color: #fff; font: 16px system-ui, sans-serif; pointer-events: none; }
+    #pw-work-startup .pw-header { height: 56px; flex: 0 0 56px; display: flex; align-items: center; justify-content: center; padding-top: env(safe-area-inset-top, 0px); }
+    #pw-work-startup .pw-skeleton, #pw-work-startup .pw-model { background: linear-gradient(110deg, #242424 20%, #404040 45%, #242424 70%); background-size: 220% 100%; animation: pw-work-shimmer 1.4s linear infinite; }
+    #pw-work-startup .pw-skeleton { display: inline-block; height: 14px; border-radius: 4px; }
+    #pw-work-startup .pw-title { width: 160px; height: 18px; }
+    #pw-work-startup .pw-model { flex: 1; min-height: 0; display: grid; place-items: center; }
+    #pw-work-startup .pw-progress { width: 64px; height: 64px; position: relative; display: grid; place-items: center; }
+    #pw-work-startup .pw-progress::before { content: ''; position: absolute; inset: 0; border: 3px solid #ffffff40; border-top-color: #fff; border-radius: 50%; animation: pw-work-spin 1s linear infinite; }
+    #pw-work-startup .pw-footer { padding: 14px 20px max(18px, env(safe-area-inset-bottom, 0px)); border-top: .5px solid #ffffff1f; }
+    #pw-work-startup .pw-meta { display: flex; align-items: center; gap: 8px; height: 28px; }
+    #pw-work-startup .pw-avatar { width: 28px; height: 28px; border-radius: 50%; }
+    #pw-work-startup .pw-author { width: 100px; margin-right: auto; }
+    #pw-work-startup .pw-count { width: 36px; }
+    #pw-work-startup .pw-description { display: block; width: min(220px, 80%); margin-top: 8px; }
+    @keyframes pw-work-shimmer { to { background-position: -220% 0; } }
+    @keyframes pw-work-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #pw-work-startup .pw-skeleton, #pw-work-startup .pw-model, #pw-work-startup .pw-progress::before { animation: none; }
+    }
+  </style>
 </head>
 <body>
-  <script>
-    if (new URLSearchParams(location.search).has('work')) {
+  <!-- Visible before the engine starts; Flutter owns the page after its first frame. -->
+  <div id="pw-work-startup" hidden role="status" aria-label="正在加载作品">
+    <header class="pw-header"><span class="pw-skeleton pw-title" aria-hidden="true"></span></header>
+    <main class="pw-model"><span class="pw-progress">0%</span></main>
+    <footer class="pw-footer" aria-hidden="true">
+      <div class="pw-meta"><span class="pw-skeleton pw-avatar"></span><span class="pw-skeleton pw-author"></span><span class="pw-skeleton pw-count"></span><span class="pw-skeleton pw-count"></span></div>
+      <span class="pw-skeleton pw-description"></span>
+    </footer>
+  </div>
+  <script id="pw-work-startup-script">
+    (() => {
+      const shell = document.getElementById('pw-work-startup');
+      if (!new URLSearchParams(location.search).has('work')) {
+        shell.remove();
+        return;
+      }
       document.documentElement.style.background = '#000';
-    }
+      shell.hidden = false;
+      // The pinned Flutter engine dispatches this only after its first render.
+      window.addEventListener('flutter-first-frame', () => shell.remove(), {once: true});
+    })();
   </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.

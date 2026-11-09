@@ -1,10 +1,10 @@
 {
   "entrypoint": "lib/main_community_web.dart",
   "base_href": "/miniprogram/",
-  "source_revision": "692ec685713cf6614fb263aaa7584572f43a3e4c",
-  "source_manifest_sha256": "635c7c50f6cca90502ac10d405a229636d6c4a459500dbf6894c49a8b8c889db",
+  "source_revision": "11395ba6a27e07b3ef33d4103384d9fb03bc574f",
+  "source_manifest_sha256": "94d9149d1f0db8102f11398321e51ba2c0f1248b3def5517b6e76e4f13c4ebeb",
   "viewer_bundle_sha256": "e34a3f94d03a3774a5ebd5c29a87a50d8eabd8fbc1a271021daea492338812b3",
-  "main_js_sha256": "23f52321bfa955b8589b73f99b854a0688ef676a8cb1eb6e387b7b1b6f561244",
+  "main_js_sha256": "4db58d49984e7443e409f162e7bdda06583539458a9b54fb560c0f147f86565d",
   "native_email_ready_define": true,
   "status": "built-local-not-deployed",
   "capabilities": {
