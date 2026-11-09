@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../community/feed_models.dart';
 import '../../community/publication_cover_url.dart';
-import '../splash_solving_orb.dart';
+import 'skeleton_shimmer.dart';
 import 'public_work_handoff_stub.dart'
     if (dart.library.js_interop) 'public_work_handoff_web.dart';
 import 'public_work_exit_stub.dart'
@@ -58,7 +58,117 @@ class PublicWorkOpening extends StatelessWidget {
     : work = work ?? readOpeningWork();
   final FeedWork? work;
 
-  Widget _orb() => const Center(child: SplashSolvingOrb());
+  Widget _skeleton(String field, double width, {double height = 14}) =>
+      SizedBox(
+        key: ValueKey('work-opening-$field'),
+        width: width,
+        height: height,
+        child: Builder(
+          builder: (context) => SkeletonBox(
+            animate:
+                !MediaQuery.disableAnimationsOf(context) &&
+                !MediaQuery.accessibleNavigationOf(context),
+          ),
+        ),
+      );
+
+  Widget _orb() => Stack(
+    fit: StackFit.expand,
+    children: [
+      Builder(
+        builder: (context) => SkeletonBox(
+          animate:
+              !MediaQuery.disableAnimationsOf(context) &&
+              !MediaQuery.accessibleNavigationOf(context),
+        ),
+      ),
+      const Center(
+        child: SizedBox.square(
+          dimension: 64,
+          child: Stack(
+            alignment: Alignment.center,
+            fit: StackFit.expand,
+            children: [
+              CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+              Center(
+                child: Text('0%', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _metadata() => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+    decoration: const BoxDecoration(
+      border: Border(top: BorderSide(color: Colors.white12, width: .5)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.account_circle_outlined,
+              color: Colors.white54,
+              size: 28,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: work?.authorDisplayName.isNotEmpty == true
+                  ? Text(
+                      work!.authorDisplayName,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                    )
+                  : Align(
+                      alignment: Alignment.centerLeft,
+                      child: _skeleton('author', 100),
+                    ),
+            ),
+            const Icon(
+              Icons.remove_red_eye_outlined,
+              color: Colors.white54,
+              size: 16,
+            ),
+            const SizedBox(width: 4),
+            if (work == null)
+              _skeleton('views', 28)
+            else
+              Text(
+                '${work!.viewsCount}',
+                style: const TextStyle(color: Colors.white70),
+              ),
+            const SizedBox(width: 12),
+            const Icon(Icons.favorite_border, color: Colors.white54, size: 18),
+            const SizedBox(width: 4),
+            if (work == null)
+              _skeleton('likes', 28)
+            else
+              Text(
+                '${work!.likesCount}',
+                style: const TextStyle(color: Colors.white70),
+              ),
+          ],
+        ),
+        if (work == null) ...[
+          const SizedBox(height: 8),
+          _skeleton('description', 220),
+        ] else if (work!.description?.trim().isNotEmpty == true) ...[
+          const SizedBox(height: 6),
+          Text(
+            work!.description!,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+        ],
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -79,27 +189,40 @@ class PublicWorkOpening extends StatelessWidget {
           icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
           onPressed: exitPublicWork,
         ),
-        title: Text(
-          work?.title ?? '',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+        title: work == null
+            ? _skeleton('title', 160, height: 18)
+            : Text(
+                work!.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SizedBox.expand(
-          child: cover == null
-              ? _orb()
-              : Image.network(
-                  cover,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => _orb(),
-                ),
+        child: Column(
+          children: [
+            Expanded(
+              child: SizedBox.expand(
+                child: cover == null
+                    ? _orb()
+                    : Image.network(
+                        cover,
+                        fit: BoxFit.contain,
+                        // A null download event also occurs before the first
+                        // response; only a decoded frame can replace the shell.
+                        frameBuilder: (_, child, frame, _) =>
+                            frame == null ? _orb() : child,
+                        errorBuilder: (_, _, _) => _orb(),
+                      ),
+              ),
+            ),
+            _metadata(),
+          ],
         ),
       ),
     );

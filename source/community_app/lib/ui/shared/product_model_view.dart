@@ -12,6 +12,7 @@ import 'community_viewer_session.dart';
 import 'model_content_identity.dart';
 import 'browser_model_transport.dart';
 
+import '../community/community_loading.dart';
 import '../../community/shared_viewer_model_path.dart';
 import '../../util/device_log.dart';
 import '../../l10n/app_localizations.dart';
@@ -195,6 +196,13 @@ class _ProductModelViewState extends State<ProductModelView>
   Future<void> _captureQueue = Future<void>.value();
   Object? _error;
   double? _downloadProgress = 0;
+  double _lastKnownDownloadProgress = 0;
+
+  void _setDownloadProgress(double? progress) {
+    _downloadProgress = progress;
+    if (progress != null) _lastKnownDownloadProgress = progress;
+  }
+
   Timer? _captureTimer;
 
   bool get _active =>
@@ -402,6 +410,7 @@ class _ProductModelViewState extends State<ProductModelView>
       }
       _epoch++;
       _downloadProgress = 0;
+      _lastKnownDownloadProgress = 0;
       _loadClock = Stopwatch()..start();
       _rotationArmed = false;
       _userTookControl = false;
@@ -457,9 +466,11 @@ class _ProductModelViewState extends State<ProductModelView>
           _loadingEpoch == _epoch) {
         final total = _controller.downloadTotalBytes;
         setState(
-          () => _downloadProgress = total == null
-              ? null
-              : (_controller.downloadedBytes / total).clamp(0.0, 1.0),
+          () => _setDownloadProgress(
+            total == null
+                ? null
+                : (_controller.downloadedBytes / total).clamp(0.0, 1.0),
+          ),
         );
       }
     }
@@ -576,6 +587,7 @@ class _ProductModelViewState extends State<ProductModelView>
       _communityRecoveryUsed = true;
       _epoch++;
       _downloadProgress = 0;
+      _lastKnownDownloadProgress = 0;
       _hostReady = false;
       _loadedEpoch = -1;
       _loadingEpoch = null;
@@ -719,7 +731,7 @@ class _ProductModelViewState extends State<ProductModelView>
       } else if (kIsWeb || widget.browserModelClient != null) {
         _logLoadPhase('renderer_load', source: 'browser');
         if (widget.onSurfacePicked == null) {
-          setState(() => _downloadProgress = null);
+          setState(() => _setDownloadProgress(null));
           await _controller.load(url: uri, format: format);
         } else {
           final controller = _controller;
@@ -745,7 +757,7 @@ class _ProductModelViewState extends State<ProductModelView>
                 }),
               );
               if (_downloadProgress != progress) {
-                setState(() => _downloadProgress = progress);
+                setState(() => _setDownloadProgress(progress));
               }
             },
             load: (bytes) => controller.loadBytes(bytes, format: format),
@@ -1045,30 +1057,36 @@ class _ProductModelViewState extends State<ProductModelView>
   Widget _downloadOverlay() => ColoredBox(
     key: const ValueKey('product-model-download'),
     color: widget.background,
-    child: Center(
-      child: SizedBox.square(
-        dimension: 64,
-        child: Stack(
-          fit: StackFit.expand,
-          alignment: Alignment.center,
-          children: [
-            CircularProgressIndicator(
-              value: _downloadProgress,
-              color: Colors.white,
-              backgroundColor: Colors.white24,
-              strokeWidth: 3,
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        const CommunityShimmer(),
+        Center(
+          child: SizedBox.square(
+            dimension: 64,
+            child: Stack(
+              fit: StackFit.expand,
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: _downloadProgress,
+                  color: Colors.white,
+                  backgroundColor: Colors.white24,
+                  strokeWidth: 3,
+                ),
+                Center(
+                  child: Text(
+                    // Download completion is not render readiness. Keep the
+                    // visible loading label below 100 until this overlay leaves.
+                    '${(_lastKnownDownloadProgress * 100).floor().clamp(0, 99)}%',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
             ),
-            Center(
-              child: Text(
-                _downloadProgress == null
-                    ? '—'
-                    : '${(_downloadProgress! * 100).floor()}%',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     ),
   );
 

@@ -1758,21 +1758,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              _l.commentLength(
-                CommunityCommentDraft.textCodeUnits(_text.text),
-                CommunityCommentDraft.maxTextCodeUnits,
-              ),
-              key: const Key('comment-length'),
-              style: AetherTextStyles.caption.copyWith(
-                color: _withinTextLimit
-                    ? AetherColors.textSecondary
-                    : AetherColors.danger,
-              ),
-            ),
-          ),
           SizedBox(
             height: 42,
             child: Row(
