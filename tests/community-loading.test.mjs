@@ -443,3 +443,15 @@ test('author-specific own-only card refresh updates metadata and retains author 
  assert.equal(current.children[1].children[1].textContent,'Author after refresh');
  assert.deepEqual(visibleTitles(page).slice(1),globalRows.map(work=>work.title));
 });
+
+
+test('initial loading restores the historical independent gray cover title author and time blocks',()=>{
+ const page=boot();
+ for(const shell of page.grid.children){
+  assert.deepEqual(Array.from(shell.children,n=>n.className),[
+   'community-picture is-loading','skeleton-title','skeleton-author','skeleton-time']);
+  assert.equal(new Set(shell.children).size,4);
+  assert(shell.children.every(n=>n.textContent===''));
+  assert.equal(shell.attributes['aria-hidden'],'true');
+ }
+});

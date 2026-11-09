@@ -82,7 +82,6 @@ html.community-light #work-dialog iframe{background:#000}
 .community-avatar{width:20px;height:20px}
 .community-like{flex:none;font-size:12px;font-weight:400;padding:6px 0 6px 6px;gap:5px}
 .community-heart{font-size:22px;line-height:20px}
-.community-skeleton .skeleton-author{position:relative;overflow:hidden;height:14px;margin:0;width:65%}
 .community-cover-message{padding:12px;text-align:center}
 
 .community-open:focus-visible{outline:0}.community-open:focus-visible .community-picture{outline:2px solid #fff;outline-offset:-4px}
