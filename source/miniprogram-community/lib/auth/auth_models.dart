@@ -121,6 +121,7 @@ sealed class SignUpRequest {
     required String phoneNumber,
     required String verificationID,
     required String code,
+    required String password,
     String? displayName,
   }) = SignUpRequestPhone;
 }
@@ -140,11 +141,13 @@ class SignUpRequestPhone extends SignUpRequest {
   final String phoneNumber;
   final String verificationID;
   final String code;
+  final String password;
   final String? displayName;
   const SignUpRequestPhone({
     required this.phoneNumber,
     required this.verificationID,
     required this.code,
+    required this.password,
     this.displayName,
   });
 }

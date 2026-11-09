@@ -33,8 +33,10 @@ class EmailSignUpPage extends StatefulWidget {
 }
 
 class _EmailSignUpPageState extends State<EmailSignUpPage> {
+  final _displayName = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
 
   bool _policyAccepted = false;
   String? _consentOwner;
@@ -60,8 +62,10 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
   @override
   void dispose() {
     widget.currentUser.removeListener(_onUserChanged);
+    _displayName.dispose();
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -111,8 +115,10 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
   String get _normalizedEmail => _email.text.trim().toLowerCase();
   bool get _canSubmit =>
       _policyAccepted &&
+      _displayName.text.trim().isNotEmpty &&
       _normalizedEmail.isNotEmpty &&
-      _password.text.length >= 8;
+      _password.text.length >= 8 &&
+      _password.text == _confirmPassword.text;
 
   Future<void> _submit() async {
     if (!_canSubmit ||
@@ -122,7 +128,11 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
     }
     try {
       await widget.currentUser.signUp(
-        SignUpRequest.email(email: _normalizedEmail, password: _password.text),
+        SignUpRequest.email(
+          email: _normalizedEmail,
+          password: _password.text,
+          displayName: _displayName.text.trim(),
+        ),
       );
     } on EmailVerificationPending catch (e) {
       if (!mounted) return;
@@ -177,85 +187,128 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AetherSpacing.xl,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 80),
-                      AuthHeading(
-                        title: l.authSignUp,
-                        subtitle: l.authCreateAccount,
-                      ),
-                      const SizedBox(height: 64),
-                      LabeledField(
-                        label: l.authEmailHint,
-                        controller: _email,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.username],
-                        onChanged: (_) =>
-                            setState(() => _policyAccepted = false),
-                      ),
-                      const SizedBox(height: AetherSpacing.xl),
-                      LabeledField(
-                        label: l.authPasswordHintMin,
-                        controller: _password,
-                        isSecure: true,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.newPassword],
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (_) {
-                          if (_canSubmit && !working) _submit();
-                        },
-                      ),
-                      const SizedBox(height: AetherSpacing.lg),
-                      AuthPolicyConsent(
-                        value: _policyAccepted,
-                        enabled: !working,
-                        onChanged: (value) =>
-                            setState(() => _policyAccepted = value),
-                      ),
-                      const SizedBox(height: AetherSpacing.lg),
-                      MinimalCta(
-                        title: l.authSignUp,
-                        enabled: _canSubmit && !working,
-                        working: working,
-                        onTap: _submit,
-                      ),
-                      const SizedBox(height: AetherSpacing.lg),
-                      MinimalLink(
-                        key: const ValueKey(
-                          'continue-email-signup-verification',
+                  padding: EdgeInsets.zero,
+                  child: AuthFormBody(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 80),
+                        AuthHeading(
+                          title: l.authSignUp,
+                          subtitle: l.authCreateAccount,
                         ),
-                        title: l.otpVerifyTitle,
-                        emphasis: MinimalLinkEmphasis.medium,
-                        onTap: _canContinueVerification && !working
-                            ? _continueSignupVerification
-                            : null,
-                      ),
-                      const SizedBox(height: AetherSpacing.xxl),
-                      MinimalLink(
-                        title: l.phoneSignUpWithPhone,
-                        emphasis: MinimalLinkEmphasis.medium,
-                        onTap: working
-                            ? null
-                            : () {
-                                setState(() => _policyAccepted = false);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => PhoneAuthPage(
-                                      currentUser: widget.currentUser,
-                                      intent: PhoneIntent.signUp,
+                        const SizedBox(height: 64),
+                        LabeledField(
+                          label: l.authEmailHint,
+                          labelFontSize: 14,
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.username],
+                          onChanged: (_) =>
+                              setState(() => _policyAccepted = false),
+                        ),
+                        const SizedBox(height: AetherSpacing.xl),
+                        LabeledField(
+                          key: const ValueKey('signup-nickname'),
+                          label: l.meDisplayName,
+                          labelFontSize: 14,
+                          controller: _displayName,
+                          enabled: !working,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.nickname],
+                          onChanged: (_) =>
+                              setState(() => _policyAccepted = false),
+                        ),
+                        const SizedBox(height: AetherSpacing.xl),
+                        LabeledField(
+                          key: const ValueKey('signup-password'),
+                          label: l.authPasswordHintMin,
+                          labelFontSize: 14,
+                          controller: _password,
+                          isSecure: true,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onChanged: (_) => setState(() {}),
+                          onSubmitted: (_) {
+                            if (_canSubmit && !working) _submit();
+                          },
+                        ),
+                        const SizedBox(height: AetherSpacing.xl),
+                        LabeledField(
+                          key: const ValueKey('signup-confirm-password'),
+                          label: l.resetConfirmPasswordHint,
+                          labelFontSize: 14,
+                          controller: _confirmPassword,
+                          enabled: !working,
+                          isSecure: true,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onChanged: (_) => setState(() {}),
+                          onSubmitted: (_) {
+                            if (_canSubmit && !working) _submit();
+                          },
+                        ),
+                        if (_confirmPassword.text.isNotEmpty &&
+                            _confirmPassword.text != _password.text)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: AetherSpacing.sm,
+                            ),
+                            child: Text(
+                              l.resetPasswordMismatch,
+                              style: const TextStyle(
+                                color: AetherColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: AetherSpacing.lg),
+                        AuthPolicyConsent(
+                          value: _policyAccepted,
+                          enabled: !working,
+                          onChanged: (value) =>
+                              setState(() => _policyAccepted = value),
+                        ),
+                        const SizedBox(height: AetherSpacing.lg),
+                        MinimalCta(
+                          title: l.authSignUp,
+                          enabled: _canSubmit && !working,
+                          working: working,
+                          onTap: _submit,
+                        ),
+                        const SizedBox(height: AetherSpacing.lg),
+                        MinimalLink(
+                          key: const ValueKey(
+                            'continue-email-signup-verification',
+                          ),
+                          title: l.otpVerifyTitle,
+                          emphasis: MinimalLinkEmphasis.medium,
+                          onTap: _canContinueVerification && !working
+                              ? _continueSignupVerification
+                              : null,
+                        ),
+                        const SizedBox(height: AetherSpacing.xxl),
+                        MinimalLink(
+                          title: l.phoneSignUpWithPhone,
+                          emphasis: MinimalLinkEmphasis.medium,
+                          onTap: working
+                              ? null
+                              : () {
+                                  setState(() => _policyAccepted = false);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => PhoneAuthPage(
+                                        currentUser: widget.currentUser,
+                                        intent: PhoneIntent.signUp,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                      ),
-                      const SizedBox(height: AetherSpacing.xl),
-                      const SizedBox(height: AetherSpacing.xl),
-                    ],
+                                  );
+                                },
+                        ),
+                        const SizedBox(height: AetherSpacing.xl),
+                        const SizedBox(height: AetherSpacing.xl),
+                      ],
+                    ),
                   ),
                 ),
               ),

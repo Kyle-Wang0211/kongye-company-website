@@ -33,6 +33,7 @@ class AuthField extends StatelessWidget {
   final TextEditingController controller;
   final AuthFieldKeyboard keyboard;
   final bool isSecure;
+  final bool enabled;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
   final void Function(String)? onChanged;
@@ -52,6 +53,7 @@ class AuthField extends StatelessWidget {
     required this.controller,
     this.keyboard = AuthFieldKeyboard.text,
     this.isSecure = false,
+    this.enabled = true,
     this.inputFormatters,
     this.textInputAction,
     this.onChanged,
@@ -71,6 +73,7 @@ class AuthField extends StatelessWidget {
     final shouldDisableInputAssistance = isPasswordLike || isEmailLike;
     final field = TextField(
       controller: controller,
+      enabled: enabled,
       obscureText: isSecure,
       keyboardType: keyboard.flutter,
       inputFormatters: inputFormatters,
@@ -86,7 +89,7 @@ class AuthField extends StatelessWidget {
         prefixIconConstraints: leading == null
             ? null
             : const BoxConstraints(minWidth: 0, minHeight: 48),
-        hintText: title,
+
         hintStyle: const TextStyle(
           color: AetherColors.textTertiary,
           fontSize: 15,
@@ -111,10 +114,24 @@ class AuthField extends StatelessWidget {
         ),
       ),
     );
-    if (width != null) {
-      return SizedBox(width: width, child: field);
-    }
-    return field;
+    final labeled = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          title,
+          softWrap: true,
+          maxLines: null,
+          style: const TextStyle(
+            fontSize: 14,
+            color: AetherColors.textTertiary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        field,
+      ],
+    );
+    if (width != null) return SizedBox(width: width, child: labeled);
+    return labeled;
   }
 }
 
@@ -221,7 +238,12 @@ class OtpBoxRow extends StatelessWidget {
               children: List.generate(otpLength, (i) {
                 final char = i < value.length ? value[i] : '';
                 final isActive = i == value.length && hasFocus;
-                return OtpBox(char: char, isActive: isActive);
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: OtpBox(char: char, isActive: isActive),
+                  ),
+                );
               }),
             ),
             // Invisible TextField stacked on top — captures the

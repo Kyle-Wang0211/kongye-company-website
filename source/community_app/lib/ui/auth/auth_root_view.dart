@@ -23,14 +23,19 @@ import '../../auth/auth_error.dart';
 import '../../auth/auth_models.dart';
 import '../../auth/current_user.dart';
 import '../../auth/password_sign_in.dart';
+import '../../auth/phone_country_catalog.dart';
+import '../../auth/phone_number_input.dart';
 import '../../config/backend_deployment.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
 import 'auth_minimal_widgets.dart';
 import 'auth_policy_consent.dart';
 import 'email_sign_in_view.dart';
-import 'phone_sign_in_view.dart';
+import 'phone_country_picker.dart';
 import 'reset_password_view.dart';
+import 'login_code_view.dart';
+
+enum _LoginMethod { phone, email }
 
 class AuthRootView extends StatefulWidget {
   final CurrentUser currentUser;
@@ -47,9 +52,16 @@ class AuthRootView extends StatefulWidget {
 }
 
 class _AuthRootViewState extends State<AuthRootView> {
-  final _account = TextEditingController();
+  final _phone = TextEditingController();
+  final _email = TextEditingController();
+  late _LoginMethod _method;
+  PhoneCountry _country = phoneCountryForIso('CN');
+
+  bool get _isPhone => _method == _LoginMethod.phone;
+  TextEditingController get _account => _isPhone ? _phone : _email;
   final _password = TextEditingController();
   bool _passwordVisible = false;
+  bool _codeLogin = false;
 
   bool _policyAccepted = false;
   String? _consentOwner;
@@ -57,6 +69,9 @@ class _AuthRootViewState extends State<AuthRootView> {
   @override
   void initState() {
     super.initState();
+    _method = widget.currentUser.deployment.region == BackendRegion.china
+        ? _LoginMethod.phone
+        : _LoginMethod.email;
     _consentOwner = widget.currentUser.signedInUser?.id.rawValue;
     widget.currentUser.addListener(_onUserChanged);
     if (widget.initialSignUp) {
@@ -80,7 +95,8 @@ class _AuthRootViewState extends State<AuthRootView> {
   @override
   void dispose() {
     widget.currentUser.removeListener(_onUserChanged);
-    _account.dispose();
+    _phone.dispose();
+    _email.dispose();
     _password.dispose();
     super.dispose();
   }
@@ -128,12 +144,99 @@ class _AuthRootViewState extends State<AuthRootView> {
     );
   }
 
-  SignInRequest? get _passwordRequest => passwordSignInRequest(
-    account: _account.text,
-    password: _password.text,
-    region: widget.currentUser.deployment.region,
-  );
+  SignInRequest? get _passwordRequest {
+    final account = _isPhone
+        ? normalizePhoneLogin(_phone.text, country: _country)
+        : _email.text;
+    if (account == null) return null;
+    final request = passwordSignInRequest(
+      account: account,
+      password: _password.text,
+      region: widget.currentUser.deployment.region,
+    );
+    return (_isPhone && request is SignInRequestPhonePassword) ||
+            (!_isPhone && request is SignInRequestEmail)
+        ? request
+        : null;
+  }
+
   bool get _canSubmit => _policyAccepted && _passwordRequest != null;
+
+  Future<void> _selectCountry() async {
+    final country = await showPhoneCountryPicker(context);
+    if (country == null ||
+        !mounted ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
+    setState(() {
+      _country = country;
+      _policyAccepted = false;
+    });
+  }
+
+  Widget _methodOption(_LoginMethod method, String label, bool working) {
+    final selected = _method == method;
+    return Expanded(
+      child: Semantics(
+        selected: selected,
+        child: TextButton(
+          key: ValueKey('auth-method-${method.name}'),
+          onPressed: working
+              ? null
+              : () => setState(() {
+                  _method = method;
+                  _codeLogin = false;
+                  _policyAccepted = false;
+                }),
+          style: TextButton.styleFrom(
+            foregroundColor: selected
+                ? AetherColors.textPrimary
+                : AetherColors.textTertiary,
+            minimumSize: const Size(0, 48),
+            shape: const RoundedRectangleBorder(),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: selected
+                      ? AetherColors.textPrimary
+                      : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String? get _codeTarget =>
+      _isPhone ? normalizePhoneLogin(_phone.text, country: _country) : null;
+  void _openCodeLogin() {
+    final target = _codeTarget;
+    if (!_isPhone ||
+        target == null ||
+        widget.currentUser.isPerformingAuthAction ||
+        widget.currentUser.isSignedIn) {
+      return;
+    }
+    if (!_policyAccepted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            LoginCodeView(currentUser: widget.currentUser, target: target),
+      ),
+    );
+  }
 
   Future<void> _submit() async {
     final request = _passwordRequest;
@@ -181,110 +284,186 @@ class _AuthRootViewState extends State<AuthRootView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AuthTopBar(),
+              const AuthTopBar(showLanguageToggle: false),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AetherSpacing.xl,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 80),
-                      AuthHeading(
-                        title: l.authSignIn,
-                        subtitle: l.authWelcomeBack,
-                      ),
-                      const SizedBox(height: 64),
-                      LabeledField(
-                        label:
-                            widget.currentUser.deployment.region ==
-                                BackendRegion.china
-                            ? l.authAccountChinaHint
-                            : l.authAccountInternationalHint,
-                        controller: _account,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.username],
-                        onChanged: (_) =>
-                            setState(() => _policyAccepted = false),
-                      ),
-                      const SizedBox(height: AetherSpacing.xl),
-                      LabeledField(
-                        label: l.authPasswordHint,
-                        controller: _password,
-                        isSecure: true,
-                        obscureText: !_passwordVisible,
-                        trailing: TextButton(
-                          onPressed: () => setState(
-                            () => _passwordVisible = !_passwordVisible,
-                          ),
-                          style: TextButton.styleFrom(
-                            foregroundColor: AetherColors.textTertiary,
-                            textStyle: const TextStyle(fontSize: 12),
-                          ),
-                          child: Text(
-                            _passwordVisible
-                                ? l.authHidePassword
-                                : l.authShowPassword,
-                          ),
+                  padding: EdgeInsets.zero,
+                  child: AuthFormBody(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 80),
+                        AuthHeading(
+                          title: l.authSignIn,
+                          subtitle: l.authWelcomeBack,
                         ),
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.password],
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (_) {
-                          if (_canSubmit && !working) _submit();
-                        },
-                      ),
-                      const SizedBox(height: AetherSpacing.lg),
-                      AuthPolicyConsent(
-                        value: _policyAccepted,
-                        enabled: !working,
-                        onChanged: (value) =>
-                            setState(() => _policyAccepted = value),
-                      ),
-                      const SizedBox(height: AetherSpacing.lg),
-                      MinimalCta(
-                        title: l.authSignIn,
-                        enabled: _canSubmit && !working,
-                        working: working,
-                        onTap: _submit,
-                      ),
-                      const SizedBox(height: AetherSpacing.xxl),
-                      MinimalLink(
-                        title: l.authSignUp,
-                        emphasis: MinimalLinkEmphasis.medium,
-                        onTap: working ? null : _pushSignUp,
-                      ),
-                      const SizedBox(height: AetherSpacing.xl),
-                      // Keep the separate SMS challenge flow available.
-                      MinimalLink(
-                        title: l.authPhoneEntry,
-                        emphasis: MinimalLinkEmphasis.medium,
-                        onTap: working
-                            ? null
-                            : () {
-                                setState(() => _policyAccepted = false);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => PhoneAuthPage(
-                                      currentUser: widget.currentUser,
-                                      intent: PhoneIntent.signIn,
-                                    ),
+                        const SizedBox(height: 32),
+                        Row(
+                          children: [
+                            _methodOption(
+                              _LoginMethod.phone,
+                              l.authPhonePasswordLogin,
+                              working,
+                            ),
+                            _methodOption(
+                              _LoginMethod.email,
+                              l.authEmailPasswordLogin,
+                              working,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AetherSpacing.lg),
+                        LabeledField(
+                          key: ValueKey(
+                            _isPhone ? 'auth-phone-input' : 'auth-email-input',
+                          ),
+                          label: _isPhone
+                              ? l.authPhoneNumberHint
+                              : l.authEmailHint,
+                          labelFontSize: 14,
+                          controller: _account,
+                          enabled: !working,
+                          leading: _isPhone
+                              ? PhoneCountryPrefix(
+                                  country: _country,
+                                  enabled: !working,
+                                  onTap: _selectCountry,
+                                )
+                              : null,
+                          keyboardType: _isPhone
+                              ? TextInputType.phone
+                              : TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: _isPhone
+                              ? const [
+                                  AutofillHints.telephoneNumberNational,
+                                  AutofillHints.username,
+                                ]
+                              : const [
+                                  AutofillHints.username,
+                                  AutofillHints.email,
+                                ],
+                          onChanged: (_) =>
+                              setState(() => _policyAccepted = false),
+                        ),
+                        const SizedBox(height: AetherSpacing.xl),
+                        if (_isPhone)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  key: const ValueKey('auth-use-password'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: !_codeLogin
+                                        ? AetherColors.textPrimary
+                                        : AetherColors.textTertiary,
                                   ),
-                                );
-                              },
-                      ),
-                      const SizedBox(height: AetherSpacing.xl),
-                      MinimalLink(
-                        key: const ValueKey('auth-forgot-password'),
-                        title: l.authForgotPassword,
-                        emphasis: MinimalLinkEmphasis.faint,
-                        onTap: working ? null : _pushReset,
-                      ),
-                      const SizedBox(height: AetherSpacing.xl),
-                    ],
+                                  onPressed: working
+                                      ? null
+                                      : () =>
+                                            setState(() => _codeLogin = false),
+                                  child: Text(l.authPasswordLogin),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextButton(
+                                  key: const ValueKey('auth-use-code'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: _codeLogin
+                                        ? AetherColors.textPrimary
+                                        : AetherColors.textTertiary,
+                                  ),
+                                  onPressed: working
+                                      ? null
+                                      : () => setState(() => _codeLogin = true),
+                                  child: Text(l.authCodeLogin),
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (!_codeLogin) ...[
+                          LabeledField(
+                            label: l.authPasswordHint,
+                            labelFontSize: 14,
+                            controller: _password,
+                            enabled: !working,
+                            isSecure: true,
+                            obscureText: !_passwordVisible,
+                            trailing: IconButton(
+                              tooltip: _passwordVisible
+                                  ? l.authHidePassword
+                                  : l.authShowPassword,
+                              onPressed: working
+                                  ? null
+                                  : () => setState(
+                                      () =>
+                                          _passwordVisible = !_passwordVisible,
+                                    ),
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                size: 20,
+                                color: AetherColors.textTertiary,
+                              ),
+                            ),
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.password],
+                            onChanged: (_) => setState(() {}),
+                            onSubmitted: (_) {
+                              if (_canSubmit && !working) _submit();
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              key: const ValueKey('auth-forgot-password'),
+                              onPressed: working ? null : _pushReset,
+                              style: TextButton.styleFrom(
+                                foregroundColor: AetherColors.textTertiary,
+                                minimumSize: const Size(0, 44),
+                                padding: EdgeInsets.zero,
+                              ),
+                              child: Text(
+                                l.authForgotPassword
+                                    .replaceAll('?', '')
+                                    .replaceAll('？', ''),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        AuthPolicyConsent(
+                          value: _policyAccepted,
+                          enabled: !working,
+                          onChanged: (value) =>
+                              setState(() => _policyAccepted = value),
+                        ),
+                        const SizedBox(height: AetherSpacing.lg),
+                        MinimalCta(
+                          title: _codeLogin
+                              ? l.authPhoneSendCode
+                              : l.authSignIn,
+                          enabled:
+                              (_codeLogin
+                                  ? _policyAccepted && _codeTarget != null
+                                  : _canSubmit) &&
+                              !working,
+                          working: working,
+                          onTap: _codeLogin ? _openCodeLogin : _submit,
+                        ),
+                        const SizedBox(height: AetherSpacing.xxl),
+                        MinimalLink(
+                          title: l.authSignUp,
+                          emphasis: MinimalLinkEmphasis.medium,
+                          onTap: working ? null : _pushSignUp,
+                        ),
+                        const SizedBox(height: AetherSpacing.xl),
+                        const SizedBox(height: AetherSpacing.xl),
+                      ],
+                    ),
                   ),
                 ),
               ),

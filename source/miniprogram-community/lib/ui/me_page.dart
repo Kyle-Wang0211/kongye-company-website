@@ -246,6 +246,7 @@ class _MePageState extends State<MePage> with WidgetsBindingObserver {
   String? _socialProfileUserId;
   Object? _socialProfileError;
   bool _socialProfileLoading = false;
+  int _socialProfileEpoch = 0;
 
   // Phase 6.4f.13.1 — direct handle to MePage's local ScaffoldMessenger.
   // Holding a GlobalKey to the local messenger lets us route SnackBars
@@ -296,9 +297,9 @@ class _MePageState extends State<MePage> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
-  void _refreshProfileIfKnown() {
+  void _refreshProfileIfKnown({bool force = false}) {
     final id = _socialProfileUserId;
-    if (id != null) unawaited(_loadSocialProfile(id));
+    if (id != null) unawaited(_loadSocialProfile(id, force: force));
   }
 
   @override
@@ -332,14 +333,17 @@ class _MePageState extends State<MePage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  void _openSettings() {
-    showMeSettingsDrawer(
+  void _openSettings() async {
+    await showMeSettingsDrawer(
       context: context,
       child: MeSettingsPage(
         stats: _stats,
         socialRepository: _socialProfileRepository(),
       ),
     );
+    // The user can rename without changing UUID. Refresh the cached header
+    // after the settings route closes rather than waiting for another login.
+    if (mounted) _refreshProfileIfKnown(force: true);
   }
 
   Future<void> _onRefresh() async {
@@ -360,8 +364,9 @@ class _MePageState extends State<MePage> with WidgetsBindingObserver {
         SupabaseSocialProfileRepository(client: Supabase.instance.client);
   }
 
-  Future<void> _loadSocialProfile(String userId) async {
-    if (_socialProfileLoading) return;
+  Future<void> _loadSocialProfile(String userId, {bool force = false}) async {
+    if (_socialProfileLoading && !force) return;
+    final epoch = ++_socialProfileEpoch;
     setState(() {
       if (_socialProfileUserId != userId) {
         _socialProfile = null;
@@ -372,7 +377,10 @@ class _MePageState extends State<MePage> with WidgetsBindingObserver {
       _likesError = null;
       _socialProfileUserId = userId;
     });
-    bool current() => mounted && _socialProfileUserId == userId;
+    bool current() =>
+        mounted &&
+        _socialProfileUserId == userId &&
+        _socialProfileEpoch == epoch;
     Future<void> loadProfile() async {
       try {
         final profile = await _socialProfileRepository().fetchProfile(userId);

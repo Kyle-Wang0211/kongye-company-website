@@ -13,7 +13,6 @@ import '../../auth/phone_country_catalog.dart';
 import '../../auth/phone_number_input.dart';
 import '../design_system.dart';
 import '../../l10n/app_localizations.dart';
-import '../../l10n/phone_country_names.dart';
 import 'auth_policy_consent.dart';
 import 'auth_shared_widgets.dart';
 import 'auth_minimal_widgets.dart';
@@ -45,19 +44,25 @@ class PhoneAuthPage extends StatelessWidget {
             const AuthTopBar(leading: AuthTopBarBack()),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AetherSpacing.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AuthHeading(
-                      title: signingUp ? l.authSignUp : l.authPhoneEntry,
-                      subtitle: signingUp
-                          ? l.authCreateAccount
-                          : l.authWelcomeBack,
-                    ),
-                    const SizedBox(height: AetherSpacing.xl),
-                    PhoneSignInView(currentUser: currentUser, intent: intent),
-                  ],
+                padding: const EdgeInsets.symmetric(vertical: AetherSpacing.xl),
+                child: AuthFormBody(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AuthHeading(
+                        title: signingUp ? l.authSignUp : l.authPhoneEntry,
+                        subtitle: signingUp
+                            ? l.authCreateAccount
+                            : l.authWelcomeBack,
+                      ),
+                      const SizedBox(height: AetherSpacing.xl),
+                      PhoneSignInView(
+                        currentUser: currentUser,
+                        intent: intent,
+                        embedded: true,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -71,24 +76,35 @@ class PhoneAuthPage extends StatelessWidget {
 class PhoneSignInView extends StatefulWidget {
   final CurrentUser currentUser;
   final PhoneIntent intent;
+  final bool embedded;
 
   const PhoneSignInView({
     super.key,
     required this.currentUser,
     required this.intent,
+    this.embedded = false,
   });
 
   @override
   State<PhoneSignInView> createState() => _PhoneSignInViewState();
 }
 
-class _PhoneSignInViewState extends State<PhoneSignInView> {
+class _PhoneSignInViewState extends State<PhoneSignInView>
+    with SingleTickerProviderStateMixin {
   PhoneCountry _country = phoneCountryForIso('CN');
   final _nationalNumber = TextEditingController();
   final _displayName = TextEditingController();
   final _code = TextEditingController();
+  final _codeFocus = FocusNode();
+  late final _codeShake = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 360),
+  );
+  final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
 
   PhoneVerificationChallenge? _challenge;
+  ({String phone, String password, String name})? _signupPayload;
   bool _operationPending = false;
   bool _policyAccepted = false;
   String? _consentOwner;
@@ -104,6 +120,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
   void _resetConsent() {
     _policyAccepted = false;
     _challenge = null;
+    _signupPayload = null;
     _code.clear();
     _formEpoch++;
   }
@@ -154,6 +171,10 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
     _nationalNumber.dispose();
     _displayName.dispose();
     _code.dispose();
+    _codeFocus.dispose();
+    _codeShake.dispose();
+    _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -167,15 +188,37 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   // Provider readiness is separate from metadata coverage. Keep overseas
   // sends disabled until international SMS delivery is explicitly verified.
-  bool get _canStart => _e164.isNotEmpty && _e164.startsWith('+86');
+  bool get _signupCredentialsValid =>
+      _displayName.text.trim().isNotEmpty &&
+      _password.text.length >= 8 &&
+      _password.text == _confirmPassword.text;
+
+  bool get _canStart =>
+      (!_isSignUp || _signupCredentialsValid) &&
+      _e164.isNotEmpty &&
+      _e164.startsWith('+86');
 
   Future<void> _startVerification() async {
     if (!_canStart || !_beginOperation()) return;
     final epoch = _formEpoch;
+    final payload = (
+      phone: _e164,
+      password: _password.text,
+      name: _displayName.text.trim(),
+    );
     try {
-      final result = await widget.currentUser.startPhoneVerification(_e164);
+      final result = await (widget.intent == PhoneIntent.signUp
+          ? widget.currentUser.startPhoneSignup(
+              phoneNumber: payload.phone,
+              password: payload.password,
+              displayName: payload.name,
+            )
+          : widget.currentUser.startPhoneVerification(payload.phone));
       if (!mounted || epoch != _formEpoch) return;
-      setState(() => _challenge = result);
+      setState(() {
+        _challenge = result;
+        _signupPayload = result != null && _isSignUp ? payload : null;
+      });
     } finally {
       _finishOperation();
     }
@@ -183,7 +226,13 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
 
   Future<void> _submitCode() async {
     final ch = _challenge;
-    if (ch == null || _code.text.length != 6 || !_beginOperation()) return;
+    final payload = _signupPayload;
+    if (ch == null ||
+        (_isSignUp && payload == null) ||
+        _code.text.length != 6 ||
+        !_beginOperation()) {
+      return;
+    }
     try {
       switch (widget.intent) {
         case PhoneIntent.signIn:
@@ -197,12 +246,11 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
         case PhoneIntent.signUp:
           await widget.currentUser.signUp(
             SignUpRequest.phone(
-              phoneNumber: ch.phoneNumber,
+              password: payload!.password,
+              phoneNumber: payload.phone,
               verificationID: ch.verificationID,
               code: _code.text,
-              displayName: _displayName.text.trim().isEmpty
-                  ? null
-                  : _displayName.text.trim(),
+              displayName: payload.name,
             ),
           );
       }
@@ -217,14 +265,17 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
     final working =
         _operationPending || widget.currentUser.isPerformingAuthAction;
     if (_challenge != null) {
-      return _codeEntryStep(l, working);
+      final child = _codeEntryStep(l, working);
+      return widget.embedded ? child : AuthFormBody(child: child);
     }
-    return _phoneEntryStep(l, working);
+    final child = _phoneEntryStep(l, working);
+    return widget.embedded ? child : AuthFormBody(child: child);
   }
 
   Future<void> _selectCountry() async {
+    if (_blocked || _challenge != null) return;
     final country = await showPhoneCountryPicker(context);
-    if (country != null && mounted) {
+    if (country != null && mounted && !_blocked && _challenge == null) {
       setState(() {
         _country = country;
         _policyAccepted = false;
@@ -232,69 +283,18 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
     }
   }
 
-  Widget _countryPrefix(bool working) {
-    final l = AppL10n.of(context);
-    final countryLabel = l.phoneCountryCallingCodeLabel(
-      phoneCountryName(l, _country.iso),
-      _country.callingCode,
-    );
-    return SizedBox(
-      width: 116,
-      child: Row(
-        children: [
-          Expanded(
-            child: Tooltip(
-              message: countryLabel,
-              excludeFromSemantics: true,
-              child: TextButton(
-                key: const ValueKey('phone-country-selector'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AetherColors.textPrimary,
-                  minimumSize: const Size(0, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                ),
-                onPressed: working ? null : _selectCountry,
-                child: Semantics(
-                  label: countryLabel,
-                  excludeSemantics: true,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _country.flag,
-                          style: const TextStyle(fontSize: 22),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '+${_country.callingCode}',
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        const Icon(Icons.arrow_drop_down, size: 18),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            key: const ValueKey('phone-country-inline-separator'),
-            width: 1,
-            height: 24,
-            color: AetherColors.border,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    );
-  }
+  Widget _countryPrefix(bool working) => PhoneCountryPrefix(
+    country: _country,
+    enabled: !working,
+    onTap: _selectCountry,
+  );
 
   Widget _phoneEntryStep(AppL10n l, bool working) {
     return Column(
       children: [
         AuthField(
+          enabled: !working,
+          key: const ValueKey('phone-signup-number'),
           title: l.authPhoneNumberHint,
           controller: _nationalNumber,
           leading: _isSignUp ? _countryPrefix(working) : null,
@@ -335,9 +335,38 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
         if (widget.intent == PhoneIntent.signUp) ...[
           const SizedBox(height: AetherSpacing.md),
           AuthField(
-            title: l.authPhoneDisplayNameHint,
+            enabled: !working,
+            key: const ValueKey('phone-signup-nickname'),
+            title: l.meDisplayName,
             controller: _displayName,
+            onChanged: (_) => setState(() => _policyAccepted = false),
           ),
+          const SizedBox(height: AetherSpacing.md),
+          AuthField(
+            enabled: !working,
+            key: const ValueKey('signup-password'),
+            title: l.authPasswordHintMin,
+            controller: _password,
+            isSecure: true,
+            autofillHints: const [AutofillHints.newPassword],
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: AetherSpacing.md),
+          AuthField(
+            enabled: !working,
+            key: const ValueKey('signup-confirm-password'),
+            title: l.resetConfirmPasswordHint,
+            controller: _confirmPassword,
+            isSecure: true,
+            autofillHints: const [AutofillHints.newPassword],
+            onChanged: (_) => setState(() {}),
+          ),
+          if (_confirmPassword.text.isNotEmpty &&
+              _confirmPassword.text != _password.text)
+            Text(
+              l.resetPasswordMismatch,
+              style: const TextStyle(color: AetherColors.textSecondary),
+            ),
         ],
         const SizedBox(height: AetherSpacing.lg),
         AuthPrimaryButton(
@@ -381,16 +410,12 @@ class _PhoneSignInViewState extends State<PhoneSignInView> {
           ),
         ),
         const SizedBox(height: AetherSpacing.md),
-        AuthField(
-          title: l.authPhoneCodeHint,
+        OtpBoxRow(
           controller: _code,
-          keyboard: AuthFieldKeyboard.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(6),
-          ],
+          focusNode: _codeFocus,
+          otpLength: 6,
+          shake: _codeShake,
           onChanged: (_) => setState(() {}),
-          textInputAction: TextInputAction.done,
         ),
         const SizedBox(height: AetherSpacing.lg),
         AuthPrimaryButton(

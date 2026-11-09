@@ -296,14 +296,14 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AetherSpacing.xl,
+                  padding: EdgeInsets.zero,
+                  child: AuthFormBody(
+                    child: _step == _Step.enterEmail
+                        ? _buildStep1(l, working)
+                        : _step == _Step.enterOtp
+                        ? _buildStep2(l, working)
+                        : _buildPasswordStep(l, working),
                   ),
-                  child: _step == _Step.enterEmail
-                      ? _buildStep1(l, working)
-                      : _step == _Step.enterOtp
-                      ? _buildStep2(l, working)
-                      : _buildPasswordStep(l, working),
                 ),
               ),
             ],

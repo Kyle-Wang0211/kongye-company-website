@@ -13,8 +13,18 @@ abstract class AuthService {
   /// Create a new account. Throws `AuthException` on failure.
   Future<AuthenticatedUser> signUp(SignUpRequest request);
 
-  /// Send an OTP to a phone number. Returns a verification handle.
-  Future<PhoneVerificationChallenge> startPhoneVerification(String phoneNumber);
+  /// Send a login OTP for an existing phone account. Signup uses
+  /// startPhoneSignup so an account is never created without a password.
+  Future<PhoneVerificationChallenge> startPhoneVerification(
+    String phoneNumber, {
+    bool forSignUp = false,
+  });
+
+  Future<PhoneVerificationChallenge> startPhoneSignup({
+    required String phoneNumber,
+    required String password,
+    String? displayName,
+  });
 
   /// Resend email verification link to the currently-signed-in user.
   Future<void> sendEmailVerification();
@@ -54,8 +64,8 @@ abstract class AuthService {
   /// Irreversible.
   Future<void> deleteAccount();
 
-  /// Update the signed-in user's display name in the provider's
-  /// `user_metadata.display_name` (Supabase). Returns the refreshed
+  /// Update the signed-in user's canonical profile display name through the
+  /// authenticated name endpoint. Returns the refreshed
   /// AuthenticatedUser so callers can drop the new value into local
   /// state without a re-sign-in. Throws AuthException on failure
   /// (network / not signed in / provider error).

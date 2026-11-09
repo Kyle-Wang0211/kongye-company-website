@@ -40,6 +40,13 @@ class MockAuthServiceImpl implements AuthService {
 
   @override
   Future<AuthenticatedUser> signUp(SignUpRequest request) async {
+    final password = switch (request) {
+      SignUpRequestEmail(:final password) ||
+      SignUpRequestPhone(:final password) => password,
+    };
+    if (password.length < 8) {
+      throw const AuthException(AuthErrorKind.weakPassword);
+    }
     final AuthenticatedUser user;
     switch (request) {
       case SignUpRequestEmail(:final email, :final displayName):
@@ -61,13 +68,26 @@ class MockAuthServiceImpl implements AuthService {
 
   @override
   Future<PhoneVerificationChallenge> startPhoneVerification(
-    String phoneNumber,
-  ) async {
+    String phoneNumber, {
+    bool forSignUp = false,
+  }) async {
     return PhoneVerificationChallenge(
       verificationID: 'mock_vid_${_slug(phoneNumber)}',
       phoneNumber: phoneNumber,
       expiresAt: DateTime.now().add(const Duration(minutes: 5)),
     );
+  }
+
+  @override
+  Future<PhoneVerificationChallenge> startPhoneSignup({
+    required String phoneNumber,
+    required String password,
+    String? displayName,
+  }) async {
+    if (password.length < 8) {
+      throw const AuthException(AuthErrorKind.weakPassword);
+    }
+    return startPhoneVerification(phoneNumber);
   }
 
   @override

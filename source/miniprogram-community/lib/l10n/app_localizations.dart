@@ -6816,6 +6816,42 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Your recovery session has expired. Return to sign in and request a new code.'**
   String get resetSessionExpired;
+
+  /// No description provided for @authPhonePasswordLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone login'**
+  String get authPhonePasswordLogin;
+
+  /// No description provided for @authEmailPasswordLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Email login'**
+  String get authEmailPasswordLogin;
+
+  /// No description provided for @authCodeLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Code login'**
+  String get authCodeLogin;
+
+  /// No description provided for @authPasswordLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Password login'**
+  String get authPasswordLogin;
+
+  /// No description provided for @authLoginCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with a code'**
+  String get authLoginCodeTitle;
+
+  /// No description provided for @authLoginCodeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to send or verify the login code. Please try again.'**
+  String get authLoginCodeFailed;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

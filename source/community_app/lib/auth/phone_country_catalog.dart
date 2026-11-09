@@ -27,9 +27,6 @@ class PhoneCountry {
     this.mobileExample,
   );
 
-  String get flag => String.fromCharCodes(
-    iso.codeUnits.map((letter) => 0x1F1E6 + letter - 65),
-  );
   String name(bool chinese) => chinese ? chineseName : englishName;
 }
 

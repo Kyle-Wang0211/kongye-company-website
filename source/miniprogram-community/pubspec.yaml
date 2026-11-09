@@ -247,6 +247,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/auth/flags/
     - assets/pointcloud_viewer/
     - assets/pointcloud_viewer/assets/
     - assets/pointcloud_viewer/source/

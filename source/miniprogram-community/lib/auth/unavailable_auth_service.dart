@@ -32,8 +32,16 @@ class UnavailableAuthService implements AuthService {
 
   @override
   Future<PhoneVerificationChallenge> startPhoneVerification(
-    String phoneNumber,
-  ) async => _unavailable();
+    String phoneNumber, {
+    bool forSignUp = false,
+  }) async => _unavailable();
+
+  @override
+  Future<PhoneVerificationChallenge> startPhoneSignup({
+    required String phoneNumber,
+    required String password,
+    String? displayName,
+  }) async => _unavailable();
 
   @override
   Future<void> sendEmailVerification() async => _unavailable();

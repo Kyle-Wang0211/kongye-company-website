@@ -55,7 +55,7 @@ class SupabaseAuthServiceImpl implements AuthService {
     // A cached token awaiting recovery is not proof of an active session. Keep
     // the cache intact so a later recovery can still succeed while offline.
     if (session == null || session.isExpired) return null;
-    return _wrap(session.user);
+    return _hydrateProfile(session.user);
   }
 
   @override
@@ -71,7 +71,7 @@ class SupabaseAuthServiceImpl implements AuthService {
           if (user == null) {
             throw const AuthException(AuthErrorKind.invalidCredentials);
           }
-          return _wrap(user);
+          return await _hydrateProfile(user);
 
         case SignInRequestPhonePassword(
           phoneNumber: final phone,
@@ -85,7 +85,7 @@ class SupabaseAuthServiceImpl implements AuthService {
           if (user == null) {
             throw const AuthException(AuthErrorKind.invalidCredentials);
           }
-          return _wrap(user);
+          return await _hydrateProfile(user);
 
         case SignInRequestPhone(phoneNumber: final phone, code: final code):
           final res = await _client.auth.verifyOTP(
@@ -97,7 +97,7 @@ class SupabaseAuthServiceImpl implements AuthService {
           if (user == null) {
             throw const AuthException(AuthErrorKind.invalidVerificationCode);
           }
-          return _wrap(user);
+          return await _hydrateProfile(user);
       }
     } on AuthRetryableFetchException catch (e) {
       throw AuthException(AuthErrorKind.network, e.message);
@@ -146,6 +146,9 @@ class SupabaseAuthServiceImpl implements AuthService {
           displayName: final name,
         ):
           _requireNativeEmail();
+          if (pw.length < 8) {
+            throw const AuthException(AuthErrorKind.weakPassword);
+          }
           final res = await _client.auth.signUp(
             email: email,
             password: pw,
@@ -159,15 +162,19 @@ class SupabaseAuthServiceImpl implements AuthService {
           if (user == null) {
             throw const AuthException(AuthErrorKind.invalidCredentials);
           }
-          return _wrap(user);
+          return await _hydrateProfile(user);
 
         case SignUpRequestPhone(
           phoneNumber: final phone,
           code: final code,
+          password: final password,
           displayName: final name,
         ):
-          // Phone path unchanged — Supabase's native verifyOTP on a
-          // never-seen phone creates the user in one shot.
+          if (password.length < 8) {
+            throw const AuthException(AuthErrorKind.weakPassword);
+          }
+          // startPhoneSignup supplied the password before sending this SMS.
+          // Verification uses that pending signup; no password mutation follows.
           final res = await _client.auth.verifyOTP(
             phone: phone,
             token: code,
@@ -178,11 +185,12 @@ class SupabaseAuthServiceImpl implements AuthService {
             throw const AuthException(AuthErrorKind.invalidVerificationCode);
           }
           if (name != null) {
-            await _client.auth.updateUser(
-              UserAttributes(data: {'display_name': name}),
-            );
+            // Metadata changes no longer sync into profiles. Persist through
+            // the same authenticated, validated endpoint used for renaming.
+            _requireCurrentIdentity(user);
+            return await _updateDisplayName(user, name);
           }
-          return _wrap(user);
+          return await _hydrateProfile(user);
       }
     } on AuthRetryableFetchException catch (e) {
       throw AuthException(AuthErrorKind.network, e.message);
@@ -201,10 +209,17 @@ class SupabaseAuthServiceImpl implements AuthService {
 
   @override
   Future<PhoneVerificationChallenge> startPhoneVerification(
-    String phoneNumber,
-  ) async {
+    String phoneNumber, {
+    bool forSignUp = false,
+  }) async {
     try {
-      await _client.auth.signInWithOtp(phone: phoneNumber);
+      if (forSignUp) {
+        throw const AuthException(AuthErrorKind.providerUnavailable);
+      }
+      await _client.auth.signInWithOtp(
+        phone: phoneNumber,
+        shouldCreateUser: false,
+      );
       return PhoneVerificationChallenge(
         // Supabase does not return a server-side verification ID; the
         // pair (phone, code) is enough for verifyOTP. Pass the phone
@@ -217,6 +232,36 @@ class SupabaseAuthServiceImpl implements AuthService {
       throw AuthException(_mapAuthApi(e), e.message);
     } catch (e) {
       throw AuthException(AuthErrorKind.unknown, e.toString());
+    }
+  }
+
+  @override
+  Future<PhoneVerificationChallenge> startPhoneSignup({
+    required String phoneNumber,
+    required String password,
+    String? displayName,
+  }) async {
+    if (password.length < 8) {
+      throw const AuthException(AuthErrorKind.weakPassword);
+    }
+    try {
+      await _client.auth.signUp(
+        phone: phoneNumber,
+        password: password,
+        data: {
+          'display_name': ?displayName,
+          'locale': _localeNotifier?.locale.languageCode ?? 'en',
+        },
+        channel: OtpChannel.sms,
+      );
+      return PhoneVerificationChallenge(
+        verificationID: phoneNumber,
+        phoneNumber: phoneNumber,
+      );
+    } on AuthApiException catch (e) {
+      throw AuthException(_mapAuthApi(e), e.message);
+    } catch (_) {
+      throw const AuthException(AuthErrorKind.network);
     }
   }
 
@@ -278,7 +323,7 @@ class SupabaseAuthServiceImpl implements AuthService {
       if (res.user == null || res.session == null) {
         throw const AuthException(AuthErrorKind.invalidVerificationCode);
       }
-      return _wrap(res.user!);
+      return await _hydrateProfile(res.user!);
     } on AuthRetryableFetchException catch (e) {
       throw AuthException(AuthErrorKind.network, e.message);
     } on AuthApiException catch (e) {
@@ -313,10 +358,10 @@ class SupabaseAuthServiceImpl implements AuthService {
     required String email,
     required String token,
   }) async {
-    final data = await _invokePasswordRecovery(
-      'password-recovery-verify',
-      {'email': email.trim().toLowerCase(), 'otp': token},
-    );
+    final data = await _invokePasswordRecovery('password-recovery-verify', {
+      'email': email.trim().toLowerCase(),
+      'otp': token,
+    });
     final resetToken = data['reset_token'];
     if (resetToken is! String || resetToken.isEmpty) {
       throw const AuthException(AuthErrorKind.providerUnavailable);
@@ -330,15 +375,11 @@ class SupabaseAuthServiceImpl implements AuthService {
     required String resetToken,
     required String newPassword,
   }) async {
-    await _invokePasswordRecovery(
-      'password-recovery-complete',
-      {
-        'email': email.trim().toLowerCase(),
-        'reset_token': resetToken,
-        'new_password': newPassword,
-      },
-      completing: true,
-    );
+    await _invokePasswordRecovery('password-recovery-complete', {
+      'email': email.trim().toLowerCase(),
+      'reset_token': resetToken,
+      'new_password': newPassword,
+    }, completing: true);
   }
 
   Future<Map<dynamic, dynamic>> _invokePasswordRecovery(
@@ -434,6 +475,15 @@ class SupabaseAuthServiceImpl implements AuthService {
     if (current == null) {
       throw const AuthException(AuthErrorKind.notSignedIn);
     }
+    return _updateDisplayName(current, displayName);
+  }
+
+  Future<AuthenticatedUser> _updateDisplayName(
+    User current,
+    String displayName,
+  ) async {
+    _requireCurrentIdentity(current);
+    final session = _client.auth.currentSession!;
     // [NAME-CHOKEPOINT 2026-08-23] 改名从"客户端直写"改为"只调 Edge Function"。
     //
     // 之前这里做两件事,两件都已经不成立:
@@ -453,18 +503,27 @@ class SupabaseAuthServiceImpl implements AuthService {
     try {
       final res = await _client.functions.invoke(
         'set-profile-name',
+        // Freeze the verified principal before any await. The shared SDK
+        // client may switch accounts while preparing the HTTP request.
+        headers: {'Authorization': 'Bearer ${session.accessToken}'},
         body: <String, dynamic>{'display_name': displayName},
       );
+      _requireCurrentIdentity(current);
       final data = res.data;
-      final newName = (data is Map ? data['display_name'] as String? : null);
-      // CurrentUser.updateDisplayName 直接拿这个返回值当新的本地状态
-      // (current_user.dart:357 `_state = CurrentUserSignedIn(updated)`),
-      // 所以不需要 refreshSession —— 服务端返回的就是权威值。
+      if (data is! Map || data['ok'] != true || data.containsKey('error')) {
+        throw const AuthException(AuthErrorKind.providerUnavailable);
+      }
+      final newName = data['display_name'];
+      // An unchanged response can omit display_name. Only a canonical profile
+      // read may fill it in; the raw request has not been normalized locally.
+      if (newName is! String || newName.isEmpty) {
+        return await _hydrateProfile(current, requireName: true);
+      }
       return AuthenticatedUser(
         id: InternalUserID(current.id),
         email: current.email,
         phone: current.phone,
-        displayName: newName ?? displayName,
+        displayName: newName,
       );
     } on FunctionException catch (e) {
       throw _mapSetProfileName(e);
@@ -511,15 +570,9 @@ class SupabaseAuthServiceImpl implements AuthService {
       case 'cooldown':
         final ms = (d is Map ? d['retry_after_ms'] : null);
         final days = ms is num ? (ms / 86400000).ceil() : 3;
-        return AuthException(
-          AuthErrorKind.rateLimited,
-          '改名太频繁,请 $days 天后再试',
-        );
+        return AuthException(AuthErrorKind.rateLimited, '改名太频繁,请 $days 天后再试');
       case 'rate_limited':
-        return const AuthException(
-          AuthErrorKind.rateLimited,
-          '操作过于频繁,请稍后再试',
-        );
+        return const AuthException(AuthErrorKind.rateLimited, '操作过于频繁,请稍后再试');
       case 'reserved_name':
         final kind = (d is Map ? d['kind']?.toString() : null) ?? '';
         return AuthException(
@@ -558,6 +611,59 @@ class SupabaseAuthServiceImpl implements AuthService {
   }
 
   // ─── helpers ─────────────────────────────────────────────────────
+
+  void _requireCurrentIdentity(User user) {
+    final session = _client.auth.currentSession;
+    if (session == null || session.isExpired || session.user.id != user.id) {
+      throw const AuthException(AuthErrorKind.notSignedIn);
+    }
+  }
+
+  Future<AuthenticatedUser> _hydrateProfile(
+    User user, {
+    bool requireName = false,
+  }) async {
+    _requireCurrentIdentity(user);
+    String? displayName;
+    try {
+      // Reuse the signed-in client's deployment and public projection. Never
+      // transfer an account token or profile lookup to another backend.
+      final table =
+          Uri.parse(_client.rest.url).origin == 'https://api.kongye.space'
+          ? 'community_author_profiles'
+          : 'profiles';
+      final row = await _client
+          .from(table)
+          .select('id, display_name')
+          .eq('id', user.id)
+          .maybeSingle();
+      if (row == null ||
+          row['id'] != user.id ||
+          (row['display_name'] != null && row['display_name'] is! String)) {
+        throw const AuthException(AuthErrorKind.unknown, 'Profile unavailable');
+      }
+      displayName = row['display_name'] as String?;
+      if (requireName && (displayName == null || displayName.isEmpty)) {
+        throw const AuthException(
+          AuthErrorKind.unknown,
+          'Profile name unavailable',
+        );
+      }
+    } catch (_) {
+      _requireCurrentIdentity(user);
+      if (requireName) rethrow;
+      // Keep session recovery usable offline. A failed profile read must not
+      // clear authentication; a successful read always outranks metadata.
+      return _wrap(user);
+    }
+    _requireCurrentIdentity(user);
+    return AuthenticatedUser(
+      id: InternalUserID(user.id),
+      email: user.email,
+      phone: user.phone,
+      displayName: displayName,
+    );
+  }
 
   AuthenticatedUser _wrap(User user) {
     final meta = user.userMetadata ?? const {};

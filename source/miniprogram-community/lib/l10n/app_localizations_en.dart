@@ -3814,4 +3814,23 @@ class AppL10nEn extends AppL10n {
   @override
   String get resetSessionExpired =>
       'Your recovery session has expired. Return to sign in and request a new code.';
+
+  @override
+  String get authPhonePasswordLogin => 'Phone login';
+
+  @override
+  String get authEmailPasswordLogin => 'Email login';
+
+  @override
+  String get authCodeLogin => 'Code login';
+
+  @override
+  String get authPasswordLogin => 'Password login';
+
+  @override
+  String get authLoginCodeTitle => 'Sign in with a code';
+
+  @override
+  String get authLoginCodeFailed =>
+      'Unable to send or verify the login code. Please try again.';
 }

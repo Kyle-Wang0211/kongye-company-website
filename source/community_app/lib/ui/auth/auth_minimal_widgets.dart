@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 // Shared widgets for the Ultra-Minimal auth design.
 //
 // Three pages use this aesthetic — sign in (AuthRootView), sign up
@@ -28,8 +29,9 @@ class AuthTopBar extends StatelessWidget {
   /// Widget rendered top-left. Typically a back-chevron IconButton on
   /// pushed sub-pages; null on the root sign-in page.
   final Widget? leading;
+  final bool showLanguageToggle;
 
-  const AuthTopBar({super.key, this.leading});
+  const AuthTopBar({super.key, this.leading, this.showLanguageToggle = true});
 
   @override
   Widget build(BuildContext context) {
@@ -65,12 +67,13 @@ class AuthTopBar extends StatelessWidget {
                 bottom: 0,
                 child: Center(child: leading!),
               ),
-            const Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: Center(child: CompactLanguageToggle()),
-            ),
+            if (showLanguageToggle)
+              const Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Center(child: CompactLanguageToggle()),
+              ),
           ],
         ),
       ),
@@ -158,8 +161,8 @@ class CompactLanguageToggle extends StatelessWidget {
 }
 
 // =====================================================================
-// Heading + (optional) subtitle. Both rendered ALL-CAPS for English
-// (no-op for Chinese) with letter-spacing applied across both scripts.
+// Heading + (optional) subtitle. Static copy defaults to ALL-CAPS.
+// Disable subtitle uppercasing when it contains an email or other user data.
 //
 // Pass subtitle=null to render just the title — used by reset password
 // step 1 where the title alone ("RESET PASSWORD") is self-explanatory.
@@ -219,13 +222,14 @@ class AuthHeading extends StatelessWidget {
 // =====================================================================
 class LabeledField extends StatelessWidget {
   final String label;
-  final bool enabled;
+  final double labelFontSize;
   final Widget? leading;
   final Widget? trailing;
   final bool? obscureText;
   final TextEditingController controller;
   final FocusNode? focusNode;
   final bool isSecure;
+  final bool enabled;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
@@ -235,13 +239,14 @@ class LabeledField extends StatelessWidget {
   const LabeledField({
     super.key,
     required this.label,
-    this.enabled = true,
+    this.labelFontSize = 11,
     this.leading,
     this.trailing,
     this.obscureText,
     required this.controller,
     this.focusNode,
     this.isSecure = false,
+    this.enabled = true,
     this.keyboardType,
     this.textInputAction,
     this.autofillHints,
@@ -258,8 +263,10 @@ class LabeledField extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 11,
+          softWrap: true,
+          maxLines: null,
+          style: TextStyle(
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w600,
             letterSpacing: 2.5,
             color: AetherColors.textTertiary,
@@ -267,8 +274,8 @@ class LabeledField extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         TextField(
-          enabled: enabled,
           controller: controller,
+          enabled: enabled,
           focusNode: focusNode,
           obscureText: obscureText ?? isSecure,
           keyboardType: keyboardType,
@@ -336,8 +343,9 @@ class MinimalCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        enabled ? AetherColors.textPrimary : AetherColors.textTertiary;
+    final color = enabled
+        ? AetherColors.textPrimary
+        : AetherColors.textTertiary;
     return GestureDetector(
       onTap: enabled ? onTap : null,
       behavior: HitTestBehavior.opaque,
@@ -426,4 +434,43 @@ class MinimalLink extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Allows hosts and geometry tests to select the web layout explicitly.
+/// Native applications default to using their full available form width.
+class AuthFormLayoutScope extends InheritedWidget {
+  final bool webLayout;
+  const AuthFormLayoutScope({
+    super.key,
+    required this.webLayout,
+    required super.child,
+  });
+  @override
+  bool updateShouldNotify(AuthFormLayoutScope oldWidget) =>
+      webLayout != oldWidget.webLayout;
+}
+
+/// Wide web forms occupy the middle third; narrow web and native forms fill
+/// the available width. Resizing never replaces the child or its controllers.
+class AuthFormBody extends StatelessWidget {
+  final Widget child;
+  const AuthFormBody({super.key, required this.child});
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final viewport = constraints.maxWidth;
+      final gutter = viewport < 600 ? 16.0 : 24.0;
+      final available = (viewport - 2 * gutter).clamp(0.0, viewport);
+      final web =
+          context
+              .dependOnInheritedWidgetOfExactType<AuthFormLayoutScope>()
+              ?.webLayout ??
+          kIsWeb;
+      final width = web && viewport >= 1080 ? viewport / 3 : available;
+      return Align(
+        alignment: Alignment.topCenter,
+        child: SizedBox(width: width, child: child),
+      );
+    },
+  );
 }

@@ -1517,5 +1517,11 @@
   "resetRequestFailed": "Unable to reset your password. Please try again.",
   "resetRateLimited": "Too many requests. Please try again later.",
   "resetNetworkError": "The request timed out or could not connect. Please try again.",
-  "resetSessionExpired": "Your recovery session has expired. Return to sign in and request a new code."
+  "resetSessionExpired": "Your recovery session has expired. Return to sign in and request a new code.",
+  "authPhonePasswordLogin": "Phone login",
+  "authEmailPasswordLogin": "Email login",
+  "authCodeLogin": "Code login",
+  "authPasswordLogin": "Password login",
+  "authLoginCodeTitle": "Sign in with a code",
+  "authLoginCodeFailed": "Unable to send or verify the login code. Please try again."
 }

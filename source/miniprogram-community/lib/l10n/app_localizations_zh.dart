@@ -3642,4 +3642,22 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get resetSessionExpired => '重置凭证已过期，请返回登录后重新获取验证码';
+
+  @override
+  String get authPhonePasswordLogin => '手机号登录';
+
+  @override
+  String get authEmailPasswordLogin => '邮箱登录';
+
+  @override
+  String get authCodeLogin => '验证码登录';
+
+  @override
+  String get authPasswordLogin => '密码登录';
+
+  @override
+  String get authLoginCodeTitle => '验证码登录';
+
+  @override
+  String get authLoginCodeFailed => '登录验证码发送或验证失败，请重试。';
 }

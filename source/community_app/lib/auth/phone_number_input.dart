@@ -5,7 +5,18 @@ import 'phone_country_catalog.dart';
 
 /// Reuses the existing credential normalizer without transmitting a password.
 /// SMS login retains legacy bare mainland numbers; overseas numbers need +/00.
-String? normalizePhoneLogin(String input) {
+String? normalizePhoneLogin(String input, {PhoneCountry? country}) {
+  if (country != null) {
+    var nationalInput = input;
+    final compact = input.replaceAll(RegExp(r'[ ()-]'), '');
+    if (country.callingCode == '86' &&
+        RegExp(r'^861[3-9][0-9]{9}$').hasMatch(compact)) {
+      nationalInput = '+$compact';
+    }
+    final national = canonicalSignupNationalNumber(nationalInput, country);
+    if (national == null) return null;
+    input = '+${country.callingCode}$national';
+  }
   final request = passwordSignInRequest(
     account: input,
     password: 'unused',

@@ -1248,5 +1248,11 @@
   "resetRequestFailed": "暂时无法重置密码，请重试",
   "resetRateLimited": "请求过于频繁，请稍后再试",
   "resetNetworkError": "请求超时或网络连接失败，请重试",
-  "resetSessionExpired": "重置凭证已过期，请返回登录后重新获取验证码"
+  "resetSessionExpired": "重置凭证已过期，请返回登录后重新获取验证码",
+  "authPhonePasswordLogin": "手机号登录",
+  "authEmailPasswordLogin": "邮箱登录",
+  "authCodeLogin": "验证码登录",
+  "authPasswordLogin": "密码登录",
+  "authLoginCodeTitle": "验证码登录",
+  "authLoginCodeFailed": "登录验证码发送或验证失败，请重试。"
 }

@@ -62,6 +62,23 @@ class CurrentUser extends ChangeNotifier {
   AuthException? _lastError;
   bool _isPerformingAuthAction = false;
   int _generation = 0;
+  int? _pendingSignInGeneration;
+
+  int? get pendingSignInToken => _pendingSignInGeneration;
+
+  void cancelPendingSignIn(int token) {
+    if (_disposed ||
+        token != _pendingSignInGeneration ||
+        token != _generation ||
+        isSignedIn) {
+      return;
+    }
+    _pendingSignInGeneration = null;
+    _identityIntent++;
+    _beginAction(performing: false, notify: false);
+    _publishSignedOut('canceled sign-in');
+  }
+
   // Metadata edits and OTP resends can supersede UI state without revoking
   // the identity established by an otherwise successful login.
   int _identityIntent = 0;
@@ -248,7 +265,15 @@ class CurrentUser extends ChangeNotifier {
   }
 
   Future<void> signIn(SignInRequest request) async {
-    await _runUserAction((service) => service.signIn(request));
+    await _runUserAction(
+      (service) => service.signIn(request),
+      cancellableSignIn: true,
+      canceledIdentityMatches: switch (request) {
+        SignInRequestPhone(:final phoneNumber) =>
+          (user) => user.phone == phoneNumber,
+        _ => null,
+      },
+    );
   }
 
   Future<void> signUp(SignUpRequest request) async {
@@ -272,8 +297,24 @@ class CurrentUser extends ChangeNotifier {
       }) ??
       false;
 
-  Future<PhoneVerificationChallenge?> startPhoneVerification(String phone) =>
-      _runValueAction((service) => service.startPhoneVerification(phone));
+  Future<PhoneVerificationChallenge?> startPhoneVerification(
+    String phone, {
+    bool forSignUp = false,
+  }) => _runValueAction(
+    (service) => service.startPhoneVerification(phone, forSignUp: forSignUp),
+  );
+
+  Future<PhoneVerificationChallenge?> startPhoneSignup({
+    required String phoneNumber,
+    required String password,
+    String? displayName,
+  }) => _runValueAction(
+    (service) => service.startPhoneSignup(
+      phoneNumber: phoneNumber,
+      password: password,
+      displayName: displayName,
+    ),
+  );
 
   Future<bool> sendPasswordReset(String email) async =>
       await _runValueAction((service) async {
@@ -412,9 +453,12 @@ class CurrentUser extends ChangeNotifier {
     Future<AuthenticatedUser> Function(AuthService) action, {
     bool rethrowVerificationPending = false,
     bool createsSession = true,
+    bool cancellableSignIn = false,
+    bool Function(AuthenticatedUser)? canceledIdentityMatches,
   }) async {
     final identityIntent = createsSession ? ++_identityIntent : _identityIntent;
     final generation = _beginAction(notify: false);
+    if (cancellableSignIn) _pendingSignInGeneration = generation;
     if (createsSession && (_attachedUserID != null || isSignedIn)) {
       _publishSignedOut('replacement authentication', performing: true);
       unawaited(
@@ -430,6 +474,26 @@ class CurrentUser extends ChangeNotifier {
     }
     if (!_isCurrent(generation)) return false;
     try {
+      if (canceledIdentityMatches != null) {
+        // A code login owns its provider slot until workspace attachment and
+        // cancellation cleanup finish. A queued B login must start afterward.
+        return await _queueProvider((service) async {
+          AuthenticatedUser? completedUser;
+          try {
+            completedUser = await action(service);
+            if (!_isCurrent(generation)) return false;
+            return await _acceptIdentity(generation, completedUser);
+          } finally {
+            if (createsSession && identityIntent != _identityIntent) {
+              await _cleanupCanceledCodeSignIn(
+                service,
+                completedUser,
+                canceledIdentityMatches,
+              );
+            }
+          }
+        });
+      }
       final user = await _queueProvider((service) async {
         try {
           return await action(service);
@@ -451,6 +515,9 @@ class CurrentUser extends ChangeNotifier {
       if (_isCurrent(generation)) _recordError(error);
       return false;
     } finally {
+      if (_pendingSignInGeneration == generation) {
+        _pendingSignInGeneration = null;
+      }
       _finishAction(generation);
     }
   }
@@ -498,6 +565,42 @@ class CurrentUser extends ChangeNotifier {
     _lastError = null;
     _isPerformingAuthAction = performing;
     notifyListeners();
+  }
+
+  Future<void> _cleanupCanceledCodeSignIn(
+    AuthService service,
+    AuthenticatedUser? completedUser,
+    bool Function(AuthenticatedUser) matchesRequest,
+  ) async {
+    AuthenticatedUser? provider;
+    var known = false;
+    try {
+      provider = await service.currentUser();
+      known = true;
+    } catch (_) {
+      // Unknown identity is not permission to revoke another session.
+    }
+    final ownsProvider =
+        known &&
+        provider != null &&
+        (completedUser != null
+            ? provider.id == completedUser.id
+            : matchesRequest(provider));
+    final ownedId = completedUser?.id ?? (ownsProvider ? provider.id : null);
+    // Revoke before awaiting workspace cleanup. An external B session that
+    // arrives during the detach hook must not be logged out afterward.
+    if (ownsProvider) await _revokeProviderSession(service);
+    if (ownedId == null) return;
+    await _queueIdentity(() async {
+      if (_attachedUserID != ownedId) return;
+      try {
+        await _onIdentityChanged?.call(null);
+        _attachedUserID = null;
+        _identityKnown = true;
+      } finally {
+        await _clearPersistedIdentity();
+      }
+    });
   }
 
   Future<void> _discardCanceledSession(AuthService service) async {

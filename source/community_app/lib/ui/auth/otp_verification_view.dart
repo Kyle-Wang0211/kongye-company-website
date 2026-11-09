@@ -28,6 +28,7 @@ import '../../auth/current_user.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
 import 'auth_shared_widgets.dart';
+import 'auth_minimal_widgets.dart';
 import 'auth_policy_consent.dart';
 
 class OtpVerificationView extends StatefulWidget {
@@ -212,112 +213,113 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AetherSpacing.lg,
-            AetherSpacing.md,
-            AetherSpacing.lg,
-            AetherSpacing.lg,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(l.otpVerifyTitle, style: AetherTextStyles.h1),
-              const SizedBox(height: AetherSpacing.sm),
-              Text(
-                l.otpVerifySubtitle(widget.email),
-                style: AetherTextStyles.bodySm,
-              ),
-              const SizedBox(height: AetherSpacing.xl),
-              OtpBoxRow(
-                controller: _code,
-                focusNode: _focusNode,
-                otpLength: _otpLength,
-                shake: _shake,
-                onChanged: _onCodeChanged,
-              ),
-              if (widget.hasPolicyConsent == null)
-                AuthPolicyConsent(
-                  value: _policyAccepted,
-                  enabled: !working,
-                  onChanged: (value) {
-                    setState(() => _policyAccepted = value);
-                    if (value && _code.text.length == _otpLength) _verify();
-                  },
-                ),
-              if (err != null) ...[
-                const SizedBox(height: AetherSpacing.md),
-                Center(
-                  child: Text(
-                    err.message,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AetherColors.danger,
-                    ),
+        child: SingleChildScrollView(
+          child: AuthFormBody(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AetherSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.otpVerifyTitle, style: AetherTextStyles.h1),
+                  const SizedBox(height: AetherSpacing.sm),
+                  Text(
+                    l.otpVerifySubtitle(widget.email),
+                    style: AetherTextStyles.bodySm,
                   ),
-                ),
-              ],
-              const SizedBox(height: AetherSpacing.lg),
-              if (working)
-                const Center(
-                  child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AetherColors.textTertiary,
+                  const SizedBox(height: AetherSpacing.xl),
+                  OtpBoxRow(
+                    controller: _code,
+                    focusNode: _focusNode,
+                    otpLength: _otpLength,
+                    shake: _shake,
+                    onChanged: _onCodeChanged,
+                  ),
+                  if (widget.hasPolicyConsent == null)
+                    AuthPolicyConsent(
+                      value: _policyAccepted,
+                      enabled: !working,
+                      onChanged: (value) {
+                        setState(() => _policyAccepted = value);
+                        if (value && _code.text.length == _otpLength) _verify();
+                      },
+                    ),
+                  if (err != null) ...[
+                    const SizedBox(height: AetherSpacing.md),
+                    Center(
+                      child: Text(
+                        err.message,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AetherColors.danger,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AetherSpacing.lg),
+                  if (working)
+                    const Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AetherColors.textTertiary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: AetherSpacing.lg),
+                  Center(
+                    child: GestureDetector(
+                      onTap:
+                          (_resendCooldownSec > 0 ||
+                              working ||
+                              !_hasPolicyConsent)
+                          ? null
+                          : _resend,
+                      child: Text(
+                        _resendCooldownSec > 0
+                            ? l.otpResendCooldown(_resendCooldownSec)
+                            : l.otpResend,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              (_resendCooldownSec > 0 ||
+                                  working ||
+                                  !_hasPolicyConsent)
+                              ? AetherColors.textTertiary
+                              : AetherColors.textSecondary,
+                          decoration:
+                              (_resendCooldownSec > 0 ||
+                                  working ||
+                                  !_hasPolicyConsent)
+                              ? TextDecoration.none
+                              : TextDecoration.underline,
+                          decorationColor: AetherColors.textSecondary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              const SizedBox(height: AetherSpacing.lg),
-              Center(
-                child: GestureDetector(
-                  onTap:
-                      (_resendCooldownSec > 0 || working || !_hasPolicyConsent)
-                      ? null
-                      : _resend,
-                  child: Text(
-                    _resendCooldownSec > 0
-                        ? l.otpResendCooldown(_resendCooldownSec)
-                        : l.otpResend,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          (_resendCooldownSec > 0 ||
-                              working ||
-                              !_hasPolicyConsent)
-                          ? AetherColors.textTertiary
-                          : AetherColors.textSecondary,
-                      decoration:
-                          (_resendCooldownSec > 0 ||
-                              working ||
-                              !_hasPolicyConsent)
-                          ? TextDecoration.none
-                          : TextDecoration.underline,
-                      decorationColor: AetherColors.textSecondary,
+                  const SizedBox(height: AetherSpacing.xl),
+                  Center(
+                    child: GestureDetector(
+                      onTap: working
+                          ? null
+                          : () => Navigator.of(context).maybePop(),
+                      child: Text(
+                        l.otpUseAnotherEmail,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AetherColors.textTertiary,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-              const Spacer(),
-              Center(
-                child: GestureDetector(
-                  onTap: working
-                      ? null
-                      : () => Navigator.of(context).maybePop(),
-                  child: Text(
-                    l.otpUseAnotherEmail,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AetherColors.textTertiary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
