@@ -25,15 +25,18 @@ class ProductViewerCapture {
     required Future<void> Function(bool) surfaceMode,
     required Future<void> Function(List<SharedSurfaceMarker>) surfaceMarkers,
     required Future<void> Function(SharedSurfaceAnchor) surfaceFocus,
+    required Future<void> Function() pauseRotation,
     required Future<String?> Function() modelIdentity,
   }) : _surfaceMode = surfaceMode,
        _surfaceMarkers = surfaceMarkers,
        _surfaceFocus = surfaceFocus,
+       _pauseRotation = pauseRotation,
        _modelIdentity = modelIdentity;
   final Future<Uint8List?> Function(double quality) _capture;
   final Future<void> Function(bool) _surfaceMode;
   final Future<void> Function(List<SharedSurfaceMarker>) _surfaceMarkers;
   final Future<void> Function(SharedSurfaceAnchor) _surfaceFocus;
+  final Future<void> Function() _pauseRotation;
   final Future<String?> Function() _modelIdentity;
 
   Future<Uint8List?> captureThumb({double quality = 0.85}) => _capture(quality);
@@ -42,6 +45,7 @@ class ProductViewerCapture {
       _surfaceMarkers(markers);
   Future<void> focusSurfaceComment(SharedSurfaceAnchor anchor) =>
       _surfaceFocus(anchor);
+  Future<void> pauseAutoRotation() => _pauseRotation();
   Future<String?> modelContentSha256() => _modelIdentity();
 }
 
@@ -101,6 +105,7 @@ class ProductModelView extends StatefulWidget {
   final String? communitySessionKey;
   final CommunityViewerSessions? communitySessions;
   final String modelUrl;
+
   /// Published model size when the browser response omits Content-Length.
   final int? modelSizeBytes;
   final Map<String, dynamic>? initialView;
@@ -154,6 +159,13 @@ class _ProductModelViewState extends State<ProductModelView>
     surfaceMode: (enabled) => _controller.setSurfaceCommentMode(enabled),
     surfaceMarkers: (markers) => _controller.setSurfaceCommentMarkers(markers),
     surfaceFocus: (anchor) => _controller.focusSurfaceComment(anchor),
+    pauseRotation: () async {
+      _userTookControl = true;
+      await _controller.configure(
+        autoRotate: false,
+        autoRotateUntilTouched: false,
+      );
+    },
     modelIdentity: () async =>
         !_disposed &&
             _loaded &&
@@ -761,7 +773,8 @@ class _ProductModelViewState extends State<ProductModelView>
             onProgress: (received, total) {
               if (!current() || !mounted) return;
               final publishedSize = widget.modelSizeBytes;
-              final size = total ??
+              final size =
+                  total ??
                   (publishedSize != null && publishedSize > 0
                       ? publishedSize
                       : null);
