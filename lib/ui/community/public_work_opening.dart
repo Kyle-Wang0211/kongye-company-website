@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../community/feed_models.dart';
-import '../../community/publication_cover_url.dart';
+import 'work_detail_page.dart' show WorkDetailMetadata;
 import 'community_loading.dart';
 import 'public_work_handoff_stub.dart'
     if (dart.library.js_interop) 'public_work_handoff_web.dart';
@@ -91,86 +91,103 @@ class PublicWorkOpening extends StatelessWidget {
     ],
   );
 
-  Widget _metadata() => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
-    decoration: const BoxDecoration(
-      border: Border(top: BorderSide(color: Colors.white12, width: .5)),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(
-              Icons.account_circle_outlined,
-              color: Colors.white54,
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: work?.authorDisplayName.isNotEmpty == true
-                  ? Text(
-                      work!.authorDisplayName,
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
-                    )
-                  : Align(
-                      alignment: Alignment.centerLeft,
-                      child: _skeleton('author', 100),
-                    ),
-            ),
-            const Icon(
-              Icons.remove_red_eye_outlined,
-              color: Colors.white54,
-              size: 16,
-            ),
-            const SizedBox(width: 4),
-            if (work == null)
-              _skeleton('views', 28)
-            else
-              Text(
-                '${work!.viewsCount}',
-                style: const TextStyle(color: Colors.white70),
-              ),
-            const SizedBox(width: 12),
-            const Icon(Icons.favorite_border, color: Colors.white54, size: 18),
-            const SizedBox(width: 4),
-            if (work == null)
-              _skeleton('likes', 28)
-            else
-              Text(
-                '${work!.likesCount}',
-                style: const TextStyle(color: Colors.white70),
-              ),
-          ],
-        ),
-        if (work == null) ...[
-          const SizedBox(height: 8),
-          _skeleton('description', 220),
-        ] else if (work!.description?.trim().isNotEmpty == true) ...[
-          const SizedBox(height: 6),
-          Text(
-            work!.description!,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+  Widget _metadata() => work != null
+      ? IgnorePointer(
+          child: WorkDetailMetadata(
+            viewsCount: work!.viewsCount,
+            commentsCount: work!.commentCount,
+            likesCount: work!.likesCount,
+            liked: work!.likedByMe,
+            likeBusy: false,
+            onLike: () => false,
+            author: work!.authorDisplayName,
+            authorUserId: work!.userId,
+            description: work!.description,
+            onComments:
+                {'glb', 'gltf', 'ply'}.contains(work!.format.toLowerCase())
+                ? () {}
+                : null,
           ),
-        ],
-      ],
-    ),
-  );
+        )
+      : Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.white12, width: .5)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.account_circle_outlined,
+                    color: Colors.white54,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: work?.authorDisplayName.isNotEmpty == true
+                        ? Text(
+                            work!.authorDisplayName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          )
+                        : Align(
+                            alignment: Alignment.centerLeft,
+                            child: _skeleton('author', 100),
+                          ),
+                  ),
+                  const Icon(
+                    Icons.remove_red_eye_outlined,
+                    color: Colors.white54,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  if (work == null)
+                    _skeleton('views', 28)
+                  else
+                    Text(
+                      '${work!.viewsCount}',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.favorite_border,
+                    color: Colors.white54,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 4),
+                  if (work == null)
+                    _skeleton('likes', 28)
+                  else
+                    Text(
+                      '${work!.likesCount}',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                ],
+              ),
+              if (work == null) ...[
+                const SizedBox(height: 8),
+                _skeleton('description', 220),
+              ] else if (work!.description?.trim().isNotEmpty == true) ...[
+                const SizedBox(height: 6),
+                Text(
+                  work!.description!,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ],
+            ],
+          ),
+        );
 
   @override
   Widget build(BuildContext context) {
-    final path = work?.thumbnailStoragePath;
-    final cover = path == null || path.isEmpty
-        ? null
-        : publicationCoverUrl(Uri.https('api.kongye.space'), path) ??
-              Uri.https(
-                'api.kongye.space',
-                '/storage/v1/object/public/thumbnails/$path',
-              ).toString();
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -197,21 +214,7 @@ class PublicWorkOpening extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-              child: SizedBox.expand(
-                child: cover == null
-                    ? _orb()
-                    : Image.network(
-                        cover,
-                        fit: BoxFit.contain,
-                        // A null download event also occurs before the first
-                        // response; only a decoded frame can replace the shell.
-                        frameBuilder: (_, child, frame, _) =>
-                            frame == null ? _orb() : child,
-                        errorBuilder: (_, _, _) => _orb(),
-                      ),
-              ),
-            ),
+            Expanded(child: SizedBox.expand(child: _orb())),
             _metadata(),
           ],
         ),

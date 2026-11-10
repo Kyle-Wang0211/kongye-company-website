@@ -416,6 +416,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     setState(() => _selectedCommentId = selected ? comment.id : null);
     unawaited(_syncCommentMarkers());
     if (!selected) return;
+    if (kIsWeb) {
+      unawaited(_surfaceViewer?.pauseAutoRotation().catchError((_) {}));
+      return;
+    }
     try {
       unawaited(
         _surfaceViewer
@@ -1332,7 +1336,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
               ),
               ValueListenableBuilder<Set<String>>(
                 valueListenable: widget.service.pendingLikeWorkIds,
-                builder: (context, pending, _) => _MetaRow(
+                builder: (context, pending, _) => WorkDetailMetadata(
                   viewsCount: _viewsCount,
                   commentsCount: _commentsCount,
                   likesCount: _likesCount,
@@ -1370,7 +1374,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 }
 
-class _MetaRow extends StatelessWidget {
+class WorkDetailMetadata extends StatelessWidget {
   final int viewsCount;
   final int commentsCount;
   final int likesCount;
@@ -1383,7 +1387,7 @@ class _MetaRow extends StatelessWidget {
   final String? description;
   final VoidCallback? onComments;
 
-  const _MetaRow({
+  const WorkDetailMetadata({
     required this.viewsCount,
     required this.commentsCount,
     required this.likesCount,
