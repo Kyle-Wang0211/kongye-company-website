@@ -1,8 +1,0 @@
-{
-  "package": "@supabase/supabase-js",
-  "version": "2.112.0",
-  "registry": "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.112.0.tgz",
-  "integrity": "sha512-dHVOgog58GOagtrZuPxJYg/R45ZV2U0qqgXffH+lMlt1OS+267Pw4g7bw3iXCGxN85OufiE0nI1baxDXlgEyfQ==",
-  "umd_sha256": "eb7564b09d311fd7b0375a7c0dc687a4c7c8ca9eda22c7823285fe86cfb21601",
-  "license": "MIT; packaged upstream license retained"
-}

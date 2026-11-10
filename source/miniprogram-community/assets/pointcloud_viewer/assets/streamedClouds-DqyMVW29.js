@@ -1,1 +1,0 @@
-var e=new WeakSet;function t(t){e.add(t)}function n(t){return e.has(t)}var r=new WeakMap;function i(e,t){t&&r.set(e,t)}function a(e){return r.get(e)}export{i,n,t as r,a as t};

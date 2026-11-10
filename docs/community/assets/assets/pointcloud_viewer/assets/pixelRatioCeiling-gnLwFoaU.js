@@ -1,1 +1,0 @@
-var e=1.5,t=e;function n(){return t}export{n,e as t};

@@ -1,1 +1,0 @@
-var e={solid:66,dashed:33};function t(t){return!Number.isFinite(t)||t<e.dashed?`gap`:t<e.solid?`dashed`:`solid`}export{t as n,e as t};

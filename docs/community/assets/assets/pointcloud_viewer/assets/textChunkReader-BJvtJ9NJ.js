@@ -1,3 +1,0 @@
-function e(e,t,n={}){let r=Math.max(65536,n.chunkBytes??4194304),i=new Uint8Array(e),a=i.length,o=new TextDecoder,s=``,c=0;for(;c<a;){let e=Math.min(c+r,a),l=e>=a,u=s+o.decode(i.subarray(c,e),{stream:!l}),d=0,f=u.indexOf(`
-`);for(;f!==-1;){let e=f;e>d&&u.charCodeAt(e-1)===13&&e--,t(u.slice(d,e)),d=f+1,f=u.indexOf(`
-`,d)}s=u.slice(d),c=e,n.onProgress?.(a>0?c/a:1)}if(s.length>0){let e=s.length;s.charCodeAt(e-1)===13&&e--,t(s.slice(0,e))}}export{e as t};

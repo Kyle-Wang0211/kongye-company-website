@@ -1,1 +1,0 @@
-function e(e){let t=e.length;if(t===0)return``;let n=e=>e.toFixed(2),r=`M ${n(e[0].x)} ${n(e[0].y)}`;for(let i=1;i<t;i++)r+=` L ${n(e[i].x)} ${n(e[i].y)}`;return r}export{e as t};

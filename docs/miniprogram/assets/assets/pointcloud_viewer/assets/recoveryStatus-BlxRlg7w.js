@@ -1,1 +1,0 @@
-import{n as e,r as t,t as n}from"./safeStorage-BrKQuqjd.js";var r=`olv:recovery:off`;function i(){return n(r)!==`1`}function a(n){n?e(r):t(r,`1`)}var o=`not-started`;function s(){return i()?o:`off:user`}function c(e){o=e}export{c as i,s as n,a as r,i as t};
