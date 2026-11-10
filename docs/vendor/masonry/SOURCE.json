@@ -1,0 +1,11 @@
+{
+  "package": "masonry-layout",
+  "version": "4.2.2",
+  "publisher": "David DeSandro / Metafizzy",
+  "license": "MIT",
+  "upstream": "https://github.com/desandro/masonry/tree/v4.2.2",
+  "npm_tarball": "https://registry.npmjs.org/masonry-layout/-/masonry-layout-4.2.2.tgz",
+  "npm_integrity": "sha512-iGtAlrpHNyxaR19CvKC3npnEcAwszXoyJiI8ARV2ePi7fmYhIud25MHK8Zx4P0LCC4d3TNO9+rFa1KoK1OEOaA==",
+  "bundled_file": "dist/masonry.pkgd.js",
+  "sha256": "07bb5de5c318bfe347f442c177a822aa0ec07eb610e073c6f47474c064d0f825"
+}

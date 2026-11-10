@@ -1,8 +1,10 @@
+import {attachCommunityMasonry} from './community-masonry.mjs?v=natural-covers-20261110-v1';
 import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
+attachCommunityMasonry(grid);
 let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,authorReadRevision=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 let viewerId = null, viewerGeneration = 0, authRevision = 0;
 let accountBound = false, accountConnecting;
@@ -306,6 +308,7 @@ function cardFor(work){
    img.addEventListener('load',async()=>{
     if(settled)return;
     try{await img.decode();if(settled)return;if(!img.naturalWidth||!img.naturalHeight)throw Error('Empty cover');
+     picture.style.aspectRatio=String(img.naturalWidth/img.naturalHeight);
      settled=true;clearTimeout(deadline);observer?.disconnect();picture.classList.remove('is-loading');picture.dataset.mediaState='ready';img.classList.add('is-ready');
     }catch{fail();}
    },{once:true});
