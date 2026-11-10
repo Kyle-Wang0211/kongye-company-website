@@ -206,7 +206,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         .firstOrNull;
     if (!mounted || _surfaceAssetSha256 == null || comment == null) return;
     setState(() {
-      _selectedCommentId = comment.id;
+      _selectedCommentId = _selectedCommentId == comment.id ? null : comment.id;
       _commentsOpen = true;
       _commentsEverOpened = true;
       _dismissedLayoutId = null;
@@ -396,10 +396,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             anchor: _sharedAnchor(_markerAnchor(comment)!),
             number: markers.length + 1,
             selected: comment.id == _selectedCommentId,
-            previewText: comment.body,
-            previewImages: comment.attachments
-                .map((image) => image.url)
-                .toList(),
+            previewText: _commentsOpen ? '' : comment.body,
+            previewImages: _commentsOpen
+                ? const []
+                : comment.attachments.map((image) => image.url).toList(),
           ),
         );
       } on ArgumentError {
@@ -423,16 +423,11 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         comment.status == CommunityCommentStatus.removed) {
       return;
     }
-    setState(() => _selectedCommentId = comment.id);
+    final selected = _selectedCommentId != comment.id;
+    setState(() => _selectedCommentId = selected ? comment.id : null);
     unawaited(_syncCommentMarkers());
-    try {
-      unawaited(
-        _surfaceViewer
-            ?.focusSurfaceComment(_sharedAnchor(anchor))
-            .catchError((_) {}),
-      );
-    } on ArgumentError {
-      /* A malformed anchor cannot move the camera. */
+    if (selected) {
+      unawaited(_surfaceViewer?.pauseAutoRotation().catchError((_) {}));
     }
   }
 
