@@ -200,8 +200,11 @@ void main() {
       expect(coverBounds.width / coverBounds.height, closeTo(3 / 4, 0.01));
       expect(infoBounds.top, closeTo(coverBounds.bottom, 0.01));
       expect(
-        find.descendant(of: coverFinder, matching: find.byType(Text)),
-        findsNothing,
+        find.descendant(
+          of: coverFinder,
+          matching: find.text(_work(0).title),
+        ),
+        findsOneWidget,
       );
       expect(
         find.descendant(
@@ -262,7 +265,7 @@ void main() {
       expect(t.takeException(), isNull);
     });
   }
-  testWidgets('one-line titles use less metadata height than two-line titles', (
+  testWidgets('metadata height stays fixed while cover titles vary', (
     t,
   ) async {
     t.view.physicalSize = const Size(390, 844);
@@ -286,10 +289,7 @@ void main() {
     final shortInfo = t.getRect(find.byKey(const ValueKey('work-info-work-0')));
     final longInfo = t.getRect(find.byKey(const ValueKey('work-info-work-1')));
     expect(longTitle.height, closeTo(shortTitle.height * 2, 0.1));
-    expect(
-      longInfo.height - shortInfo.height,
-      closeTo(longTitle.height - shortTitle.height, 0.1),
-    );
+    expect(longInfo.height, closeTo(shortInfo.height, 0.01));
     expect(find.text('Creator 0'), findsOneWidget);
     expect(find.text('@creator0'), findsNothing);
     expect(t.takeException(), isNull);

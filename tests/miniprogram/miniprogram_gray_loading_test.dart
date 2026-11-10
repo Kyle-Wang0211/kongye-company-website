@@ -11,10 +11,10 @@ Widget shell({bool reduced = false}) => MaterialApp(
     ),
   ),
 );
-Color colorOf(WidgetTester t) => t
+Color colorOf(WidgetTester t, {int box = 0}) => t
     .widgetList<Container>(
       find.descendant(
-        of: find.byType(SkeletonBox).first,
+        of: find.byType(SkeletonBox).at(box),
         matching: find.byType(Container),
       ),
     )
@@ -33,13 +33,15 @@ void main() {
     await t.pumpWidget(shell());
     expect(find.byType(SkeletonWorkCard), findsOneWidget);
     expect(find.byType(SkeletonBox), findsWidgets);
-    final start = colorOf(t);
-    expect(start, kSkeletonBase);
+    // The cover bone renders one shade lighter than the text bones.
+    expect(colorOf(t), kSkeletonCoverBase);
+    expect(colorOf(t, box: 1), kSkeletonBase);
+    final start = colorOf(t, box: 1);
     expect(start.computeLuminance(), greaterThan(.5));
     await t.pump();
     await t.pump(const Duration(milliseconds: 900));
-    expect(colorOf(t), isNot(start));
-    expect(colorOf(t).computeLuminance(), greaterThan(.5));
+    expect(colorOf(t, box: 1), isNot(start));
+    expect(colorOf(t, box: 1).computeLuminance(), greaterThan(.5));
     final gradients = t
         .widgetList<Container>(
           find.descendant(

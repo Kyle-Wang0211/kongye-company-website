@@ -343,27 +343,74 @@ class _WorkCardState extends State<WorkCard> {
                         aspectRatio: ratio ?? kCommunityLoadingCoverAspectRatio,
                         child: ColoredBox(
                           color: Colors.black,
-                          child: _thumbnailProvider == null
-                              ? Semantics(
-                                  key: ValueKey(
-                                    'work-cover-placeholder-${_work.id}',
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              _thumbnailProvider == null
+                                  ? Semantics(
+                                      key: ValueKey(
+                                        'work-cover-placeholder-${_work.id}',
+                                      ),
+                                      label: '暂无封面',
+                                      child: const SizedBox.expand(),
+                                    )
+                                  : Image(
+                                      image: _thumbnailProvider!,
+                                      fit: BoxFit.contain,
+                                      alignment: Alignment.center,
+                                      gaplessPlayback: true,
+                                      errorBuilder: (_, _, _) =>
+                                          const SizedBox.shrink(),
+                                    ),
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: DecoratedBox(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black87,
+                                      ],
+                                    ),
                                   ),
-                                  label: '暂无封面',
-                                  child: const SizedBox.expand(),
-                                )
-                              : Image(
-                                  image: _thumbnailProvider!,
-                                  fit: BoxFit.contain,
-                                  alignment: Alignment.center,
-                                  gaplessPlayback: true,
-                                  errorBuilder: (_, _, _) =>
-                                      const SizedBox.shrink(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      8,
+                                      24,
+                                      8,
+                                      8,
+                                    ),
+                                    child: Text(
+                                      _work.title,
+                                      key: ValueKey(
+                                        'work-cover-title-${_work.id}',
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        height: 1.3,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       KeyedSubtree(
                         key: ValueKey('work-info-${_work.id}'),
-                        child: _cardInformation(),
+                        child: SizedBox(
+                          height: communityInformationHeight(context),
+                          child: _cardInformation(),
+                        ),
                       ),
                     ],
                   ),
@@ -398,62 +445,63 @@ class _WorkCardState extends State<WorkCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            _work.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.3,
-              fontWeight: FontWeight.w600,
-              color: AetherColors.textPrimary,
+          SizedBox(
+            height: communityAuthorRowHeight(context),
+            child: Row(
+              children: [
+                GestureDetector(
+                  key: ValueKey('work-avatar-${_work.id}'),
+                  onTap: widget.onAuthorTap == null
+                      ? null
+                      : () => widget.onAuthorTap!(_work),
+                  child: GeneratedAccountAvatar(
+                    userId: _work.userId,
+                    readPublic: true,
+                    radius: 8,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      text: currentAuthorName(
+                        context,
+                        _work.userId,
+                        _work.authorDisplayName,
+                      ),
+                      recognizer: _authorTapRecognizer,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: kCommunityMetadataTextStyle.copyWith(
+                      color: AetherColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 2),
+                ValueListenableBuilder<Set<String>>(
+                  valueListenable: widget.service.pendingLikeWorkIds,
+                  builder: (_, pending, _) => _LikeButton(
+                    liked: _work.likedByMe,
+                    count: _work.likesCount,
+                    busy: _likeInFlight || pending.contains(_work.id),
+                    onTap: _toggleLike,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              GestureDetector(
-                key: ValueKey('work-avatar-${_work.id}'),
-                onTap: widget.onAuthorTap == null
-                    ? null
-                    : () => widget.onAuthorTap!(_work),
-                child: GeneratedAccountAvatar(
-                  userId: _work.userId,
-                  readPublic: true,
-                  radius: 8,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    text: currentAuthorName(
-                      context,
-                      _work.userId,
-                      _work.authorDisplayName,
-                    ),
-                    recognizer: _authorTapRecognizer,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    height: 1.2,
-                    color: AetherColors.textSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 2),
-              ValueListenableBuilder<Set<String>>(
-                valueListenable: widget.service.pendingLikeWorkIds,
-                builder: (_, pending, _) => _LikeButton(
-                  liked: _work.likedByMe,
-                  count: _work.likesCount,
-                  busy: _likeInFlight || pending.contains(_work.id),
-                  onTap: _toggleLike,
-                ),
-              ),
-            ],
+          Text(
+            _work.publishedAt == null
+                ? ''
+                : '${_work.publishedAt!.year}-${_work.publishedAt!.month.toString().padLeft(2, '0')}-${_work.publishedAt!.day.toString().padLeft(2, '0')}',
+            maxLines: 1,
+            style: const TextStyle(
+              fontSize: 10,
+              height: 1.2,
+              color: AetherColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -483,13 +531,13 @@ class _LikeButton extends StatelessWidget {
       onTap: busy ? null : onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        padding: kCommunityLikePadding,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               liked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-              size: 16,
+              size: kCommunityLikeIconSize,
               // Keep the existing design-system like colors.
               color: liked ? AetherColors.danger : AetherColors.textPrimary,
             ),
@@ -502,11 +550,10 @@ class _LikeButton extends StatelessWidget {
               const SizedBox(width: 3),
               Text(
                 formatCount(count),
-                style: const TextStyle(
-                  fontSize: 11,
+                style: kCommunityMetadataTextStyle.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AetherColors.textPrimary,
-                  fontFeatures: [FontFeature.tabularFigures()],
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],

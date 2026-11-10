@@ -158,7 +158,7 @@ void main() {
     );
   }
   testWidgets(
-    'ready poster exposes title, avatar, author and likes below media with working taps',
+    'ready poster exposes cover title plus avatar, author and likes with working taps',
     (t) async {
       await viewport(t);
       final service = _Service();
@@ -198,7 +198,7 @@ void main() {
     },
   );
   testWidgets(
-    'one-line and two-line titles use their natural metadata height',
+    'cover titles vary in height while metadata stays fixed',
     (t) async {
       await viewport(t);
       final service = _Service();
@@ -214,11 +214,13 @@ void main() {
         _app(service, _work(thumb: 'poster.png', title: longTitle)),
       );
       await t.pump();
-      expect(t.getSize(info).height, greaterThan(oneLine));
-      expect(t.widget<Text>(find.text(longTitle)).maxLines, 2);
+      expect(t.getSize(info).height, oneLine);
+      final titleText = t.widget<Text>(find.text(longTitle));
+      expect(titleText.maxLines, 2);
+      expect(titleText.overflow, TextOverflow.ellipsis);
       expect(
-        t.widget<Text>(find.text(longTitle)).overflow,
-        TextOverflow.ellipsis,
+        find.byKey(const ValueKey('work-cover-title-w1')),
+        findsOneWidget,
       );
       await t.pumpWidget(const SizedBox());
     },

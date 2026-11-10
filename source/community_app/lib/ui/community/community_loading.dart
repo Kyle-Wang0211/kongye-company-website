@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'masonry_policy.dart';
+import 'skeleton_shimmer.dart';
 
 // The author and like count share line metrics; padding belongs to the
 // counted-like row even when enlarged accessibility text exceeds the icon.
@@ -77,26 +78,17 @@ class _CommunityShimmerState extends State<CommunityShimmer>
   );
 }
 
+/// Reuse the shared gray pulsing card; no separate loading animation or palette.
 class CommunityCardSkeleton extends StatelessWidget {
   const CommunityCardSkeleton({super.key});
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: IgnorePointer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const AspectRatio(
-            aspectRatio: kCommunityLoadingCoverAspectRatio,
-            child: CommunityShimmer(),
-          ),
-          SizedBox(
-            height: communityInformationHeight(context),
-            child: const Padding(
-              padding: EdgeInsets.all(8),
-              child: CommunityShimmer(),
-            ),
-          ),
-        ],
+      child: SkeletonWorkCard(
+        animate:
+            !MediaQuery.disableAnimationsOf(context) &&
+            !MediaQuery.accessibleNavigationOf(context),
+        coverAspectRatio: kCommunityLoadingCoverAspectRatio,
       ),
     ),
   );

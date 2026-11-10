@@ -240,8 +240,12 @@ function loadingShells(){
  for(let i=0;i<12;i++){
   const shell=document.createElement('article');shell.className='community-skeleton';shell.setAttribute('aria-hidden','true');
   const picture=document.createElement('div');picture.className='community-picture is-loading';
+  const title=document.createElement('span');title.className='skeleton-title';picture.append(title);
   const row=document.createElement('div');row.className='community-author-row';
-  const author=document.createElement('div');author.className='skeleton-author';row.append(author);shell.append(picture,row);
+  const avatar=document.createElement('div');avatar.className='skeleton-avatar';
+  const author=document.createElement('div');author.className='skeleton-author';
+  const like=document.createElement('div');like.className='skeleton-like';row.append(avatar,author,like);
+  const time=document.createElement('div');time.className='skeleton-time';shell.append(picture,row,time);
   grid.append(shell);shells.push(shell);
  }
  return shells;

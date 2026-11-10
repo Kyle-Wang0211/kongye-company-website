@@ -37,7 +37,7 @@ html[data-motion="paused"] .window-stack,html[data-motion="paused"] .window-stac
 
 /* Stable row geometry: metadata first, independently decoded covers second. */
 .community-grid{align-items:start}.community-card-title{height:2.6em}.community-author-row{height:28px}.community-card time{height:14px}.community-cover-image{opacity:0;transition:none}.community-cover-image.is-ready{opacity:1}.community-picture[data-media-state="error"],.community-picture[data-media-state="empty"]{display:grid;place-items:center;color:var(--muted);font-size:12px}
-.is-loading,.skeleton-title,.skeleton-author,.skeleton-time{background:#1b1b1b}.is-loading:after,.skeleton-title:after,.skeleton-author:after,.skeleton-time:after{content:"";position:absolute;inset:0;background:#ffffff12;opacity:.25;animation:community-pulse 1.6s ease-in-out infinite;pointer-events:none}.community-skeleton{min-width:0}.community-skeleton>div{position:relative;overflow:hidden}.skeleton-title{height:33.8px;margin:6px 8px 4px;border-radius:2px}.skeleton-author{height:28px;margin:0 8px;width:65%;border-radius:2px}.skeleton-time{height:14px;margin:4px 8px 0;width:30%;border-radius:2px}@keyframes community-pulse{0%,100%{opacity:.2}50%{opacity:.75}}@media(prefers-reduced-motion:reduce){.is-loading:after,.skeleton-title:after,.skeleton-author:after,.skeleton-time:after{animation:none;transform:none;background:none}.community-cover-image{transition:none}}
+.is-loading,.skeleton-title,.skeleton-author,.skeleton-time,.skeleton-avatar,.skeleton-like{background:#1b1b1b}.is-loading:after,.skeleton-title:after,.skeleton-author:after,.skeleton-time:after,.skeleton-avatar:after,.skeleton-like:after{content:"";position:absolute;inset:0;background:#ffffff12;opacity:.25;animation:community-pulse 1.6s ease-in-out infinite;pointer-events:none}.community-skeleton{min-width:0}.community-skeleton>div{position:relative;overflow:hidden}.skeleton-title{position:absolute;left:10px;bottom:10px;width:60%;height:15px;margin:0;border-radius:2px}.skeleton-avatar{width:20px;height:20px;border-radius:50%;flex:none}.skeleton-author{height:14px;flex:1;min-width:0;border-radius:2px}.skeleton-like{width:20px;height:20px;border-radius:2px;flex:none}.skeleton-time{height:10px;margin:6px 8px 0;width:45%;border-radius:2px}@keyframes community-pulse{0%,100%{opacity:.2}50%{opacity:.75}}@media(prefers-reduced-motion:reduce){.is-loading:after,.skeleton-title:after,.skeleton-author:after,.skeleton-time:after,.skeleton-avatar:after,.skeleton-like:after{animation:none;transform:none;background:none}.community-cover-image{transition:none}}
 
 /* Community account header: one row at every viewport width. */
 .community-header{flex-wrap:nowrap;gap:16px;min-height:72px}.community-brand{font:500 23px/1.3 var(--sans);text-decoration:none;white-space:nowrap}.community-header #account-nav{width:auto;margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:22px;min-width:0}.community-header #account-nav a{font-size:14px}.community-account{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none}.community-account img,.account-avatar-pending{width:34px;height:34px;border-radius:50%;flex:none}.account-avatar-pending{display:block;background:#222}.community-account-name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.community-section #feed-status:empty{margin:0}.community-header+.community-section{padding-top:18px}@media(max-width:600px){.community-header{min-height:64px;padding-block:14px}.community-header #account-nav{gap:16px}.community-account-name{max-width:130px}}
@@ -63,10 +63,10 @@ html.community-light .account-dropdown a:hover,html.community-light .account-dro
 html.community-light #account-summary:focus-visible{outline-color:#161616}
 html.community-light .account-avatar-pending{background-color:#eee}
 html.community-light .account-guest-avatar{background-color:#eee;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34' fill='none' stroke='%23737373' stroke-width='1.5'%3E%3Ccircle cx='17' cy='12' r='4'/%3E%3Cpath d='M9 27v-3a8 8 0 0 1 16 0v3'/%3E%3C/svg%3E")}
-html.community-light .is-loading,html.community-light .skeleton-title,html.community-light .skeleton-author,html.community-light .skeleton-time{background:#eee}
-html.community-light .is-loading:after,html.community-light .skeleton-title:after,html.community-light .skeleton-author:after,html.community-light .skeleton-time:after{background:#00000012}
-html.community-light .community-picture.is-loading{background:#e8e8e8;border-color:#e8e8e8}
-html.community-light .community-picture.is-loading:after{background:#00000018}
+html.community-light .is-loading,html.community-light .skeleton-title,html.community-light .skeleton-author,html.community-light .skeleton-time,html.community-light .skeleton-avatar,html.community-light .skeleton-like{background:#ccc}
+html.community-light .is-loading:after,html.community-light .skeleton-title:after,html.community-light .skeleton-author:after,html.community-light .skeleton-time:after,html.community-light .skeleton-avatar:after,html.community-light .skeleton-like:after{background:#ffffff4d}
+html.community-light .community-picture.is-loading{background:#e4e4e4;border-color:#e4e4e4}
+html.community-light .community-picture.is-loading:after{background:#ffffff80}
 html.community-light #feed-more{background:#f6f6f6;color:#161616}
 html.community-light #site-settings footer,html.community-light #site-settings .caption,html.community-light #site-settings .compact-support small{color:#737373}
 html.community-light #work-dialog{color-scheme:dark;--white:#ffffff;--muted:#b5b5b5;--line:#363636;background:#000;color:#ffffff}
@@ -82,7 +82,7 @@ html.community-light #work-dialog iframe{background:#000}
 .community-avatar{width:20px;height:20px}
 .community-like{flex:none;font-size:12px;font-weight:400;padding:6px 0 6px 6px;gap:5px}
 .community-heart{font-size:22px;line-height:20px}
-.community-skeleton .skeleton-author{position:relative;overflow:hidden;height:14px;margin:0;width:65%}
+.community-skeleton .skeleton-avatar,.community-skeleton .skeleton-author,.community-skeleton .skeleton-like{position:relative;overflow:hidden}
 .community-cover-message{padding:12px;text-align:center}
 
 .community-open:focus-visible{outline:0}.community-open:focus-visible .community-picture{outline:2px solid #fff;outline-offset:-4px}

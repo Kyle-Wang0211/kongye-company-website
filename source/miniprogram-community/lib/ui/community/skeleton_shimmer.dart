@@ -77,6 +77,11 @@ const Duration kSkeletonPulsePeriod = Duration(milliseconds: 1800);
 const Color kSkeletonBase = AetherColors.borderStrong;
 const Color kSkeletonHighlight = AetherColors.bgElevated;
 
+// [2026-11-10 用户签决] 封面骨头单独降一档:其余骨头维持上面的 base/highlight,
+// 封面用 border(#E4E4E4)→bgCanvas(#FFFFFF),整块面积更浅,呼吸仍然可见。
+const Color kSkeletonCoverBase = AetherColors.border;
+const Color kSkeletonCoverHighlight = AetherColors.bgCanvas;
+
 /// 一块会轻微呼吸的灰色骨头。
 ///
 /// [animate] 为 false 时**停掉 controller**并画成静态底色 —— 见文件头注释,
@@ -87,12 +92,18 @@ class SkeletonBox extends StatefulWidget {
   final BorderRadius? borderRadius;
   final bool animate;
 
+  /// 呼吸两端;默认 kSkeletonBase/kSkeletonHighlight。
+  final Color? baseColor;
+  final Color? highlightColor;
+
   const SkeletonBox({
     super.key,
     this.width,
     this.height,
     this.borderRadius,
     this.animate = true,
+    this.baseColor,
+    this.highlightColor,
   });
 
   @override
@@ -131,12 +142,14 @@ class _SkeletonBoxState extends State<SkeletonBox>
   @override
   Widget build(BuildContext context) {
     final radius = widget.borderRadius ?? BorderRadius.circular(8);
+    final base = widget.baseColor ?? kSkeletonBase;
+    final highlight = widget.highlightColor ?? kSkeletonHighlight;
     if (!widget.animate) {
       // 静态:不挂 AnimatedBuilder ⇒ 这棵子树不再每帧重建。
       return Container(
         width: widget.width,
         height: widget.height,
-        decoration: BoxDecoration(color: kSkeletonBase, borderRadius: radius),
+        decoration: BoxDecoration(color: base, borderRadius: radius),
       );
     }
     return AnimatedBuilder(
@@ -145,7 +158,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
         width: widget.width,
         height: widget.height,
         decoration: BoxDecoration(
-          color: Color.lerp(kSkeletonBase, kSkeletonHighlight, _c.value),
+          color: Color.lerp(base, highlight, _c.value),
           borderRadius: radius,
         ),
       ),
@@ -153,7 +166,8 @@ class _SkeletonBoxState extends State<SkeletonBox>
   }
 }
 
-/// Matches a cover with title and author placeholders below it.
+/// Matches a cover — title line overlaid at its bottom-left — with author and
+/// date placeholders below it.
 class SkeletonWorkCard extends StatelessWidget {
   final bool animate;
 
@@ -177,6 +191,8 @@ class SkeletonWorkCard extends StatelessWidget {
         animate: animate,
         borderRadius:
             coverBorderRadius ?? BorderRadius.circular(kCommunityCardRadius),
+        baseColor: kSkeletonCoverBase,
+        highlightColor: kSkeletonCoverHighlight,
       );
     }
     return ClipRRect(
@@ -187,9 +203,27 @@ class SkeletonWorkCard extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: coverAspectRatio,
-            child: SkeletonBox(
-              animate: animate,
-              borderRadius: BorderRadius.zero,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                SkeletonBox(
+                  animate: animate,
+                  borderRadius: BorderRadius.zero,
+                  baseColor: kSkeletonCoverBase,
+                  highlightColor: kSkeletonCoverHighlight,
+                ),
+                // 标题条:压在封面左下角,对应真卡标题叠图的位置。
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 8,
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 0.6,
+                    child: SkeletonBox(animate: animate, height: 15),
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
@@ -197,16 +231,25 @@ class SkeletonWorkCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SkeletonBox(animate: animate, height: 17),
-                const SizedBox(height: 4),
                 Row(
                   children: [
-                    SkeletonBox(animate: animate, width: 16, height: 16),
+                    SkeletonBox(
+                      animate: animate,
+                      width: 20,
+                      height: 20,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     const SizedBox(width: 4),
                     Expanded(child: SkeletonBox(animate: animate, height: 13)),
                     const SizedBox(width: 8),
-                    SkeletonBox(animate: animate, width: 24, height: 24),
+                    SkeletonBox(animate: animate, width: 20, height: 20),
                   ],
+                ),
+                const SizedBox(height: 4),
+                FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 0.45,
+                  child: SkeletonBox(animate: animate, height: 10),
                 ),
               ],
             ),
