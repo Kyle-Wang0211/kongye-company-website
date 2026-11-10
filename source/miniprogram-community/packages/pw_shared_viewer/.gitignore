@@ -1,5 +1,0 @@
-.dart_tool/
-build/
-!web/vendor/three/build/
-!web/vendor/three/build/*.js
-.flutter-plugins-dependencies

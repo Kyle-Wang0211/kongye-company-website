@@ -1,0 +1,63 @@
+import 'package:flutter/widgets.dart';
+import 'dart:typed_data';
+
+import '../../community/feed_models.dart';
+import 'masonry_policy.dart';
+
+/// Actual prepared sizes. Pairing never changes a work's layout or aspect ratio.
+class CommunityCardMetrics {
+  const CommunityCardMetrics({
+    required this.cardSize,
+    required this.viewerSize,
+    required this.pixelRatio,
+    this.readinessToken,
+    this.stillFrameBytes,
+  });
+
+  final Size cardSize;
+  final Size viewerSize;
+  final double pixelRatio;
+  final Object? readinessToken;
+  final Uint8List? stillFrameBytes;
+
+  /// Keep catalogue dimensions without retaining disposed States or images.
+  CommunityCardMetrics get layoutOnly => CommunityCardMetrics(
+    cardSize: cardSize,
+    viewerSize: viewerSize,
+    pixelRatio: pixelRatio,
+  );
+
+  bool get isValid =>
+      pixelRatio.isFinite &&
+      pixelRatio > 0 &&
+      cardSize.width.isFinite &&
+      cardSize.height.isFinite &&
+      viewerSize.width.isFinite &&
+      viewerSize.height.isFinite &&
+      cardSize.width > 0 &&
+      viewerSize.width > 0 &&
+      viewerSize.height > 0 &&
+      cardSize.height >= viewerSize.height;
+
+  /// Equality at the current display's pixel resolution, without resizing.
+  (double, int, int, int, int) get pixelDimensions => (
+    pixelRatio,
+    (cardSize.width * pixelRatio).round(),
+    (cardSize.height * pixelRatio).round(),
+    (viewerSize.width * pixelRatio).round(),
+    (viewerSize.height * pixelRatio).round(),
+  );
+}
+
+/// Keep incoming work order and each cover's own proportions from the first row.
+/// The existing preparation gate still verifies both initial cards are ready.
+List<FeedWork>? communityFirstPairOrder(
+  List<FeedWork> works,
+  Map<String, CommunityCardMetrics> metrics,
+) {
+  for (final work in works.take(2)) {
+    final measured = metrics[communityCoverSourceKey(work)];
+    if (measured == null || !measured.isValid) return null;
+  }
+  return List<FeedWork>.unmodifiable(works);
+}
