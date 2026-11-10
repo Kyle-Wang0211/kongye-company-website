@@ -85,3 +85,24 @@ html.community-light #work-dialog iframe{background:#000}
 .community-cover-message{padding:12px;text-align:center}
 
 .community-open:focus-visible{outline:0}.community-open:focus-visible .community-picture{outline:2px solid #fff;outline-offset:-4px}
+
+/* Port of the currently served miniprogram a672818 SkeletonWorkCard/SkeletonBox.
+   Keep these rules scoped to loading placeholders. */
+.community-skeleton{border-radius:4px}
+.community-skeleton .community-picture.is-loading{border:0;border-radius:0}
+.community-skeleton .skeleton-information{padding:6px 8px}
+.community-skeleton .skeleton-title{height:17px;margin:0 0 4px;width:100%;border-radius:8px}
+.community-skeleton .skeleton-author-row{display:flex;align-items:center;gap:0;height:24px}
+.community-skeleton .skeleton-avatar{width:16px;height:16px;margin-right:4px;flex:none;border-radius:8px}
+.community-skeleton .skeleton-author{height:13px;width:auto;margin:0;flex:1;min-width:0;border-radius:8px}
+.community-skeleton .skeleton-like{width:24px;height:24px;margin-left:8px;flex:none;border-radius:8px}
+html .community-skeleton .community-picture.is-loading,html .community-skeleton .skeleton-title,html .community-skeleton .skeleton-avatar,html .community-skeleton .skeleton-author,html .community-skeleton .skeleton-like{background:#ccc;animation:miniprogram-skeleton-pulse 1.8s linear infinite alternate}
+html .community-skeleton .community-picture.is-loading:after,html .community-skeleton .skeleton-title:after,html .community-skeleton .skeleton-avatar:after,html .community-skeleton .skeleton-author:after,html .community-skeleton .skeleton-like:after{content:none;animation:none}
+@keyframes miniprogram-skeleton-pulse{from{background-color:#ccc}to{background-color:#f3f3f3}}
+@media(prefers-reduced-motion:reduce){html .community-skeleton .community-picture.is-loading,html .community-skeleton .skeleton-title,html .community-skeleton .skeleton-avatar,html .community-skeleton .skeleton-author,html .community-skeleton .skeleton-like{animation:none}}
+html[data-motion="paused"] .community-skeleton *{animation-play-state:paused}
+
+/* The decoded-cover placeholder uses the same selected SkeletonBox pulse. */
+html .community-grid .community-picture.is-loading{background:#ccc;border-color:#ccc;animation:miniprogram-skeleton-pulse 1.8s linear infinite alternate}
+html .community-grid .community-picture.is-loading:after{content:none;animation:none}
+@media(prefers-reduced-motion:reduce){html .community-grid .community-picture.is-loading{animation:none}}

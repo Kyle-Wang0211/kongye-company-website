@@ -445,13 +445,15 @@ test('author-specific own-only card refresh updates metadata and retains author 
 });
 
 
-test('initial loading restores the historical independent gray cover title author and time blocks',()=>{
+test('initial loading uses the selected miniprogram cover title avatar author and action placeholders',()=>{
  const page=boot();
  for(const shell of page.grid.children){
   assert.deepEqual(Array.from(shell.children,n=>n.className),[
-   'community-picture is-loading','skeleton-title','skeleton-author','skeleton-time']);
-  assert.equal(new Set(shell.children).size,4);
-  assert(shell.children.every(n=>n.textContent===''));
+   'community-picture is-loading','skeleton-information']);
+  assert.deepEqual(Array.from(shell.children[1].children,n=>n.className),[
+   'skeleton-title','skeleton-author-row']);
+  assert.deepEqual(Array.from(shell.children[1].children[1].children,n=>n.className),[
+   'skeleton-avatar','skeleton-author','skeleton-like']);
   assert.equal(shell.attributes['aria-hidden'],'true');
  }
 });

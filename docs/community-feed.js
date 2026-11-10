@@ -239,7 +239,14 @@ function loadingShells(){
  const shells=[];
  for(let i=0;i<12;i++){
   const shell=document.createElement('article');shell.className='community-skeleton';shell.setAttribute('aria-hidden','true');
-  for(const name of ['community-picture is-loading','skeleton-title','skeleton-author','skeleton-time']){const part=document.createElement('div');part.className=name;shell.append(part);}
+  const picture=document.createElement('div');picture.className='community-picture is-loading';
+  const information=document.createElement('div');information.className='skeleton-information';
+  const title=document.createElement('div');title.className='skeleton-title';
+  const row=document.createElement('div');row.className='skeleton-author-row';
+  const avatar=document.createElement('div');avatar.className='skeleton-avatar';
+  const author=document.createElement('div');author.className='skeleton-author';
+  const like=document.createElement('div');like.className='skeleton-like';
+  row.append(avatar,author,like);information.append(title,row);shell.append(picture,information);
   grid.append(shell);shells.push(shell);
  }
  return shells;
