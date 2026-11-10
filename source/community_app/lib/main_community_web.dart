@@ -47,6 +47,7 @@ Future<void> main() async {
 }
 
 Future<void>? _supabaseInit;
+final _supabaseClientReady = ValueNotifier<bool>(false);
 StreamSubscription<AuthState>? _authStateSubscription;
 Future<void> _startSupabase(EndpointConfig endpoint) {
   late final Future<void> f;
@@ -62,7 +63,10 @@ Future<void> _startSupabase(EndpointConfig endpoint) {
         ),
         // Official Supabase Flutter browser persistence.
       ).then<void>(
-        (_) {},
+        (_) {
+          // Public reads can start before session refresh and profile bootstrap.
+          _supabaseClientReady.value = true;
+        },
         onError: (Object e, StackTrace st) {
           if (identical(_supabaseInit, f)) _supabaseInit = null;
           DeviceLog.log('AuthStartup', 'Supabase.initialize error: $e');
@@ -313,7 +317,7 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
             communityMessagingRoute(settings, user) ??
             communityAccountRoute(settings, user),
         home: AnimatedBuilder(
-          animation: user,
+          animation: Listenable.merge([user, _supabaseClientReady]),
           builder: (context, _) {
             final state = user.state;
             final query = Uri.base.queryParameters;
@@ -322,6 +326,11 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
                 query['publish'] != '1' &&
                 !query.containsKey('auth')) {
               return _WebsiteHomeEntry(routes: _routes, onExit: widget.onExit);
+            }
+            if (_supabaseClientReady.value &&
+                query.containsKey('work') &&
+                !query.containsKey('profile')) {
+              return PublicWorkEntry(user: user);
             }
             // Public profiles use the existing mobile page for guests and
             // members, once the shared backend initialization has completed.

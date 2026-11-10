@@ -19,8 +19,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
-  "main_js_sha256": "542a1bef8a0d518336a27aff707a061b7a0f1a1bed15b91569f37b3bb60b7085",
+  "main_js_sha256": "d6dd26243a5704ebf67407afaa6a85ca9cde413ce9f997ec1b60d245194bfaff",
   "status": "built-local-not-deployed",
-  "source_revision": "1a585ad12c5657965d919ffd2a9227304bd66662",
-  "source_manifest_sha256": "3d1aca2b694ae4b524d79869d880646722c0501f11a8ec1547b791c4189d934f"
+  "source_revision": "63260ff89716a8a51e6c4c5b5ef8fe0c92f4b3db",
+  "source_manifest_sha256": "42119dfa81e0f25ac7f0c7d22f995004cdb1176206a4b35192f7bd3f1c8121a5"
 }

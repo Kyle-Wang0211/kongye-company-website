@@ -147,7 +147,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   String? _lastCommentUser;
   bool get _supportsSurfaceComments =>
       pointCloudStreamingSourceFor(widget.work.id) == null &&
-      {'glb', 'gltf', 'ply'}.contains(widget.work.format.toLowerCase());
+      widget.work.format.toLowerCase() == 'glb';
   String get _commentPartition =>
       '${widget.work.id}:${widget.work.modelStoragePath}:${widget.service.currentUserId}:'
       '${EndpointConfigResolver.current?.deployment.namespace}:'
@@ -435,6 +435,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   late int _commentsCount = widget.work.commentCount;
   late int _likesCount = math.max(0, widget.work.likesCount);
   late bool _liked = widget.work.likedByMe;
+  late bool _likeStateKnown = widget.work.likeStateKnown;
   bool _likeInFlight = false;
   String? _likeUser;
   bool _likeIdentityLoading = false;
@@ -443,10 +444,13 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   Future<void> _refreshLikeIdentity() async {
     final service = widget.service;
     final user = service.currentUserId;
-    if (user == _likeUser || _likeIdentityLoading) return;
+    if ((user == _likeUser && _likeStateKnown) || _likeIdentityLoading) return;
     final epoch = ++_likeIdentityEpoch;
     final workId = widget.work.id;
-    setState(() => _likeIdentityLoading = true);
+    setState(() {
+      _likeStateKnown = false;
+      _likeIdentityLoading = true;
+    });
     try {
       final updated = await service.fetchPublicWork(workId);
       if (!mounted ||
@@ -470,6 +474,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   void _setLikeState({required bool liked, required int count}) {
     void update() {
       _liked = liked;
+      _likeStateKnown = true;
       _likesCount = math.max(0, count);
     }
 
@@ -483,6 +488,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     widget.onWorkUpdated?.call(
       widget.work.copyWith(
         likedByMe: _liked,
+        likeStateKnown: _likeStateKnown,
         likesCount: _likesCount,
         viewsCount: _viewsCount,
         commentCount: _commentsCount,
@@ -496,7 +502,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       return false;
     }
     if (_likeIdentityLoading) return false;
-    if (widget.service.currentUserId != _likeUser) {
+    if (!_likeStateKnown || widget.service.currentUserId != _likeUser) {
       unawaited(_refreshLikeIdentity());
       return false;
     }
@@ -545,7 +551,11 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       try {
         if (currentIdentity()) {
           service.reportLikeResult(
-            work.copyWith(likedByMe: _liked, likesCount: _likesCount),
+            work.copyWith(
+              likedByMe: _liked,
+              likeStateKnown: true,
+              likesCount: _likesCount,
+            ),
           );
         }
       } finally {
@@ -822,10 +832,16 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   void _onLikeResult() {
     final result = widget.service.lastLikeResult.value;
     if (!mounted || result == null || result.id != widget.work.id) return;
-    if (_likeIdentityLoading || widget.service.currentUserId != _likeUser) {
+    if (!result.likeStateKnown ||
+        _likeIdentityLoading ||
+        widget.service.currentUserId != _likeUser) {
       return;
     }
-    if (result.likedByMe == _liked && result.likesCount == _likesCount) return;
+    if (_likeStateKnown &&
+        result.likedByMe == _liked &&
+        result.likesCount == _likesCount) {
+      return;
+    }
     // Another surface may finish after this route opens. Its outcome concerns
     // likes only: retain this detail's separately recorded view count.
     _setLikeState(liked: result.likedByMe, count: result.likesCount);
@@ -845,6 +861,21 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       _likeIdentityEpoch++;
       _likeIdentityLoading = false;
       _likeUser = widget.service.currentUserId;
+      _liked = widget.work.likedByMe;
+      _likeStateKnown = widget.work.likeStateKnown;
+      _likesCount = math.max(0, widget.work.likesCount);
+    } else if (!widget.work.likeStateKnown && oldWidget.work.likeStateKnown) {
+      // An auth event invalidates the old viewer's state immediately.
+      _likeIdentityEpoch++;
+      _likeIdentityLoading = false;
+      _likeStateKnown = false;
+    } else if (!_likeInFlight &&
+        widget.work.likeStateKnown &&
+        !oldWidget.work.likeStateKnown) {
+      _likeIdentityEpoch++;
+      _likeIdentityLoading = false;
+      _likeUser = widget.service.currentUserId;
+      _likeStateKnown = true;
       _liked = widget.work.likedByMe;
       _likesCount = math.max(0, widget.work.likesCount);
     } else if (_likeUser != widget.service.currentUserId) {
@@ -993,6 +1024,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           key: ValueKey('work-mesh-${widget.work.id}'),
           modelUrl: widget.service.modelUrlFor(widget.work.modelStoragePath!),
           modelSizeBytes: widget.work.fileSizeBytes,
+          requireModelContentIdentity: _supportsSurfaceComments,
           initialView: widget.work.initialView,
           communitySessionKey: jsonEncode([
             kIsWeb ? null : widget.service.currentUserId,
@@ -1375,6 +1407,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
 }
 
 class WorkDetailMetadata extends StatelessWidget {
+  static double heightForWidth(double width) => width >= 600 ? 104 : 164;
   final int viewsCount;
   final int commentsCount;
   final int likesCount;
@@ -1403,87 +1436,97 @@ class WorkDetailMetadata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        border: Border(top: BorderSide(color: Colors.white12, width: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onAuthorTap,
-                  child: Row(
-                    children: [
-                      GeneratedAccountAvatar(
-                        userId: authorUserId,
-                        readPublic: true,
-                        radius: 14,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          author,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+    return SizedBox(
+      height: heightForWidth(MediaQuery.sizeOf(context).width),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+        decoration: const BoxDecoration(
+          color: Colors.black,
+          border: Border(top: BorderSide(color: Colors.white12, width: 0.5)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onAuthorTap,
+                    child: Row(
+                      children: [
+                        GeneratedAccountAvatar(
+                          userId: authorUserId,
+                          readPublic: true,
+                          radius: 14,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            author,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _CountChip(
-                icon: Icons.remove_red_eye_outlined,
-                value: viewsCount,
-              ),
-              const SizedBox(width: 12),
-              if (onComments != null) ...[
-                TextButton.icon(
-                  key: const ValueKey('work-detail-comments'),
-                  onPressed: onComments,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white70,
-                    minimumSize: const Size(44, 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-                  label: Text(
-                    '$commentsCount',
-                    semanticsLabel:
-                        '${AppL10n.of(context).commentAll} $commentsCount',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                _CountChip(
+                  icon: Icons.remove_red_eye_outlined,
+                  value: viewsCount,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 12),
+                if (onComments != null) ...[
+                  TextButton.icon(
+                    key: const ValueKey('work-detail-comments'),
+                    onPressed: onComments,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white70,
+                      minimumSize: const Size(44, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    icon: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 18,
+                    ),
+                    label: Text(
+                      '$commentsCount',
+                      semanticsLabel:
+                          '${AppL10n.of(context).commentAll} $commentsCount',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                _DetailLikeButton(
+                  liked: liked,
+                  count: likesCount,
+                  busy: likeBusy,
+                  onTap: onLike,
+                ),
               ],
-              _DetailLikeButton(
-                liked: liked,
-                count: likesCount,
-                busy: likeBusy,
-                onTap: onLike,
+            ),
+            if (description != null && description!.trim().isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                description!,
+                maxLines: MediaQuery.sizeOf(context).width >= 600 ? 1 : 4,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 20 / 13,
+                  color: Colors.white70,
+                ),
               ),
             ],
-          ),
-          if (description != null && description!.trim().isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              description!,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Colors.white70),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }
