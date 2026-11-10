@@ -49,29 +49,15 @@ class CommunityCardMetrics {
   );
 }
 
-/// Reorder only the selected pair; all remaining raw-order works stay in order.
-/// Null means the prepared candidates do not contain a verified matching pair.
+/// Keep incoming work order and each cover's own proportions from the first row.
+/// The existing preparation gate still verifies both initial cards are ready.
 List<FeedWork>? communityFirstPairOrder(
   List<FeedWork> works,
   Map<String, CommunityCardMetrics> metrics,
 ) {
-  if (works.length < 2) return List<FeedWork>.unmodifiable(works);
-  final bySize = <(double, int, int, int, int), List<int>>{};
-  for (var i = 0; i < works.length; i++) {
-    final measured = metrics[communityCoverSourceKey(works[i])];
-    if (measured == null || !measured.isValid) continue;
-    bySize.putIfAbsent(measured.pixelDimensions, () => []).add(i);
+  for (final work in works.take(2)) {
+    final measured = metrics[communityCoverSourceKey(work)];
+    if (measured == null || !measured.isValid) return null;
   }
-  // Map insertion order preserves the earliest raw-order matching group.
-  for (final indices in bySize.values) {
-    if (indices.length < 2) continue;
-    final a = indices[0], b = indices[1];
-    return List<FeedWork>.unmodifiable([
-      works[a],
-      works[b],
-      for (var i = 0; i < works.length; i++)
-        if (i != a && i != b) works[i],
-    ]);
-  }
-  return null;
+  return List<FeedWork>.unmodifiable(works);
 }
