@@ -78,6 +78,12 @@ class PublicWorkOpening extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+              Center(
+                child: Text(
+                  '0%',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
             ],
           ),
         ),

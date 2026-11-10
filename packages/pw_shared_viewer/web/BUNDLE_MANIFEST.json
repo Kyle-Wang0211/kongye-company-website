@@ -3,7 +3,7 @@
   "engine": "three",
   "engine_version": "0.186.1",
   "upstream_commit": "9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
-  "bundle_sha256": "b1d7edee546f28b399754ae00c3373987d1615c575738e44666d9fc3785f2f41",
+  "bundle_sha256": "0e41de2b0e6235a9017395e9d45c8e0758ab043422ccd17817b6649adc43f01b",
   "identity_rule": "SHA-256 of canonical UTF-8 JSON files object, keys sorted and separators comma/colon; manifest excludes itself",
   "files": {
     "MODEL_FRAMING_LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
@@ -33,6 +33,6 @@
     "vendor/three/examples/jsm/utils/BufferGeometryUtils.js": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797",
     "vendor/three/examples/jsm/utils/SkeletonUtils.js": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f",
     "vendor/three/package.json": "f9c474a27c920b9435353a6235968f4453436bee0444fac7e5fd289c8fa463de",
-    "viewer.mjs": "0cdda75df3cc09c105dfbaec0463a1dd46c9855869e35418250ef4281ab7068d"
+    "viewer.mjs": "f05c761450e0cf00323ffcbccedc6c52f56ff7ad64617019bd2157d249f37fc6"
   }
 }
