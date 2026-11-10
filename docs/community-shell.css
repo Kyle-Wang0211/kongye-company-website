@@ -21,10 +21,10 @@
 .community-search button{display:flex;align-items:center;justify-content:center;gap:7px;flex:none;min-height:36px;border:0;border-radius:20px;background:transparent;color:#555;font:14px/1.5 var(--sans);padding:6px 12px;cursor:pointer}
 .community-search button:hover{background:#e9e9e9}.community-search button:focus-visible,.community-categories button:focus-visible{outline:2px solid #333;outline-offset:3px}
 .community-search button[hidden]{display:none}.community-search svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-.community-shell .community-categories{display:flex;align-items:center;gap:8px;padding:8px 0 20px;overflow-x:auto;scrollbar-width:none}
-.community-categories button{flex:none;min-height:42px;padding:9px 24px;border:0;border-radius:24px;background:transparent;color:#777;font:16px/1.5 var(--sans);cursor:pointer}
+.community-shell .community-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;gap:8px;padding:8px 0 20px}
+.community-categories button{width:100%;min-width:0;min-height:42px;padding:9px 8px;border:0;border-radius:24px;background:transparent;color:#777;font:16px/1.5 var(--sans);cursor:pointer}
 .community-categories button:hover{background:#f7f7f7;color:#161616}.community-categories button[aria-pressed="true"]{background:#f1f1f1;color:#161616;font-weight:600}
-@media(max-width:800px){.community-shell .community-header{flex-wrap:wrap;gap:12px}.community-search{order:1;flex-basis:100%;max-width:none;margin:0;min-height:44px}.community-shell .community-categories{gap:4px;padding-bottom:14px}.community-categories button{min-height:40px;padding:8px 20px;font-size:15px}}
+@media(max-width:800px){.community-shell .community-header{flex-wrap:wrap;gap:12px}.community-search{order:1;flex-basis:100%;max-width:none;margin:0;min-height:44px}.community-shell .community-categories{gap:4px;padding-bottom:14px}.community-categories button{min-height:40px;padding:8px 4px;font-size:15px}}
 .community-shell .header-action{display:flex;align-items:center;gap:8px;color:#555;text-decoration:none;font-size:14px;white-space:nowrap}
 .community-shell .header-action:hover{color:#161616}.community-shell .community-header #account-nav{margin-left:0;flex:none}.community-shell .community-account-name{font-size:14px;max-width:130px}
 .community-shell .community-screen-overflow{overflow-x:clip}.community-shell #account-summary{gap:8px}
