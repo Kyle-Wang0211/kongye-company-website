@@ -7,6 +7,99 @@ let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorE
 let viewerId = null, viewerGeneration = 0, authRevision = 0;
 let accountBound = false, accountConnecting;
 let publicOrder = [], ownPublicWorks = [], ownRequest;
+const searchForm = document.querySelector('#community-search');
+const searchInput = document.querySelector('#community-query');
+const clearSearch = document.querySelector('#community-search-clear');
+const categoryNav = document.querySelector('#community-categories');
+let activeQuery = '', activeCategory = 'all', filterRevision = 0, filterPending = false;
+let categoryCatalogPromise;
+
+function renderDiscoveryControls() {
+  const zh = currentLocale() === 'zh';
+  const names = zh
+    ? {all: '全部', art: '艺术', life: '生活', scene: '场景'}
+    : {all: 'All', art: 'Art', life: 'Life', scene: 'Places'};
+  searchForm.setAttribute('aria-label', zh ? '搜索社区作品' : 'Search community works');
+  const hint = zh ? '搜索作品关键词' : 'Search works by keyword';
+  searchForm.querySelector('label').textContent = hint;
+  searchInput.placeholder = hint;
+  clearSearch.hidden = searchInput.value.length === 0;
+  clearSearch.setAttribute('aria-label', zh ? '清除搜索' : 'Clear search');
+  const submit = searchForm.querySelector('[type="submit"]');
+  submit.setAttribute('aria-label', zh ? '搜索' : 'Search');
+  submit.querySelector('span').textContent = zh ? '搜索' : 'Search';
+  categoryNav.setAttribute('aria-label', zh ? '作品分类' : 'Work categories');
+  for (const button of categoryNav.querySelectorAll('[data-category]')) {
+    button.textContent = names[button.dataset.category];
+    button.setAttribute('aria-pressed', String(button.dataset.category === activeCategory));
+  }
+}
+
+function categoryCatalog() {
+  categoryCatalogPromise ??= fetch('community-work-categories.json?v=discovery-20261110-v1')
+    .then(response => {
+      if (!response.ok) throw translatedError('siteFeedConnection');
+      return response.json();
+    }).then(catalog => {
+      if (catalog.schemaVersion !== 1 || !catalog.assignments ||
+          Object.entries(catalog.assignments).some(([id, category]) =>
+            !/^[0-9a-f-]{36}$/i.test(id) || !['art', 'life', 'scene'].includes(category))) {
+        throw translatedError('siteFeedFormat');
+      }
+      return catalog.assignments;
+    }).catch(error => {
+      categoryCatalogPromise = undefined;
+      throw error;
+    });
+  return categoryCatalogPromise;
+}
+
+async function readFeed(after, filters) {
+  const url = feedUrl(config.origin, after);
+  if (filters.query) {
+    const pattern = '%' + filters.query.replace(/[\\%_]/g, '\\$&') + '%';
+    const value = '"' + pattern.replace(/[\\"]/g, '\\$&') + '"';
+    url.searchParams.set('and', `(or(title.ilike.${value},description.ilike.${value}))`);
+  }
+  if (filters.category !== 'all') {
+    const assignments = await categoryCatalog();
+    const ids = Object.keys(assignments).filter(id => assignments[id] === filters.category);
+    if (!ids.length) return [];
+    url.searchParams.set('id', 'in.(' + ids.join(',') + ')');
+  }
+  if (filters.owner) {
+    url.searchParams.set('user_id', 'eq.' + filters.owner);
+    url.searchParams.set('deleted_at', 'is.null');
+    url.searchParams.set('select', url.searchParams.get('select') + ',visibility,moderation_status,deleted_at');
+  }
+  return read(url);
+}
+
+function changeDiscoveryFilters(category = activeCategory) {
+  const query = searchInput.value.trim();
+  if (query === activeQuery && category === activeCategory) return;
+  activeQuery = query;
+  activeCategory = category;
+  filterRevision++;
+  filterPending = true;
+  renderDiscoveryControls();
+  drainRefresh();
+}
+searchForm.addEventListener('submit', event => {
+  event.preventDefault();
+  changeDiscoveryFilters();
+});
+searchInput.addEventListener('input', () => { clearSearch.hidden = searchInput.value.length === 0; });
+clearSearch.addEventListener('click', () => {
+  searchInput.value = '';
+  renderDiscoveryControls();
+  changeDiscoveryFilters();
+  searchInput.focus();
+});
+categoryNav.addEventListener('click', event => {
+  const button = event.target.closest('[data-category]');
+  if (button) changeDiscoveryFilters(button.dataset.category);
+});
 function orderVisibleCards() {
   const allowed = new Set([...publicOrder, ...ownPublicWorks.map(work => work.id)]);
   for (const [id, entry] of cards) {
@@ -49,19 +142,16 @@ function reconcileCard(work) {
 }
 async function refreshOwnPublicWorks() {
   if (!viewerId || !config) return;
-  const owner = viewerId, generation = viewerGeneration;
-  if (ownRequest?.generation === generation) return ownRequest.promise;
-  const request = {generation};
+  const owner = viewerId, generation = viewerGeneration, revision = filterRevision;
+  const filters = {query: activeQuery, category: activeCategory, owner};
+  if (ownRequest?.generation === generation && ownRequest?.revision === revision) return ownRequest.promise;
+  const request = {generation, revision};
   request.promise = (async () => {
     const own = [];
     let after;
     do {
-      const url = feedUrl(config.origin, after);
-      url.searchParams.set('user_id', 'eq.' + owner);
-      url.searchParams.set('deleted_at', 'is.null');
-      url.searchParams.set('select', url.searchParams.get('select') + ',visibility,moderation_status,deleted_at');
-      const page = await read(url);
-      if (generation !== viewerGeneration) return;
+      const page = await readFeed(after, filters);
+      if (generation !== viewerGeneration || revision !== filterRevision) return;
       own.push(...page.filter(work => work.user_id === owner && work.visibility === 'public' &&
         work.moderation_status === 'ok' && work.deleted_at === null && Number.isFinite(Date.parse(work.published_at))));
       if (page.length < 12) break;
@@ -69,7 +159,7 @@ async function refreshOwnPublicWorks() {
       if (next.id === after?.id) throw translatedError('siteFeedFormat');
       after = next;
     } while (true);
-    if (generation !== viewerGeneration) return;
+    if (generation !== viewerGeneration || revision !== filterRevision) return;
     ownPublicWorks = [...new Map(own.map(work => [work.id, work])).values()];
     for (const work of ownPublicWorks) reconcileCard(work);
     orderVisibleCards();
@@ -252,18 +342,19 @@ function loadingShells(){
  return shells;
 }
 async function load(){
+ const revision=filterRevision,filters={query:activeQuery,category:activeCategory};
  if(busy)return;busy=true;pageFailed=false;more.disabled=true;grid.setAttribute('aria-busy','true');const shells=loadingShells();status.replaceChildren();delete status.dataset.i18n;
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
- const rows=await read(feedUrl(config.origin,cursor));lastFeedRead=Date.now();
+ const rows=await readFeed(cursor,filters);if(revision!==filterRevision)return;lastFeedRead=Date.now();
  for(const shell of shells)shell.remove();
  for(const work of rows){if(!publicOrder.includes(work.id))publicOrder.push(work.id);if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
  orderVisibleCards();void refreshOwnPublicWorks();
  void readAuthors(rows);
  cursor=rows.at(-1)||cursor;localizeElement(more,'siteLoadMore');localizeElement(status,seen.size?'siteFeedHint':'siteFeedEmpty');more.hidden=rows.length<12;
  await openSharedWork();
- }catch(e){pageFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
+ }catch(e){if(revision!==filterRevision)return;pageFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{for(const shell of shells)shell.remove();busy=false;more.disabled=false;grid.setAttribute('aria-busy','false');drainRefresh();syncPaging();}
 }
 // Refresh the loaded window atomically, not just the next (older) page.
@@ -274,14 +365,24 @@ function requestRefresh(force=false){
  if(refreshTimer!==undefined)return;
  refreshTimer=setTimeout(()=>{refreshTimer=undefined;drainRefresh();},100);
 }
-function drainRefresh(){if(document.visibilityState!=='hidden'&&refreshPending&&!busy&&refreshTimer===undefined){refreshPending=false;void refreshLoaded();}}
+function drainRefresh(){
+ if(document.visibilityState==='hidden'||busy)return;
+ if(filterPending){
+  filterPending=false;refreshPending=false;cursor=undefined;publicOrder=[];ownPublicWorks=[];
+  cards.clear();seen.clear();authorNodes.clear();grid.replaceChildren();
+  pageFailed=false;refreshFailed=false;more.hidden=true;
+  void load();return;
+ }
+ if(refreshPending&&refreshTimer===undefined){refreshPending=false;void refreshLoaded();}
+}
 async function refreshLoaded(){
  if(!config){void load();return;}
  busy=true;more.disabled=true;
+ const revision=filterRevision,filters={query:activeQuery,category:activeCategory};
  try{
   const target=Math.max(12,publicOrder.length),rows=[];let nextCursor,hasMore=true;
   while(rows.length<target&&hasMore){
-   const page=await read(feedUrl(config.origin,nextCursor));
+   const page=await readFeed(nextCursor,filters);if(revision!==filterRevision)return;
    rows.push(...page);nextCursor=page.at(-1)||nextCursor;hasMore=page.length===12;
   }
   // Retain the visible card's screen position when new works precede it.
@@ -303,7 +404,7 @@ async function refreshLoaded(){
   // Author endpoint accepts at most twelve IDs; each batch is independent.
   for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));
   await openSharedWork();
- }catch(e){pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
+ }catch(e){if(revision!==filterRevision)return;pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{busy=false;more.disabled=false;drainRefresh();syncPaging();}
 }
 function revalidateAuthorNames(){
@@ -345,6 +446,7 @@ async function openSharedWork(){
  openWork(rows[0]);shareResolved=true;
 }
 window.addEventListener(localeEvent,()=>{
+ renderDiscoveryControls();
  for(const time of grid.querySelectorAll('time[data-published-at]'))time.textContent=publishedLabel(time.dataset.publishedAt);
  for(const img of grid.querySelectorAll('[data-i18n-alt]'))img.alt=t(img.dataset.i18nAlt);
  for(const open of grid.querySelectorAll('[data-i18n-values]')){
@@ -352,5 +454,5 @@ window.addEventListener(localeEvent,()=>{
   if(title?.dataset.i18n==='siteUntitled')localizeElement(open,'siteViewWork',{title:t('siteUntitled')},'aria-label');
  }
 });
-if(document.documentElement)initSiteLocale().then(load).catch(()=>{more.hidden=false;more.disabled=false;});
+if(document.documentElement)initSiteLocale().then(()=>{renderDiscoveryControls();return load();}).catch(()=>{more.hidden=false;more.disabled=false;});
 else load();
