@@ -34,6 +34,9 @@ class CommunityCommentsPanel extends StatefulWidget {
     this.onPickPoint,
     this.onClearAnchor,
     this.onClose,
+    this.scrollController,
+    this.expanded = false,
+    this.onToggleExpanded,
     this.onCommentSelected,
     this.onVisibleCommentsChanged,
     this.onCommentSubmitted,
@@ -55,6 +58,9 @@ class CommunityCommentsPanel extends StatefulWidget {
   final VoidCallback? onPickPoint;
   final VoidCallback? onClearAnchor;
   final VoidCallback? onClose;
+  final ScrollController? scrollController;
+  final bool expanded;
+  final VoidCallback? onToggleExpanded;
   final ValueChanged<CommunityComment>? onCommentSelected;
   final ValueChanged<List<CommunityComment>>? onVisibleCommentsChanged;
   final void Function(CommunityComment, CommunityCommentAnchor?)?
@@ -81,7 +87,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   AppL10n get _l => AppL10n.of(context);
   final _text = TextEditingController();
   final _focus = FocusNode();
-  final _scroll = ScrollController();
+  late final _scroll = widget.scrollController ?? ScrollController();
   final _images = <CommunityCommentImageDraft>[];
   final _busyComments = <String>{};
   final _reportRevision = ValueNotifier(0);
@@ -998,7 +1004,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     _text.removeListener(_textChanged);
     _text.dispose();
     _focus.dispose();
-    _scroll.dispose();
+    if (widget.scrollController == null) _scroll.dispose();
     super.dispose();
   }
 
@@ -1035,26 +1041,41 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                                 style: AetherTextStyles.h3,
                               ),
                             ),
-                            IconButton(
-                              tooltip: _l.commentRefresh,
-                              onPressed:
-                                  _loading ||
-                                      _refreshing ||
-                                      _inflightLoadToken != null ||
-                                      _sending ||
-                                      _busyComments.isNotEmpty
-                                  ? null
-                                  : _manualRefresh,
-                              icon: _refreshing
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                            if (widget.onToggleExpanded != null)
+                              IconButton(
+                                tooltip: widget.expanded ? '缩小评论' : '放大评论',
+                                onPressed: widget.onToggleExpanded,
+                                icon: Icon(
+                                  widget.expanded
+                                      ? Icons.fullscreen_exit_rounded
+                                      : Icons.fullscreen_rounded,
+                                  size: 24,
+                                ),
+                              )
+                            else
+                              IconButton(
+                                tooltip: _l.commentRefresh,
+                                onPressed:
+                                    _loading ||
+                                        _refreshing ||
+                                        _inflightLoadToken != null ||
+                                        _sending ||
+                                        _busyComments.isNotEmpty
+                                    ? null
+                                    : _manualRefresh,
+                                icon: _refreshing
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.refresh_rounded,
+                                        size: 20,
                                       ),
-                                    )
-                                  : const Icon(Icons.refresh_rounded, size: 20),
-                            ),
+                              ),
                             IconButton(
                               tooltip: _l.commentClose,
                               onPressed: widget.onClose,
@@ -1135,6 +1156,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     if (_paged) {
       return SingleChildScrollView(
         controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: _section(CommunityCommentSection.hot),
       );
@@ -1154,6 +1176,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     final rows = _ranked(_comments);
     return ListView.separated(
       controller: _scroll,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       itemCount: rows.length,
       separatorBuilder: (_, _) => const SizedBox(height: 20),

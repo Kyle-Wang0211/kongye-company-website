@@ -37,6 +37,7 @@ import 'aether_cpp_card_demo.dart';
 import 'generated_account_avatar.dart';
 import 'public_profile_entry.dart';
 import 'comments/community_comments_panel.dart';
+import 'comments/community_comments_sheet.dart';
 import 'comment_moderation_routes.dart';
 import 'user_report_page.dart';
 import 'viewer_impl.dart' show ViewerQuality;
@@ -174,6 +175,9 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   void _showComments() {
+    if (MediaQuery.sizeOf(context).width < 760) {
+      _commentViewerPointerEvents.value = false;
+    }
     setState(() {
       _commentsEverOpened = true;
       _commentsEnabled = true;
@@ -211,10 +215,13 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     FocusScope.of(context).unfocus();
     setState(() {
       _commentsOpen = false;
+      _commentsEnabled = false;
+      _selectedCommentId = null;
       _dismissedLayoutId = _commentLayout?.id;
       _selectingCommentPoint = false;
     });
     unawaited(_setPicking(false));
+    unawaited(_syncCommentMarkers());
   }
 
   Future<void> _setPicking(bool enabled) async {
@@ -237,6 +244,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       if (_selectingCommentPoint) _commentsOpen = true;
     });
     if (!_selectingCommentPoint) _clearCommentAnchor();
+    _commentViewerPointerEvents.value = _selectingCommentPoint;
     unawaited(_setPicking(_selectingCommentPoint));
   }
 
@@ -262,6 +270,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       );
       _selectingCommentPoint = false;
     });
+    _commentViewerPointerEvents.value = false;
     unawaited(_setPicking(false));
     unawaited(_syncCommentMarkers());
   }
@@ -1028,39 +1037,64 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     }
   }
 
-  Widget _floatingComments(BoxConstraints viewport) {
-    final width = math.min(360.0, math.max(0.0, viewport.maxWidth - 24));
-    final bottomReserve = viewport.maxHeight < 300 ? 16.0 : 84.0;
-    final height = math.min(
-      460.0,
-      math.max(0.0, viewport.maxHeight - bottomReserve - 8),
-    );
-    final point = _commentLayout;
-    final x = (point?.x ?? .5) * viewport.maxWidth;
-    final y = (point?.y ?? .3) * viewport.maxHeight;
-    final preferredLeft = x > viewport.maxWidth / 2 ? x - width - 18 : x + 18;
-    final left = preferredLeft.clamp(
-      12.0,
-      math.max(12.0, viewport.maxWidth - width - 12),
-    );
-    final preferredTop = y + height + 24 <= viewport.maxHeight - 76
-        ? y + 12
-        : y - height - 12;
-    final top = preferredTop.clamp(
-      8.0,
-      math.max(8.0, viewport.maxHeight - height - bottomReserve),
-    );
-    return Positioned(
-      left: left.toDouble(),
-      top: top.toDouble(),
-      width: width,
-      height: height,
-      child: _commentPanel(),
-    );
-  }
-
-  Widget _commentPanel() {
+  Widget _commentPanel({
+    ScrollController? scrollController,
+    bool expanded = false,
+    VoidCallback? onToggleExpanded,
+  }) {
     final commentIdentityEpoch = _commentIdentityEpoch;
+    final panel = CommunityCommentsPanel(
+      key: ValueKey(_commentPartition),
+      workId: widget.work.id,
+      workAuthorId: widget.work.userId,
+      active: _commentsOpen || _commentsEnabled,
+      presentationVisible: scrollController != null || _floatingCommentsVisible,
+      repository: _commentRepository,
+      requireAssetBinding: true,
+      expectedAssetSha256: _surfaceAssetSha256,
+      imagePicker: widget.commentImagePicker,
+      currentUserId: widget.service.currentUserId,
+      onSignIn:
+          widget.onSignIn != null ||
+              context.getInheritedWidgetOfExactType<AuthScope>() != null
+          ? _requestSignIn
+          : null,
+      selectedAnchor: _commentAnchor,
+      onPickPoint: _surfaceViewer == null || _surfaceAssetSha256 == null
+          ? null
+          : _pickCommentPoint,
+      onClearAnchor: _clearCommentAnchor,
+      onClose: _closeComments,
+      scrollController: scrollController,
+      expanded: expanded,
+      onToggleExpanded: onToggleExpanded,
+      onCommentSelected: _focusComment,
+      onVisibleCommentsChanged: _commentsChanged,
+      onPublicCountChanged: (count) {
+        if (!mounted ||
+            commentIdentityEpoch != _commentIdentityEpoch ||
+            count == _commentsCount) {
+          return;
+        }
+        setState(() => _commentsCount = count);
+        widget.onWorkUpdated?.call(
+          widget.work.copyWith(
+            commentCount: count,
+            likedByMe: _liked,
+            likesCount: _likesCount,
+            viewsCount: _viewsCount,
+          ),
+        );
+      },
+      onCommentSubmitted: _commentSubmitted,
+      onModerationCaseSelected: (caseId) => openCommentModerationCase(
+        context,
+        caseId: caseId,
+        repository: widget.commentModerationRepository,
+        userIdReader: () => widget.service.currentUserId,
+      ),
+    );
+    if (scrollController != null) return panel;
     return Offstage(
       offstage: !_floatingCommentsVisible,
       child: TickerMode(
@@ -1074,54 +1108,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: CommunityCommentsPanel(
-              key: ValueKey(_commentPartition),
-              workId: widget.work.id,
-              workAuthorId: widget.work.userId,
-              active: _commentsOpen || _commentsEnabled,
-              presentationVisible: _floatingCommentsVisible,
-              repository: _commentRepository,
-              requireAssetBinding: true,
-              expectedAssetSha256: _surfaceAssetSha256,
-              imagePicker: widget.commentImagePicker,
-              currentUserId: widget.service.currentUserId,
-              onSignIn:
-                  widget.onSignIn != null ||
-                      context.getInheritedWidgetOfExactType<AuthScope>() != null
-                  ? _requestSignIn
-                  : null,
-              selectedAnchor: _commentAnchor,
-              onPickPoint: _surfaceViewer == null || _surfaceAssetSha256 == null
-                  ? null
-                  : _pickCommentPoint,
-              onClearAnchor: _clearCommentAnchor,
-              onClose: _closeComments,
-              onCommentSelected: _focusComment,
-              onVisibleCommentsChanged: _commentsChanged,
-              onPublicCountChanged: (count) {
-                if (!mounted ||
-                    commentIdentityEpoch != _commentIdentityEpoch ||
-                    count == _commentsCount) {
-                  return;
-                }
-                setState(() => _commentsCount = count);
-                widget.onWorkUpdated?.call(
-                  widget.work.copyWith(
-                    commentCount: count,
-                    likedByMe: _liked,
-                    likesCount: _likesCount,
-                    viewsCount: _viewsCount,
-                  ),
-                );
-              },
-              onCommentSubmitted: _commentSubmitted,
-              onModerationCaseSelected: (caseId) => openCommentModerationCase(
-                context,
-                caseId: caseId,
-                repository: widget.commentModerationRepository,
-                userIdReader: () => widget.service.currentUserId,
-              ),
-            ),
+            child: panel,
           ),
         ),
       ),
@@ -1209,7 +1196,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         ? _commentSidebarWidth.clamp(280.0, maxWidth)
         : viewport.maxWidth;
     final showDivider = wide && _floatingCommentsVisible;
-    if (!showDivider && !_commentViewerPointerEvents.value) {
+    if (wide && !showDivider && !_commentViewerPointerEvents.value) {
       _commentViewerPointerEvents.value = true;
     }
     final panel = SizedBox(
@@ -1243,8 +1230,6 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   Widget _viewerControls(BoxConstraints viewport) => Stack(
     children: [
       Positioned.fill(child: _buildBody()),
-      if (!_webCommentLayout && _commentsEverOpened && _supportsSurfaceComments)
-        _floatingComments(viewport),
       if (_selectingCommentPoint)
         Positioned(
           left: 20,
@@ -1275,7 +1260,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   Widget build(BuildContext context) {
     // Black, matching the drafts viewer and the sparse thumbnail — a
     // point cloud reads far better on black than on white.
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -1320,7 +1305,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             children: [
               Expanded(
                 child: LayoutBuilder(
-                  builder: (context, viewport) => _webCommentLayout
+                  builder: (context, viewport) =>
+                      _webCommentLayout && viewport.maxWidth >= 760
                       ? _webCommentsBody(viewport)
                       : _viewerControls(viewport),
                 ),
@@ -1361,6 +1347,26 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           ),
         ),
       ),
+    );
+    final mobileSheet =
+        !_webCommentLayout || MediaQuery.sizeOf(context).width < 760;
+    return Stack(
+      children: [
+        scaffold,
+        if (mobileSheet && _commentsEverOpened && _supportsSurfaceComments)
+          Positioned.fill(
+            child: CommunityCommentsSheet(
+              visible: _floatingCommentsVisible,
+              onClose: _closeComments,
+              builder: (scrollController, expanded, toggleExpanded) =>
+                  _commentPanel(
+                    scrollController: scrollController,
+                    expanded: expanded,
+                    onToggleExpanded: toggleExpanded,
+                  ),
+            ),
+          ),
+      ],
     );
   }
 }
