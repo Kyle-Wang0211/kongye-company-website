@@ -25,6 +25,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
   const pointers = new Set();
   const document = canvas.ownerDocument;
   let layoutSignature = 'null';
+  let referenceProjectionScale = null;
   function publishLayout(layout) {
     const signature = JSON.stringify(layout);
     if (signature === layoutSignature) return;
@@ -147,11 +148,16 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     }
     update();
   }
-  function styleSelection(marker) {
-    const size = marker.selected ? '12px' : '9px';
-    marker.dot.style.width = size;
-    marker.dot.style.height = size;
-    marker.halo.style.boxShadow = marker.selected ? '0 0 12px 5px #fff9' : '0 0 8px 2px #fff6';
+  function styleSelection(marker, scale = 1) {
+    const size = (marker.selected ? 12 : 9) * scale;
+    marker.dot.style.width = `${size}px`;
+    marker.dot.style.height = `${size}px`;
+    marker.halo.style.width = `${22 * scale}px`;
+    marker.halo.style.height = `${22 * scale}px`;
+    marker.halo.style.filter = `blur(${4 * scale}px)`;
+    marker.halo.style.boxShadow = marker.selected
+      ? `0 0 ${12 * scale}px ${5 * scale}px #fff9`
+      : `0 0 ${8 * scale}px ${2 * scale}px #fff6`;
     marker.button.style.zIndex = marker.selected ? '2' : '1';
   }
   function visible(node, root) {
@@ -246,11 +252,20 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     if (!overlay || !root || disposed || enabled) { publishLayout(null); return; }
     root.updateWorldMatrix(true,true);camera.updateMatrixWorld();
     const rect = canvas.getBoundingClientRect();
+    const overview = getOverviewDistance?.();
+    if (referenceProjectionScale == null && Number.isFinite(overview) && overview > 0 && rect.height > 1) {
+      referenceProjectionScale = rect.height / camera.getViewSize(overview, new THREE.Vector2()).y;
+    }
     const layouts = [];
     const hasSelection = markers.some(marker => marker.selected);
     for (const marker of markers) {
       const world = root.localToWorld(new THREE.Vector3(...marker.anchor.position));
       const projected = world.clone().project(camera);
+      const depth = world.clone().sub(camera.position).dot(camera.getWorldDirection(new THREE.Vector3()));
+      if (referenceProjectionScale > 0 && depth > 0 && rect.height > 1) {
+        const projectionScale = rect.height / camera.getViewSize(depth, new THREE.Vector2()).y;
+        styleSelection(marker, projectionScale / referenceProjectionScale);
+      }
       const shown = root.visible && supported() && projected.z >= -1 && projected.z <= 1 && Math.abs(projected.x) <= 1 && Math.abs(projected.y) <= 1;
       marker.button.style.display = shown ? 'block' : 'none';
       if (!shown) continue;
@@ -306,7 +321,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
     camera.position.copy(position);controls.target.copy(target);controls.update();controls.enableDamping=damping;
     update();
   }
-  function clear() { enabled=false;down=null;pointers.clear();for(const marker of markers)marker.animation?.cancel();markers=[];markerSignature=null;overlay?.replaceChildren();publishLayout(null); }
+  function clear() { enabled=false;referenceProjectionScale=null;down=null;pointers.clear();for(const marker of markers)marker.animation?.cancel();markers=[];markerSignature=null;overlay?.replaceChildren();publishLayout(null); }
   function dispose() { disposed=true;clear();for(const [name,handler] of Object.entries(handlers))canvas.removeEventListener?.(name,handler);overlay?.remove(); }
   return {setMode,setMarkers,focus,update,clear,dispose,get enabled(){return enabled;}};
 }

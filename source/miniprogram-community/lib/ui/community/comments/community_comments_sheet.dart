@@ -60,6 +60,7 @@ class _CommunityCommentsSheetState extends State<CommunityCommentsSheet>
   void initState() {
     super.initState();
     _slide.addListener(_reportHeight);
+    _sheet.addListener(_reportHeight);
     if (widget.visible) _entrance.forward();
   }
 

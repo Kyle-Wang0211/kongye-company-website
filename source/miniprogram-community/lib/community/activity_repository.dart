@@ -19,8 +19,26 @@ class CommunityActivity {
   final int sortOrder;
   final String summary;
 
-  Uri get destination =>
-      Uri.https('kongye.space', '/screen.html', {'activity': slug});
+  Uri get destination => communityActivityDestination(slug);
+}
+
+/// Stable catalog identity plus compatibility with the currently served details.
+Uri communityActivityDestination(
+  String slug, {
+  Uri? origin,
+  bool mini = false,
+}) {
+  const legacyScreens = {'ceramic': '1', 'resort': '2', 'courtyard': '3'};
+  final screen = legacyScreens[slug];
+  return (origin ?? Uri.https('kongye.space'))
+      .resolve('/screen.html')
+      .replace(
+        queryParameters: {
+          'activity': slug,
+          'screen': ?screen,
+          if (mini) 'mini': '1',
+        },
+      );
 }
 
 bool isTrustedActivityUrl(String value) {

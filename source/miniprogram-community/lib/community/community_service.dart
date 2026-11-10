@@ -1,3 +1,5 @@
+import 'community_work_categories.dart';
+import 'dart:convert';
 // Supabase queries that power the community feed.
 //
 // Three responsibilities:
@@ -114,7 +116,10 @@ class CommunityService {
   /// Read the author's public rows independently of the community cursor.
   /// Owner RLS also permits private/pending rows, so reuse the strict public
   /// query rather than the account's private work catalogue.
-  Future<List<FeedWork>> fetchOwnPublicFeed({String? query}) async {
+  Future<List<FeedWork>> fetchOwnPublicFeed({
+    String? query,
+    String category = 'all',
+  }) async {
     final owner = viewerUserId;
     if (owner == null) return const [];
     const batchSize = 100;
@@ -125,6 +130,7 @@ class CommunityService {
         limit: batchSize,
         authorUserId: owner,
         query: query,
+        category: category,
         afterPublishedAt: cursor?.publishedAt,
         afterId: cursor?.id,
       );
@@ -149,6 +155,7 @@ class CommunityService {
     int offset = 0,
     FeedSort sortBy = FeedSort.recent,
     String? query,
+    String category = 'all',
 
     /// [D7 2026-08-23 用户签决] 只看某个作者的作品 —— 流内过滤,**不是**
     /// 个人主页。后端本就 100% 就绪:profiles 六字段齐、FeedWork 已带 userId,
@@ -184,6 +191,11 @@ class CommunityService {
         .eq('moderation_status', 'ok')
         .isFilter('deleted_at', null)
         .not('published_at', 'is', null);
+    if (category != 'all') {
+      final ids = await CommunityWorkCategories.ids(category);
+      if (ids.isEmpty) return const [];
+      filter = filter.inFilter('id', ids);
+    }
     if (authorUserId != null && authorUserId.isNotEmpty) {
       filter = filter.eq('user_id', authorUserId);
     }
@@ -192,7 +204,12 @@ class CommunityService {
       // ilike is parameterized — pattern is sent as-is and matches as a
       // case-insensitive substring. Wildcards in the user's input
       // collapse to literals on the wire (PostgREST escapes them).
-      filter = filter.ilike('title', '%$trimmedQuery%');
+      final literal = trimmedQuery
+          .replaceAll(r'\', r'\\')
+          .replaceAll('%', r'\%')
+          .replaceAll('_', r'\_');
+      final pattern = jsonEncode('%$literal%');
+      filter = filter.or('title.ilike.$pattern,description.ilike.$pattern');
     }
     // [KEYSET-PAGINATION 2026-08-23] 游标 —— 等价于 PostgreSQL 的元组比较
     //   (published_at, id) < (T, I)

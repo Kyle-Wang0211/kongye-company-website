@@ -1,3 +1,4 @@
+import 'community/community_discovery_controls.dart';
 // Community image feed. Only published cover images are prepared here.
 // Models and the shared 3D viewer load only after opening work detail.
 // Naturally matched first covers reveal together; later covers retain their aspect.
@@ -35,8 +36,6 @@ class VaultPage extends StatefulWidget {
     this.isVisible = true,
     this.activities = const [],
     this.onActivityTap,
-    this.showEmptyTopicCard = true,
-    this.onActivityRefresh,
     this.viewerHostBuilderForTesting,
   });
 
@@ -44,8 +43,6 @@ class VaultPage extends StatefulWidget {
   final bool isVisible;
   final List<TopicActivity> activities;
   final ValueChanged<int>? onActivityTap;
-  final bool showEmptyTopicCard;
-  final Future<void> Function()? onActivityRefresh;
   // Forward the shared renderer's existing test seam.
   // ignore: invalid_use_of_visible_for_testing_member
   final ProductModelHostBuilder? viewerHostBuilderForTesting;
@@ -63,6 +60,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
   FeedWork? _publicCursor;
   int _publicRowsLoaded = 0;
   String _query = '';
+  String _category = 'all';
   bool _foreground = true;
   bool _detailOpen = false;
   bool _refreshRequested = false;
@@ -401,10 +399,14 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
       sortBy: FeedSort.recent,
       authorUserId: _authorFilterId,
       query: _query.isEmpty ? null : _query,
+      category: _category,
     );
     final own =
         viewer != null && (_authorFilterId == null || _authorFilterId == viewer)
-        ? _service.fetchOwnPublicFeed(query: _query.isEmpty ? null : _query)
+        ? _service.fetchOwnPublicFeed(
+            query: _query.isEmpty ? null : _query,
+            category: _category,
+          )
         : Future.value(const <FeedWork>[]);
     return Future.wait([page, own]).then((results) {
       if (generation != _feedGeneration || viewer != _viewerId) return [];
@@ -448,6 +450,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
         sortBy: FeedSort.recent,
         authorUserId: _authorFilterId,
         query: _query.isEmpty ? null : _query,
+        category: _category,
         afterPublishedAt: cursorAt,
         afterId: cursorAt == null ? null : last!.id,
       );
@@ -500,10 +503,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
       _resetFocus();
       _feed = next;
     });
-    await Future.wait([
-      next,
-      if (widget.onActivityRefresh != null) widget.onActivityRefresh!(),
-    ]);
+    await next;
   }
 
   // ignore: unused_element  —— [D2] 搜索代码按用户要求保留,只是不渲染。
@@ -579,66 +579,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
               children: [
                 Column(
                   children: [
-                    if (kIsWeb &&
-                        Supabase.instance.client.auth.currentUser != null)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              tooltip:
-                                  Localizations.localeOf(
-                                        context,
-                                      ).languageCode ==
-                                      'zh'
-                                  ? '消息'
-                                  : 'Messages',
-                              icon: const Icon(
-                                Icons.chat_bubble_outline_rounded,
-                              ),
-                              onPressed: () =>
-                                  Navigator.of(context).pushNamed('/messages'),
-                            ),
-                            IconButton(
-                              tooltip: '发布作品',
-                              icon: const Icon(Icons.add),
-                              onPressed: () async {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const WebPublicationPage(),
-                                  ),
-                                );
-                                if (mounted) await _refresh();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    // [D1/D2/D3 2026-08-23 用户签决] 冷启动期社区首页 = **单信息流**。
-                    //
-                    // 砍掉的两样:
-                    //   · 三个标签(热门/附近/发现)—— 公开作品个位数,空标签比没有
-                    //     更伤。且实测「热门」与「发现」本就是同一个流的两个排序键,
-                    //     合并零信息损失。「附近」的文案是"敬请期待"——**一句没兑现
-                    //     的承诺比一个空标签更糟**。
-                    //   · 顶部搜索框 —— 几件作品搜什么。
-                    //
-                    // ⚠️ 搜索的**代码全部保留**(_SearchBar / _searchController /
-                    // _query / _onQuerySubmitted / _onClearQuery / service 的 query
-                    // 参数),只是不渲染。用户明确要求"先留着别删"。
-                    // 恢复 = 把下面这个 Padding 的注释解开。
-                    //
-                    // if (false) Padding(
-                    //   padding: const EdgeInsets.fromLTRB(AetherSpacing.lg,
-                    //       AetherSpacing.md, AetherSpacing.lg, AetherSpacing.sm),
-                    //   child: _SearchBar(
-                    //     controller: _searchController,
-                    //     hasQuery: _query.isNotEmpty,
-                    //     onSubmitted: _onQuerySubmitted,
-                    //     onClear: _onClearQuery,
-                    //   ),
-                    // ),
+                    _discoveryHeader,
                     // [D7] 作者过滤条 —— 只在过滤生效时占位,平时零高度。
                     // 它就是"只看这个人"这个状态的**唯一** UI:没有头像、没有简介、
                     // 没有关注、没有任何计数。
@@ -673,14 +614,24 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
 
   /// 主题卡只在**没有作者过滤**时出现 —— 「本周精选」是策展,
   /// 在"只看某个人"的视图里没有意义。
-  bool get _showTopicCard =>
-      (widget.activities.isNotEmpty ||
-          (widget.showEmptyTopicCard && kShowCommunityTopicCard)) &&
-      _authorFilterId == null;
+  Widget get _discoveryHeader => CommunityDiscoveryHeader(
+    selected: _category,
+    controller: _searchController,
+    onSearch: _onQuerySubmitted,
+    onClear: _onClearQuery,
+    onChanged: (category) {
+      if (category == _category) return;
+      setState(() {
+        _resetFocus();
+        _category = category;
+        _feed = _loadFeed();
+      });
+    },
+  );
 
   Widget _buildFeed() {
     final sourceFeed = _feed;
-    final showActivityHeader = _showTopicCard && widget.activities.isNotEmpty;
+    const showActivityHeader = false;
     return FutureBuilder<List<FeedWork>>(
       future: sourceFeed,
       builder: (context, snap) {
@@ -733,7 +684,7 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
             });
             return _LoadingState(showActivityHeader: showActivityHeader);
           }
-          return const _EmptyState();
+          return Column(children: [const Expanded(child: _EmptyState())]);
         }
         if (_preparationError != null) {
           return _LoadingState(showActivityHeader: showActivityHeader);
@@ -878,13 +829,6 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
               return false; // 别拦,RefreshIndicator 还要用这些通知
             },
             child: CommunityMasonry(
-              header: _showTopicCard
-                  ? TopicCard(
-                      autoPlay: _governor.liveAllowed,
-                      activities: widget.activities,
-                      onActivityTap: widget.onActivityTap,
-                    )
-                  : null,
               itemCount: displayWorks.length + (_loadingMore ? 2 : 0),
               itemBuilder: (context, index) => index < displayWorks.length
                   ? _buildWorkCard(displayWorks[index], displayWorks)
@@ -1250,9 +1194,7 @@ const double kTopicActivityAspect = 16 / 9;
 const Duration kTopicAutoPlayInterval = Duration(seconds: 5);
 
 class TopicActivity {
-  const TopicActivity({this.id, required this.title, required this.image});
-
-  final String? id;
+  const TopicActivity({required this.title, required this.image});
 
   final String title;
   final ImageProvider image;
@@ -1318,23 +1260,11 @@ class _TopicCardState extends State<TopicCard> {
     if (widget.autoPlay != old.autoPlay) _syncAutoPlay();
     final oldCount = old.activities.isEmpty ? 3 : old.activities.length;
     final modeChanged = old.activities.isEmpty != widget.activities.isEmpty;
-    final selectedId = old.activities.isEmpty
-        ? null
-        : old.activities[_page.clamp(0, old.activities.length - 1)].id;
-    final retainedIndex = selectedId == null
-        ? -1
-        : widget.activities.indexWhere((entry) => entry.id == selectedId);
-    var nextPage = _page.clamp(0, _slideCount - 1);
-    if (modeChanged || (selectedId != null && retainedIndex < 0)) {
-      nextPage = 0;
-    } else if (retainedIndex >= 0) {
-      nextPage = retainedIndex;
-    }
-    if (oldCount != _slideCount || modeChanged || nextPage != _page) {
-      _page = nextPage;
+    if (oldCount != _slideCount || modeChanged) {
+      _page = modeChanged ? 0 : _page.clamp(0, _slideCount - 1);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !_pc.hasClients) return;
-        _pc.jumpToPage(_slideCount > 1 ? nextPage + 1 : 0);
+        _pc.jumpToPage(_slideCount > 1 ? _page + 1 : 0);
       });
     }
   }

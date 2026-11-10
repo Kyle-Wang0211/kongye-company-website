@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../community/activity_repository.dart';
 
 typedef ActivityLoader = Future<List<CommunityActivity>> Function();

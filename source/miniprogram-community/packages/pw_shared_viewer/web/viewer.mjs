@@ -397,6 +397,9 @@ export function createViewerWithDependencies(canvas, options = {}, api) {
 
   function resize(nextWidth = canvas.clientWidth, nextHeight = canvas.clientHeight, nextPixelRatio = options.pixelRatio ?? globalThis.devicePixelRatio ?? 1) {
     assertActive();
+    // A fully expanded sheet can temporarily give the platform surface no
+    // area. Keep its last valid projection until the viewer has space again.
+    if (!(Number(nextWidth) > 1 && Number(nextHeight) > 1)) return;
     width = Math.max(1, Math.floor(Number(nextWidth) || 1));
     height = Math.max(1, Math.floor(Number(nextHeight) || 1));
     pixelRatio = Math.max(0.25, Math.min(3, Number(nextPixelRatio) || 1));

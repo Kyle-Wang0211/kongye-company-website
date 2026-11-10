@@ -1,3 +1,5 @@
+import 'community_comment_layout.dart';
+import '../generated_account_avatar.dart';
 import '../current_author_name.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -1016,21 +1018,12 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             top: Radius.circular(AetherRadii.lg),
           ),
           child: Material(
-            color: AetherColors.bgCanvas,
+            color: Colors.white,
             child: LayoutBuilder(
               builder: (context, constraints) => Stack(
                 children: [
                   Column(
                     children: [
-                      const SizedBox(height: 8),
-                      Container(
-                        width: 32,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AetherColors.borderStrong,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 4),
                         child: Row(
@@ -1269,64 +1262,66 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        currentAuthorName(
-                          context,
-                          comment.userId,
-                          comment.authorName,
-                        ),
-                        style: AetherTextStyles.bodySm.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (!hidden &&
-                        widget.workAuthorId != null &&
-                        widget.workAuthorId!.trim().isNotEmpty &&
-                        comment.userId == widget.workAuthorId)
-                      Container(
-                        key: ValueKey('author-reply-${comment.id}'),
-                        margin: const EdgeInsets.only(left: 6),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: Center(
-                          widthFactor: 1,
-                          heightFactor: 1,
-                          child: Text(
-                            _l.localeName.startsWith('zh') ? '作者' : 'Author',
-                            textAlign: TextAlign.center,
-                            textHeightBehavior: const TextHeightBehavior(
-                              applyHeightToFirstAscent: false,
-                              applyHeightToLastDescent: false,
-                            ),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              height: 1,
+                CommunityCommentHeader(
+                  author: currentAuthorName(
+                    context,
+                    comment.userId,
+                    comment.authorName,
+                  ),
+                  date: _date(comment.createdAt),
+                  badge:
+                      !hidden &&
+                          widget.workAuthorId != null &&
+                          widget.workAuthorId!.trim().isNotEmpty &&
+                          comment.userId == widget.workAuthorId
+                      ? Container(
+                          key: ValueKey('author-reply-${comment.id}'),
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Center(
+                            widthFactor: 1,
+                            heightFactor: 1,
+                            child: Text(
+                              _l.localeName.startsWith('zh') ? '作者' : 'Author',
+                              textAlign: TextAlign.center,
+                              textHeightBehavior: const TextHeightBehavior(
+                                applyHeightToFirstAscent: false,
+                                applyHeightToLastDescent: false,
+                              ),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                height: 1,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    if (mine)
-                      Padding(
-                        padding: EdgeInsets.only(left: 6),
-                        child: Text(
-                          _l.commentMe,
-                          style: AetherTextStyles.caption,
-                        ),
-                      ),
-                  ],
+                        )
+                      : null,
+                  mineLabel: mine ? _l.commentMe : null,
+                  likesCount: comment.likesCount,
+                  liked: comment.likedByMe,
+                  showLikes: comment.published,
+                  likeLabel: comment.likedByMe
+                      ? _l.commentUnlikeCount(comment.likesCount)
+                      : _l.commentLikeCount(comment.likesCount),
+                  locationLabel: _l.commentViewPoint,
+                  onLocation:
+                      !hidden && !personalHidden && comment.anchor != null
+                      ? () => widget.onCommentSelected?.call(comment)
+                      : null,
+                  onLike:
+                      _busyComments.contains(comment.id) ||
+                          widget.currentUserId == null
+                      ? null
+                      : () => _like(comment),
                 ),
                 if (!hidden && !personalHidden && comment.parentId != null)
                   Padding(
@@ -1397,20 +1392,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       ],
                     ),
                   ),
-                if (!hidden && !personalHidden && comment.anchor != null)
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 36),
-                      foregroundColor: AetherColors.primary,
-                    ),
-                    onPressed: () => widget.onCommentSelected?.call(comment),
-                    icon: const Icon(Icons.location_on_outlined, size: 15),
-                    label: Text(
-                      _l.commentViewPoint,
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ),
                 if (privateLabel != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
@@ -1431,10 +1412,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   spacing: 10,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Text(
-                      _date(comment.createdAt),
-                      style: AetherTextStyles.caption,
-                    ),
                     if (comment.published && !personalHidden && _canComment)
                       _textAction(_l.commentReply, () {
                         _changed(() => _reply = comment);
@@ -1448,55 +1425,6 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       _textAction(
                         _l.reportAction,
                         () => _reportComment(comment),
-                      ),
-                    if (comment.published)
-                      InkWell(
-                        onTap:
-                            _busyComments.contains(comment.id) ||
-                                widget.currentUserId == null
-                            ? null
-                            : () => _like(comment),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Semantics(
-                          label: comment.likedByMe
-                              ? _l.commentUnlikeCount(comment.likesCount)
-                              : _l.commentLikeCount(comment.likesCount),
-                          button: true,
-                          enabled:
-                              !_busyComments.contains(comment.id) &&
-                              widget.currentUserId != null,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 3,
-                              vertical: 8,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  comment.likedByMe
-                                      ? Icons.favorite_rounded
-                                      : Icons.favorite_border_rounded,
-                                  size: 16,
-                                  color:
-                                      _busyComments.contains(comment.id) ||
-                                          widget.currentUserId == null
-                                      ? AetherColors.textSecondary.withValues(
-                                          alpha: .4,
-                                        )
-                                      : comment.likedByMe
-                                      ? AetherColors.danger
-                                      : AetherColors.textSecondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${comment.likesCount}',
-                                  style: AetherTextStyles.caption,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ),
                     if (comment.published)
                       IconButton(
@@ -1764,121 +1692,139 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 ),
               ),
             ),
-          if (widget.currentUserId == null && widget.onSignIn != null)
-            TextButton(
-              onPressed: widget.onSignIn,
-              child: Text(_l.commentSignIn),
-            ),
-          TextField(
-            key: const Key('comment-input'),
-            controller: _text,
-            focusNode: _focus,
-            enabled: _canComment && !_sending,
-            minLines: 1,
-            maxLines: 3,
-            style: AetherTextStyles.body,
-            decoration: InputDecoration(
-              hintText: widget.currentUserId == null
-                  ? _l.commentSignIn
-                  : _page == null
-                  ? _l.commentServiceUnavailable
-                  : !_canComment
-                  ? _l.commentUnavailable
-                  : _l.commentComposerHint,
-              counterText: '',
-              filled: true,
-              fillColor: AetherColors.bgElevated,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 42,
-            child: Row(
-              children: [
-                IconButton(
-                  tooltip: _l.commentAddEmoji,
-                  onPressed: !_canComment || _sending
-                      ? null
-                      : () => setState(() => _emojiOpen = !_emojiOpen),
-                  icon: const Icon(
-                    Icons.sentiment_satisfied_alt_outlined,
-                    size: 22,
-                  ),
-                ),
-                IconButton(
-                  tooltip: _l.commentAddImage,
-                  onPressed:
-                      !_canComment ||
-                          _sending ||
-                          _picking ||
-                          _images.length >= 3
-                      ? null
-                      : _pickImages,
-                  icon: _picking
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AetherColors.primary,
-                          ),
-                        )
-                      : const Icon(Icons.image_outlined, size: 22),
-                ),
-                IconButton(
-                  tooltip: _l.commentSelectPoint,
-                  onPressed: !_canComment || _sending
-                      ? null
-                      : widget.onPickPoint,
-                  icon: const Icon(Icons.add_location_alt_outlined, size: 22),
-                ),
-                const Spacer(),
-                SizedBox(
-                  height: 34,
-                  child: FilledButton(
-                    key: const Key('comment-send'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AetherColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      minimumSize: const Size(62, 34),
+          Focus(
+            onFocusChange: (_) => setState(() {}),
+            child: CommunityCommentComposerRow(
+              avatar: widget.currentUserId == null
+                  ? const CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Color(0xffeeeeee),
+                      child: Icon(
+                        Icons.person_outline_rounded,
+                        color: Color(0xff888888),
+                        size: 21,
+                      ),
+                    )
+                  : GeneratedAccountAvatar(
+                      userId: widget.currentUserId!,
+                      radius: 16,
                     ),
-                    onPressed:
-                        _canComment &&
-                            _hasDraft &&
-                            _withinTextLimit &&
-                            !_sending &&
-                            !_picking
-                        ? _send
-                        : null,
-                    child: _sending
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            _l.commentSend,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+              input: GestureDetector(
+                onTap: widget.currentUserId == null ? widget.onSignIn : null,
+                child: IgnorePointer(
+                  ignoring: widget.currentUserId == null,
+                  child: TextField(
+                    key: const Key('comment-input'),
+                    controller: _text,
+                    focusNode: _focus,
+                    enabled: _canComment && !_sending,
+                    minLines: 1,
+                    maxLines: 3,
+                    style: AetherTextStyles.body,
+                    decoration: InputDecoration(
+                      hintText: widget.currentUserId == null
+                          ? _l.commentSignIn
+                          : _page == null
+                          ? _l.commentServiceUnavailable
+                          : !_canComment
+                          ? _l.commentUnavailable
+                          : _l.commentComposerHint,
+                      counterText: '',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                 ),
-              ],
+              ),
+              emojiButton: IconButton(
+                tooltip: _l.commentAddEmoji,
+                onPressed: !_canComment || _sending
+                    ? null
+                    : () => setState(() => _emojiOpen = !_emojiOpen),
+                icon: const Icon(
+                  Icons.sentiment_satisfied_alt_outlined,
+                  size: 22,
+                ),
+              ),
+              imageButton: IconButton(
+                tooltip: _l.commentAddImage,
+                onPressed:
+                    !_canComment || _sending || _picking || _images.length >= 3
+                    ? null
+                    : _pickImages,
+                icon: _picking
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AetherColors.primary,
+                        ),
+                      )
+                    : const Icon(Icons.image_outlined, size: 22),
+              ),
             ),
           ),
+          if (_focus.hasFocus || _hasDraft || _anchor != null)
+            SizedBox(
+              height: 42,
+              child: Row(
+                children: [
+                  const Spacer(),
+                  IconButton(
+                    tooltip: _l.commentSelectPoint,
+                    onPressed: !_canComment || _sending
+                        ? null
+                        : widget.onPickPoint,
+                    icon: const Icon(Icons.add_location_alt_outlined, size: 22),
+                  ),
+                  SizedBox(
+                    height: 34,
+                    child: FilledButton(
+                      key: const Key('comment-send'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AetherColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        minimumSize: const Size(62, 34),
+                      ),
+                      onPressed:
+                          _canComment &&
+                              _hasDraft &&
+                              _withinTextLimit &&
+                              !_sending &&
+                              !_picking
+                          ? _send
+                          : null,
+                      child: _sending
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              _l.commentSend,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           if (_emojiOpen)
             SizedBox(
               height: 40,

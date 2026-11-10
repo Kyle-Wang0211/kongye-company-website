@@ -9,4 +9,4 @@ void openCommunitySettings() {}
 void openCommunityFollowing() {}
 void openCommunityFiling() {}
 
-void openCommunityActivitySlug(String slug) {}
+void openCommunityActivityDestination(Uri destination) {}

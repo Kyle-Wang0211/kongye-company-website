@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'community_profile_shell.dart';
+import 'community_bottom_tab_bar.dart';
 
 /// Guards document exits while keeping pushed pages and their drafts mounted.
 class CommunityNavigationController {
@@ -45,6 +45,7 @@ class CommunityNavigationFrame extends StatelessWidget {
     required this.onMessages,
     required this.onSettings,
     this.onOpenFiling,
+    this.onActivities,
     this.visible = true,
     this.selectedDestination = 'profile',
   });
@@ -53,21 +54,38 @@ class CommunityNavigationFrame extends StatelessWidget {
   final bool visible;
   final String selectedDestination;
   final VoidCallback onHome, onFollowing, onMyProfile, onMessages, onSettings;
-  final VoidCallback? onOpenFiling;
+  final VoidCallback? onOpenFiling, onActivities;
   @override
   Widget build(BuildContext context) => CommunityNavigationScope(
     controller: controller,
-    child: CommunityProfileShell(
-      visible: visible,
-      selectedDestination: selectedDestination,
-      onHome: onHome,
-      onFollowing: onFollowing,
-      onMyProfile: onMyProfile,
-      onMessages: onMessages,
-      onSettings: onSettings,
-      onOpenFiling: onOpenFiling,
-      // Scope route BlockSemantics to the content so it cannot hide navigation.
-      child: Semantics(container: true, explicitChildNodes: true, child: child),
+    child: Column(
+      children: [
+        Expanded(
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            child: child,
+          ),
+        ),
+        if (visible)
+          CommunityBottomTabBar(
+            current: selectedDestination == 'settings'
+                ? 'profile'
+                : selectedDestination,
+            onChanged: (tab) {
+              switch (tab) {
+                case 'activities':
+                  onActivities?.call();
+                case 'messages':
+                  onMessages();
+                case 'profile':
+                  onMyProfile();
+                default:
+                  onHome();
+              }
+            },
+          ),
+      ],
     ),
   );
 }
@@ -164,6 +182,7 @@ bool communitySidebarVisible(Uri entry, String route) {
 String communitySidebarDestination(Uri entry, String route, {String? ownerId}) {
   final name = _effectiveRoute(entry, route);
   if (name == '/messages') return 'messages';
+  if (name == '/activities') return 'activities';
   if (_profileRoutes.contains(name)) return 'profile';
   final target =
       Uri.tryParse(name)?.queryParameters['profile'] ??
