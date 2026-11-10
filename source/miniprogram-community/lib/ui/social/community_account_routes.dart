@@ -216,6 +216,7 @@ class _WebAccountDestinationState extends State<_WebAccountDestination> {
         MaterialPageRoute(
           builder: (_) => WorkDetailPage(
             work: work,
+            personalView: work.userId == CommunityService().currentUserId,
             service: CommunityService(),
             onAuthorTap: () => Navigator.of(context).push<void>(
               MaterialPageRoute(
@@ -495,6 +496,7 @@ class _WebFavoritesAccountEntryState extends State<WebFavoritesAccountEntry> {
         MaterialPageRoute<void>(
           builder: (_) => WorkDetailPage(
             work: work,
+            personalView: work.userId == CommunityService().currentUserId,
             service: CommunityService(),
             onAuthorTap: () => Navigator.of(context).push<void>(
               MaterialPageRoute<void>(

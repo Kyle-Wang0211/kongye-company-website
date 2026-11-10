@@ -42,6 +42,7 @@ import 'comment_moderation_routes.dart';
 import 'user_report_page.dart';
 import 'viewer_impl.dart' show ViewerQuality;
 import '../shared/product_model_view.dart';
+import '../shared/model_download_placeholder.dart';
 import '../shared/community_viewer_session.dart';
 import '../shared/streaming_point_cloud_view.dart';
 
@@ -49,6 +50,7 @@ enum _CloudStatus { loading, shared, streaming, unsupported, failed }
 
 class WorkDetailPage extends StatefulWidget {
   final FeedWork work;
+  final bool personalView;
   final CommunityService service;
   final SocialProfileRepository? reportRepository;
   final ValueChanged<FeedWork>? onWorkUpdated;
@@ -73,6 +75,7 @@ class WorkDetailPage extends StatefulWidget {
   const WorkDetailPage({
     super.key,
     required this.work,
+    this.personalView = false,
     required this.service,
     this.reportRepository,
     this.onSignIn,
@@ -94,6 +97,7 @@ class WorkDetailPage extends StatefulWidget {
 
 class _WorkDetailPageState extends State<WorkDetailPage> {
   bool _commentsOpen = false;
+  final _commentSheetHeight = ValueNotifier<double>(0);
   double _commentSidebarWidth = 360;
   final _commentViewerPointerEvents = ValueNotifier<bool>(true);
   final _commentResizeFocus = FocusNode(
@@ -892,6 +896,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     _commentAuth?.cancel();
     unawaited(_setPicking(false));
     widget.service.lastLikeResult.removeListener(_onLikeResult);
+    _commentSheetHeight.dispose();
     super.dispose();
   }
 
@@ -973,16 +978,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     final l = AppL10n.of(context);
     switch (_status) {
       case _CloudStatus.loading:
-        return const Center(
-          child: SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white54,
-            ),
-          ),
-        );
+        return const ModelDownloadPlaceholder();
       case _CloudStatus.streaming:
         return StreamingPointCloudView(
           key: ValueKey('work-streaming-${widget.work.id}'),
@@ -1269,24 +1265,32 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
           onPressed: _leaveWork,
         ),
-        actions: [
-          WorkFavoriteEntry(workId: widget.work.id, onSignIn: _requestSignIn),
-          // Guideline 1.2 wants a report mechanism AND a way to block
-          // abusive users; Apple's UGC rejection letters additionally ask
-          // for a way for authors to immediately remove their own posts
-          // from the feed. All three tables have existed since April but
-          // had no client entry point — and this AppBar had no `actions:`
-          // at all, so there was nowhere to put one.
-          //
-          // The menu contents flip by ownership: reporting or blocking
-          // yourself is meaningless, and deleting someone else's work
-          // isn't yours to do.
-          IconButton(
-            icon: const Icon(Icons.more_horiz_rounded, color: Colors.white),
-            tooltip: AppL10n.of(context).workMoreActions,
-            onPressed: _showMoreActions,
-          ),
-        ],
+        actions: widget.personalView
+            ? const []
+            : [
+                WorkFavoriteEntry(
+                  workId: widget.work.id,
+                  onSignIn: _requestSignIn,
+                ),
+                // Guideline 1.2 wants a report mechanism AND a way to block
+                // abusive users; Apple's UGC rejection letters additionally ask
+                // for a way for authors to immediately remove their own posts
+                // from the feed. All three tables have existed since April but
+                // had no client entry point — and this AppBar had no `actions:`
+                // at all, so there was nowhere to put one.
+                //
+                // The menu contents flip by ownership: reporting or blocking
+                // yourself is meaningless, and deleting someone else's work
+                // isn't yours to do.
+                IconButton(
+                  icon: const Icon(
+                    Icons.more_horiz_rounded,
+                    color: Colors.white,
+                  ),
+                  tooltip: AppL10n.of(context).workMoreActions,
+                  onPressed: _showMoreActions,
+                ),
+              ],
         title: Text(
           widget.work.title,
           maxLines: 1,
@@ -1311,38 +1315,53 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                       : _viewerControls(viewport),
                 ),
               ),
-              ValueListenableBuilder<Set<String>>(
-                valueListenable: widget.service.pendingLikeWorkIds,
-                builder: (context, pending, _) => _MetaRow(
-                  viewsCount: _viewsCount,
-                  commentsCount: _commentsCount,
-                  likesCount: _likesCount,
-                  liked: _liked,
-                  likeBusy: _likeInFlight || pending.contains(widget.work.id),
-                  onLike: _beginToggleLike,
-                  author: currentAuthorName(
-                    context,
-                    widget.work.userId,
-                    widget.work.authorDisplayName,
-                  ),
-                  authorUserId: widget.work.userId,
-                  onAuthorTap:
-                      widget.onAuthorTap ??
-                      () => Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) => communityProfilePage(
-                            context,
-                            userId: widget.work.userId,
-                            seedWork: widget.work,
-                            communityService: widget.service,
-                            repository: widget.reportRepository,
+              Offstage(
+                offstage: _floatingCommentsVisible || widget.personalView,
+                child: ValueListenableBuilder<Set<String>>(
+                  valueListenable: widget.service.pendingLikeWorkIds,
+                  builder: (context, pending, _) => _MetaRow(
+                    viewsCount: _viewsCount,
+                    commentsCount: _commentsCount,
+                    likesCount: _likesCount,
+                    liked: _liked,
+                    likeBusy: _likeInFlight || pending.contains(widget.work.id),
+                    onLike: _beginToggleLike,
+                    author: currentAuthorName(
+                      context,
+                      widget.work.userId,
+                      widget.work.authorDisplayName,
+                    ),
+                    authorUserId: widget.work.userId,
+                    onAuthorTap:
+                        widget.onAuthorTap ??
+                        () => Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) => communityProfilePage(
+                              context,
+                              userId: widget.work.userId,
+                              seedWork: widget.work,
+                              communityService: widget.service,
+                              repository: widget.reportRepository,
+                            ),
                           ),
                         ),
-                      ),
-                  description: widget.work.description,
-                  onComments: _supportsSurfaceComments ? _showComments : null,
+                    description: widget.work.description,
+                    onComments: _supportsSurfaceComments ? _showComments : null,
+                  ),
                 ),
               ),
+              if (widget.personalView)
+                Container(
+                  color: Colors.black,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: const IconButton(
+                    tooltip: '已分享到社区',
+                    onPressed: null,
+                    disabledColor: Colors.white38,
+                    icon: Icon(Icons.ios_share_rounded, size: 26),
+                  ),
+                ),
             ],
           ),
         ),
@@ -1352,12 +1371,20 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         !_webCommentLayout || MediaQuery.sizeOf(context).width < 760;
     return Stack(
       children: [
-        scaffold,
+        ValueListenableBuilder<double>(
+          valueListenable: _commentSheetHeight,
+          child: scaffold,
+          builder: (context, height, child) => Padding(
+            padding: EdgeInsets.only(bottom: height),
+            child: child,
+          ),
+        ),
         if (mobileSheet && _commentsEverOpened && _supportsSurfaceComments)
           Positioned.fill(
             child: CommunityCommentsSheet(
               visible: _floatingCommentsVisible,
               onClose: _closeComments,
+              onHeightChanged: (height) => _commentSheetHeight.value = height,
               builder: (scrollController, expanded, toggleExpanded) =>
                   _commentPanel(
                     scrollController: scrollController,

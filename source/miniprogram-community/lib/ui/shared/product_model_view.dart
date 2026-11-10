@@ -10,9 +10,9 @@ import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 import 'local_work_viewer_session.dart';
 import 'community_viewer_session.dart';
 import 'model_content_identity.dart';
+import 'model_download_placeholder.dart';
 import 'browser_model_transport.dart';
 
-import '../community/skeleton_shimmer.dart';
 import '../../community/shared_viewer_model_path.dart';
 import '../../util/device_log.dart';
 import '../../l10n/app_localizations.dart';
@@ -196,27 +196,13 @@ class _ProductModelViewState extends State<ProductModelView>
   Future<void> _captureQueue = Future<void>.value();
   Object? _error;
   double? _downloadProgress;
+  double _lastKnownDownloadProgress = 0;
   int _receivedDownloadBytes = 0;
 
   void _setDownloadProgress(double? progress, {int? receivedBytes}) {
     _downloadProgress = progress;
+    if (progress != null) _lastKnownDownloadProgress = progress;
     if (receivedBytes != null) _receivedDownloadBytes = receivedBytes;
-  }
-
-  String get _downloadLabel {
-    final progress = _downloadProgress;
-    // A missing denominator cannot produce a meaningful percentage. Report
-    // observed body bytes while the ring remains indeterminate instead.
-    if (progress == null) {
-      final bytes = _receivedDownloadBytes;
-      if (bytes == 0) return '';
-      if (bytes >= 1000000) return '${(bytes / 1000000).toStringAsFixed(1)} MB';
-      if (bytes >= 1000) return '${(bytes / 1000).toStringAsFixed(1)} KB';
-      return '$bytes B';
-    }
-    // Download completion precedes renderer readiness; the overlay owns that
-    // later boundary and never claims 100% before leaving.
-    return '${(progress * 100).floor().clamp(0, 99)}%';
   }
 
   Timer? _captureTimer;
@@ -426,6 +412,7 @@ class _ProductModelViewState extends State<ProductModelView>
       }
       _epoch++;
       _downloadProgress = null;
+      _lastKnownDownloadProgress = 0;
       _receivedDownloadBytes = 0;
       _loadClock = Stopwatch()..start();
       _rotationArmed = false;
@@ -604,6 +591,7 @@ class _ProductModelViewState extends State<ProductModelView>
       _communityRecoveryUsed = true;
       _epoch++;
       _downloadProgress = null;
+      _lastKnownDownloadProgress = 0;
       _receivedDownloadBytes = 0;
       _hostReady = false;
       _loadedEpoch = -1;
@@ -1074,47 +1062,10 @@ class _ProductModelViewState extends State<ProductModelView>
       _error == null &&
       _notifiedEpoch != _epoch;
 
-  Widget _downloadOverlay() => ColoredBox(
+  Widget _downloadOverlay() => ModelDownloadPlaceholder(
     key: const ValueKey('product-model-download'),
-    color: widget.background,
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Builder(
-          builder: (context) => SkeletonBox(
-            animate:
-                !MediaQuery.disableAnimationsOf(context) &&
-                !MediaQuery.accessibleNavigationOf(context),
-          ),
-        ),
-        Center(
-          child: SizedBox.square(
-            dimension: 64,
-            child: Stack(
-              fit: StackFit.expand,
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: _downloadProgress,
-                  color: Colors.white,
-                  backgroundColor: Colors.white24,
-                  strokeWidth: 3,
-                ),
-                Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      _downloadLabel,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
+    progress: _downloadProgress,
+    lastProgress: _lastKnownDownloadProgress,
   );
 
   @override

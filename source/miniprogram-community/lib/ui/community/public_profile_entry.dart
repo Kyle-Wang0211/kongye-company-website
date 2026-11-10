@@ -128,6 +128,7 @@ class _PublicProfileEntryState extends State<PublicProfileEntry> {
       MaterialPageRoute(
         builder: (_) => WorkDetailPage(
           work: work,
+          personalView: work.userId == _service.currentUserId,
           service: _service,
           onSignIn: _signIn,
           onAuthorTap: () => Navigator.of(context).push<void>(
