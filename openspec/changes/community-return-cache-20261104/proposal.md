@@ -1,7 +1,0 @@
-# Community return and resource caching
-
-User requests 2026-11-04: homepage covers load independently of GLB; returning to a page retains nicknames and avatars; loading indicator pulses opacity in place, without translation. User explicitly excludes test/review rounds.
-
-Keep existing Supabase APIs, source PNG verification, author identities and layouts. Use standard browser HTTP caching with stable public cover URLs and ETag, ordinary bfcache restoration, and bounded same-tab presentation reuse. A focus/pageshow/visibility event within 60 seconds must not refetch the entire loaded feed; later background revalidation retains visible author/image DOM. Public-author presentation is reused for five minutes; signed-in header always checks the official current session, clears on signout/account switch, and deduplicates profile reads. Covers never request GLB. First visible covers load eagerly, later covers remain browser lazy images. No new image-processing or caching algorithm, dependency, account system, CDN purchase, or phone deployment.
-
-Official references: https://www.alibabacloud.com/help/en/oss/user-guide/manage-object-metadata-10 ; https://supabase.com/docs/guides/storage/production/scaling ; https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching ; https://developer.mozilla.org/en-US/docs/Glossary/bfcache . Aliyun self-hosted Storage does not automatically inherit Supabase managed Smart CDN.

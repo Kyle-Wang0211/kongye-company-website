@@ -1,1 +1,0 @@
-var e=`Suitability: not survey-grade unless validated against ground-truth control.`;export{e as t};

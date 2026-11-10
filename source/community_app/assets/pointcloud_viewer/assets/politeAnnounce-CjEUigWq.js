@@ -1,1 +1,0 @@
-function e(e,t=typeof document>`u`?void 0:document){if(!t||typeof t.querySelector!=`function`)return!1;let n=t.querySelector(`body > .olv-visually-hidden[role="status"]`)??t.querySelector(`.olv-visually-hidden[role="status"]`);return n?(n.textContent=``,n.textContent=e,!0):!1}export{e as t};

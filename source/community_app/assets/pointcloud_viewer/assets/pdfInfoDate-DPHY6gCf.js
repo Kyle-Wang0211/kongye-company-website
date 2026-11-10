@@ -1,1 +1,0 @@
-var e=new Date(0);function t(t){if(t instanceof Date)return Number.isFinite(t.getTime())?t:e;if(typeof t==`number`)return Number.isFinite(t)?new Date(t):e;if(typeof t==`string`&&t.trim()!==``){let e=new Date(t);if(Number.isFinite(e.getTime()))return e}return e}export{t};

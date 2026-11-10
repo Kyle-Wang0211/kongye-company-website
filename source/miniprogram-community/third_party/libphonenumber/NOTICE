@@ -1,4 +1,0 @@
-Phone country catalog and canonical mobile-format expressions derived by PocketWorld on 2026-11-02 from Google libphonenumber v9.0.42, commit 8d8d75272c351b60b87163db5328e439c53a6b56, resources/PhoneNumberMetadata.xml.
-Copyright (C) 2009 The Libphonenumber Authors. Licensed under the Apache License, Version 2.0; see LICENSE alongside this notice.
-Changes: mechanically extracted 245 geographic CLDR region identifiers, calling codes, mobile patterns and example numbers; excluded non-geographic region001; removed XML formatting whitespace from patterns and changed representation to Dart constants. Country display names use system country-name facts and common localized labels.
-No general national-number parser or national-prefix transformations are included. Canonical mobile format validation is not proof of number ownership, reachability or SMS availability. Country identifiers are CLDR regions, not a guarantee of exhaustive ISO-3166-1 coverage.

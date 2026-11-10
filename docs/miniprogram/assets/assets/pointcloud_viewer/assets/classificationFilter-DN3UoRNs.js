@@ -1,1 +1,0 @@
-var e=[3,4,5,6,7,18];function t(e){return e===7||e===18}function n(e,t){return e!=null&&e.length===t?e:void 0}function r(e){return!e||e<=0?``:`${e.toLocaleString(`en-US`)} noise points (classes 7, 18) excluded`}export{r as i,n,t as r,e as t};

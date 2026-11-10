@@ -1,1 +1,0 @@
-import{i as e}from"./lasSemantics-hybMTZU5.js";function t(e,t=!1){return e===`scientific-processing`?t?`preserve`:`exclude`:`preserve`}function n(e,n=!1){return t(e,n)===`exclude`}function r(t){return Number.isFinite(t)?e(t).withheld:!1}export{r as n,n as t};
