@@ -2,8 +2,8 @@
   "font_cache_identity": [
     {
       "original": "fonts/MaterialIcons-Regular.otf",
-      "asset": "fonts/MaterialIcons-Regular.7a88d4d8cb7d836b.otf",
-      "sha256": "7a88d4d8cb7d836b6a8113e6c350b4d79b1afcfe863882f56f89cc13882e21af"
+      "asset": "fonts/MaterialIcons-Regular.1e0763bb5cb1a279.otf",
+      "sha256": "1e0763bb5cb1a279e34d651cecfaa91e277d53cbe433f311e622eac6fd010971"
     },
     {
       "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
@@ -20,8 +20,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "a1741c0bbee2ad0dff94252ed05f71fb262cef360b8203fd8ab43d72adf65615",
-  "main_js_sha256": "b97a4045deb0c37dd96243161d0348925eac5ab0e14f46eb9cd00b0035518c57",
+  "main_js_sha256": "00c363f3757c24b598f6ee210cca46b7dd5e4ee57a5727dd32c5329fced7f94d",
   "status": "built-local-not-deployed",
-  "source_revision": "71b6d31c88e43bcd1b9937e252b5aeded2f5da66",
-  "source_manifest_sha256": "66e6be85259e090460af5da0f0a8e9fcc68777762d0183419cc69260273acb40"
+  "source_revision": "1f09374b7a58df0d2efca09e97d7cfee52e3d152",
+  "source_manifest_sha256": "b919c99d2ade71716e737ada7c414025ad6c2e2c8bacc6ec10ba524879898002"
 }
