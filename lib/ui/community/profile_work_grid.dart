@@ -74,7 +74,7 @@ class ProfileWorkGrid extends StatelessWidget {
     if (communityService == null) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => WorkDetailPage(work: work, service: communityService),
+        builder: (_) => WorkDetailPage(work: work, service: communityService, personalView: work.userId == communityService.currentUserId),
       ),
     );
   }

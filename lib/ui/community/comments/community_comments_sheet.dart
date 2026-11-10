@@ -14,11 +14,13 @@ class CommunityCommentsSheet extends StatefulWidget {
     required this.visible,
     required this.onClose,
     required this.builder,
+    required this.onHeightChanged,
   });
 
   final bool visible;
   final VoidCallback onClose;
   final CommunityCommentsSheetBuilder builder;
+  final ValueChanged<double> onHeightChanged;
 
   @override
   State<CommunityCommentsSheet> createState() => _CommunityCommentsSheetState();
@@ -37,10 +39,27 @@ class _CommunityCommentsSheetState extends State<CommunityCommentsSheet>
   final _sheet = DraggableScrollableController();
   bool _expanded = false;
   double _half = .5;
+  double _viewportHeight = 0;
+  bool _heightScheduled = false;
+
+  void _reportHeight() {
+    if (_heightScheduled) return;
+    _heightScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _heightScheduled = false;
+      if (!mounted) return;
+      final extent = _sheet.isAttached ? _sheet.size : _half;
+      final visibleHeight = (_viewportHeight * (extent - _slide.value.dy))
+          .clamp(0.0, _viewportHeight);
+      widget.onHeightChanged(visibleHeight);
+    });
+    WidgetsBinding.instance.scheduleFrame();
+  }
 
   @override
   void initState() {
     super.initState();
+    _slide.addListener(_reportHeight);
     if (widget.visible) _entrance.forward();
   }
 
@@ -108,6 +127,8 @@ class _CommunityCommentsSheetState extends State<CommunityCommentsSheet>
             bottom: media.viewInsets.bottom,
             child: LayoutBuilder(
               builder: (context, viewport) {
+                _viewportHeight = viewport.maxHeight;
+                _reportHeight();
                 _half = (media.size.height / 2 / viewport.maxHeight).clamp(
                   .5,
                   1,
@@ -116,6 +137,7 @@ class _CommunityCommentsSheetState extends State<CommunityCommentsSheet>
                   position: _slide,
                   child: NotificationListener<DraggableScrollableNotification>(
                     onNotification: (notification) {
+                      _reportHeight();
                       final expanded = notification.extent > (_half + 1) / 2;
                       if (expanded != _expanded) {
                         setState(() => _expanded = expanded);
