@@ -1,0 +1,118 @@
+{
+  "schema": "PW_GOOGLE_MODEL_FRAMING_ADAPTATION_V1",
+  "engine": {
+    "name": "three",
+    "version": "0.186.1",
+    "commit": "9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8",
+    "replacement": false
+  },
+  "upstream": {
+    "repository": "https://github.com/google/model-viewer",
+    "commit": "626f7498f3b8bf1130d0ca0c7b7bb756d6fb89ee",
+    "license": "Apache-2.0",
+    "license_file": "MODEL_FRAMING_LICENSE",
+    "license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "notice_file": "MODEL_FRAMING_NOTICE",
+    "root_notice": "Absent at pinned revision (HTTP 404)"
+  },
+  "sources": [
+    {
+      "path": "packages/model-viewer/src/three-components/ModelScene.ts",
+      "sha256": "f615551ce894a9dcd85fc43e4199f10bd82fa99c37f9714b301bd1a4544fd2e3",
+      "url": "https://github.com/google/model-viewer/blob/626f7498f3b8bf1130d0ca0c7b7bb756d6fb89ee/packages/model-viewer/src/three-components/ModelScene.ts",
+      "lines": {
+        "bounding_box_reducer": [
+          566,
+          575
+        ],
+        "updateFraming": [
+          605,
+          650
+        ],
+        "idealCameraDistance": [
+          657,
+          661
+        ],
+        "adjustedFoV": [
+          667,
+          671
+        ],
+        "external_renderer_framing_assignment": [
+          229,
+          234
+        ]
+      }
+    },
+    {
+      "path": "packages/model-viewer/src/features/controls.ts",
+      "sha256": "ff84452d6e20e56ac4142db0212f24bdc963aa29132d120526767eb8595123db",
+      "url": "https://github.com/google/model-viewer/blob/626f7498f3b8bf1130d0ca0c7b7bb756d6fb89ee/packages/model-viewer/src/features/controls.ts",
+      "lines": {
+        "getIdealAspect": [
+          450,
+          452
+        ]
+      },
+      "adaptation": "Expose computed value through existing getState bridge; no control replacement."
+    },
+    {
+      "path": "examples/jsm/utils/SceneUtils.js",
+      "sha256": "d2d1673d80cdb919232f8e22fd341f79ec5b6f1c8d7df3fe884ceb8c8fbedc07",
+      "url": "https://github.com/mrdoob/three.js/blob/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/examples/jsm/utils/SceneUtils.js",
+      "lines": {
+        "reduceVertices": [
+          169,
+          216
+        ]
+      },
+      "license": "MIT",
+      "license_file": "vendor/three/LICENSE",
+      "adaptation": "Exact function copied without changes; import Vector3 from already packaged Three.js."
+    },
+    {
+      "path": "packages/modelviewer.dev/data/docs.json",
+      "sha256": "51d178572717822359d1599104c73fd662fb8447b47c6adcad68d4266d181384",
+      "url": "https://github.com/google/model-viewer/blob/626f7498f3b8bf1130d0ca0c7b7bb756d6fb89ee/packages/modelviewer.dev/data/docs.json#L219",
+      "lines": {
+        "registerRenderer_external_FramingInfo_default": [
+          219,
+          219
+        ]
+      },
+      "support": "Official registerRenderer documentation defines framedRadius as bounding-sphere size and states fieldOfViewAspect 1.0 is a good default."
+    }
+  ],
+  "adaptations": [
+    "Synchronous one-root framing for existing static GLB/PLY/SKP preview; omit model-viewer reactive element update, target detach/reattach and multi-model loop wrappers.",
+    "Use visible world-space vertices and their bounding-box center; retain all radius, horizontal tangent, idealAspect, idealCameraDistance and adjustedFoV arithmetic.",
+    "No model-viewer baked-shadow discovery/visibility changes are applied because this host has no baked-shadow subsystem; supplied visible geometry is framed.",
+    "Return null for empty, nonfinite or degenerate framing; getState idealAspect is null when no valid current geometry exists.",
+    "Retain host initial orbit vector (1.8,1.2,1.8), five-percent distance margin, near/far limits and OrbitControls ownership.",
+    "Before controls start, resize changes adjusted camera FOV to keep geometry framed; after controls start, retain user FOV, zoom, target and position. Explicit reset opts back into automatic viewport framing.",
+    "Compute framing once per successful model replacement; viewport resize and camera orbit do not recompute geometry or idealAspect.",
+    "Rollback restores old FOV and leaves prior framing intact on render failure; preserve existing supersession, loader, resource disposal and bridge protocol.",
+    "Geometry-derived idealAspect remains model metadata for card layout. Camera FOV instead uses Google external FramingInfo documented default fieldOfViewAspect=1, retaining unchanged adjustedFoV arithmetic and radius-derived distance; both camera axes enclose the framing sphere before user interaction."
+  ],
+  "limits": [
+    "Static loaded pose only: existing host does not play GLTF animation or recompute framing for animated, morphed or edited geometry after load.",
+    "Three.js pinned reduceVertices behavior is retained, including its existing InstancedMesh/skinned-geometry traversal semantics; no alternative geometry algorithm is introduced.",
+    "This is an attributed host adaptation of selected official model-viewer framing functions, not a claim that the full model-viewer product is embedded."
+  ],
+  "reference_tests": {
+    "path": "../tests/model_framing_reference.mjs",
+    "method": "Execute frozen original methods after removing TypeScript annotations only; compare exact numbers against the adaptation with real packaged Three.js geometry.",
+    "excerpts_sha256": {
+      "modelSceneSource": "c97baf7d85121715c23172c0289024b081684d33f976f58cc7182169b0b8b70c",
+      "reduceVerticesSource": "515d1f2c12a404db3ed0f84691d5875c9f30eeaf1f630d03c16de54d63213f09"
+    }
+  },
+  "adaptation_sha256": "22bc2551b22d52cd0fef089ec5c644028c5ef4866e0da000357a8f04a855b41f",
+  "selected_product_configuration": {
+    "framedFoVDeg": 45,
+    "fieldOfViewAspect": 1,
+    "distance_margin": 1.05,
+    "layout_idealAspect": "Unchanged geometry-derived output of Google updateFraming, passed to card layout only.",
+    "camera_recipe": "Call unchanged Google adjustedFoV with documented external-FramingInfo fieldOfViewAspect=1 and radius-derived idealCameraDistance. This is a selected product configuration, not the full model-viewer runtime default.",
+    "reason": "The geometry-derived idealAspect can be below 1 for flat XZ geometry. Using it directly for camera FOV clipped a vertex at an automatic orbit in a portrait viewport (NDC x=1.0071282001524418). Spherical framing protects the retained host orbit and automatic camera rotations."
+  }
+}
