@@ -1,3 +1,4 @@
+import {bindActivityDetail} from './community-activities.mjs?v=activities-20261110';
 export const resortCategories = Object.freeze([
   {id:'all',label:'全部空间'},
   {id:'rooms',label:'客房'},
@@ -75,7 +76,7 @@ const annotationStyle = `
 .olv-anno-marker:hover .olv-anno-halo,.olv-anno-marker:focus .olv-anno-halo,.olv-anno-selected .olv-anno-halo{stroke:#fff;stroke-width:3}
 `;
 
-export function mountCommunityResort(config = resortConfig) {
+export function mountCommunityResort(config = resortConfig, detail = null) {
   validateResortConfig(config);
   const main = document.querySelector('main');
   const header = document.querySelector('header');
@@ -105,6 +106,7 @@ export function mountCommunityResort(config = resortConfig) {
     <section class="resort-stay" aria-labelledby="resort-stay-title"><div><p class="resort-kicker">从一晚好眠，到一整日闲适</p><h2 id="resort-stay-title">把日子，过慢一点。</h2></div><div class="resort-stay-grid"><article><span>住</span><h3>客房</h3><p>推窗见景，归来有处。先看看不同住处，在空间里感受休息的尺度。</p></article><article><span>抵</span><h3>前台</h3><p>从抵达开始熟悉山庄。接待、问询与出行信息，在这里找到方向。</p></article><article><span>食</span><h3>餐饮</h3><p>为一顿饭留些时间。从早餐到晚茶，发现停下来相聚的地方。</p></article><article><span>游</span><h3>娱乐</h3><p>散步、闲坐，或与朋友共度片刻。让一天的安排，多一点随心。</p></article></div></section>
     <footer class="resort-source"><div><p class="resort-kicker">关于这个样板</p><p>本页展示窗后城的三维空间导览方式。云栖山庄、设施分区及介绍均为概念设定，不代表真实度假村的设施、预订信息或已达成的合作。</p></div><div><p class="resort-kicker">场景资料</p><p data-resort-source></p><p class="resort-source-note">导览样板，采用羊角村公开扫描数据，设施与房号为演示配置。</p></div></footer>
     <dialog class="resort-dialog" aria-labelledby="resort-detail-title" aria-describedby="resort-detail-description"><button type="button" class="resort-dialog-close" aria-label="关闭空间介绍">×</button><p class="resort-kicker" data-resort-detail-category></p><h2 id="resort-detail-title"></h2><p id="resort-detail-description"></p><p class="resort-detail-note">云栖山庄 · 概念导览点位</p><button type="button" class="resort-dialog-done">继续探索</button></dialog>`;
+  if (detail) bindActivityDetail(main, detail, 'resort-20261110-v1');
   const source = main.querySelector('[data-resort-source]');
   source.textContent = [config.sourceLabel,config.sourceCredit,config.sourceLicense].filter(Boolean).join(' · ');
   if (config.sourcePage && /^https:\/\//i.test(config.sourcePage)) {
@@ -201,6 +203,8 @@ export function mountCommunityResort(config = resortConfig) {
   };
   window.addEventListener('message',onMessage);
   frame.addEventListener('load',connectViewer);
-  window.addEventListener('pagehide',()=>window.removeEventListener('message',onMessage),{once:true});
+  const dispose=()=>window.removeEventListener('message',onMessage);
+  main.activityUnmount=dispose;
+  window.addEventListener('pagehide',dispose,{once:true});
   main.querySelector('.resort-viewer-mount').append(frame);
 }

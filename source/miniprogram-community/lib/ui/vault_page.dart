@@ -35,6 +35,8 @@ class VaultPage extends StatefulWidget {
     this.isVisible = true,
     this.activities = const [],
     this.onActivityTap,
+    this.showEmptyTopicCard = true,
+    this.onActivityRefresh,
     this.viewerHostBuilderForTesting,
   });
 
@@ -42,6 +44,8 @@ class VaultPage extends StatefulWidget {
   final bool isVisible;
   final List<TopicActivity> activities;
   final ValueChanged<int>? onActivityTap;
+  final bool showEmptyTopicCard;
+  final Future<void> Function()? onActivityRefresh;
   // Forward the shared renderer's existing test seam.
   // ignore: invalid_use_of_visible_for_testing_member
   final ProductModelHostBuilder? viewerHostBuilderForTesting;
@@ -496,7 +500,10 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
       _resetFocus();
       _feed = next;
     });
-    await next;
+    await Future.wait([
+      next,
+      if (widget.onActivityRefresh != null) widget.onActivityRefresh!(),
+    ]);
   }
 
   // ignore: unused_element  —— [D2] 搜索代码按用户要求保留,只是不渲染。
@@ -667,7 +674,8 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
   /// 主题卡只在**没有作者过滤**时出现 —— 「本周精选」是策展,
   /// 在"只看某个人"的视图里没有意义。
   bool get _showTopicCard =>
-      (widget.activities.isNotEmpty || kShowCommunityTopicCard) &&
+      (widget.activities.isNotEmpty ||
+          (widget.showEmptyTopicCard && kShowCommunityTopicCard)) &&
       _authorFilterId == null;
 
   Widget _buildFeed() {
@@ -1242,7 +1250,9 @@ const double kTopicActivityAspect = 16 / 9;
 const Duration kTopicAutoPlayInterval = Duration(seconds: 5);
 
 class TopicActivity {
-  const TopicActivity({required this.title, required this.image});
+  const TopicActivity({this.id, required this.title, required this.image});
+
+  final String? id;
 
   final String title;
   final ImageProvider image;
@@ -1308,11 +1318,23 @@ class _TopicCardState extends State<TopicCard> {
     if (widget.autoPlay != old.autoPlay) _syncAutoPlay();
     final oldCount = old.activities.isEmpty ? 3 : old.activities.length;
     final modeChanged = old.activities.isEmpty != widget.activities.isEmpty;
-    if (oldCount != _slideCount || modeChanged) {
-      _page = modeChanged ? 0 : _page.clamp(0, _slideCount - 1);
+    final selectedId = old.activities.isEmpty
+        ? null
+        : old.activities[_page.clamp(0, old.activities.length - 1)].id;
+    final retainedIndex = selectedId == null
+        ? -1
+        : widget.activities.indexWhere((entry) => entry.id == selectedId);
+    var nextPage = _page.clamp(0, _slideCount - 1);
+    if (modeChanged || (selectedId != null && retainedIndex < 0)) {
+      nextPage = 0;
+    } else if (retainedIndex >= 0) {
+      nextPage = retainedIndex;
+    }
+    if (oldCount != _slideCount || modeChanged || nextPage != _page) {
+      _page = nextPage;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !_pc.hasClients) return;
-        _pc.jumpToPage(_slideCount > 1 ? _page + 1 : 0);
+        _pc.jumpToPage(_slideCount > 1 ? nextPage + 1 : 0);
       });
     }
   }

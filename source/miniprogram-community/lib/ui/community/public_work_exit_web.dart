@@ -43,3 +43,10 @@ void openCommunityFollowing() =>
     _assignLocation(Uri.base.resolve('../?panel=following').toString().toJS);
 void openCommunityFiling() =>
     _assignLocation('https://beian.miit.gov.cn/'.toJS);
+
+void openCommunityActivitySlug(String slug) {
+  final destination = Uri.base
+      .resolve('/screen.html')
+      .replace(queryParameters: {'activity': slug, 'mini': '1'});
+  _assignLocation(destination.toString().toJS);
+}

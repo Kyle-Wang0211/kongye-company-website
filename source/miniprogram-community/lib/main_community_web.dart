@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/vault_page.dart';
+import 'ui/community/activity_feed.dart';
 import 'ui/community/public_work_opening.dart';
 import 'ui/community/public_profile_entry.dart';
 import 'ui/community/community_navigation_frame.dart';
@@ -385,28 +386,20 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
   );
 }
 
-Widget _mobileCommunityFeed() => VaultPage(
-  activities: const [
-    TopicActivity(
-      title: '瓷影｜器物与日常',
-      image: NetworkImage(
-        'https://kongye.space/assets/events/porcelain-ink.png',
-      ),
-    ),
-    TopicActivity(
-      title: '云栖山庄',
-      image: NetworkImage(
-        'https://kongye.space/assets/events/landscape-ink.png',
-      ),
-    ),
-    TopicActivity(
-      title: '水墨庭院',
-      image: NetworkImage(
-        'https://kongye.space/assets/events/courtyard-ink.png',
-      ),
-    ),
-  ],
-  onActivityTap: (index) => openCommunityActivity(index + 1),
+Widget _mobileCommunityFeed() => ActivityFeed(
+  builder: (context, entries, refresh) => VaultPage(
+    showEmptyTopicCard: false,
+    onActivityRefresh: refresh,
+    activities: [
+      for (final entry in entries)
+        TopicActivity(
+          id: entry.id,
+          title: entry.title,
+          image: NetworkImage(entry.coverUrl),
+        ),
+    ],
+    onActivityTap: (index) => openCommunityActivitySlug(entries[index].slug),
+  ),
 );
 
 /// The website owns the homepage. This blank route is only a return target

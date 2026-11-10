@@ -1,17 +1,4 @@
 {
-  "entrypoint": "lib/main_community_web.dart",
-  "base_href": "/miniprogram/",
-  "source_revision": "9994a5d4c4ae30d8ae077afdd98f04d55f79fbf9",
-  "source_manifest_sha256": "ecf0b060d8e96e7d2bc72e44ef730a838484ba4b6c2649187838a0c4dcace340",
-  "viewer_bundle_sha256": "a1741c0bbee2ad0dff94252ed05f71fb262cef360b8203fd8ab43d72adf65615",
-  "main_js_sha256": "183bd53df0308ed01986df3ab68ef56d7c0a24b48c373c329fb694f2b18e6ca3",
-  "native_email_ready_define": true,
-  "status": "built-local-not-deployed",
-  "capabilities": {
-    "PW_COMMUNITY_FAVORITES_ENABLED": "true",
-    "PW_COMMUNITY_MESSAGING_READY": "true",
-    "PW_COMMUNITY_PROFILES_ENABLED": "true"
-  },
   "font_cache_identity": [
     {
       "original": "fonts/MaterialIcons-Regular.otf",
@@ -23,5 +10,18 @@
       "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
       "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
     }
-  ]
+  ],
+  "entrypoint": "lib/main_community_web.dart",
+  "base_href": "/miniprogram/",
+  "native_entrypoint": "lib/main.dart",
+  "capabilities": {
+    "PW_COMMUNITY_FAVORITES_ENABLED": "true",
+    "PW_COMMUNITY_MESSAGING_READY": "true",
+    "PW_COMMUNITY_PROFILES_ENABLED": "true"
+  },
+  "viewer_bundle_sha256": "a1741c0bbee2ad0dff94252ed05f71fb262cef360b8203fd8ab43d72adf65615",
+  "main_js_sha256": "023bdec331f8530c75badd47dd4b0158df0fdd3e1ffa7d25bd2b83347a5ba2f4",
+  "status": "built-local-not-deployed",
+  "source_revision": "feec6c5469dab8db78896d4735a909b14eb2a964",
+  "source_manifest_sha256": "681fc300b7a5767224d7a1abfcb8470df8d6661534b6140b9314cb4fb4899334"
 }

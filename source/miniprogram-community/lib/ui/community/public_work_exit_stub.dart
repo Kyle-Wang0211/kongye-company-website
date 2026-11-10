@@ -8,3 +8,5 @@ void openCommunityActivity(int screen) {}
 void openCommunitySettings() {}
 void openCommunityFollowing() {}
 void openCommunityFiling() {}
+
+void openCommunityActivitySlug(String slug) {}

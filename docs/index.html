@@ -8,16 +8,16 @@
   <title data-i18n="siteTitle">窗后城 — 让空间，留在身边。</title>
   <link rel="preconnect" href="https://api.kongye.space" crossorigin>
   <link rel="canonical" href="https://kongye.space/">
-  <link rel="stylesheet" href="styles.css?v=monochrome-20261106-v46">
+  <link rel="stylesheet" href="styles.css?v=mini-loading-standard-20261110-r1">
   <link rel="stylesheet" href="community-shell.css?v=account-library-20261106-v44">
   <link rel="stylesheet" href="community-screens.css?v=resort-guide-20261106-v45">
   <link rel="stylesheet" href="community-account-menu.css?v=account-library-20261106-v44">
-  <script src="community-screens.mjs?v=account-library-20261106-v44" type="module"></script>
+  <script src="community-screens.mjs?v=activities-20261110" type="module"></script>
   <script defer src="vendor/supabase/supabase-2.112.0.js"></script>
   <script src="community-settings.mjs?v=sidebar-parity-20261109-v1" type="module"></script>
   <script src="community-account.mjs?v=account-restore-20261109-v2" type="module"></script>
   <script src="community-following.mjs?v=sidebar-parity-20261109-v1" type="module"></script>
-  <script src="community-feed.js?v=profile-tabs-single-session-20261109-v3" type="module"></script>
+  <script src="community-feed.js?v=mini-loading-standard-20261110-r1" type="module"></script>
 </head>
 <body class="community-shell">
   <a class="skip" href="#main" data-i18n="siteSkip">跳至正文</a>
@@ -50,14 +50,8 @@
     <div class="community-screen-overflow">
     <section id="top" class="community-screen-section wrap" aria-label="精选屏幕" data-i18n-aria="siteScreenStage">
       <div class="community-screen-stage">
-        <a class="community-feature-screen community-screen-event" data-position="left" href="screen.html?screen=1" aria-label="瓷影 · 古瓷文物展"><img src="assets/events/porcelain-ink.png" width="1536" height="1024" alt="瓷影 · 古瓷文物展，水墨瓷器与庭院"></a>
-        <a class="community-feature-screen community-screen-event" data-position="center" href="screen.html?screen=2" aria-label="屏幕 2 · 水墨山水"><img src="assets/events/landscape-ink.png" width="1536" height="1024" alt="水墨山水"></a>
-        <a class="community-feature-screen community-screen-event" data-position="right" href="screen.html?screen=3" aria-label="屏幕 3 · 水墨庭院"><img src="assets/events/courtyard-ink.png" width="1536" height="1024" alt="水墨庭院"></a>
       </div>
       <nav class="community-screen-switcher" aria-label="切换屏幕" data-i18n-aria="siteScreenSelection">
-        <button class="community-screen-choice" type="button" aria-label="屏幕 01" aria-pressed="false"><span class="community-screen-dot" aria-hidden="true"></span></button>
-        <button class="community-screen-choice" type="button" aria-label="屏幕 02" aria-pressed="true"><span class="community-screen-dot" aria-hidden="true"></span></button>
-        <button class="community-screen-choice" type="button" aria-label="屏幕 03" aria-pressed="false"><span class="community-screen-dot" aria-hidden="true"></span></button>
       </nav>
     </section>
     </div>

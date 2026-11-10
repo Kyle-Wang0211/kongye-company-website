@@ -1,7 +1,8 @@
+import {bindActivityDetail} from './community-activities.mjs?v=activities-20261110';
 const registrationIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3v4m8-4v4M4 10h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="m9 15 2 2 4-4"/></svg>';
 const arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
 
-export function mountCeramicEvent() {
+export function mountCeramicEvent(detail = null) {
   const main = document.querySelector('main');
   const header = document.querySelector('header');
   if (!main || !header || main.dataset.ceramicEvent === 'mounted') return;
@@ -29,6 +30,7 @@ export function mountCeramicEvent() {
     <section class="event-section event-partners" aria-labelledby="event-partners-title"><div class="event-section-index">05 / 让相聚发生</div><h2 id="event-partners-title">联合出品 · 策划席位</h2><p class="event-fine">窗后城发起；其余名称仅为视觉占位，不代表已确认合作或品牌背书。</p><div class="event-partner-grid"><div class="event-partner"><div class="event-partner-mark event-partner-brand"><img src="assets/app-icon.png" width="34" height="34" alt="">窗后城</div><span>活动发起</span></div><div class="event-partner"><div class="event-partner-mark event-mark-seal">观器</div><span>拟邀占位 · 未确认</span></div><div class="event-partner"><div class="event-partner-mark event-mark-serif">青白</div><span>拟邀占位 · 未确认</span></div><div class="event-partner"><div class="event-partner-mark event-mark-spaced">南山</div><span>拟邀占位 · 未确认</span></div></div></section>
     <div class="event-closing"><p>在城市里，为器物留一个下午。</p><button class="event-text-button" type="button" data-event-register>留下报名意向 ${arrow}</button><span>深圳 · 2026 秋</span></div>
     <dialog class="event-dialog" aria-labelledby="event-dialog-title" aria-describedby="event-dialog-description"><button class="event-dialog-close" type="button" aria-label="关闭报名意向窗口">×</button><p class="event-kicker">期待与您相见</p><h2 id="event-dialog-title">留下报名意向</h2><p id="event-dialog-description">活动尚在筹划。填写后点击下方按钮将打开您的邮箱，由您确认并发送邮件；本页面不提交或保存个人资料，也不会生成报名成功记录。</p><form class="event-form"><label>怎么称呼您 <span>选填</span><input name="name" autocomplete="name" maxlength="80" placeholder="您的名字"></label><label>意向人数<select name="people"><option value="1">1 位</option><option value="2">2 位</option><option value="3">3 位</option><option value="4">4 位</option></select></label><label>联系邮箱 <span>选填</span><input name="email" type="email" autocomplete="email" maxlength="254" placeholder="方便后续联系的邮箱"></label><p class="event-fine">意向接收：kaidong@kongye.space<br>发送邮件不等于报名确认，具体安排将另行沟通。若未配置邮箱应用，可自行发送至以上地址。</p><a class="event-send" href="mailto:kaidong@kongye.space">打开邮箱发送意向 ${arrow}</a><p class="event-mail-status" role="status"></p></form></dialog>`;
+  if (detail) bindActivityDetail(main, detail, 'ceramic-20261110-v1');
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'event-header-register';

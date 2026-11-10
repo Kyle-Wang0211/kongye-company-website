@@ -38,6 +38,6 @@ test('resort reuses native annotations with model XYZ and selection callbacks',(
 test('screen two mounts the resort while retaining the ceramic event entry',async()=>{
  const source = await readFile(new URL('../docs/screen-page.mjs',import.meta.url),'utf8');
  assert.match(source,/mountCeramicEvent/);
- assert.match(source,/index===1/);
+ assert.match(source,/content\.template_key\s*===\s*'resort'/);
  assert.match(source,/mountCommunityResort/);
 });
