@@ -28,3 +28,23 @@ test('selected screen remains a solid enlarged dot', () => {
   assert.equal(selected.transform, 'scale(1.25)');
   assert.equal(declarations('.community-screen-dot')['border-radius'], '50%');
 });
+
+test('activity cover frames use 16:9 on desktop and compact screens', () => {
+  const desktop = declarations('.community-feature-screen');
+  assert.equal(desktop['aspect-ratio'], '16/9');
+  const compactRules = css.match(/@media\(max-width:600px\)\{([^\n]+)\n/)[1];
+  const compactFrame = compactRules.match(/\.community-feature-screen\{([^}]+)\}/)[1];
+  assert.match(compactFrame, /aspect-ratio:16\/9(?:;|$)/);
+  const desktopHeight = Number(declarations('.community-screen-stage')['aspect-ratio'].split('/')[1]);
+  const compactHeight = Number(compactRules.match(/aspect-ratio:100\/([\d.]+)/)[1]);
+  assert.ok(Math.abs(desktopHeight - parseFloat(desktop.width) * 9 / 16) < 0.00001);
+  assert.ok(Math.abs(compactHeight - 58.67896 * 9 / 16) < 0.00001);
+});
+
+test('shared activity artwork fills frame width and aligns to its top', () => {
+  const image = declarations('.community-screen-event>img');
+  assert.equal(image.width, '100%');
+  assert.equal(image.height, '100%');
+  assert.equal(image['object-fit'], 'cover');
+  assert.equal(image['object-position'], 'center top');
+});

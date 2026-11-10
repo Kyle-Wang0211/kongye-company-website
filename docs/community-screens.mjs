@@ -56,8 +56,8 @@ async function refresh() {
       const image = document.createElement('img');
       image.src = row.content.cover_url;
       image.alt = row.content.title;
-      image.width = 1536;
-      image.height = 1024;
+      image.width = 1600;
+      image.height = 900;
       link.append(image);
       stage.append(link);
       const button = document.createElement('button');
