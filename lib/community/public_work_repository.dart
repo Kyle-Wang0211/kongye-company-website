@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/endpoint_config.dart';
 import 'feed_models.dart';
 
 String? publicWorkId(Uri location) {
@@ -15,12 +16,101 @@ String? publicWorkId(Uri location) {
 class PublicWorkRepository {
   PublicWorkRepository(this.client);
   final SupabaseClient client;
+  // Keep the established API authoritative for callers that toggle likes.
   Future<FeedWork> fetch(String id) async {
+    final session = client.auth.currentSession;
+    final viewerId = client.auth.currentUser?.id;
+    var work = await _readWork(client.rest, id);
+    final enrichment = await Future.wait<FeedWork>([
+      _readAuthor(client.rest, work).catchError((_) => work),
+      fetchLike(work),
+    ]);
+    work = enrichment[0];
+    final liked = enrichment[1];
+    if (!identical(client.auth.currentSession, session) ||
+        client.auth.currentUser?.id != viewerId) {
+      throw StateError('Public work account changed during load');
+    }
+    return work.copyWith(likedByMe: liked.likedByMe, likeStateKnown: true);
+  }
+
+  PostgrestClient _publicClient() {
+    final config = EndpointConfigResolver.current;
+    // Bind the anonymous key to this client's actual regional endpoint.
+    if (config == null ||
+        client.rest.url != '${config.supabaseUrl}/rest/v1' ||
+        !config.deployment.acceptsApi(
+          config.supabaseUrl,
+          config.supabaseAnonKey,
+        )) {
+      throw StateError('Public work endpoint unavailable');
+    }
+    return PostgrestClient(
+      client.rest.url,
+      headers: {
+        'apikey': config.supabaseAnonKey,
+        'Authorization': 'Bearer ${config.supabaseAnonKey}',
+      },
+    );
+  }
+
+  /// The shared route reads public content without waiting for personal auth.
+  Future<FeedWork> fetchPublic(String id) async {
+    final rest = _publicClient();
+    try {
+      return await _readWork(rest, id);
+    } finally {
+      await rest.dispose();
+    }
+  }
+
+  Future<FeedWork> fetchAuthor(FeedWork work) async {
+    final rest = _publicClient();
+    try {
+      return await _readAuthor(rest, work);
+    } finally {
+      await rest.dispose();
+    }
+  }
+
+  Future<FeedWork> _readAuthor(PostgrestClient rest, FeedWork work) async {
+    final profile = await rest
+        .from('community_author_profiles')
+        .select('id,display_name,avatar_url,handle')
+        .eq('id', work.userId)
+        .maybeSingle()
+        .timeout(const Duration(seconds: 15));
+    return work.copyWith(
+      authorDisplayName: profile?['display_name'] as String?,
+      authorAvatarUrl: profile?['avatar_url'] as String?,
+      authorHandle: profile?['handle'] as String?,
+    );
+  }
+
+  Future<FeedWork> fetchLike(FeedWork work) async {
+    final session = client.auth.currentSession;
+    final viewerId = client.auth.currentUser?.id;
+    final row = viewerId == null
+        ? null
+        : await client
+              .from('work_likes')
+              .select('work_id')
+              .eq('user_id', viewerId)
+              .eq('work_id', work.id)
+              .maybeSingle()
+              .timeout(const Duration(seconds: 15));
+    if (!identical(client.auth.currentSession, session) ||
+        client.auth.currentUser?.id != viewerId) {
+      throw StateError('Public work account changed during load');
+    }
+    return work.copyWith(likedByMe: row != null, likeStateKnown: true);
+  }
+
+  Future<FeedWork> _readWork(PostgrestClient rest, String id) async {
     if (publicWorkId(Uri(queryParameters: {'work': id})) == null) {
       throw const FormatException('作品链接无效');
     }
-    final viewerId = client.auth.currentUser?.id;
-    final row = await client
+    final row = await rest
         .from('works')
         .select(
           'id,user_id,title,description,format,model_storage_path,thumbnail_storage_path,initial_view,file_size_bytes,likes_count,comments_count,views_count,published_at,publish_region',
@@ -33,48 +123,6 @@ class PublicWorkRepository {
         .maybeSingle()
         .timeout(const Duration(seconds: 15));
     if (row == null) throw StateError('分享的作品暂不可访问，可能已取消公开。');
-    Future<Map<String, dynamic>?> readLike(String userId) => client
-        .from('work_likes')
-        .select('work_id')
-        .eq('user_id', userId)
-        .eq('work_id', id)
-        .maybeSingle()
-        .timeout(const Duration(seconds: 15));
-
-    Object? likeError;
-    StackTrace? likeStack;
-    final likeFuture =
-        viewerId != null && client.auth.currentUser?.id == viewerId
-        ? readLike(viewerId).then<Map<String, dynamic>?>(
-            (value) => value,
-            onError: (Object error, StackTrace stack) {
-              // Preserve profile/auth error priority while this read overlaps.
-              likeError = error;
-              likeStack = stack;
-              return null;
-            },
-          )
-        : null;
-    final profile = await client
-        .from('community_author_profiles')
-        .select('id,display_name,avatar_url,handle')
-        .eq('id', row['user_id'])
-        .maybeSingle()
-        .timeout(const Duration(seconds: 15));
-    if (client.auth.currentUser?.id != viewerId) {
-      throw StateError('Public work account changed during load');
-    }
-    var likedByMe = false;
-    if (viewerId != null) {
-      final like = await (likeFuture ?? readLike(viewerId));
-      if (likeError != null) {
-        Error.throwWithStackTrace(likeError!, likeStack!);
-      }
-      if (client.auth.currentUser?.id != viewerId) {
-        throw StateError('Public work account changed during load');
-      }
-      likedByMe = like != null;
-    }
     return FeedWork(
       id: row['id'] as String,
       userId: row['user_id'] as String,
@@ -87,14 +135,15 @@ class PublicWorkRepository {
           : null,
       thumbnailStoragePath: row['thumbnail_storage_path'] as String?,
       fileSizeBytes: (row['file_size_bytes'] as num?)?.toInt(),
-      likedByMe: likedByMe,
+      likedByMe: false,
+      likeStateKnown: false,
       likesCount: (row['likes_count'] as num?)?.toInt() ?? 0,
       commentCount: (row['comments_count'] as num?)?.toInt() ?? 0,
       viewsCount: (row['views_count'] as num?)?.toInt() ?? 0,
       publishedAt: DateTime.parse(row['published_at'] as String),
-      authorDisplayName: profile?['display_name'] as String? ?? 'unknown',
-      authorAvatarUrl: profile?['avatar_url'] as String?,
-      authorHandle: profile?['handle'] as String?,
+      authorDisplayName: '',
+      authorAvatarUrl: null,
+      authorHandle: null,
       publishRegion: row['publish_region'] as String?,
     );
   }

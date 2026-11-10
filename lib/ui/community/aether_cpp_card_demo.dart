@@ -17,6 +17,7 @@ class AetherCppCardDemo extends StatelessWidget {
     super.key,
     required this.modelUrl,
     this.modelSizeBytes,
+    this.requireModelContentIdentity,
     this.isFocused = false,
     this.interactive = false,
     this.pointerEventsEnabled = true,
@@ -47,6 +48,7 @@ class AetherCppCardDemo extends StatelessWidget {
 
   final String modelUrl;
   final int? modelSizeBytes;
+  final bool? requireModelContentIdentity;
   final Map<String, dynamic>? initialView;
   final LocalWorkViewerBinding? localWork;
   final String? communitySessionKey;
@@ -80,6 +82,7 @@ class AetherCppCardDemo extends StatelessWidget {
   Widget build(BuildContext context) => ProductModelView(
     modelUrl: modelUrl,
     modelSizeBytes: modelSizeBytes,
+    requireModelContentIdentity: requireModelContentIdentity,
     initialView: initialView,
     localWork: localWork,
     communitySessionKey: communitySessionKey,

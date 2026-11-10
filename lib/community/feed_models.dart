@@ -65,6 +65,9 @@ class FeedWork {
   // network roundtrip. Defaults to false when the user is signed out.
   final bool likedByMe;
 
+  /// False while a public route has not resolved the current viewer's like.
+  final bool likeStateKnown;
+
   const FeedWork({
     required this.id,
     required this.userId,
@@ -79,6 +82,7 @@ class FeedWork {
     required this.authorDisplayName,
     required this.authorAvatarUrl,
     required this.likedByMe,
+    this.likeStateKnown = true,
     this.commentCount = 0,
     this.initialView,
     this.fileSizeBytes,
@@ -114,6 +118,10 @@ class FeedWork {
     int? commentCount,
     int? viewsCount,
     bool? likedByMe,
+    bool? likeStateKnown,
+    String? authorDisplayName,
+    String? authorAvatarUrl,
+    String? authorHandle,
   }) {
     return FeedWork(
       id: id,
@@ -128,11 +136,12 @@ class FeedWork {
       commentCount: commentCount ?? this.commentCount,
       viewsCount: viewsCount ?? this.viewsCount,
       publishedAt: publishedAt,
-      authorDisplayName: authorDisplayName,
-      authorAvatarUrl: authorAvatarUrl,
+      authorDisplayName: authorDisplayName ?? this.authorDisplayName,
+      authorAvatarUrl: authorAvatarUrl ?? this.authorAvatarUrl,
       likedByMe: likedByMe ?? this.likedByMe,
+      likeStateKnown: likeStateKnown ?? this.likeStateKnown,
       fileSizeBytes: fileSizeBytes,
-      authorHandle: authorHandle,
+      authorHandle: authorHandle ?? this.authorHandle,
       publishRegion: publishRegion,
     );
   }

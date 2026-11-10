@@ -69,6 +69,7 @@ class ProductModelView extends StatefulWidget {
     super.key,
     required this.modelUrl,
     this.modelSizeBytes,
+    this.requireModelContentIdentity,
     this.initialView,
     this.interactive = false,
     this.concealRenderSource = false,
@@ -108,6 +109,11 @@ class ProductModelView extends StatefulWidget {
 
   /// Published model size when the browser response omits Content-Length.
   final int? modelSizeBytes;
+
+  /// Hash the bytes supplied to the renderer when the consumer needs a stable
+  /// asset identity, such as for surface comments. On web this uses the bounded
+  /// byte transport. Null preserves the legacy onSurfacePicked-based policy.
+  final bool? requireModelContentIdentity;
   final Map<String, dynamic>? initialView;
   final bool interactive;
 
@@ -147,6 +153,9 @@ class _ProductModelViewState extends State<ProductModelView>
     with WidgetsBindingObserver {
   static const _captureInterval = Duration(milliseconds: 42); // <= 24 fps.
   late SharedViewerController _controller;
+  bool get _requiresModelContentIdentity =>
+      widget.requireModelContentIdentity ?? widget.onSurfacePicked != null;
+
   LocalWorkViewerLease? _localLease;
   CommunityViewerLease? _communityLease;
   int? _communityGeneration;
@@ -460,7 +469,9 @@ class _ProductModelViewState extends State<ProductModelView>
         !identical(oldWidget.localWorkSessions, widget.localWorkSessions) ||
         oldWidget.resolveLocalPath != widget.resolveLocalPath ||
         oldWidget.hostBuilder != widget.hostBuilder ||
-        (oldWidget.onSurfacePicked == null) != (widget.onSurfacePicked == null);
+        (oldWidget.requireModelContentIdentity ??
+                oldWidget.onSurfacePicked != null) !=
+            _requiresModelContentIdentity;
     if (_hostReady &&
         (!(widget.webActivityUpdatesForTesting ?? kIsWeb) || activityChanged)) {
       _updateActivity();
@@ -486,9 +497,12 @@ class _ProductModelViewState extends State<ProductModelView>
       if (!_disposed &&
           mounted &&
           _active &&
-          widget.onSurfacePicked == null &&
+          !_requiresModelContentIdentity &&
           _loadingEpoch == _epoch) {
-        final total = _controller.downloadTotalBytes;
+        final publishedSize = widget.modelSizeBytes;
+        final total =
+            _controller.downloadTotalBytes ??
+            (publishedSize != null && publishedSize > 0 ? publishedSize : null);
         setState(
           () => _setDownloadProgress(
             total == null
@@ -629,6 +643,68 @@ class _ProductModelViewState extends State<ProductModelView>
     debugPrint('[ProductModelView] $error');
   }
 
+  bool get _canRetryModel => kIsWeb && widget.interactive;
+
+  void _retryModel() {
+    if (_disposed || !mounted || !_canRetryModel || _error == null) return;
+    // Invalidate downloads, host callbacks and pending lease acquisition before
+    // releasing the failed model. The surrounding detail page stays mounted.
+    _epoch++;
+    _preparation++;
+    _cancelCapture();
+    _removeOwnerRevocation?.call();
+    _removeOwnerRevocation = null;
+    _releaseController();
+    final frame = _frame;
+    setState(() {
+      _hostReady = false;
+      _loadedEpoch = -1;
+      _loadingEpoch = null;
+      _initialViewAttemptedEpoch = -1;
+      _notifiedEpoch = -1;
+      _notifiedAspectEpoch = -1;
+      _frame = null;
+      _frameEpoch = -1;
+      _frameLayoutRevision = -1;
+      _modelContentHash = null;
+      _downloadProgress = null;
+      _lastKnownDownloadProgress = 0;
+      _receivedDownloadBytes = 0;
+      _lastDownloadProgressRevision = 0;
+      _rotationArmed = false;
+      _userTookControl = false;
+      _rotationConfigurationEpoch = -1;
+      _loadClock = Stopwatch()..start();
+      _error = null;
+    });
+    if (frame != null) unawaited(frame.evict());
+    _prepareController();
+  }
+
+  Widget _modelFailure() {
+    const icon = Icon(
+      Icons.error_outline_rounded,
+      color: Colors.grey,
+      size: 32,
+    );
+    if (!_canRetryModel) return const Center(child: icon);
+    return ColoredBox(
+      color: widget.background,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            TextButton(
+              onPressed: _retryModel,
+              child: Text(AppL10n.of(context).commentReload),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _updateActivity() {
     if (!_hostReady || _disposed) return;
     _cancelCapture();
@@ -703,7 +779,16 @@ class _ProductModelViewState extends State<ProductModelView>
           'ProductModelView.load',
         );
       }
-      final format = switch (uri.path.toLowerCase()) {
+      var modelPath = uri.path;
+      if (uri.scheme == 'https' &&
+          uri.host.isNotEmpty &&
+          uri.path == '/functions/v1/publication-model') {
+        final sourcePaths = uri.queryParametersAll['path'];
+        if (sourcePaths != null && sourcePaths.length == 1) {
+          modelPath = sourcePaths.single;
+        }
+      }
+      final format = switch (modelPath.toLowerCase()) {
         final path when path.endsWith('.ply') => SharedModelFormat.ply,
         final path when path.endsWith('.skp') => SharedModelFormat.skp,
         _ => SharedModelFormat.glb,
@@ -727,7 +812,7 @@ class _ProductModelViewState extends State<ProductModelView>
         final controller = community.controller;
         final resolver =
             widget.resolveLocalPath ?? resolveSharedViewerModelPath;
-        final needsIdentity = widget.onSurfacePicked != null;
+        final needsIdentity = _requiresModelContentIdentity;
         String? verifiedIdentity;
         await community.ensureLoaded(() async {
           final path = uri.scheme.isEmpty
@@ -756,7 +841,7 @@ class _ProductModelViewState extends State<ProductModelView>
         _logLoadPhase('renderer_load', source: 'retained_local');
       } else if (kIsWeb || widget.browserModelClient != null) {
         _logLoadPhase('renderer_load', source: 'browser');
-        if (widget.onSurfacePicked == null) {
+        if (!_requiresModelContentIdentity) {
           setState(() => _setDownloadProgress(null));
           await _controller.load(url: uri, format: format);
         } else {
@@ -811,11 +896,9 @@ class _ProductModelViewState extends State<ProductModelView>
                 url,
               );
         if (_disposed || epoch != _epoch || !_active) return;
-        // Only surface-comment consumers request content identity. Other model
-        // viewers keep their existing load path and cost.
-        final identity = widget.onSurfacePicked == null
-            ? null
-            : await modelFileSha256(path);
+        final identity = _requiresModelContentIdentity
+            ? await modelFileSha256(path)
+            : null;
         if (_disposed || epoch != _epoch || !_active) return;
         _logLoadPhase(
           'renderer_load',
@@ -1135,13 +1218,7 @@ class _ProductModelViewState extends State<ProductModelView>
             ? (_showDownloadProgress
                   ? _downloadOverlay()
                   : const SizedBox.expand())
-            : const Center(
-                child: Icon(
-                  Icons.error_outline_rounded,
-                  color: Colors.grey,
-                  size: 32,
-                ),
-              ),
+            : _modelFailure(),
       );
     }
     final viewerL10n = Localizations.of<AppL10n>(context, AppL10n);
@@ -1158,8 +1235,28 @@ class _ProductModelViewState extends State<ProductModelView>
       // The pinned localization bridge accepts non-empty strings only.
       if (kIsWeb) ...{'initializing': ' ', 'loading': ' '},
     };
-    final host =
-        widget.hostBuilder?.call(context, _controller, _ready, _fail) ??
+    final guardHostCallbacks = _canRetryModel;
+    final hostEpoch = _epoch;
+    final hostController = _controller;
+    bool currentHost() =>
+        !_disposed &&
+        hostEpoch == _epoch &&
+        identical(hostController, _controller);
+    void onHostReady() {
+      if (!guardHostCallbacks || currentHost()) _ready();
+    }
+
+    void onHostError(Object error) {
+      if (!guardHostCallbacks || currentHost()) _fail(error);
+    }
+
+    final modelHost =
+        widget.hostBuilder?.call(
+          context,
+          _controller,
+          onHostReady,
+          onHostError,
+        ) ??
         SharedViewer(
           uiStrings: viewerUiStrings,
           controller: _controller,
@@ -1168,9 +1265,12 @@ class _ProductModelViewState extends State<ProductModelView>
           active: _active,
           pointerEventsEnabled: widget.pointerEventsEnabled,
           pointerEventsEnabledNotifier: widget.pointerEventsEnabledNotifier,
-          onReady: _ready,
-          onError: _fail,
+          onReady: onHostReady,
+          onError: onHostError,
         );
+    final host = _canRetryModel
+        ? KeyedSubtree(key: ObjectKey(hostController), child: modelHost)
+        : modelHost;
     return LayoutBuilder(
       builder: (context, constraints) {
         if (widget.concealRenderSource) {
@@ -1216,14 +1316,7 @@ class _ProductModelViewState extends State<ProductModelView>
                         ),
                 ),
               if (_showDownloadProgress) _downloadOverlay(),
-              if (_error != null)
-                const Center(
-                  child: Icon(
-                    Icons.error_outline_rounded,
-                    color: Colors.grey,
-                    size: 32,
-                  ),
-                ),
+              if (_error != null) _modelFailure(),
             ],
           ),
         );
