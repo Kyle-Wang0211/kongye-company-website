@@ -27,27 +27,19 @@ class CommunityBottomTabBar extends StatelessWidget {
               Expanded(
                 child: InkWell(
                   onTap: () => onChanged(entry.key),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
+                  child: Semantics(
+                    label: entry.value.$1,
+                    button: true,
+                    selected: current == entry.key,
+                    child: Center(
+                      child: Icon(
                         entry.value.$2,
                         size: 25,
                         color: current == entry.key
                             ? AetherColors.primary
                             : AetherColors.textTertiary,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        entry.value.$1,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: current == entry.key
-                              ? AetherColors.primary
-                              : AetherColors.textTertiary,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
