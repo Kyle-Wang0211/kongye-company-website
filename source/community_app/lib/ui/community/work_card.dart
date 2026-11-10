@@ -309,15 +309,12 @@ class _WorkCardState extends State<WorkCard> {
       onVisibilityChanged: (info) {
         if (mounted) widget.onVisibilityChanged?.call(info.visibleFraction);
       },
-      child: Stack(
-        children: [
-          Visibility(
-            visible:
-                ready && widget.revealed && !widget.prepareWhileHidden,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: GestureDetector(
+      child: Visibility(
+        visible: widget.revealed && !widget.prepareWhileHidden,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: GestureDetector(
           onTap: widget.onTap,
           behavior: HitTestBehavior.opaque,
           child: ClipRRect(
@@ -346,6 +343,12 @@ class _WorkCardState extends State<WorkCard> {
                                     semanticLabel: AppL10n.of(
                                       context,
                                     ).communityCoverUnavailable,
+                                  ),
+                                )
+                              : !ready
+                              ? CommunityShimmer(
+                                  key: ValueKey(
+                                    'work-cover-loading-${_work.id}',
                                   ),
                                 )
                               : Image(
@@ -401,24 +404,7 @@ class _WorkCardState extends State<WorkCard> {
               ),
             ),
           ),
-          ),
-          ),
-          if (!ready &&
-              !_coverFailed &&
-              widget.revealed &&
-              !widget.prepareWhileHidden)
-            Positioned.fill(
-              child: LayoutBuilder(
-                builder: (context, constraints) => FittedBox(
-                  fit: BoxFit.fill,
-                  child: SizedBox(
-                    width: constraints.maxWidth,
-                    child: const CommunityCardSkeleton(),
-                  ),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

@@ -120,8 +120,9 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
         stopRotation();
         // Native click/keyboard activation must show feedback locally, without
         // waiting for an asynchronous Flutter bridge echo.
+        const wasSelected = marker.selected;
         for (const other of markers) {
-          other.selected = other.id === marker.id;
+          other.selected = !wasSelected && other.id === marker.id;
           other.button.setAttribute('aria-pressed', String(other.selected));
           styleSelection(other);
         }
@@ -260,7 +261,7 @@ export function createSurfaceComments({THREE, canvas, camera, controls, getModel
       const hit=intersections(root)[0];
       const occluded=hit && hit.distance < distance - Math.max(1e-6,distance*1e-5);
       marker.occluded = Boolean(occluded);
-      marker.button.style.opacity = occluded ? '0.25' : '1';
+      marker.button.style.opacity = hasSelection && !marker.selected ? '0.08' : occluded ? '0.25' : '1';
       marker.button.disabled = Boolean(occluded);
       marker.button.style.pointerEvents = occluded ? 'none' : 'auto';
       const overview=getOverviewDistance?.();

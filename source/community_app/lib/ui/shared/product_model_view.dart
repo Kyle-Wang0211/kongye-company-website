@@ -64,6 +64,7 @@ class ProductModelView extends StatefulWidget {
   const ProductModelView({
     super.key,
     required this.modelUrl,
+    this.modelSizeBytes,
     this.initialView,
     this.interactive = false,
     this.concealRenderSource = false,
@@ -100,6 +101,8 @@ class ProductModelView extends StatefulWidget {
   final String? communitySessionKey;
   final CommunityViewerSessions? communitySessions;
   final String modelUrl;
+  /// Published model size when the browser response omits Content-Length.
+  final int? modelSizeBytes;
   final Map<String, dynamic>? initialView;
   final bool interactive;
 
@@ -196,27 +199,19 @@ class _ProductModelViewState extends State<ProductModelView>
   Future<void> _captureQueue = Future<void>.value();
   Object? _error;
   double? _downloadProgress;
+  double _lastKnownDownloadProgress = 0;
   int _receivedDownloadBytes = 0;
 
   void _setDownloadProgress(double? progress, {int? receivedBytes}) {
     _downloadProgress = progress;
+    if (progress != null) _lastKnownDownloadProgress = progress;
     if (receivedBytes != null) _receivedDownloadBytes = receivedBytes;
   }
 
   String get _downloadLabel {
-    final progress = _downloadProgress;
-    // A missing denominator cannot produce a meaningful percentage. Report
-    // observed body bytes while the ring remains indeterminate instead.
-    if (progress == null) {
-      final bytes = _receivedDownloadBytes;
-      if (bytes == 0) return '';
-      if (bytes >= 1000000) return '${(bytes / 1000000).toStringAsFixed(1)} MB';
-      if (bytes >= 1000) return '${(bytes / 1000).toStringAsFixed(1)} KB';
-      return '$bytes B';
-    }
     // Download completion precedes renderer readiness; the overlay owns that
     // later boundary and never claims 100% before leaving.
-    return '${(progress * 100).floor().clamp(0, 99)}%';
+    return '${(_lastKnownDownloadProgress * 100).floor().clamp(0, 99)}%';
   }
 
   Timer? _captureTimer;
@@ -426,6 +421,7 @@ class _ProductModelViewState extends State<ProductModelView>
       }
       _epoch++;
       _downloadProgress = null;
+      _lastKnownDownloadProgress = 0;
       _receivedDownloadBytes = 0;
       _loadClock = Stopwatch()..start();
       _rotationArmed = false;
@@ -604,6 +600,7 @@ class _ProductModelViewState extends State<ProductModelView>
       _communityRecoveryUsed = true;
       _epoch++;
       _downloadProgress = null;
+      _lastKnownDownloadProgress = 0;
       _receivedDownloadBytes = 0;
       _hostReady = false;
       _loadedEpoch = -1;
@@ -763,11 +760,16 @@ class _ProductModelViewState extends State<ProductModelView>
             client: widget.browserModelClient,
             onProgress: (received, total) {
               if (!current() || !mounted) return;
-              final progress = total == null
+              final publishedSize = widget.modelSizeBytes;
+              final size = total ??
+                  (publishedSize != null && publishedSize > 0
+                      ? publishedSize
+                      : null);
+              final progress = size == null
                   ? null
-                  : (received / total).clamp(0.0, 1.0);
+                  : (received / size).clamp(0.0, 1.0);
               unawaited(
-                controller.setDownloadProgress(received, total).catchError((
+                controller.setDownloadProgress(received, size).catchError((
                   Object error,
                 ) {
                   if (current()) _fail(error);

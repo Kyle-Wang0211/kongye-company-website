@@ -87,6 +87,7 @@ Widget _app(
       width: 600 + value.toDouble(),
       child: ProductModelView(
         modelUrl: 'https://example.test/model.glb',
+        modelSizeBytes: client.total == null ? 100 : 200,
         interactive: true,
         browserModelClient: client,
         onSurfacePicked: (_) {},
@@ -113,10 +114,10 @@ void main() {
       await tester.pumpWidget(_app(client, renderer, revision));
       await _flush(tester);
       expect(client.requests, 1);
-      expect(find.text('0%'), known ? findsOneWidget : findsNothing);
+      expect(find.text('0%'), findsOneWidget);
       client.body.add(List.filled(25, 1));
       await _flush(tester);
-      expect(find.text(known ? '25%' : '25 B'), findsOneWidget);
+      expect(find.text('25%'), findsOneWidget);
       expect(renderer.loads, 0);
       client.body.add(List.filled(75, 2));
       await client.body.close();
@@ -124,7 +125,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
       });
       await _flush(tester);
-      expect(find.text(known ? '99%' : '100 B'), findsOneWidget);
+      expect(find.text('99%'), findsOneWidget);
       expect(renderer.loads, 1);
       expect(renderer.readyCallbacks, 0);
       // The blob parser has its own local 0/100% transfer. It must not replace
@@ -138,7 +139,7 @@ void main() {
         'totalBytes': 100,
       });
       await _flush(tester);
-      expect(find.text(known ? '99%' : '100 B'), findsOneWidget);
+      expect(find.text('99%'), findsOneWidget);
       expect(renderer.readyCallbacks, 0);
       final bytes = Uint8List.fromList([
         ...List.filled(25, 1),

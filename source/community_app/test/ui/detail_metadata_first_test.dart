@@ -94,7 +94,7 @@ void main() {
         expect(client.requested, isTrue);
         expect(client.pendingRequest.isCompleted, isFalse);
         expect(find.text('Known author'), findsOneWidget);
-        expect(find.text('0%'), findsNothing);
+        expect(find.text('0%'), findsOneWidget);
         expect(find.byType(CommunityShimmer), findsOneWidget);
         final size = tester.getSize(find.byType(CommunityShimmer));
         expect(size.width, greaterThan(500));
@@ -129,7 +129,7 @@ void main() {
         isNull,
       );
       expect(find.byType(CommunityShimmer), findsNWidgets(6));
-      expect(find.text('0%'), findsNothing);
+      expect(find.text('0%'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     },
   );

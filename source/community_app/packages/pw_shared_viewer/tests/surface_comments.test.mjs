@@ -129,6 +129,30 @@ test('white point overlay projects actual root-local anchors, selects by id and 
  f.surface.dispose();assert.equal(overlay.removed,true);
 });
 
+test('selected point is bright, others fade and deselection restores white points',()=>{
+ const f=fixture(true);
+ const points=[
+  {id:'one',number:1,anchor:{position:[-.2,0,1]}},
+  {id:'two',number:2,anchor:{position:[.2,0,1]}}];
+ f.surface.setMarkers(points);
+ let [one,two]=f.document.body.children[0].children;
+ assert.equal(one.style.opacity,'1');assert.equal(two.style.opacity,'1');
+ one.listeners.get('click')({target:one,stopPropagation(){}});
+ assert.equal(one.style.opacity,'1');assert.equal(two.style.opacity,'0.08');
+ assert.equal(f.elements.some(e=>e.attributes['data-comment-content']),false);
+ two.listeners.get('click')({target:two,stopPropagation(){}});
+ assert.equal(one.style.opacity,'0.08');assert.equal(two.style.opacity,'1');
+ two.listeners.get('click')({target:two,stopPropagation(){}});
+ assert.equal(one.style.opacity,'1');assert.equal(two.style.opacity,'1');
+ f.surface.setMarkers(points.map((p,i)=>({...p,selected:i===0})));
+ [one,two]=f.document.body.children[0].children;
+ assert.equal(one.style.opacity,'1');assert.equal(two.style.opacity,'0.08');
+ f.surface.setMarkers(points);
+ [one,two]=f.document.body.children[0].children;
+ assert.equal(one.style.opacity,'1');assert.equal(two.style.opacity,'1');
+ f.surface.dispose();
+});
+
 test('click opens only its spatial comment immediately without requiring a Flutter echo',()=>{
  const f=fixture(true);
  f.surface.setMarkers([

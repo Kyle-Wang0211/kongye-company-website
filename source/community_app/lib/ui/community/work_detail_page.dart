@@ -198,7 +198,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         .firstOrNull;
     if (!mounted || _surfaceAssetSha256 == null || comment == null) return;
     setState(() {
-      _selectedCommentId = comment.id;
+      _selectedCommentId = _selectedCommentId == comment.id ? null : comment.id;
       _commentsOpen = true;
       _commentsEverOpened = true;
       _dismissedLayoutId = null;
@@ -211,10 +211,12 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     FocusScope.of(context).unfocus();
     setState(() {
       _commentsOpen = false;
+      _selectedCommentId = null;
       _dismissedLayoutId = _commentLayout?.id;
       _selectingCommentPoint = false;
     });
     unawaited(_setPicking(false));
+    unawaited(_syncCommentMarkers());
   }
 
   Future<void> _setPicking(bool enabled) async {
@@ -383,10 +385,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             anchor: _sharedAnchor(_markerAnchor(comment)!),
             number: markers.length + 1,
             selected: comment.id == _selectedCommentId,
-            previewText: comment.body,
-            previewImages: comment.attachments
-                .map((image) => image.url)
-                .toList(),
+            previewText: _webCommentLayout && _commentsOpen ? '' : comment.body,
+            previewImages: _webCommentLayout && _commentsOpen
+                ? const []
+                : comment.attachments.map((image) => image.url).toList(),
           ),
         );
       } on ArgumentError {
@@ -410,8 +412,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
         comment.status == CommunityCommentStatus.removed) {
       return;
     }
-    setState(() => _selectedCommentId = comment.id);
+    final selected = _selectedCommentId != comment.id;
+    setState(() => _selectedCommentId = selected ? comment.id : null);
     unawaited(_syncCommentMarkers());
+    if (!selected) return;
     try {
       unawaited(
         _surfaceViewer
@@ -984,9 +988,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           pointerEventsEnabledNotifier: _commentViewerPointerEvents,
           key: ValueKey('work-mesh-${widget.work.id}'),
           modelUrl: widget.service.modelUrlFor(widget.work.modelStoragePath!),
+          modelSizeBytes: widget.work.fileSizeBytes,
           initialView: widget.work.initialView,
           communitySessionKey: jsonEncode([
-            widget.service.currentUserId,
+            kIsWeb ? null : widget.service.currentUserId,
             widget.work.id,
             widget.work.format,
             widget.work.publishedAt?.toUtc().toIso8601String(),
