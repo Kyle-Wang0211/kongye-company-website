@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {ActivityEditor,listActivities,normalizeActivities,carouselPosition,selectedActivityIndex,safeActivityUrl,bindActivityDetail} from '../docs/community-activities.mjs';
+import {activityPageUrl,ActivityEditor,listActivities,normalizeActivities,carouselPosition,selectedActivityIndex,safeActivityUrl,bindActivityDetail} from '../docs/community-activities.mjs';
 const content={title:'活动',cover_url:'https://kongye.space/a.png',sort_order:2,template_key:'article',detail:{sections:[]}};
 const row={id:'id-1',slug:'one',revision:1,content};
 test('catalog public read honors successful empty and arbitrary length lists',async()=>{
@@ -93,4 +93,16 @@ test('admin summary field preserves existing details and saves edited summary fo
   assert.equal(saved.detail.summary,'更新后的简介');assert.deepEqual(saved.detail.sections,original.sections);
  }
  assert.match(source,/detail:\s*\{\s*summary:\s*'',\s*sections:/);
+});
+
+
+test('shared covers retain each existing detail page across catalog reordering', () => {
+  for (const [slug, screen] of [['resort', '2'], ['courtyard', '3'], ['ceramic', '1']]) {
+    const url = new URL(activityPageUrl(slug), 'https://kongye.space/');
+    assert.equal(url.searchParams.get('activity'), slug);
+    assert.equal(url.searchParams.get('screen'), screen);
+  }
+  const future = new URL(activityPageUrl('future-event'), 'https://kongye.space/');
+  assert.equal(future.searchParams.get('activity'), 'future-event');
+  assert.equal(future.searchParams.has('screen'), false);
 });

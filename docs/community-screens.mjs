@@ -1,8 +1,9 @@
 import {
+  activityPageUrl,
   carouselPosition,
   listActivities,
   selectedActivityIndex,
-} from './community-activities.mjs?v=activities-20261110';
+} from './community-activities.mjs?v=cover16x9-20261110-r2';
 const stage = document.querySelector('.community-screen-stage');
 const switcher = document.querySelector('.community-screen-switcher');
 let rows = [];
@@ -51,7 +52,7 @@ async function refresh() {
     rows.forEach((row, index) => {
       const link = document.createElement('a');
       link.className = 'community-feature-screen community-screen-event';
-      link.href = 'screen.html?activity=' + encodeURIComponent(row.slug);
+      link.href = activityPageUrl(row.slug);
       link.setAttribute('aria-label', row.content.title);
       const image = document.createElement('img');
       image.src = row.content.cover_url;

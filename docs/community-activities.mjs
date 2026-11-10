@@ -1,5 +1,13 @@
 // Public and editor clients use the deployed official Supabase SDK.
 export const legacyActivitySlugs = ['ceramic', 'resort', 'courtyard'];
+export function activityPageUrl(slug) {
+  const parameters = new URLSearchParams({ activity: slug });
+  const legacyIndex = legacyActivitySlugs.indexOf(slug);
+  if (legacyIndex >= 0) {
+    parameters.set('screen', String(legacyIndex + 1));
+  }
+  return 'screen.html?' + parameters.toString();
+}
 export function safeActivityUrl(value, { external = false } = {}) {
   if (typeof value !== 'string' || /[\u0000-\u0020\\]/u.test(value)) {
     throw Error('地址无效');
