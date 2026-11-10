@@ -184,7 +184,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   }
 
   void _onSurfaceMarkerSelected(String id) {
-    if (!_commentsEnabled) return;
+    if (!_commentsEnabled || !_commentsOpen) return;
     final comment = _visibleComments
         .where(
           (comment) =>
@@ -357,7 +357,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   Future<void> _syncCommentMarkers() async {
     final markers = <SharedSurfaceMarker>[];
     final draft = _commentAnchor;
-    if (_commentsEnabled && _surfaceAssetSha256 != null && draft != null) {
+    if (_commentsOpen && _commentsEnabled && _surfaceAssetSha256 != null && draft != null) {
       markers.add(
         SharedSurfaceMarker(
           id: _draftSurfaceMarkerId,
@@ -368,7 +368,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       );
     }
     for (final comment
-        in !_commentsEnabled || _surfaceAssetSha256 == null
+        in !_commentsOpen || !_commentsEnabled || _surfaceAssetSha256 == null
             ? <CommunityComment>[]
             : _visibleComments) {
       if (markers.length == 256) break;

@@ -140273,7 +140273,7 @@ return A.l($async$rt,r)},
 aVd(){this.t(new A.bbY(this))
 this.lH()},
 aPJ(a){var s,r,q=this
-if(!q.x)return
+if(!q.x||!q.d)return
 s=q.CW
 r=A.rX(new A.ar(s,new A.bbM(q,a),A.a6(s).i("ar<1>")))
 if(q.c==null||q.ch==null||r==null)return
@@ -140357,8 +140357,8 @@ lH(){var s=0,r=A.m(t.H),q=1,p=[],o=this,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1
 var $async$lH=A.i(function(a3,a4){if(a3===1){p.push(a4)
 s=q}for(;;)switch(s){case 0:a=A.b([],t.pA)
 a0=o.ax
-if(o.x&&o.ch!=null&&a0!=null)J.cT(a,A.bq7(o.aV1(a0),"pw-draft-comment-point",1,B.bx,"",!0))
-m=!o.x||o.ch==null?A.b([],t.X4):o.CW
+if(o.d&&o.x&&o.ch!=null&&a0!=null)J.cT(a,A.bq7(o.aV1(a0),"pw-draft-comment-point",1,B.bx,"",!0))
+m=!o.d||!o.x||o.ch==null?A.b([],t.X4):o.CW
 l=m.length
 k=0
 for(;k<m.length;m.length===l||(0,A.L)(m),++k){n=m[k]
