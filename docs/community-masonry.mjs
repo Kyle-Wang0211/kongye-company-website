@@ -1,4 +1,4 @@
-import './vendor/masonry/masonry.pkgd.js?v=4.2.2';
+import './masonry-4.2.2.js?v=4.2.2';
 
 // The upstream library owns shortest-column placement. This adapter only keeps
 // its item list and measurements in sync with the existing paginated feed.
