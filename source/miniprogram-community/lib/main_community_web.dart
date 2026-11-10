@@ -153,10 +153,6 @@ Future<void> _initialize(
         SupabaseAuthServiceImpl(localeNotifier: localeNotifier),
       );
       await currentUser.bootstrap();
-      final wechatRequest = wechatSignInFlow.consumeCallback(
-        signedOut: currentUser.state is CurrentUserSignedOut,
-      );
-      if (wechatRequest != null) await currentUser.signIn(wechatRequest);
     }
   } catch (e, st) {
     DeviceLog.log('AuthStartup', 'init failed: $e\n$st');

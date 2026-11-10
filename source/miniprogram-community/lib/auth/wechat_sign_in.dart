@@ -26,7 +26,8 @@ class WechatSignInFlow {
   SignInRequestWechat? _captured;
   DateTime? _createdAt;
   WechatSignInFailure? lastFailure;
-  bool get available => _port.available;
+  // This mini-program uses guest browsing plus phone/email account sign-in.
+  bool get available => false;
 
   bool begin() {
     cancel();
