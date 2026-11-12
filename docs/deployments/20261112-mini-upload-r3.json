@@ -1,0 +1,43 @@
+{
+  "scope": "mini-program late callback guard",
+  "server_parent_release": "20261112-mini-upload-r1",
+  "prior_candidate_archive": "649e602ce10eece3fd83a041a7fe2595ae9a9110",
+  "prior_candidate_status": "staged, never activated",
+  "main_reused_from_prior_candidate": true,
+  "build_receipt": {
+    "font_cache_identity": [
+      {
+        "original": "fonts/MaterialIcons-Regular.otf",
+        "asset": "fonts/MaterialIcons-Regular.1ec799ea1f1f78fd.otf",
+        "sha256": "1ec799ea1f1f78fd1bce7af7b7b56848c5b06d917f7c2522abbefe318cc69cb5"
+      },
+      {
+        "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
+        "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+        "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
+      }
+    ],
+    "entrypoint": "lib/main_community_web.dart",
+    "base_href": "/miniprogram/",
+    "native_entrypoint": "lib/main.dart",
+    "capabilities": {
+      "PW_COMMUNITY_FAVORITES_ENABLED": "true",
+      "PW_COMMUNITY_MESSAGING_READY": "true",
+      "PW_COMMUNITY_PROFILES_ENABLED": "true"
+    },
+    "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
+    "main_js_sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
+    "status": "asset-updated-local-not-deployed",
+    "source_revision": "649e602ce10eece3fd83a041a7fe2595ae9a9110",
+    "source_manifest_sha256": "0ec65cbf0f96065911b9e87c28a87c9a72d088724a8fb7090274071f38681381",
+    "asset_only_update": {
+      "compiled_main_reused": true,
+      "prior_receipt_sha256": "114c3ed2af3587e2ac567b32aaa17a643bc524bf36ecea75d8e5dda8198f632d",
+      "changed_assets": [
+        "web/model_handoff.js"
+      ]
+    }
+  },
+  "tests": "5 native environment/late callback tests passed",
+  "status": "candidate-not-yet-deployed"
+}

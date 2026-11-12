@@ -21,7 +21,14 @@
   },
   "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
   "main_js_sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
-  "status": "built-local-not-deployed",
-  "source_revision": "6b02b6d4b5795fd3c25989fc07da8d62847511b5",
-  "source_manifest_sha256": "95a9074c2b1f1151ed48f7065cb55267a54f10bac966e50bfbcd2243d0482385"
+  "status": "asset-updated-local-not-deployed",
+  "source_revision": "649e602ce10eece3fd83a041a7fe2595ae9a9110",
+  "source_manifest_sha256": "0ec65cbf0f96065911b9e87c28a87c9a72d088724a8fb7090274071f38681381",
+  "asset_only_update": {
+    "compiled_main_reused": true,
+    "prior_receipt_sha256": "114c3ed2af3587e2ac567b32aaa17a643bc524bf36ecea75d8e5dda8198f632d",
+    "changed_assets": [
+      "web/model_handoff.js"
+    ]
+  }
 }

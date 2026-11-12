@@ -25,14 +25,26 @@
       try { draft = JSON.parse(value); } catch (_) { reject(Error('invalid_handoff')); return; }
       var mini = window.wx && window.wx.miniProgram;
       if (!mini || !/^[0-9a-f-]{36}$/i.test(draft.id || '') || !/^[A-Za-z0-9_-]{43}$/.test(draft.grant || '')) { reject(Error('native_picker_unavailable')); return; }
-      var timer = setTimeout(function () { reject(Error('native_picker_timeout')); }, 5000);
-      mini.getEnv({ success: function (env) {
+      var settled = false;
+      var timer = setTimeout(function () { finish(Error('native_picker_timeout')); }, 5000);
+      function finish(error) {
+        if (settled) return;
+        settled = true;
         clearTimeout(timer);
-        if (!env.miniprogram) { reject(Error('native_picker_unavailable')); return; }
-        mini.postMessage({ data: { type: 'pw.model-handoff.v1', id: draft.id, grant: draft.grant } });
-        mini.redirectTo({ url: '/pages/model-upload/index?id=' + encodeURIComponent(draft.id),
-          success: function () { resolve(true); }, fail: reject });
-      }, fail: function (error) { clearTimeout(timer); reject(error); } });
+        if (error) reject(error); else resolve(true);
+      }
+      try {
+        mini.getEnv({ success: function (env) {
+          if (settled) return;
+          if (!env.miniprogram) { finish(Error('native_picker_unavailable')); return; }
+          try {
+            mini.postMessage({ data: { type: 'pw.model-handoff.v1', id: draft.id, grant: draft.grant } });
+            mini.redirectTo({ url: '/pages/model-upload/index?id=' + encodeURIComponent(draft.id),
+              success: function () { finish(); }, fail: finish });
+          } catch (error) { finish(error); }
+        }, fail: finish });
+      } catch (error) { finish(error); }
+
     });
   };
 })();
