@@ -1,0 +1,30 @@
+{
+  "parent_release": "20261112-search-author-r1",
+  "source_revision": "0f1a6c6c4da865309a42c400bbfac3e1f0f32912",
+  "source_manifest_sha256": "9408eef0b526a09c095b21e87c92b0711696de42497816e7db27448a7550d2cd",
+  "scope": [
+    "Dedicated search page using existing official PostgreSQL pg_trgm RPC",
+    "Canonical comment author display name refresh"
+  ],
+  "files": [
+    {
+      "path": "community/main.dart.js",
+      "sha256": "a454e037e248016e435a6cd8385fe0c32e5e366d9fb57d94844c5a01d3e64235",
+      "size": 4746555
+    },
+    {
+      "path": "community/shared-source-build.json",
+      "sha256": "fe3ecf7f76b2e1f1962c14ef9f2a9283d3bbafd6d3f6a5e8020b90b227571b32",
+      "size": 1133
+    }
+  ],
+  "preserve": [
+    "community/index.html",
+    "community/flutter_bootstrap.js",
+    "community/flutter_service_worker.js",
+    "community/assets/packages/pw_shared_viewer/web/**",
+    "all other parent release files"
+  ],
+  "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
+  "status": "candidate-built-source-reviewed-not-deployed"
+}

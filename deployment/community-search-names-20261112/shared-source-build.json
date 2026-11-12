@@ -1,0 +1,26 @@
+{
+  "font_cache_identity": [
+    {
+      "original": "fonts/MaterialIcons-Regular.otf",
+      "asset": "fonts/MaterialIcons-Regular.d442f1f7575cfca5.otf",
+      "sha256": "d442f1f7575cfca5ff02eee51c3bfacb276c41018fa424efae2830f47fffb80c"
+    },
+    {
+      "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
+      "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+      "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
+    }
+  ],
+  "entrypoint": "lib/main_community_web.dart",
+  "native_entrypoint": "lib/main.dart",
+  "capabilities": {
+    "PW_COMMUNITY_FAVORITES_ENABLED": "true",
+    "PW_COMMUNITY_MESSAGING_READY": "true",
+    "PW_COMMUNITY_PROFILES_ENABLED": "true"
+  },
+  "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
+  "main_js_sha256": "a454e037e248016e435a6cd8385fe0c32e5e366d9fb57d94844c5a01d3e64235",
+  "status": "built-local-not-deployed",
+  "source_revision": "0f1a6c6c4da865309a42c400bbfac3e1f0f32912",
+  "source_manifest_sha256": "9408eef0b526a09c095b21e87c92b0711696de42497816e7db27448a7550d2cd"
+}
