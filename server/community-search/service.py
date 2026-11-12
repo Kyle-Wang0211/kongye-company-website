@@ -66,6 +66,8 @@ def synchronize():
         existing = request_json(ENGINE + '/' + INDEX, engine=True)
         if INDEX not in existing:
             raise
+        request_json(ENGINE + '/' + INDEX + '/_delete_by_query?refresh=true',
+                     {'query': {'match_all': {}}}, engine=True)
     previous = {}
     while True:
         try:
@@ -102,7 +104,7 @@ def query_engine(action, query):
     if action == 'suggest':
         body = {'size': 0, '_source': False, 'suggest': {'titles': {
             'prefix': query,
-            'completion': {'field': 'suggest', 'size': 100, 'skip_duplicates': True,
+            'completion': {'field': 'suggest', 'size': 100, 'skip_duplicates': False,
                            'fuzzy': {'fuzziness': 'AUTO', 'unicode_aware': True}},
         }}}
         result = request_json(ENGINE + '/' + INDEX + '/_search', body, engine=True)
