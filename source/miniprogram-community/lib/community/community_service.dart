@@ -149,6 +149,7 @@ class CommunityService {
     int offset = 0,
     FeedSort sortBy = FeedSort.recent,
     String? query,
+    List<String>? workIds,
 
     /// [D7 2026-08-23 用户签决] 只看某个作者的作品 —— 流内过滤,**不是**
     /// 个人主页。后端本就 100% 就绪:profiles 六字段齐、FeedWork 已带 userId,
@@ -184,6 +185,10 @@ class CommunityService {
         .eq('moderation_status', 'ok')
         .isFilter('deleted_at', null)
         .not('published_at', 'is', null);
+    if (workIds != null) {
+      if (workIds.isEmpty) return const [];
+      filter = filter.inFilter('id', workIds);
+    }
     if (authorUserId != null && authorUserId.isNotEmpty) {
       filter = filter.eq('user_id', authorUserId);
     }
