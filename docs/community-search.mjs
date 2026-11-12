@@ -27,12 +27,9 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
   const zh=()=>currentLocale()==='zh';
   const label=(cn,en)=>zh()?cn:en;
   const priorSearch=document.querySelector('#community-search');
-  if(priorSearch)priorSearch.style.display='none';
-  const entry=document.createElement('button');
-  entry.type='button';entry.className='header-action';entry.dataset.communitySearch='';
-  entry.textContent=label('搜索','Search');
-  entry.setAttribute('aria-label',label('搜索作品','Search works'));
-  header.insertBefore(entry,header.querySelector('#account-nav'));
+  const entry=document.querySelector('#community-query');
+  if(!priorSearch||!entry)return;
+  priorSearch.dataset.communitySearch='';
   const style=document.createElement('style');
   style.textContent=`.pw-community-search{box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:24px;border:0;background:#fff;color:#111}.pw-community-search::backdrop{background:#fff}.pw-community-search header{display:flex;align-items:center;gap:12px;max-width:900px;margin:auto}.pw-community-search input{min-width:0;flex:1;font:inherit;border:1px solid #bbb;border-radius:8px;padding:12px;background:#f5f5f5;color:#111}.pw-community-search button{font:inherit;cursor:pointer;background:#fff;border:0;color:#111;padding:12px}.pw-community-search ul{list-style:none;padding:0;max-width:900px;margin:20px auto}.pw-community-search li button{display:block;width:100%;text-align:left;border-bottom:1px solid #eee;padding:18px 12px}.pw-community-search [role=status]{max-width:900px;margin:20px auto;color:#666}.pw-community-search .search-retry{border:1px solid #aaa;border-radius:6px}@media(max-width:600px){.pw-community-search{padding:12px}.pw-community-search header{gap:2px}.pw-community-search button{padding:10px}}`;
   document.head.append(style);
@@ -78,12 +75,14 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
     if(history.state?.pwCommunitySearch)history.back();
     else{const url=new URL(location.href);url.searchParams.delete('search');history.replaceState(history.state,'',url);close();}
   }
-  entry.addEventListener('click',()=>{
+  priorSearch.addEventListener('submit',event=>{
+    event.preventDefault();input.value=entry.value;
+    if(!input.value.trim())return;
     if(!new URL(location.href).searchParams.has('search')){const url=new URL(location.href);url.searchParams.set('search','1');history.pushState({pwCommunitySearch:true},'',url);}
-    show();
+    show();void run('search');
   });
   input.addEventListener('input',()=>{invalidate();submitted=false;if(input.value.trim())timer=setTimeout(()=>void run('suggest'),200);});
-  input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();void run('search');}});
+  input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing){event.preventDefault();void run('search');}});
   clear.addEventListener('click',()=>{input.value='';submitted=false;invalidate();input.focus();});
   submit.addEventListener('click',()=>void run('search'));
   back.addEventListener('click',leave);
