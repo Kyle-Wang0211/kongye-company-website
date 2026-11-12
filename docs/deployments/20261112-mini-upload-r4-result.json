@@ -1,0 +1,50 @@
+{
+  "schema": "pw.mini-deployment-result.v1",
+  "status": "deployed-https-verified-awaiting-user-wechat",
+  "release": "20261112-mini-upload-r4",
+  "parent_release": "20261112-mini-upload-r3",
+  "source_commit": "819314afa5f434a6bb14b79ba477a9cf84e3b0ac",
+  "source_branch": "codex/mini-upload-20261112-r1",
+  "source_manifest_sha256": "a86bbb5c5361926cc1c65b75360b1af5fcac1c0373a2c4fd4baaf4d8a66c4001",
+  "main_js_sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
+  "javascript_bridge_sha256": "c8a95c36993410fdb25acb8e9e3b99540b8f174522f4e98b5555e54a2d8308af",
+  "build_receipt_sha256": "62061c9e96bdada771603633bb83d1dfe99bd2e03f19ea5001c4b559c45e55d7",
+  "main_recompiled": false,
+  "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
+  "activated_at": "2026-11-12T12:09:12.068731+00:00",
+  "verified_at": "2026-11-12T12:10:57.804275+00:00",
+  "remote_result_sha256": "1bf7df752a7113986ba2f30b249ed1110389796655f3216f65e2965fdc35f6fb",
+  "external_http_checks": [
+    {
+      "path": "miniprogram/model_handoff.js",
+      "sha256": "c8a95c36993410fdb25acb8e9e3b99540b8f174522f4e98b5555e54a2d8308af",
+      "status": 200
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "sha256": "62061c9e96bdada771603633bb83d1dfe99bd2e03f19ea5001c4b559c45e55d7",
+      "status": 200
+    }
+  ],
+  "scope_preservation": {
+    "outside_changed_files_preserved": 2273,
+    "old_release_preserved": true,
+    "exact_previous_nginx_config_reconstructed": true,
+    "switch_back_performed": false
+  },
+  "official_jssdk_reference": {
+    "url": "https://res.wx.qq.com/open/js/jweixin-1.6.0.js",
+    "sha256": "0f17c4f7daf51a49a9627714ad2da6c037352442699ba8ceca68b7c6dc0b1dba",
+    "getEnv_argument": "function callback"
+  },
+  "regressions": "5 tests passed with official getEnv argument shape and late callback guards",
+  "native_preview": {
+    "official_cli_exit_code": 0,
+    "package_bytes": 14723,
+    "source_manifest_sha256": "5b8360cf760db9981c126be72fc2e098dfe57e3bd9ced48c0f0aae45d0766691",
+    "source_unchanged_after_preview": true,
+    "submitted_for_review": false,
+    "published": false
+  },
+  "pending": "User normal WeChat login and GLB/PLY native file round trip, selection or full-retain confirmation, name and description confirmation, publication review."
+}
