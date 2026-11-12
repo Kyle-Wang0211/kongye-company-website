@@ -3,22 +3,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'community_service.dart';
 import 'feed_models.dart';
 
-/// The server owns Alibaba OpenSearch credentials and relevance. The client
-/// preserves the returned order and never falls back to substring matching.
+/// RDS PostgreSQL owns candidate retrieval and its installed pg_trgm similarity
+/// ordering. Clients preserve that order and hydrate through public-feed rules.
 class CommunitySearchService {
   CommunitySearchService({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
   final SupabaseClient _client;
 
   Future<Map<String, dynamic>> _request(String action, String query) async {
-    final response = await _client.functions.invoke(
-      'community-search',
-      body: {'action': action, 'query': query.trim()},
+    final response = await _client.rpc(
+      'community_search',
+      params: {'p_action': action, 'p_query': query.trim()},
     );
-    if (response.status != 200 || response.data is! Map) {
+    if (response is! Map) {
       throw const FormatException('Search unavailable');
     }
-    return Map<String, dynamic>.from(response.data as Map);
+    return Map<String, dynamic>.from(response);
   }
 
   Future<List<String>> suggest(String query) async {

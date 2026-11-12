@@ -1,0 +1,41 @@
+{
+  "status": "prepared_for_review_live_rpc_pending",
+  "provider": "Existing Alibaba RDS PostgreSQL 18.6",
+  "extension": {
+    "name": "pg_trgm",
+    "installed_version": "1.6",
+    "installation_required": false
+  },
+  "rpc": {
+    "name": "community_search",
+    "parameters": [
+      "p_action",
+      "p_query"
+    ],
+    "security": "SECURITY INVOKER",
+    "statement_timeout": "5s"
+  },
+  "suggestions": {
+    "candidate_retrieval": "literal case-folded SQL title prefix",
+    "limit": 10,
+    "ranking": "installed pg_trgm similarity(lower(title), query), native score descending; equal scores title ascending"
+  },
+  "search": {
+    "candidate_retrieval": "literal case-folded SQL title or description contains",
+    "limit": 20,
+    "ranking": "installed pg_trgm similarity(lower(concat_ws(title,description)), query), native score descending; equal scores id ascending"
+  },
+  "public_projection": "public-work-projection.sql",
+  "withdrawn_titles": "Publication visibility/moderation/deletion checked directly at each RPC read",
+  "constraints": [
+    "No tokenizer or pinyin completion",
+    "Single-character candidate retrieval uses SQL prefix and is not claimed as trigram-index acceleration",
+    "No extension installation, database restart, new paid resources or custom scoring"
+  ],
+  "official_sources": [
+    "https://help.aliyun.com/zh/analyticdb/analyticdb-for-postgresql/user-guide/pg-trgm",
+    "https://help.aliyun.com/en/rds/apsaradb-rds-for-postgresql/use-the-pg-bigm-extension-to-perform-fuzzy-match-based-queries",
+    "https://www.postgresql.org/docs/18/pgtrgm.html"
+  ],
+  "live_verification": "Pending release owner application and public/authenticated RPC reads"
+}
