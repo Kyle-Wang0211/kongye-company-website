@@ -30,6 +30,57 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
   const entry=document.querySelector('#community-query');
   if(!priorSearch||!entry)return;
   priorSearch.dataset.communitySearch='';
+  const suggestions=document.createElement('ul');
+  suggestions.id='community-search-suggestions';suggestions.className='community-search-suggestions';
+  suggestions.hidden=true;suggestions.setAttribute('role','listbox');
+  entry.setAttribute('role','combobox');entry.setAttribute('aria-autocomplete','list');
+  entry.setAttribute('aria-controls',suggestions.id);entry.setAttribute('aria-expanded','false');
+  priorSearch.append(suggestions);
+  let homeTimer,homeGeneration=0,composing=false;
+  function dismissSuggestions(){
+    clearTimeout(homeTimer);homeGeneration++;
+    suggestions.hidden=true;entry.setAttribute('aria-expanded','false');
+  }
+  async function suggestHome(){
+    const query=entry.value.trim(),revision=++homeGeneration;
+    if(!query){dismissSuggestions();return;}
+    try{
+      const values=await requestCommunitySearch(await getClient(),'suggest',query);
+      if(revision!==homeGeneration||entry.value.trim()!==query)return;
+      suggestions.replaceChildren();
+      for(const title of values){
+        const item=document.createElement('li'),button=document.createElement('button');
+        button.type='button';button.textContent=title;button.setAttribute('role','option');
+        button.addEventListener('click',()=>{
+          entry.value=title;document.querySelector('#community-search-clear').hidden=false;
+          openHomeSearch();
+        });
+        item.append(button);suggestions.append(item);
+      }
+      suggestions.hidden=!values.length;entry.setAttribute('aria-expanded',String(values.length>0));
+    }catch{if(revision===homeGeneration)dismissSuggestions();}
+  }
+  function queueSuggestions(){
+    dismissSuggestions();
+    if(entry.value.trim())homeTimer=setTimeout(()=>void suggestHome(),160);
+  }
+  entry.addEventListener('input',queueSuggestions);
+  entry.addEventListener('compositionstart',()=>{composing=true;});
+  entry.addEventListener('compositionend',()=>{composing=false;queueSuggestions();});
+  entry.addEventListener('focus',()=>{if(entry.value.trim())queueSuggestions();});
+  entry.addEventListener('keydown',event=>{
+    if(event.key==='Escape')dismissSuggestions();
+    if(event.key==='ArrowDown'&&!suggestions.hidden){event.preventDefault();suggestions.querySelector('button')?.focus();}
+  });
+  suggestions.addEventListener('keydown',event=>{
+    const buttons=[...suggestions.querySelectorAll('button')],index=buttons.indexOf(document.activeElement);
+    if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+      event.preventDefault();buttons[(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();
+    }
+    if(event.key==='Escape'){entry.focus();dismissSuggestions();}
+  });
+  document.addEventListener('click',event=>{if(!priorSearch.contains(event.target))dismissSuggestions();});
+  document.querySelector('#community-search-clear').addEventListener('click',dismissSuggestions);
   const style=document.createElement('style');
   style.textContent=`.pw-community-search{box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:24px;border:0;background:#fff;color:#111}.pw-community-search::backdrop{background:#fff}.pw-community-search header{display:flex;align-items:center;gap:12px;max-width:900px;margin:auto}.pw-community-search input{min-width:0;flex:1;font:inherit;border:1px solid #bbb;border-radius:8px;padding:12px;background:#f5f5f5;color:#111}.pw-community-search button{font:inherit;cursor:pointer;background:#fff;border:0;color:#111;padding:12px}.pw-community-search ul{list-style:none;padding:0;max-width:900px;margin:20px auto}.pw-community-search li button{display:block;width:100%;text-align:left;border-bottom:1px solid #eee;padding:18px 12px}.pw-community-search [role=status]{max-width:900px;margin:20px auto;color:#666}.pw-community-search .search-retry{border:1px solid #aaa;border-radius:6px}@media(max-width:600px){.pw-community-search{padding:12px}.pw-community-search header{gap:2px}.pw-community-search button{padding:10px}}`;
   document.head.append(style);
@@ -75,12 +126,13 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
     if(history.state?.pwCommunitySearch)history.back();
     else{const url=new URL(location.href);url.searchParams.delete('search');history.replaceState(history.state,'',url);close();}
   }
-  priorSearch.addEventListener('submit',event=>{
-    event.preventDefault();input.value=entry.value;
+  function openHomeSearch(){
+    dismissSuggestions();input.value=entry.value;
     if(!input.value.trim())return;
     if(!new URL(location.href).searchParams.has('search')){const url=new URL(location.href);url.searchParams.set('search','1');history.pushState({pwCommunitySearch:true},'',url);}
     show();void run('search');
-  });
+  }
+  priorSearch.addEventListener('submit',event=>{event.preventDefault();if(!composing)openHomeSearch();});
   input.addEventListener('input',()=>{invalidate();submitted=false;if(input.value.trim())timer=setTimeout(()=>void run('suggest'),200);});
   input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing){event.preventDefault();void run('search');}});
   clear.addEventListener('click',()=>{input.value='';submitted=false;invalidate();input.focus();});
