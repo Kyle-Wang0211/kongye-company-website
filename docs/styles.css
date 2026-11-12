@@ -139,7 +139,7 @@ html .community-grid .community-picture.is-loading:after{content:none;animation:
 .pw-search-users{max-width:900px;margin:0 auto}
 .pw-search-user-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid #eee}
 .pw-search-user-row .following-person{flex:1;min-width:0;margin:0;padding:8px}
-.pw-search-user-row .following-avatar{width:44px;height:44px}
+.pw-search-user-row .following-avatar{position:relative;width:44px;height:44px}
 .pw-search-user-identity{display:flex;flex-direction:column;min-width:0;gap:4px}
 .pw-search-user-identity>strong{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pw-search-user-meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:#888}
