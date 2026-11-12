@@ -19,7 +19,7 @@ DECLARE
   blocked_author_ids uuid[] := ARRAY[]::uuid[];
 BEGIN
   IF p_action IS NULL OR p_action NOT IN ('suggest', 'search', 'visible')
-      OR query_text IS NULL OR char_length(query_text) NOT BETWEEN 1 AND CASE WHEN p_action = 'visible' THEN 4096 ELSE 128 END THEN
+      OR query_text IS NULL OR char_length(query_text) NOT BETWEEN 1 AND (CASE WHEN p_action = 'visible' THEN 4096 ELSE 128 END) THEN
     RAISE EXCEPTION 'invalid_query' USING ERRCODE = '22023';
   END IF;
   -- Anonymous callers have no SELECT privilege on blocks. This statement is
