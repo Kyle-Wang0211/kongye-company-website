@@ -1,0 +1,56 @@
+{
+  "schema": "pw.mini-deployment-result.v1",
+  "status": "deployed-http-and-browser-verified",
+  "release": "20261112-mini-upload-r3",
+  "parent_release": "20261112-mini-upload-r1",
+  "composite_parent_release": "20261112-community-search-names-r1",
+  "source_commit": "35e4cd5638956069e465dbaa5b8a31a4cadddd4d",
+  "source_branch": "codex/mini-upload-20261112-r1",
+  "source_manifest_sha256": "0ec65cbf0f96065911b9e87c28a87c9a72d088724a8fb7090274071f38681381",
+  "main_js_sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
+  "javascript_bridge_sha256": "04768223376bf23c6eaa142cb12cddcdfb24e2f4fba24122d45d533fd15a5ced",
+  "build_receipt_sha256": "036cab8f8b6cc9db22ac57fad9cbda1e1e4d92154269f1baba2c25cf02ad582b",
+  "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
+  "activated_at": "2026-11-12T11:51:59.419987+00:00",
+  "verified_at": "2026-11-12T11:55:54.718071+00:00",
+  "remote_result_sha256": "766d47bf70ef23de2241d9e752239d93c406316c4cd7c6787b8c42f2c30b0716",
+  "external_http_checks": [
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "sha256": "c46779d3cb726febc26110dc25f76b2d7590724500252adbc321c68f084086d3",
+      "http_status": 200
+    },
+    {
+      "path": "miniprogram/main.dart.js",
+      "sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
+      "http_status": 200
+    },
+    {
+      "path": "miniprogram/model_handoff.js",
+      "sha256": "04768223376bf23c6eaa142cb12cddcdfb24e2f4fba24122d45d533fd15a5ced",
+      "http_status": 200
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "sha256": "036cab8f8b6cc9db22ac57fad9cbda1e1e4d92154269f1baba2c25cf02ad582b",
+      "http_status": 200
+    }
+  ],
+  "scope_preservation": {
+    "outside_changed_files_preserved": 2271,
+    "old_release_preserved": true,
+    "exact_previous_nginx_config_reconstructed": true,
+    "production_switch_back_performed": false
+  },
+  "native_development_preview": {
+    "official_cli_exit_code": 0,
+    "package_bytes": 14723,
+    "source_manifest_sha256": "f3516bbb46a0935dd877a6ef48826af334e1e03fe9707b3e38f0580d63b441d3",
+    "source_unchanged_after_preview": true,
+    "submitted_for_review": false,
+    "published": false
+  },
+  "private_draft_rows_at_final_readback": 0,
+  "pending": "User scans development preview, logs in normally, and validates GLB/PLY file round trip and publication review confirmation.",
+  "source_provenance": "Mini source is derived from the complete f189 source plus exact live compiled/server staging pair. Historical embedded export metadata is stale. Final full candidate source manifest is recorded independently. Other website components inherit the composite server parent and its separate source records."
+}
