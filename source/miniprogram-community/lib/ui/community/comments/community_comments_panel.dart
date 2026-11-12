@@ -216,7 +216,8 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         comment.authorName;
   }
 
-  Timer? _authorNameTimer;
+  StreamSubscription<void>? _authorNameSubscription;
+  bool _authorNamesPending = false;
   bool _authorNameLoading = false;
   final _authorNames = <String, String>{};
 
@@ -225,10 +226,14 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     if (!_pollingEnabled ||
         !widget.presentationVisible ||
         !_foreground ||
-        _authorNameLoading ||
         repository is! CommunityCommentAuthorNameRepository) {
       return;
     }
+    if (_authorNameLoading) {
+      _authorNamesPending = true;
+      return;
+    }
+    _authorNamesPending = false;
     final generation = _generation;
     final authors = <String>{
       for (final comment in _comments) comment.userId,
@@ -262,7 +267,14 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       // The full comment refresh remains available when a name read is offline.
     } finally {
       _authorNameLoading = false;
+      if (mounted && _authorNamesPending) unawaited(_refreshAuthorNames());
     }
+  }
+
+  void _stopAuthorNameEvents() {
+    final subscription = _authorNameSubscription;
+    _authorNameSubscription = null;
+    if (subscription != null) unawaited(subscription.cancel());
   }
 
   Timer? _refreshTimer;
@@ -365,15 +377,25 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     if (!allowed) {
       _refreshTimer?.cancel();
       _refreshTimer = null;
-      _authorNameTimer?.cancel();
-      _authorNameTimer = null;
+      _stopAuthorNameEvents();
       return;
     }
     _refreshTimer ??= Timer.periodic(interval, (_) => _refresh());
-    _authorNameTimer ??= Timer.periodic(
-      const Duration(seconds: 2),
-      (_) => _refreshAuthorNames(),
-    );
+    final repository = widget.repository;
+    if (_authorNameSubscription == null &&
+        repository is CommunityCommentAuthorNameEvents) {
+      final generation = _generation;
+      _authorNameSubscription = (repository as CommunityCommentAuthorNameEvents)
+          .watchAuthorNameChanges(widget.workId)
+          .listen(
+            (_) {
+              if (_current(generation)) unawaited(_refreshAuthorNames());
+            },
+            onError: (Object error) {
+              // The SDK reconnects. A successful rejoin reconciles names.
+            },
+          );
+    }
     if (refreshNow || !wasEnabled) unawaited(_refreshAuthorNames());
     if (refreshNow || (refreshOnEnable && !wasEnabled && _page != null)) {
       _refresh();
@@ -415,6 +437,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
         oldWidget.repository != widget.repository ||
         oldWidget.expectedAssetSha256 != widget.expectedAssetSha256 ||
         oldWidget.requireAssetBinding != widget.requireAssetBinding) {
+      _stopAuthorNameEvents();
       _generation++;
       _text.clear();
       _images.clear();
@@ -516,6 +539,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   }
 
   void _notifyVisible() {
+    unawaited(_refreshAuthorNames());
     _reportRevision.value++;
     final generation = _generation;
     final token = _loadToken;
@@ -1080,7 +1104,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     _reportRevision.value++;
     _reportRevision.dispose();
     _refreshTimer?.cancel();
-    _authorNameTimer?.cancel();
+    _stopAuthorNameEvents();
     WidgetsBinding.instance.removeObserver(this);
     _text.removeListener(_textChanged);
     _text.dispose();

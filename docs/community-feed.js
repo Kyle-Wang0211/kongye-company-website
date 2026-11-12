@@ -1,3 +1,4 @@
+import {installCommunitySearch} from './community-search.mjs?v=rds-pg-trgm-20261112-v1';
 import {attachCommunityMasonry} from './community-masonry.mjs?v=natural-covers-20261110-v2';
 import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
@@ -287,6 +288,7 @@ async function readAuthors(rows){
    if(!authors.has(id))authorFailures.add(id);
    refreshAuthor(id);
   }
+  syncAuthorNameRefresh();
  }
 }
 function cardFor(work){
@@ -326,7 +328,7 @@ function cardFor(work){
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  const count=document.createElement('span');count.textContent=formatCount(Number.isSafeInteger(work.likes_count)&&work.likes_count>0?work.likes_count:0);like.append(count);
  row.append(avatar,author,like);card.append(open,row);
- cards.set(work.id,{card,work,author,avatar,like});return card;
+ cards.set(work.id,{card,work,author,avatar,like});syncAuthorNameRefresh();return card;
 }
 function loadingShells(){
  const shells=[];
@@ -350,6 +352,7 @@ async function load(){
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
+ installCommunitySearch({getClient:getAccountClient,getConfig:()=>config,onOpenWork:openWork});
  const rows=await readFeed(cursor,filters);if(revision!==filterRevision)return;lastFeedRead=Date.now();
  for(const shell of shells)shell.remove();
  for(const work of rows){if(!publicOrder.includes(work.id))publicOrder.push(work.id);if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
@@ -410,6 +413,51 @@ async function refreshLoaded(){
  }catch(e){if(revision!==filterRevision)return;pageFailed=true;refreshFailed=true;localizeElement(status,e.localeKey||'siteFeedRetry');localizeElement(more,'siteReload');more.hidden=false;}
  finally{busy=false;more.disabled=false;drainRefresh();syncPaging();}
 }
+// The existing, locally bundled Supabase SDK owns WebSocket auth and reconnects.
+const authorNameChannels=new Map();
+let authorNameClient,authorNameConnecting,authorNameEpoch=0,authorNamesSuspended=false;
+function stopAuthorNameRefresh(){
+ authorNameEpoch++;
+ for(const channel of authorNameChannels.values())void authorNameClient?.removeChannel(channel);
+ authorNameChannels.clear();
+}
+function invalidateWorkAuthor(workId){
+ const entry=cards.get(workId);
+ if(!entry||!entry.card.isConnected||document.visibilityState==='hidden')return;
+ // Keep covers, work models and card ordering while revalidating names only.
+ revalidateAuthorNames();
+}
+function syncAuthorNameRefresh(){
+ if(authorNamesSuspended||document.visibilityState==='hidden'||!config){stopAuthorNameRefresh();return;}
+ if(authorNameConnecting)return;
+ const epoch=authorNameEpoch;
+ authorNameConnecting=getAccountClient().then(client=>{
+  if(epoch!==authorNameEpoch||authorNamesSuspended||document.visibilityState==='hidden')return;
+  authorNameClient=client;
+  const workIds=new Set([...cards].filter(([,entry])=>entry.card.isConnected).map(([id])=>id));
+  for(const [id,channel] of authorNameChannels){
+   if(!workIds.has(id)){authorNameChannels.delete(id);void client.removeChannel(channel);}
+  }
+  for(const id of workIds){
+   if(authorNameChannels.has(id))continue;
+   const channel=client.channel('community:author-names:'+id,{config:{private:true}});
+   authorNameChannels.set(id,channel);
+   channel.on('broadcast',{event:'author_names_changed'},message=>{
+    if(epoch===authorNameEpoch&&message.payload?.work_id===id)invalidateWorkAuthor(id);
+   }).subscribe(status=>{
+    if(status==='SUBSCRIBED'&&epoch===authorNameEpoch)invalidateWorkAuthor(id);
+   });
+  }
+ }).catch(()=>{/* A lifecycle return retries through the existing SDK client. */})
+ .finally(()=>{
+  authorNameConnecting=null;
+  // A foreground return can arrive while an older client lookup is pending.
+  if(epoch!==authorNameEpoch&&!authorNamesSuspended&&document.visibilityState!=='hidden'&&config)syncAuthorNameRefresh();
+ });
+}
+window.addEventListener('pagehide',()=>{authorNamesSuspended=true;stopAuthorNameRefresh();});
+window.addEventListener('pageshow',()=>{authorNamesSuspended=false;syncAuthorNameRefresh();});
+document.addEventListener?.('visibilitychange',syncAuthorNameRefresh);
 function revalidateAuthorNames(){
  authorReadRevision++;authorRequests.clear();authorFreshness.clear();
  if(!config)return;

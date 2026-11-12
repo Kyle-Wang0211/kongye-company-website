@@ -28,6 +28,19 @@ abstract class CommunityCommentFeedRepository {
   });
 }
 
+/// Name-only canonical projection for authors already present in this work.
+abstract interface class CommunityCommentAuthorNameRepository {
+  Future<Map<String, String>> fetchAuthorNames(
+    String workId,
+    Set<String> userIds,
+  );
+}
+
+/// Official Realtime invalidations for canonical names in one visible work.
+abstract interface class CommunityCommentAuthorNameEvents {
+  Stream<void> watchAuthorNameChanges(String workId);
+}
+
 abstract class CommunityCommentReportRepository {
   Future<String> report(CommunityCommentReportDraft draft);
 }
@@ -278,13 +291,104 @@ class SupabaseCommunityCommentRepository extends _CommunityCommentGateway
     implements
         CommunityCommentRepository,
         CommunityCommentFeedRepository,
-        CommunityCommentReportRepository {
+        CommunityCommentReportRepository,
+        CommunityCommentAuthorNameRepository,
+        CommunityCommentAuthorNameEvents {
   SupabaseCommunityCommentRepository({
     super.client,
     super.transport,
     super.identity,
     super.requestTimeout = const Duration(seconds: 30),
   });
+
+  // Share one SDK channel when multiple panels display the same work.
+  static final _nameStreams = Expando<Map<String, Stream<void>>>();
+
+  @override
+  Stream<void> watchAuthorNameChanges(String workId) {
+    _validateId(workId);
+    _readIdentity(); // Validate the existing client and regional endpoint.
+    final client = _client;
+    final streams = _nameStreams[client] ??= <String, Stream<void>>{};
+    return streams.putIfAbsent(workId, () {
+      RealtimeChannel? channel;
+      late final StreamController<void> events;
+      events = StreamController<void>.broadcast(
+        onListen: () {
+          channel =
+              client.channel(
+                  'community:author-names:$workId',
+                  opts: const RealtimeChannelConfig(private: true),
+                )
+                ..onBroadcast(
+                  event: 'author_names_changed',
+                  callback: (payload) {
+                    if (payload['payload'] is Map &&
+                        payload['payload']['work_id'] == workId &&
+                        !events.isClosed) {
+                      events.add(null);
+                    }
+                  },
+                ).subscribe((status, error) {
+                  // Reconcile missed changes after every SDK reconnect as well.
+                  if (status == RealtimeSubscribeStatus.subscribed &&
+                      !events.isClosed) {
+                    events.add(null);
+                  }
+                });
+        },
+        onCancel: () {
+          streams.remove(workId);
+          final oldChannel = channel;
+          if (oldChannel != null) unawaited(client.removeChannel(oldChannel));
+          unawaited(events.close());
+        },
+      );
+      return events.stream;
+    });
+  }
+
+  @override
+  Future<Map<String, String>> fetchAuthorNames(
+    String workId,
+    Set<String> userIds,
+  ) async {
+    if (userIds.isEmpty) return const {};
+    if (userIds.length > 200) {
+      throw const CommunityCommentException('invalid_draft');
+    }
+    final identity = _requestIdentity(allowAnonymous: true);
+    if (identity == null) {
+      throw const CommunityCommentException('auth_required');
+    }
+    final response = await _client
+        .rpc(
+          'community_comment_author_names',
+          params: {
+            'p_work_id': workId,
+            'p_user_ids': userIds.toList(growable: false),
+          },
+        )
+        .timeout(const Duration(seconds: 5));
+    if (!_isCurrent(identity)) {
+      throw const CommunityCommentException('identity_changed');
+    }
+    if (response is! List) {
+      throw const CommunityCommentException('invalid_response');
+    }
+    final names = <String, String>{};
+    for (final row in response) {
+      if (row is! Map ||
+          row['user_id'] is! String ||
+          row['display_name'] is! String ||
+          !userIds.contains(row['user_id']) ||
+          names.containsKey(row['user_id'])) {
+        throw const CommunityCommentException('invalid_response');
+      }
+      names[row['user_id'] as String] = row['display_name'] as String;
+    }
+    return names;
+  }
 
   @override
   Future<String> report(CommunityCommentReportDraft draft) async {

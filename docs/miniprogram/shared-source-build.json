@@ -20,16 +20,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
-  "main_js_sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
-  "status": "asset-updated-local-not-deployed",
-  "source_revision": "1bbb03fc20fc08eae054ea5bfeebabf0a0a56a15",
-  "source_manifest_sha256": "a86bbb5c5361926cc1c65b75360b1af5fcac1c0373a2c4fd4baaf4d8a66c4001",
-  "asset_only_update": {
-    "compiled_main_reused": true,
-    "prior_receipt_sha256": "036cab8f8b6cc9db22ac57fad9cbda1e1e4d92154269f1baba2c25cf02ad582b",
-    "changed_assets": [
-      "web/model_handoff.js"
-    ],
-    "official_jssdk_sha256": "0f17c4f7daf51a49a9627714ad2da6c037352442699ba8ceca68b7c6dc0b1dba"
-  }
+  "main_js_sha256": "184a4da3bb1fce1eb26a520b6fea3b5139fbed9e5df6f32c9c24b74c67ef2dd8",
+  "status": "built-local-not-deployed",
+  "source_revision": "14bff276ba5d5b370735e2505f1e9e8eb6c6f68b",
+  "source_manifest_sha256": "c8cb73db5b46c7a0a05c2118c4fac7f9c4e719d02428581b66f1aa22141dc9e6"
 }

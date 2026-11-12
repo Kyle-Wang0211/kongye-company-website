@@ -1,0 +1,46 @@
+{
+  "release": "20261112-author-name-broadcast-r1",
+  "parent_release": "20261112-mini-upload-r4",
+  "parent_archive_commit": "14bff276ba5d5b370735e2505f1e9e8eb6c6f68b",
+  "static_source_parent_commit": "020144b",
+  "scope": "Official Supabase Broadcast name invalidation for existing public author displays and comments. Preserve parent pages, UI, assets, model Viewer, upload and auth behavior.",
+  "sql_sha256": "fad789bedc427d69ce7a78e5e4b4ffc17b4d1dff20315d0a5f70a7e47258f38b",
+  "files": [
+    {
+      "path": "community-feed.js",
+      "sha256": "de457027078d4c84235d3653965acc3dd55c486ea9f53a75f0f0548dbdae2f00",
+      "size": 30977
+    },
+    {
+      "path": "community/main.dart.js",
+      "sha256": "bda1f6c6da57b32e36aa1d1b14baab5d307aaed06d5092107ab3c907992fff81",
+      "size": 4748518
+    },
+    {
+      "path": "community/flutter_bootstrap.js",
+      "sha256": "f176dcf04b24ac6900c4b0c53b0fbc43fa0f91dcf52c7f9360be866fc01ca989",
+      "size": 13458
+    },
+    {
+      "path": "community/shared-source-build.json",
+      "sha256": "9f0656ac78d1927f85495669889864662173ded3d2c061bb85e60b3fa621a8d8",
+      "size": 1133
+    },
+    {
+      "path": "miniprogram/main.dart.js",
+      "sha256": "184a4da3bb1fce1eb26a520b6fea3b5139fbed9e5df6f32c9c24b74c67ef2dd8",
+      "size": 4814510
+    },
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "sha256": "2ed681de98829b06462019128c63e0e1b30039f6f0d13cb6369168bee6339d18",
+      "size": 13091
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "sha256": "3fc111a31ba5dec18bf94f0e5a1497c3a6bb1694669d79ce1712b896b2f134ed",
+      "size": 1165
+    }
+  ],
+  "status": "prepared-not-yet-published"
+}
