@@ -4,7 +4,8 @@
   "extension": {
     "name": "pg_trgm",
     "installed_version": "1.6",
-    "installation_required": false
+    "installation_required": false,
+    "schema": "public"
   },
   "rpc": {
     "name": "community_search",
@@ -12,8 +13,7 @@
       "p_action",
       "p_query"
     ],
-    "security": "SECURITY INVOKER",
-    "statement_timeout": "5s"
+    "security": "SECURITY INVOKER"
   },
   "suggestions": {
     "candidate_retrieval": "literal case-folded SQL title prefix",
@@ -37,5 +37,6 @@
     "https://help.aliyun.com/en/rds/apsaradb-rds-for-postgresql/use-the-pg-bigm-extension-to-perform-fuzzy-match-based-queries",
     "https://www.postgresql.org/docs/18/pgtrgm.html"
   ],
-  "live_verification": "Pending release owner application and public/authenticated RPC reads"
+  "live_verification": "Pending release owner application and public/authenticated RPC reads",
+  "viewer_blocks": "authenticated callers load their RLS-scoped blocked IDs; anonymous branch never queries blocks"
 }
