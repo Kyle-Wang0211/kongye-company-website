@@ -1,6 +1,7 @@
 -- Extend the existing RPC with a candidate visibility check for the search engine.
--- Native PostgreSQL similarity() is the only relevance score. No extension,
--- dictionary, user/account data or server parameter is changed here.
+-- The deployed search adapter uses OpenSearch BM25 and completion ranking.
+-- Existing SQL suggest/search branches remain available through the original RPC.
+-- The visible action only revalidates current visibility and block rules.
 -- https://help.aliyun.com/zh/analyticdb/analyticdb-for-postgresql/user-guide/pg-trgm
 -- https://www.postgresql.org/docs/18/pgtrgm.html
 BEGIN;
