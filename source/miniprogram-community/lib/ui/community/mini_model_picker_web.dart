@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 @JS('window.pwOpenModelPicker')
 external JSPromise<JSBoolean> _openModelPicker(JSString value);
+@JS('window.pwCanUseModelPicker')
+external JSPromise<JSBoolean> _canUseModelPicker();
 @JS('window.pwConsumeModelHandoff')
 external JSString? _consumeModelHandoff();
 
@@ -51,10 +53,15 @@ Future<PlatformFile?> pickMiniModelFile() async {
       bytes: response.bodyBytes,
     );
   }
-  final response = await client.functions.invoke(
-    'mini-model-handoff',
-    body: {'action': 'create'},
+  final nativeAvailable = await _canUseModelPicker().toDart.timeout(
+    const Duration(seconds: 5),
   );
+  if (!nativeAvailable.toDart) {
+    throw StateError('请在微信小程序中选择文件');
+  }
+  final response = await client.functions
+      .invoke('mini-model-handoff', body: {'action': 'create'})
+      .timeout(const Duration(seconds: 30));
   final data = response.data;
   if (response.status != 200 ||
       data is! Map ||
@@ -67,6 +74,8 @@ Future<PlatformFile?> pickMiniModelFile() async {
       !RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(grant))
     throw StateError('文件选择暂不可用');
   // No session token or grant is placed in the native page URL.
-  await _openModelPicker('{"id":"$grantId","grant":"$grant"}'.toJS).toDart;
+  await _openModelPicker(
+    '{"id":"$grantId","grant":"$grant"}'.toJS,
+  ).toDart.timeout(const Duration(seconds: 10));
   return null;
 }

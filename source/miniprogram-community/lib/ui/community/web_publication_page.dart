@@ -510,8 +510,15 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _resetPreview();
         _selected = true;
       });
-    } catch (_) {
-      if (_current) setState(() => _message = '文件或模型选区不可用，请选择有效 GLB / PLY');
+    } catch (error) {
+      if (_current) {
+        setState(
+          () =>
+              _message = error is StateError && error.message == '请在微信小程序中选择文件'
+              ? '请在微信小程序中选择文件'
+              : '文件或模型选区不可用，请选择有效 GLB / PLY',
+        );
+      }
     } finally {
       if (_current) setState(() => _busy = false);
     }
