@@ -7,6 +7,7 @@ import 'package:characters/characters.dart';
 class SocialProfile {
   final String id;
   final String displayName;
+  final String? publicAccountNumber;
   final String? handle;
   final String? avatarUrl;
   final String? bio;
@@ -20,6 +21,7 @@ class SocialProfile {
   const SocialProfile({
     required this.id,
     required this.displayName,
+    this.publicAccountNumber,
     required this.handle,
     required this.avatarUrl,
     required this.bio,
@@ -37,6 +39,7 @@ class SocialProfile {
     return SocialProfile(
       id: id,
       displayName: displayName,
+      publicAccountNumber: _optionalString(map['public_account_number']),
       handle: _optionalString(map['handle']),
       avatarUrl: _optionalString(map['avatar_url']),
       bio: _optionalString(map['bio']),
@@ -52,6 +55,7 @@ class SocialProfile {
   }
 
   SocialProfile copyWith({
+    String? publicAccountNumber,
     int? followersCount,
     int? followingCount,
     int? publicWorksCount,
@@ -61,6 +65,7 @@ class SocialProfile {
     return SocialProfile(
       id: id,
       displayName: displayName,
+      publicAccountNumber: publicAccountNumber ?? this.publicAccountNumber,
       handle: handle,
       avatarUrl: avatarUrl,
       bio: bio,

@@ -64,6 +64,13 @@ class MeProfileHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(name, style: AetherTextStyles.h2),
+                    if (value?.publicAccountNumber != null) ...[
+                      const SizedBox(height: AetherSpacing.xs),
+                      Text(
+                        '窗后城号 ${value!.publicAccountNumber}',
+                        style: AetherTextStyles.bodySm,
+                      ),
+                    ],
                     if (identity.isNotEmpty) ...[
                       const SizedBox(height: AetherSpacing.xs),
                       Text(identity, style: AetherTextStyles.bodySm),

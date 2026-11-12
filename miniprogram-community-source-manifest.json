@@ -2882,8 +2882,8 @@
     },
     {
       "path": "lib/community/community_search_service.dart",
-      "sha256": "246ce9cadad70ee02c51201b5bcd27104602b9e541e115c3ba9d5b89176d7f7e",
-      "size": 1804
+      "sha256": "fc74702aca4bea9e0facf24f049ca3d4584c8aeb7f15dd96e2cc265f532b7214",
+      "size": 3291
     },
     {
       "path": "lib/community/community_service.dart",
@@ -2967,8 +2967,8 @@
     },
     {
       "path": "lib/community/social_profile_models.dart",
-      "sha256": "ae24f08819b94da56ed7a79e5c32b685b6fb4c6eb6fa11a5aee52418cd1912af",
-      "size": 11767
+      "sha256": "205b926879a59b7414ca005a3e5f19ddf912149391f99c796132868b27a3db99",
+      "size": 12017
     },
     {
       "path": "lib/community/social_profile_repository.dart",
@@ -4377,8 +4377,8 @@
     },
     {
       "path": "lib/ui/community/community_search_page.dart",
-      "sha256": "c42869884f75988feccb79d4164994bdc7c640a4f66a85905696d4acdec8848b",
-      "size": 5836
+      "sha256": "ed4e50d84d39132599fa8783773c988412200d9f263425d20083372e83514062",
+      "size": 14882
     },
     {
       "path": "lib/ui/community/current_author_name.dart",
@@ -4537,8 +4537,8 @@
     },
     {
       "path": "lib/ui/community/user_profile_page.dart",
-      "sha256": "04181d3d0bc4a1aedc3d2eaad33006f336d38c1b05be14c3e93d7c98c38bfcb0",
-      "size": 22028
+      "sha256": "752a3562ff8d18c65ac755e74c3601a7b8452a4122e9112e54a395f6678b2aac",
+      "size": 22360
     },
     {
       "path": "lib/ui/community/user_report_page.dart",
@@ -4652,8 +4652,8 @@
     },
     {
       "path": "lib/ui/me_profile_header.dart",
-      "sha256": "3e29e645d7c190aa4eb69ee1e8ff4943348d5d7b2b376b3263d834860f2ae022",
-      "size": 4909
+      "sha256": "d0d2612f14ae3c8a85db2d1443163bfe26f7e09cba665734e76003588df5ad61",
+      "size": 5240
     },
     {
       "path": "lib/ui/me_settings_drawer.dart",
@@ -6332,6 +6332,6 @@
     }
   ],
   "schema": "pw.community-source-export.v1",
-  "source_revision": "4bb336bbf539a9757b7b81fb632d8ebab692fdaf",
+  "source_revision": "b0eed0db9d77310eecb98e90d0c94eb538a26b82",
   "source_subdirectory": "source/miniprogram-community"
 }

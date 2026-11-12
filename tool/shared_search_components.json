@@ -1,0 +1,40 @@
+{
+  "applied": true,
+  "source": "App canonical product source",
+  "destination": "source/miniprogram-community",
+  "shared_files": [
+    {
+      "path": "lib/community/community_search_service.dart",
+      "source_sha256": "fc74702aca4bea9e0facf24f049ca3d4584c8aeb7f15dd96e2cc265f532b7214",
+      "previous_sha256": "246ce9cadad70ee02c51201b5bcd27104602b9e541e115c3ba9d5b89176d7f7e",
+      "changed": true
+    },
+    {
+      "path": "lib/ui/community/community_search_page.dart",
+      "source_sha256": "ed4e50d84d39132599fa8783773c988412200d9f263425d20083372e83514062",
+      "previous_sha256": "c42869884f75988feccb79d4164994bdc7c640a4f66a85905696d4acdec8848b",
+      "changed": true
+    },
+    {
+      "path": "lib/ui/community/search_suggestion_list.dart",
+      "source_sha256": "04585565fe6e0bcee684269574d3e6051f0715cc721dd6caa80cab220d1e7f18",
+      "previous_sha256": "04585565fe6e0bcee684269574d3e6051f0715cc721dd6caa80cab220d1e7f18",
+      "changed": false
+    }
+  ],
+  "existing_host_dependencies": [
+    "lib/community/community_service.dart",
+    "lib/community/feed_models.dart",
+    "lib/community/social_profile_models.dart",
+    "lib/community/social_profile_repository.dart",
+    "lib/l10n/app_localizations.dart",
+    "lib/ui/community/community_loading.dart",
+    "lib/ui/community/generated_account_avatar.dart",
+    "lib/ui/community/masonry_layout.dart",
+    "lib/ui/community/masonry_policy.dart",
+    "lib/ui/community/user_profile_page.dart",
+    "lib/ui/community/work_card.dart"
+  ],
+  "source_revision": "4135eab26d52ba581b0ee1c12bc98c261c4aa061",
+  "profile_number_delta_revision": "c4e72788b83948987f7d7f7b407bb96aafc4f189"
+}

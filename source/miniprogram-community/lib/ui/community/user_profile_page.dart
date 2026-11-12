@@ -433,6 +433,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _nickname(profile, compact: compact),
+                      if (profile.publicAccountNumber != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          '窗后城号 ${profile.publicAccountNumber}',
+                          style: AetherTextStyles.bodySm,
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 28,

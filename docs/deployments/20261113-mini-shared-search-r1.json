@@ -1,0 +1,27 @@
+{
+  "scope": "shared App and mini work/user live search page, existing two-column work cards, public user follow row and profile account number",
+  "canonical_revision": "4135eab26d52ba581b0ee1c12bc98c261c4aa061",
+  "profile_number_delta": "c4e72788b83948987f7d7f7b407bb96aafc4f189",
+  "source_parent": "b0eed0db9d77310eecb98e90d0c94eb538a26b82",
+  "files": [
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "base_sha256": "7873be2e05aa7d87b1e57a0a0f4db224b6c6ba464e34022849eb997bd3361303",
+      "sha256": "e6882d53855926316e8133aa4de2d326a876f0c7daed5a3ca1f52bb4d8ce4995",
+      "bytes": 13090
+    },
+    {
+      "path": "miniprogram/main.dart.js",
+      "base_sha256": "21823ce72123932a431b18f213358c96c7d7b46d2519a4b47fc215b77a9baadb",
+      "sha256": "186ca8e541953143c09ea491f32a4376a42c489c64687b3c90f2f9e383808daf",
+      "bytes": 4842670
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "base_sha256": "e9a9a27a48065976eb0deae79e0ab680ef8fa61968c32a43d353ab6df3bc9bb2",
+      "sha256": "a097cad1e7ad183d5554758fd3c7dd6953b8243c512b515d0cc18c05d9ee6326",
+      "bytes": 1165
+    }
+  ],
+  "status": "candidate-built"
+}
