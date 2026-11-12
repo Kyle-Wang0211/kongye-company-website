@@ -17,7 +17,7 @@ test('missing native callback resolves unavailable after its bounded wait',async
  const result=window.pwCanUseModelPicker();timers[0]();assert.equal(await result,false);
 });
 test('official native environment is accepted',async()=>{
- const {window}=load('MicroMessenger',{getEnv(options){options.success({miniprogram:true});}});
+ const {window}=load('MicroMessenger',{getEnv(callback){assert.equal(typeof callback,'function');callback({miniprogram:true});}});
  assert.equal(await window.pwCanUseModelPicker(),true);
 });
 
@@ -25,7 +25,7 @@ const draft=JSON.stringify({id:'00000000-0000-4000-8000-000000000002',grant:'A'.
 test('late environment callback cannot post a grant or redirect after timeout',async()=>{
  let callback,posts=0,redirects=0;
  const {window,timers}=load('MicroMessenger',{
-  getEnv(options){callback=options.success;},postMessage(){posts++;},redirectTo(){redirects++;},
+  getEnv(fn){assert.equal(typeof fn,'function');callback=fn;},postMessage(){posts++;},redirectTo(){redirects++;},
  });
  const result=assert.rejects(window.pwOpenModelPicker(draft),/native_picker_timeout/);
  timers[0]();await result;callback({miniprogram:true});
@@ -34,7 +34,7 @@ test('late environment callback cannot post a grant or redirect after timeout',a
 test('timeout covers redirect completion and ignores its late callbacks',async()=>{
  let callbacks;
  const {window,timers}=load('MicroMessenger',{
-  getEnv(options){options.success({miniprogram:true});},postMessage(){},redirectTo(options){callbacks=options;},
+  getEnv(callback){assert.equal(typeof callback,'function');callback({miniprogram:true});},postMessage(){},redirectTo(options){callbacks=options;},
  });
  const result=assert.rejects(window.pwOpenModelPicker(draft),/native_picker_timeout/);
  timers[0]();await result;callbacks.success();callbacks.fail(Error('late'));

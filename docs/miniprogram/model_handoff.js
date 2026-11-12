@@ -14,8 +14,7 @@
       if (!mini || !/MicroMessenger/i.test(navigator.userAgent)) { resolve(false); return; }
       var timer = setTimeout(function () { resolve(false); }, 3000);
       try {
-        mini.getEnv({ success: function (env) { clearTimeout(timer); resolve(env.miniprogram === true); },
-          fail: function () { clearTimeout(timer); resolve(false); } });
+        mini.getEnv(function (env) { clearTimeout(timer); resolve(env.miniprogram === true); });
       } catch (_) { clearTimeout(timer); resolve(false); }
     });
   };
@@ -34,7 +33,7 @@
         if (error) reject(error); else resolve(true);
       }
       try {
-        mini.getEnv({ success: function (env) {
+        mini.getEnv(function (env) {
           if (settled) return;
           if (!env.miniprogram) { finish(Error('native_picker_unavailable')); return; }
           try {
@@ -42,7 +41,7 @@
             mini.redirectTo({ url: '/pages/model-upload/index?id=' + encodeURIComponent(draft.id),
               success: function () { finish(); }, fail: finish });
           } catch (error) { finish(error); }
-        }, fail: finish });
+        });
       } catch (error) { finish(error); }
 
     });

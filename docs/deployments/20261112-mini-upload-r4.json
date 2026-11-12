@@ -1,0 +1,43 @@
+{
+  "scope": "mini-program official getEnv function callback signature",
+  "server_parent_release": "20261112-mini-upload-r3",
+  "main_reused": true,
+  "build_receipt": {
+    "font_cache_identity": [
+      {
+        "original": "fonts/MaterialIcons-Regular.otf",
+        "asset": "fonts/MaterialIcons-Regular.1ec799ea1f1f78fd.otf",
+        "sha256": "1ec799ea1f1f78fd1bce7af7b7b56848c5b06d917f7c2522abbefe318cc69cb5"
+      },
+      {
+        "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
+        "asset": "packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+        "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d"
+      }
+    ],
+    "entrypoint": "lib/main_community_web.dart",
+    "base_href": "/miniprogram/",
+    "native_entrypoint": "lib/main.dart",
+    "capabilities": {
+      "PW_COMMUNITY_FAVORITES_ENABLED": "true",
+      "PW_COMMUNITY_MESSAGING_READY": "true",
+      "PW_COMMUNITY_PROFILES_ENABLED": "true"
+    },
+    "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
+    "main_js_sha256": "81334b77bcd1b9711032a41a28b6c9ed262e4ee33741ef87424ad986cd5b0934",
+    "status": "asset-updated-local-not-deployed",
+    "source_revision": "1bbb03fc20fc08eae054ea5bfeebabf0a0a56a15",
+    "source_manifest_sha256": "a86bbb5c5361926cc1c65b75360b1af5fcac1c0373a2c4fd4baaf4d8a66c4001",
+    "asset_only_update": {
+      "compiled_main_reused": true,
+      "prior_receipt_sha256": "036cab8f8b6cc9db22ac57fad9cbda1e1e4d92154269f1baba2c25cf02ad582b",
+      "changed_assets": [
+        "web/model_handoff.js"
+      ],
+      "official_jssdk_sha256": "0f17c4f7daf51a49a9627714ad2da6c037352442699ba8ceca68b7c6dc0b1dba"
+    }
+  },
+  "official_source": "https://res.wx.qq.com/open/js/jweixin-1.6.0.js",
+  "tests": "5 tests with official function callback shape passed, including late callback guards",
+  "status": "candidate-not-yet-deployed"
+}
