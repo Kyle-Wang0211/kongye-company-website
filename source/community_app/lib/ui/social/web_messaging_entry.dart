@@ -10,6 +10,7 @@ import '../../config/endpoint_config.dart';
 import '../design_system.dart';
 import 'web_conversation_page.dart';
 import 'web_messages_page.dart';
+import '../community/notifications/official_notifications_page.dart';
 
 @immutable
 class WebMessagingPeer {
@@ -235,14 +236,28 @@ class _WebMessagingEntryState extends State<WebMessagingEntry> {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('私信')),
-      body: WebMessagesPage(
-        key: ValueKey('${widget.ownerId}:$_inboxRevision'),
-        loadConversations: repository?.available == true
-            ? repository!.inbox
-            : null,
-        onOpen: _open,
-        isEnglish: Localizations.localeOf(context).languageCode != 'zh',
+      appBar: AppBar(
+        title: Text(
+          Localizations.localeOf(context).languageCode == 'zh'
+              ? '消息'
+              : 'Messages',
+        ),
+      ),
+      body: Column(
+        children: [
+          OfficialNotificationsTile(ownerId: widget.ownerId),
+          const Divider(height: 1),
+          Expanded(
+            child: WebMessagesPage(
+              key: ValueKey('${widget.ownerId}:$_inboxRevision'),
+              loadConversations: repository?.available == true
+                  ? repository!.inbox
+                  : null,
+              onOpen: _open,
+              isEnglish: Localizations.localeOf(context).languageCode != 'zh',
+            ),
+          ),
+        ],
       ),
     );
   }
