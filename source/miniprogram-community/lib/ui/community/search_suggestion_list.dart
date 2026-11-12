@@ -38,7 +38,7 @@ class SearchSuggestionList extends StatelessWidget {
             tooltip: fillTooltip,
             onPressed: () => onFill(title),
             icon: const Text(
-              '↖',
+              '↖\uFE0E',
               style: TextStyle(fontSize: 24, color: Colors.black),
             ),
           ),

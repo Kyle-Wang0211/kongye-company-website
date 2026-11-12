@@ -20,8 +20,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
-  "main_js_sha256": "599f0b88e3552d1bd1788981204025ba2b12d1510e17648e4586a946b480d000",
+  "main_js_sha256": "3cab9102a3ab33fdd7aefb00a72073fa4be3b5f96c28db63b71c85a3c5c01df7",
   "status": "built-local-not-deployed",
-  "source_revision": "f1e94cf56c69b23d210222bfc22cf19fddb879c3",
-  "source_manifest_sha256": "1e53c146663ab59d6c8367f989f34bf6fed39f44b578f388550fadc445e019d7"
+  "source_revision": "5ce0b77562972fd55f15187b7b68f443ba1f0df4",
+  "source_manifest_sha256": "56f0d8a430e3c170b02c735b4347d4348b212caad89ab2ba27014b8b20f1f9e0"
 }

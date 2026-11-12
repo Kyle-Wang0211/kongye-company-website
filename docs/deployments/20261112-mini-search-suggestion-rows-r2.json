@@ -1,0 +1,27 @@
+{
+  "scope": "VS15 text presentation for search arrow only",
+  "source_parent": "5ce0b77562972fd55f15187b7b68f443ba1f0df4",
+  "website_parent": "20261112-mini-search-suggestion-rows-r1",
+  "component_sha256": "d331b27f79680c70c3cedca20aa353cda37fdb6fef8b6dadd48f0051e4c9a4fb",
+  "files": [
+    {
+      "path": "miniprogram/main.dart.js",
+      "base_sha256": "599f0b88e3552d1bd1788981204025ba2b12d1510e17648e4586a946b480d000",
+      "sha256": "3cab9102a3ab33fdd7aefb00a72073fa4be3b5f96c28db63b71c85a3c5c01df7",
+      "bytes": 4815668
+    },
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "base_sha256": "8d3289b234fe97dc682a3054f85be57b8d950c34f3bc470bd3c95c2a1f81e693",
+      "sha256": "2b4819e7144ccbc0206cf57558650ed6ef176687b1c27b98b2839e8eb6e98846",
+      "bytes": 13091
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "base_sha256": "02a0c426399ad879588a3bdc71c5002e00e4875011e55d509be192fce7dc41df",
+      "sha256": "3b5eaa3f38c4e24d77f4ef6d5e2e127a9ea1f79445d8fcfe29d236043a0f971d",
+      "bytes": 1165
+    }
+  ],
+  "status": "candidate-built"
+}
