@@ -1,3 +1,4 @@
+import 'community/community_search_page.dart';
 import 'community/community_discovery_controls.dart';
 // Community image feed. Only published cover images are prepared here.
 // Models and the shared 3D viewer load only after opening work detail.
@@ -618,6 +619,11 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
     selected: _category,
     controller: _searchController,
     onSearch: _onQuerySubmitted,
+    onOpenSearch: () => Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => CommunitySearchPage(onWorkSelected: _openWork),
+      ),
+    ),
     onClear: _onClearQuery,
     onChanged: (category) {
       if (category == _category) return;

@@ -6,9 +6,11 @@ class CommunityBottomTabBar extends StatelessWidget {
     super.key,
     required this.current,
     required this.onChanged,
+    this.creationButton,
   });
   final String current;
   final ValueChanged<String> onChanged;
+  final Widget? creationButton;
   @override
   Widget build(BuildContext context) => Material(
     color: AetherColors.bgCanvas,
@@ -23,7 +25,9 @@ class CommunityBottomTabBar extends StatelessWidget {
               'activities': ('活动', Icons.local_activity_outlined),
               'messages': ('消息', Icons.chat_bubble_outline_rounded),
               'profile': ('我', Icons.person_outline_rounded),
-            }.entries)
+            }.entries) ...[
+              if (entry.key == 'messages' && creationButton != null)
+                Expanded(child: Center(child: creationButton)),
               Expanded(
                 child: InkWell(
                   onTap: () => onChanged(entry.key),
@@ -43,6 +47,7 @@ class CommunityBottomTabBar extends StatelessWidget {
                   ),
                 ),
               ),
+            ],
           ],
         ),
       ),

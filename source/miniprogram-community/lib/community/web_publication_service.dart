@@ -158,7 +158,12 @@ class _SupabaseWebPublicationPorts implements WebPublicationPorts {
           path,
           token,
           bytes,
-          const FileOptions(contentType: 'model/gltf-binary', upsert: false),
+          FileOptions(
+            contentType: path.endsWith('.ply')
+                ? 'application/octet-stream'
+                : 'model/gltf-binary',
+            upsert: false,
+          ),
         );
     onBytesSent?.call(bytes.length, bytes.length);
   }
@@ -299,6 +304,7 @@ class WebPublicationService {
   /// falls back to sparse PLY or creates a new UUID after an ambiguous response.
   Future<WebPublicationStatus> submit({
     required Uint8List bytes,
+    String format = 'glb',
     required String title,
     String description = '',
     required String idempotencyKey,
@@ -321,18 +327,29 @@ class WebPublicationService {
     try {
       onProgress?.call('reading', 0);
       final size = snapshot.length;
-      if (size < 20 || size > maxSourceBytes) {
+      if (!const {'glb', 'ply'}.contains(format) ||
+          size < 20 ||
+          size > maxSourceBytes) {
         throw const WebPublicationException('invalid_glb_source');
       }
       final header = snapshot.sublist(0, 12);
-      if (header.length != 12 ||
-          header[0] != 0x67 ||
-          header[1] != 0x6c ||
-          header[2] != 0x54 ||
-          header[3] != 0x46 ||
-          ByteData.sublistView(header).getUint32(4, Endian.little) != 2 ||
-          ByteData.sublistView(header).getUint32(8, Endian.little) != size) {
+      if (format == 'glb' &&
+          (header.length != 12 ||
+              header[0] != 0x67 ||
+              header[1] != 0x6c ||
+              header[2] != 0x54 ||
+              header[3] != 0x46 ||
+              ByteData.sublistView(header).getUint32(4, Endian.little) != 2 ||
+              ByteData.sublistView(header).getUint32(8, Endian.little) !=
+                  size)) {
         throw const WebPublicationException('invalid_glb_source');
+      }
+      if (format == 'ply' &&
+          !utf8
+              .decode(snapshot.sublist(0, 5), allowMalformed: true)
+              .replaceAll('\r', '')
+              .startsWith('ply\n')) {
+        throw const WebPublicationException('invalid_model_source');
       }
       final hash = sha256.convert(snapshot).toString();
       if (expectedSourceSha256 != null && hash != expectedSourceSha256) {
@@ -350,7 +367,7 @@ class WebPublicationService {
         'action': 'initiate',
         'title': title.trim(),
         'description': description.trim(),
-        'format': 'glb',
+        'format': format,
         'byte_length': size,
         'source_sha256': hash,
         'idempotency_key': idempotencyKey,
@@ -372,7 +389,7 @@ class WebPublicationService {
           : 'publication-selection-staging';
       if (upload is! Map ||
           bucket != expectedBucket ||
-          upload['path'] != '$uid/$submissionId/source.glb' ||
+          upload['path'] != '$uid/$submissionId/source.$format' ||
           upload['token'] is! String ||
           (upload['token'] as String).isEmpty ||
           (upload['token'] as String).length > 8192 ||

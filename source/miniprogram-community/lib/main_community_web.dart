@@ -295,6 +295,9 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
             child: child,
             builder: (context, navigator) => CommunityNavigationFrame(
               controller: _navigationController,
+              navigatorKey: _communityNavigator,
+              onUpload: () =>
+                  _communityNavigator.currentState?.pushNamed<void>('/publish'),
               visible: communitySidebarVisible(
                 _entryUri,
                 _sidebarRoutes.currentRoute,

@@ -8,11 +8,13 @@ class CommunityDiscoveryHeader extends StatefulWidget {
     required this.controller,
     required this.onSearch,
     required this.onClear,
+    this.onOpenSearch,
   });
   final String selected;
   final ValueChanged<String> onChanged, onSearch;
   final TextEditingController controller;
   final VoidCallback onClear;
+  final VoidCallback? onOpenSearch;
   @override
   State<CommunityDiscoveryHeader> createState() =>
       _CommunityDiscoveryHeaderState();
@@ -70,7 +72,9 @@ class _CommunityDiscoveryHeaderState extends State<CommunityDiscoveryHeader> {
             IconButton(
               tooltip: '搜索',
               icon: const Icon(Icons.search, size: 26),
-              onPressed: () => setState(() => _searchOpen = !_searchOpen),
+              onPressed:
+                  widget.onOpenSearch ??
+                  () => setState(() => _searchOpen = !_searchOpen),
             ),
             const SizedBox(width: 4),
           ],

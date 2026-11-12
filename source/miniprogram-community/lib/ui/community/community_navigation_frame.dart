@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'community_bottom_tab_bar.dart';
+import 'mini_program_create_button.dart';
 
 /// Guards document exits while keeping pushed pages and their drafts mounted.
 class CommunityNavigationController {
@@ -46,6 +47,8 @@ class CommunityNavigationFrame extends StatelessWidget {
     required this.onSettings,
     this.onOpenFiling,
     this.onActivities,
+    this.onUpload,
+    this.navigatorKey,
     this.visible = true,
     this.selectedDestination = 'profile',
   });
@@ -54,7 +57,8 @@ class CommunityNavigationFrame extends StatelessWidget {
   final bool visible;
   final String selectedDestination;
   final VoidCallback onHome, onFollowing, onMyProfile, onMessages, onSettings;
-  final VoidCallback? onOpenFiling, onActivities;
+  final VoidCallback? onOpenFiling, onActivities, onUpload;
+  final GlobalKey<NavigatorState>? navigatorKey;
   @override
   Widget build(BuildContext context) => CommunityNavigationScope(
     controller: controller,
@@ -69,6 +73,12 @@ class CommunityNavigationFrame extends StatelessWidget {
         ),
         if (visible)
           CommunityBottomTabBar(
+            creationButton: onUpload == null
+                ? null
+                : MiniProgramCreateButton(
+                    navigatorKey: navigatorKey,
+                    onUpload: onUpload!,
+                  ),
             current: selectedDestination == 'settings'
                 ? 'profile'
                 : selectedDestination,

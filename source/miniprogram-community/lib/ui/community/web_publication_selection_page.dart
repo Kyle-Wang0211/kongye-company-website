@@ -2,8 +2,10 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
+
 import '../../official_capture/selection_box.dart';
 
 import '../official_capture/cloud_camera.dart';
@@ -12,7 +14,7 @@ import '../official_capture/selection_rect_handles.dart';
 import '../official_capture/web_publication_camera_controls.dart'
     show CloudViewCamera, CloudViewController;
 
-/// null route result is cancellation; box == null explicitly retains all GLB.
+/// null route result is cancellation; box == null explicitly retains all 模型.
 class WebPublicationSelectionResult {
   const WebPublicationSelectionResult({this.box});
   final SelectionBox? box;
@@ -20,8 +22,13 @@ class WebPublicationSelectionResult {
 
 /// Publication-only draft. Never reads or writes the capture selection archive.
 class WebPublicationSelectionPage extends StatefulWidget {
-  const WebPublicationSelectionPage({super.key, required this.bytes});
+  const WebPublicationSelectionPage({
+    super.key,
+    required this.bytes,
+    this.format = SharedModelFormat.glb,
+  });
   final Uint8List bytes;
+  final SharedModelFormat format;
 
   @override
   State<WebPublicationSelectionPage> createState() =>
@@ -39,6 +46,8 @@ class _WebPublicationSelectionPageState
   String? _error;
   bool _busy = false, _keepAll = false, _showAdjustment = false;
   bool get _supportedModel => true;
+  bool get _retainFullPly => widget.format == SharedModelFormat.ply;
+  bool _fullModelReady = false;
 
   double _span = 1;
   Timer? _cameraPoll;
@@ -48,7 +57,7 @@ class _WebPublicationSelectionPageState
   void initState() {
     super.initState();
     _controls.addListener(_moveCamera);
-    if (!_supportedModel) _error = '发布选区只支持 GLB 模型';
+    if (!_supportedModel) _error = '模型格式不可用';
   }
 
   void _fail(Object error) {
@@ -59,21 +68,29 @@ class _WebPublicationSelectionPageState
     final viewer = _controller;
     _viewer = viewer;
     try {
-      await viewer.loadBytes(widget.bytes, format: SharedModelFormat.glb);
+      await viewer.loadBytes(widget.bytes, format: widget.format);
+      if (_retainFullPly) {
+        if (mounted)
+          setState(() {
+            _keepAll = true;
+            _fullModelReady = true;
+          });
+        return;
+      }
       final bounds = await viewer.getSelectionBounds();
       List<double> read(String key) {
         final raw = bounds?[key];
         if (raw is! List ||
             raw.length != 3 ||
             raw.any((v) => v is! num || !v.isFinite)) {
-          throw StateError('无法读取原始 GLB 边界');
+          throw StateError('无法读取原始 模型 边界');
         }
         return raw.map((v) => (v as num).toDouble()).toList();
       }
 
       final min = read('min'), max = read('max');
       if (List.generate(3, (i) => max[i] <= min[i]).any((v) => v)) {
-        throw StateError('GLB 边界无效');
+        throw StateError('模型 边界无效');
       }
       _span = List.generate(3, (i) => max[i] - min[i]).reduce(math.max);
       final initial = SelectionBox.initialSquareFace(
@@ -187,13 +204,15 @@ class _WebPublicationSelectionPageState
     if (_busy) return;
     try {
       await _queue;
-      await _viewer?.setSelectionPreview(null);
-      await _viewer?.endSelectionEditing();
+      if (!_retainFullPly) {
+        await _viewer?.setSelectionPreview(null);
+        await _viewer?.endSelectionEditing();
+      }
       if (!mounted) return;
       if (cancel) {
         Navigator.of(context).pop();
       } else {
-        if (_error != null || _box == null) return;
+        if (_error != null || (_box == null && !_fullModelReady)) return;
         Navigator.of(
           context,
         ).pop(WebPublicationSelectionResult(box: _keepAll ? null : _box));
@@ -467,7 +486,36 @@ class _WebPublicationSelectionPageState
                     ],
                   ),
                 ),
-              if (_box == null || _error != null)
+              if (_fullModelReady && _error == null)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 24,
+                  child: SafeArea(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () => _finish(cancel: true),
+                          child: const Text(
+                            '取消',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                          ),
+                          onPressed: () => _finish(),
+                          child: const Text('确认保留完整 PLY 模型'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if ((_box == null && !_fullModelReady) || _error != null)
                 SafeArea(
                   child: Column(
                     children: [

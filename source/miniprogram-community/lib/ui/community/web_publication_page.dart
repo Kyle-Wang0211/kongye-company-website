@@ -14,6 +14,8 @@ import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 
 import '../../community/web_publication_service.dart';
 import 'web_publication_selection_page.dart';
+import 'mini_model_picker_stub.dart'
+    if (dart.library.js_interop) 'mini_model_picker_web.dart';
 
 /// Private drafts never enter the public feed. Reload resumes status, never
 /// silently starts another submission after an ambiguous request.
@@ -93,7 +95,12 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         background: 0,
       );
       if (!current()) return;
-      await controller.loadBytes(bytes, format: SharedModelFormat.glb);
+      await controller.loadBytes(
+        bytes,
+        format: _format == 'ply'
+            ? SharedModelFormat.ply
+            : SharedModelFormat.glb,
+      );
       if (!current()) return;
       await controller.setSelectionPreview(_selection, decorations: false);
       if (!current()) return;
@@ -101,7 +108,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         await controller.setCameraFraming(_confirmedView!);
       if (current()) setState(() => _previewReady = true);
     } catch (_) {
-      if (current()) setState(() => _message = '3D 预览暂不可用，请重新选择 GLB');
+      if (current()) setState(() => _message = '3D 预览暂不可用，请重新选择 GLB / PLY');
     }
   }
 
@@ -209,7 +216,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _selected = _bytes != null;
         _coverEditing = true;
         _message = _bytes == null
-            ? '标题、描述和选区已保留。请选择同一 GLB 后重新确认封面。'
+            ? '标题、描述和选区已保留。请选择同一 GLB / PLY 后重新确认封面。'
             : '请调整 3D 取景并重新确认封面。';
       });
       _showPreview();
@@ -230,7 +237,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       if (_current && epoch == _previewEpoch)
         setState(() {
           _previewReady = false;
-          _message = '3D 预览暂不可用，请重新选择 GLB';
+          _message = '3D 预览暂不可用，请重新选择 GLB / PLY';
         });
     }
 
@@ -297,6 +304,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     );
   }
 
+  String _format = 'glb';
   Map<String, dynamic>? _selection;
   String? _key, _submission, _message, _sourceHash;
   WebPublicationStatus? _status;
@@ -317,7 +325,15 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     _auth = changes.listen((owner) {
       if (owner != _owner) _invalidateIdentity();
     });
-    unawaited(_restore());
+    unawaited(
+      _restore().then((_) {
+        if (_current && usesMiniModelPicker && _submission == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_current) unawaited(_pick());
+          });
+        }
+      }),
+    );
   }
 
   @override
@@ -370,16 +386,17 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _submission = editable ? null : draft['submission'] as String?;
         _coverEditing = editable;
         _sourceHash = draft['sha256'] as String?;
+        _format = draft['format'] == 'ply' ? 'ply' : 'glb';
         _selection = (draft['selection'] as Map?)?.cast<String, dynamic>();
         _confirmedView = (draft['initial_view'] as Map?)
             ?.cast<String, dynamic>();
         _title.text = draft['title'] as String? ?? '';
         _description.text = draft['description'] as String? ?? '';
         if (editable) {
-          _message = '标题、描述和选区已保留。请选择同一 GLB 后重新确认封面。';
+          _message = '标题、描述和选区已保留。请选择同一 GLB / PLY 后重新确认封面。';
         } else {
           _message = _submission == null
-              ? '上次提交结果未确认。重新选择同一 GLB 可安全重试。'
+              ? '上次提交结果未确认。重新选择同一 GLB / PLY 可安全重试。'
               : '正在查询上次提交';
         }
       });
@@ -404,6 +421,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         'sha256': _sourceHash,
         'selection': _selection,
         'initial_view': _confirmedView,
+        'format': _format,
         'title': _title.text,
         'description': _description.text,
       }),
@@ -439,22 +457,26 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       PlatformFile? file;
       if (widget.pickFileForTesting != null) {
         file = await widget.pickFileForTesting!();
+      } else if (usesMiniModelPicker) {
+        file = await pickMiniModelFile();
       } else {
         final result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
-          allowedExtensions: ['glb'],
+          allowedExtensions: ['glb', 'ply'],
           withData: true,
           allowMultiple: false,
         );
         file = result?.files.single;
       }
       if (!_current || file == null) return;
-      if (!file.name.toLowerCase().endsWith('.glb') ||
+      final format = file.name.split('.').last.toLowerCase();
+      if (!const {'glb', 'ply'}.contains(format) ||
           file.size > WebPublicationService.maxSourceBytes ||
           file.bytes == null) {
-        throw const WebPublicationException('请选择不超过 50 MB 的 GLB');
+        throw const WebPublicationException('请选择不超过 50 MB 的 GLB / PLY');
       }
       final bytes = file.bytes!;
+      _format = format;
       if (_key != null || (_bytes == null && _sourceHash != null)) {
         if (sha256.convert(bytes).toString() != _sourceHash) {
           throw const WebPublicationException('source_changed');
@@ -470,7 +492,12 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       final route = MaterialPageRoute<WebPublicationSelectionResult>(
         builder: (context) =>
             widget.selectionBuilderForTesting?.call(context, bytes) ??
-            WebPublicationSelectionPage(bytes: bytes),
+            WebPublicationSelectionPage(
+              bytes: bytes,
+              format: _format == 'ply'
+                  ? SharedModelFormat.ply
+                  : SharedModelFormat.glb,
+            ),
       );
       _selectionRoute = route;
       final selection = await Navigator.of(context).push(route);
@@ -484,7 +511,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         _selected = true;
       });
     } catch (_) {
-      if (_current) setState(() => _message = '文件或模型选区不可用，请选择有效 GLB');
+      if (_current) setState(() => _message = '文件或模型选区不可用，请选择有效 GLB / PLY');
     } finally {
       if (_current) setState(() => _busy = false);
     }
@@ -515,6 +542,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       if (!_current) return;
       final status = await _service.submit(
         bytes: _bytes!,
+        format: _format,
         title: _title.text,
         description: _description.text,
         idempotencyKey: _key!,
@@ -651,7 +679,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                         ? null
                         : _pick,
                     icon: const Icon(Icons.upload_file),
-                    label: Text(_selected ? '重新选择 GLB / 调整选区' : '选择 GLB'),
+                    label: Text(
+                      _selected ? '重新选择 GLB / PLY / 调整选区' : '选择 GLB / PLY',
+                    ),
                   ),
                   if (_selected)
                     Text(_selection == null ? '保留整个模型' : '已确认模型选区'),
