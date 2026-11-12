@@ -37,9 +37,10 @@ class SearchSuggestionList extends StatelessWidget {
           trailing: IconButton(
             tooltip: fillTooltip,
             onPressed: () => onFill(title),
-            icon: const Text(
-              '↖\uFE0E',
-              style: TextStyle(fontSize: 24, color: Colors.black),
+            icon: const Icon(
+              Icons.north_west,
+              size: 24,
+              color: Colors.black,
             ),
           ),
           onTap: () => onSearch(title),

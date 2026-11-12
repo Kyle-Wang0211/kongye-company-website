@@ -1,0 +1,39 @@
+{
+  "scope": "replace colored emoji with existing monochrome Material north_west icon only",
+  "website_parent": "20261112-mini-search-suggestion-rows-r2",
+  "component_sha256": "04585565fe6e0bcee684269574d3e6051f0715cc721dd6caa80cab220d1e7f18",
+  "files": [
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "base_sha256": "2b4819e7144ccbc0206cf57558650ed6ef176687b1c27b98b2839e8eb6e98846",
+      "sha256": "7873be2e05aa7d87b1e57a0a0f4db224b6c6ba464e34022849eb997bd3361303",
+      "bytes": 13091
+    },
+    {
+      "path": "miniprogram/main.dart.js",
+      "base_sha256": "3cab9102a3ab33fdd7aefb00a72073fa4be3b5f96c28db63b71c85a3c5c01df7",
+      "sha256": "21823ce72123932a431b18f213358c96c7d7b46d2519a4b47fc215b77a9baadb",
+      "bytes": 4815526
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "base_sha256": "3b5eaa3f38c4e24d77f4ef6d5e2e127a9ea1f79445d8fcfe29d236043a0f971d",
+      "sha256": "e9a9a27a48065976eb0deae79e0ab680ef8fa61968c32a43d353ab6df3bc9bb2",
+      "bytes": 1165
+    },
+    {
+      "path": "miniprogram/assets/FontManifest.json",
+      "base_sha256": "b33d323d7b0194cfb52067aefd2b7fb5ca25e0c471311e5a77500198491299e3",
+      "sha256": "66d21b33ffa69c307c3ed1aa1c0e8c576c27ee88923d0d090f56a41f9b39ddd9",
+      "bytes": 243
+    },
+    {
+      "path": "miniprogram/assets/fonts/MaterialIcons-Regular.821071d902c41a88.otf",
+      "base_sha256": null,
+      "sha256": "821071d902c41a881bf2e68b7c043a35232bd78463a427983f94d1f2ed1aa9fc",
+      "bytes": 17668
+    }
+  ],
+  "status": "candidate-built",
+  "build_note": "Compiler success24.2s. Final source guard saw receipt-only HEAD advance, all input files hash-verified unchanged and existing font versioning/receipt steps completed without recompiling."
+}

@@ -1,6 +1,6 @@
 {
   "canonical_component": "App/lib/ui/community/search_suggestion_list.dart",
-  "sha256": "d331b27f79680c70c3cedca20aa353cda37fdb6fef8b6dadd48f0051e4c9a4fb",
+  "sha256": "04585565fe6e0bcee684269574d3e6051f0715cc721dd6caa80cab220d1e7f18",
   "copies": [
     "source/miniprogram-community/lib/ui/community/search_suggestion_list.dart"
   ],
