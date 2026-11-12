@@ -90,7 +90,7 @@ html.community-light #work-dialog iframe{background:#000}
    Keep these rules scoped to loading placeholders. */
 .community-skeleton{border-radius:4px}
 .community-skeleton .community-picture.is-loading{border:0;border-radius:0}
-.community-skeleton .skeleton-information{padding:6px 8px}
+.community-skeleton .skeleton-information{padding:6px 8px;background:#f5f5f5}
 .community-skeleton .skeleton-title{height:17px;margin:0 0 4px;width:100%;border-radius:8px}
 .community-skeleton .skeleton-author-row{display:flex;align-items:center;gap:0;height:24px}
 .community-skeleton .skeleton-avatar{width:16px;height:16px;margin-right:4px;flex:none;border-radius:8px}
