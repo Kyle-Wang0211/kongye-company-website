@@ -8,16 +8,16 @@
   <title data-i18n="siteTitle">窗后城 — 让空间，留在身边。</title>
   <link rel="preconnect" href="https://api.kongye.space" crossorigin>
   <link rel="canonical" href="https://kongye.space/">
-  <link rel="stylesheet" href="styles.css?v=mini-loading-standard-20261110-r1">
-  <link rel="stylesheet" href="community-shell.css?v=account-library-20261106-v44">
-  <link rel="stylesheet" href="community-screens.css?v=resort-guide-20261106-v45">
+  <link rel="stylesheet" href="styles.css?v=discovery-20261110-v2">
+  <link rel="stylesheet" href="community-shell.css?v=natural-masonry-20261110-v1">
+  <link rel="stylesheet" href="community-screens.css?v=cover16x9-20261110">
   <link rel="stylesheet" href="community-account-menu.css?v=account-library-20261106-v44">
-  <script src="community-screens.mjs?v=account-library-20261106-v44" type="module"></script>
+  <script src="community-screens.mjs?v=cover16x9-20261110-r2" type="module"></script>
   <script defer src="vendor/supabase/supabase-2.112.0.js"></script>
   <script src="community-settings.mjs?v=sidebar-parity-20261109-v1" type="module"></script>
   <script src="community-account.mjs?v=account-restore-20261109-v2" type="module"></script>
   <script src="community-following.mjs?v=sidebar-parity-20261109-v1" type="module"></script>
-  <script src="community-feed.js?v=mini-loading-standard-20261110-r1" type="module"></script>
+  <script src="community-feed.js?v=search-author-20261112-r1" type="module"></script>
 </head>
 <body class="community-shell">
   <a class="skip" href="#main" data-i18n="siteSkip">跳至正文</a>
@@ -36,7 +36,12 @@
     </div>
   </aside>
   <header class="site-header community-header wrap">
-    <span class="community-section-label" data-i18n="siteCommunity">社区</span>
+    <form id="community-search" class="community-search" role="search" aria-label="搜索社区作品">
+      <label class="visually-hidden" for="community-query">搜索作品关键词</label>
+      <input id="community-query" name="q" type="search" placeholder="搜索作品关键词" autocomplete="off" maxlength="120">
+      <button id="community-search-clear" type="button" aria-label="清除搜索" hidden>×</button>
+      <button id="community-search-submit" type="submit" aria-label="搜索"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>搜索</span></button>
+    </form>
     <a class="header-action" data-i18n-aria="navMessages" aria-label="消息" href="community/#/messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11a9 9 0 0 1-9 9H3v-9a9 9 0 0 1 18 0Z"/></svg><span data-i18n="navMessages">消息</span></a>
     <a id="upload-work" data-i18n-aria="navUpload" aria-label="上传作品" class="header-action" href="community/?publish=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6"/></svg><span data-i18n="navUpload">上传作品</span></a>
     <nav id="account-nav" aria-label="账号" aria-busy="true">
@@ -50,17 +55,18 @@
     <div class="community-screen-overflow">
     <section id="top" class="community-screen-section wrap" aria-label="精选屏幕" data-i18n-aria="siteScreenStage">
       <div class="community-screen-stage">
-        <a class="community-feature-screen community-screen-event" data-position="left" href="screen.html?screen=1" aria-label="瓷影 · 古瓷文物展"><img src="assets/events/porcelain-ink.png" width="1536" height="1024" alt="瓷影 · 古瓷文物展，水墨瓷器与庭院"></a>
-        <a class="community-feature-screen community-screen-event" data-position="center" href="screen.html?screen=2" aria-label="屏幕 2 · 水墨山水"><img src="assets/events/landscape-ink.png" width="1536" height="1024" alt="水墨山水"></a>
-        <a class="community-feature-screen community-screen-event" data-position="right" href="screen.html?screen=3" aria-label="屏幕 3 · 水墨庭院"><img src="assets/events/courtyard-ink.png" width="1536" height="1024" alt="水墨庭院"></a>
       </div>
       <nav class="community-screen-switcher" aria-label="切换屏幕" data-i18n-aria="siteScreenSelection">
-        <button class="community-screen-choice" type="button" aria-label="屏幕 01" aria-pressed="false"><span class="community-screen-dot" aria-hidden="true"></span></button>
-        <button class="community-screen-choice" type="button" aria-label="屏幕 02" aria-pressed="true"><span class="community-screen-dot" aria-hidden="true"></span></button>
-        <button class="community-screen-choice" type="button" aria-label="屏幕 03" aria-pressed="false"><span class="community-screen-dot" aria-hidden="true"></span></button>
       </nav>
     </section>
     </div>
+
+    <nav id="community-categories" class="community-categories wrap" aria-label="作品分类">
+      <button type="button" data-category="all" aria-pressed="true">全部</button>
+      <button type="button" data-category="art" aria-pressed="false">艺术</button>
+      <button type="button" data-category="life" aria-pressed="false">生活</button>
+      <button type="button" data-category="scene" aria-pressed="false">场景</button>
+    </nav>
 
     <section class="community-section wrap" aria-label="社区作品">
       <p id="feed-status" role="status" aria-live="polite"></p>
