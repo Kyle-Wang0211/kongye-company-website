@@ -4537,8 +4537,8 @@
     },
     {
       "path": "lib/ui/community/user_profile_page.dart",
-      "sha256": "752a3562ff8d18c65ac755e74c3601a7b8452a4122e9112e54a395f6678b2aac",
-      "size": 22360
+      "sha256": "8532133ae5b9761981e7a6a9d1fe6885fcaa28452ed5813032c500b417f15e85",
+      "size": 22439
     },
     {
       "path": "lib/ui/community/user_report_page.dart",
@@ -4652,8 +4652,8 @@
     },
     {
       "path": "lib/ui/me_profile_header.dart",
-      "sha256": "d0d2612f14ae3c8a85db2d1443163bfe26f7e09cba665734e76003588df5ad61",
-      "size": 5240
+      "sha256": "5b70888072d3036d086f54c2be431f963dfde721b01529ffeb7d71e20d01b1c1",
+      "size": 5319
     },
     {
       "path": "lib/ui/me_settings_drawer.dart",
@@ -6332,6 +6332,6 @@
     }
   ],
   "schema": "pw.community-source-export.v1",
-  "source_revision": "b0eed0db9d77310eecb98e90d0c94eb538a26b82",
+  "source_revision": "ea393fced37547941f22b0e0c864fca53ec68ffe",
   "source_subdirectory": "source/miniprogram-community"
 }

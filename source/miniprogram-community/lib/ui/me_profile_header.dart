@@ -67,7 +67,7 @@ class MeProfileHeader extends StatelessWidget {
                     if (value?.publicAccountNumber != null) ...[
                       const SizedBox(height: AetherSpacing.xs),
                       Text(
-                        '窗后城号 ${value!.publicAccountNumber}',
+                        '${Localizations.localeOf(context).languageCode == 'zh' ? '窗后城号' : 'Account number'} ${value!.publicAccountNumber}',
                         style: AetherTextStyles.bodySm,
                       ),
                     ],

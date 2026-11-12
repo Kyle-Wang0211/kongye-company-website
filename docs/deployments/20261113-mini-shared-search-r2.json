@@ -1,0 +1,28 @@
+{
+  "scope": "shared App and mini work/user live search page and bilingual profile account number",
+  "canonical_revision": "3b5273ed784e6e8ad050b239e46a7b1b6831f692",
+  "search_surface_revision": "4135eab26d52ba581b0ee1c12bc98c261c4aa061",
+  "profile_number_delta": "c4e72788b83948987f7d7f7b407bb96aafc4f189",
+  "source_parent": "ea393fced37547941f22b0e0c864fca53ec68ffe",
+  "files": [
+    {
+      "path": "miniprogram/main.dart.js",
+      "base_sha256": "21823ce72123932a431b18f213358c96c7d7b46d2519a4b47fc215b77a9baadb",
+      "sha256": "1584b7832763d6918d6bf0ac06e3b0ac3feca7aea9c02956e107f639f1b6da59",
+      "bytes": 4842731
+    },
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "base_sha256": "7873be2e05aa7d87b1e57a0a0f4db224b6c6ba464e34022849eb997bd3361303",
+      "sha256": "29004e33a677bb763c5d2d10720fad8cb6a194820e4ed4a7854675e7ad397087",
+      "bytes": 13091
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "base_sha256": "e9a9a27a48065976eb0deae79e0ab680ef8fa61968c32a43d353ab6df3bc9bb2",
+      "sha256": "1eb636cd2debfcbf817be585b242270178b8242232ce153def01cf20a554e577",
+      "bytes": 1165
+    }
+  ],
+  "status": "candidate-built"
+}

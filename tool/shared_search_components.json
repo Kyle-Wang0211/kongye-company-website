@@ -35,6 +35,7 @@
     "lib/ui/community/user_profile_page.dart",
     "lib/ui/community/work_card.dart"
   ],
-  "source_revision": "4135eab26d52ba581b0ee1c12bc98c261c4aa061",
-  "profile_number_delta_revision": "c4e72788b83948987f7d7f7b407bb96aafc4f189"
+  "source_revision": "3b5273ed784e6e8ad050b239e46a7b1b6831f692",
+  "profile_number_delta_revision": "c4e72788b83948987f7d7f7b407bb96aafc4f189",
+  "profile_number_label_revision": "3b5273ed784e6e8ad050b239e46a7b1b6831f692"
 }

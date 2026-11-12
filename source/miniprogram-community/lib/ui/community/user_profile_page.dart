@@ -436,7 +436,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       if (profile.publicAccountNumber != null) ...[
                         const SizedBox(height: 8),
                         Text(
-                          '窗后城号 ${profile.publicAccountNumber}',
+                          '${Localizations.localeOf(context).languageCode == 'zh' ? '窗后城号' : 'Account number'} ${profile.publicAccountNumber}',
                           style: AetherTextStyles.bodySm,
                         ),
                       ],
