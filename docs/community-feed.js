@@ -1,3 +1,4 @@
+import {installCommunitySearch} from './community-search.mjs?v=rds-pg-trgm-20261112-v1';
 import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
@@ -256,6 +257,7 @@ async function load(){
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
+ installCommunitySearch({getClient:getAccountClient,getConfig:()=>config,onOpenWork:openWork});
  const rows=await read(feedUrl(config.origin,cursor));lastFeedRead=Date.now();
  for(const shell of shells)shell.remove();
  for(const work of rows){if(!publicOrder.includes(work.id))publicOrder.push(work.id);if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
