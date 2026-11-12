@@ -28,6 +28,14 @@ abstract class CommunityCommentFeedRepository {
   });
 }
 
+/// Name-only canonical projection for authors already present in this work.
+abstract interface class CommunityCommentAuthorNameRepository {
+  Future<Map<String, String>> fetchAuthorNames(
+    String workId,
+    Set<String> userIds,
+  );
+}
+
 abstract class CommunityCommentReportRepository {
   Future<String> report(CommunityCommentReportDraft draft);
 }
@@ -278,13 +286,56 @@ class SupabaseCommunityCommentRepository extends _CommunityCommentGateway
     implements
         CommunityCommentRepository,
         CommunityCommentFeedRepository,
-        CommunityCommentReportRepository {
+        CommunityCommentReportRepository,
+        CommunityCommentAuthorNameRepository {
   SupabaseCommunityCommentRepository({
     super.client,
     super.transport,
     super.identity,
     super.requestTimeout = const Duration(seconds: 30),
   });
+
+  @override
+  Future<Map<String, String>> fetchAuthorNames(
+    String workId,
+    Set<String> userIds,
+  ) async {
+    if (userIds.isEmpty) return const {};
+    if (userIds.length > 200) {
+      throw const CommunityCommentException('invalid_draft');
+    }
+    final identity = _readIdentity();
+    if (identity == null) {
+      throw const CommunityCommentException('auth_required');
+    }
+    final response = await _client
+        .rpc(
+          'community_comment_author_names',
+          params: {
+            'p_work_id': workId,
+            'p_user_ids': userIds.toList(growable: false),
+          },
+        )
+        .timeout(const Duration(seconds: 5));
+    if (!_isCurrent(identity)) {
+      throw const CommunityCommentException('identity_changed');
+    }
+    if (response is! List) {
+      throw const CommunityCommentException('invalid_response');
+    }
+    final names = <String, String>{};
+    for (final row in response) {
+      if (row is! Map ||
+          row['user_id'] is! String ||
+          row['display_name'] is! String ||
+          !userIds.contains(row['user_id']) ||
+          names.containsKey(row['user_id'])) {
+        throw const CommunityCommentException('invalid_response');
+      }
+      names[row['user_id'] as String] = row['display_name'] as String;
+    }
+    return names;
+  }
 
   @override
   Future<String> report(CommunityCommentReportDraft draft) async {

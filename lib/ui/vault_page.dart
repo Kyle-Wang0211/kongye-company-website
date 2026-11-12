@@ -1,3 +1,4 @@
+import 'community/community_search_page.dart';
 // Community image feed. Only published cover images are prepared here.
 // Models and the shared 3D viewer load only after opening work detail.
 // Metadata appears in API order; each fixed-size cover resolves independently.
@@ -534,6 +535,22 @@ class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
                           ],
                         ),
                       ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip:
+                            Localizations.localeOf(context).languageCode == 'zh'
+                            ? '搜索'
+                            : 'Search',
+                        icon: const Icon(Icons.search, color: Colors.black),
+                        onPressed: () => Navigator.of(context).push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                CommunitySearchPage(onWorkSelected: _openWork),
+                          ),
+                        ),
+                      ),
+                    ),
                     // [D1/D2/D3 2026-08-23 用户签决] 冷启动期社区首页 = **单信息流**。
                     //
                     // 砍掉的两样:

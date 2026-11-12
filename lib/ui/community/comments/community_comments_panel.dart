@@ -1,5 +1,5 @@
-import '../current_author_name.dart';
 import 'dart:async';
+import '../../../auth/auth_scope.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -197,6 +197,66 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   CommunityComment? _reply;
   CommunityCommentAttachment? _previewAttachment;
   String? _previewCommentId;
+  String? _lastOwnName;
+  String _authorName(CommunityComment comment) {
+    final owner = context
+        .dependOnInheritedWidgetOfExactType<AuthScope>()
+        ?.notifier
+        ?.signedInUser;
+    return _authorNames[comment.userId] ??
+        (owner?.id.rawValue == comment.userId ? owner?.displayName : null) ??
+        comment.authorName;
+  }
+
+  Timer? _authorNameTimer;
+  bool _authorNameLoading = false;
+  final _authorNames = <String, String>{};
+
+  Future<void> _refreshAuthorNames() async {
+    final repository = widget.repository;
+    if (!_pollingEnabled ||
+        !widget.presentationVisible ||
+        !_foreground ||
+        _authorNameLoading ||
+        repository is! CommunityCommentAuthorNameRepository) {
+      return;
+    }
+    final generation = _generation;
+    final authors = <String>{
+      for (final comment in _comments) comment.userId,
+      for (final comment in _parentComments.values) comment.userId,
+      if (_reply != null) _reply!.userId,
+    }.toList(growable: false);
+    if (authors.isEmpty) return;
+    _authorNameLoading = true;
+    try {
+      final names = <String, String>{};
+      for (var offset = 0; offset < authors.length; offset += 200) {
+        names.addAll(
+          await (repository as CommunityCommentAuthorNameRepository)
+              .fetchAuthorNames(
+                widget.workId,
+                authors.skip(offset).take(200).toSet(),
+              ),
+        );
+      }
+      if (!_current(generation) || !_pollingEnabled) return;
+      if (names.length != _authorNames.length ||
+          names.entries.any(
+            (entry) => _authorNames[entry.key] != entry.value,
+          )) {
+        setState(() {
+          _authorNames.clear();
+          _authorNames.addAll(names);
+        });
+      }
+    } catch (_) {
+      // The full comment refresh remains available when a name read is offline.
+    } finally {
+      _authorNameLoading = false;
+    }
+  }
+
   Timer? _refreshTimer;
   bool _routeCurrent = true;
   bool _tickerEnabled = true;
@@ -247,6 +307,16 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final owner = context
+        .dependOnInheritedWidgetOfExactType<AuthScope>()
+        ?.notifier
+        ?.signedInUser;
+    if (_lastOwnName != owner?.displayName) {
+      _lastOwnName = owner?.displayName;
+      if (owner != null && owner.displayName != null) {
+        _authorNames[owner.id.rawValue] = owner.displayName!;
+      }
+    }
     _routeCurrent = ModalRoute.isCurrentOf(context) ?? true;
     _tickerEnabled = TickerMode.valuesOf(context).enabled;
     _syncPolling();
@@ -287,9 +357,16 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     if (!allowed) {
       _refreshTimer?.cancel();
       _refreshTimer = null;
+      _authorNameTimer?.cancel();
+      _authorNameTimer = null;
       return;
     }
     _refreshTimer ??= Timer.periodic(interval, (_) => _refresh());
+    _authorNameTimer ??= Timer.periodic(
+      const Duration(seconds: 2),
+      (_) => _refreshAuthorNames(),
+    );
+    if (refreshNow || !wasEnabled) unawaited(_refreshAuthorNames());
     if (refreshNow || (refreshOnEnable && !wasEnabled && _page != null)) {
       _refresh();
     }
@@ -334,6 +411,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
       _text.clear();
       _images.clear();
       _comments = [];
+      _authorNames.clear();
       _hiddenCommentIds = {};
       _visibilityLoaded = false;
       _visibilityError = null;
@@ -994,6 +1072,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
     _reportRevision.value++;
     _reportRevision.dispose();
     _refreshTimer?.cancel();
+    _authorNameTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _text.removeListener(_textChanged);
     _text.dispose();
@@ -1250,11 +1329,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                   children: [
                     Flexible(
                       child: Text(
-                        currentAuthorName(
-                          context,
-                          comment.userId,
-                          comment.authorName,
-                        ),
+                        _authorName(comment),
                         style: AetherTextStyles.bodySm.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -1312,11 +1387,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                       _l.commentReplyTo(
                         parent == null
                             ? _l.commentReplyFallback
-                            : currentAuthorName(
-                                context,
-                                parent.userId,
-                                parent.authorName,
-                              ),
+                            : _authorName(parent),
                       ),
                       style: AetherTextStyles.caption,
                       maxLines: 1,
@@ -1658,13 +1729,7 @@ class _CommunityCommentsPanelState extends State<CommunityCommentsPanel>
                 children: [
                   if (_reply != null)
                     _chip(
-                      _l.commentReplyTo(
-                        currentAuthorName(
-                          context,
-                          _reply!.userId,
-                          _reply!.authorName,
-                        ),
-                      ),
+                      _l.commentReplyTo(_authorName(_reply!)),
                       _l.commentCancelReply,
                       () => _changed(() => _reply = null),
                       Icons.reply_rounded,
