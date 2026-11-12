@@ -26,6 +26,8 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
   if(!header||header.querySelector('[data-community-search]'))return;
   const zh=()=>currentLocale()==='zh';
   const label=(cn,en)=>zh()?cn:en;
+  const priorSearch=document.querySelector('#community-search');
+  if(priorSearch)priorSearch.style.display='none';
   const entry=document.createElement('button');
   entry.type='button';entry.className='header-action';entry.dataset.communitySearch='';
   entry.textContent=label('搜索','Search');
