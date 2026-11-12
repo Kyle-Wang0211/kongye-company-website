@@ -1,0 +1,47 @@
+{
+  "release": "20261112-author-name-broadcast-r1",
+  "parent_release": "20261112-mini-upload-r4",
+  "source_commit": "f1e94cf56c69b23d210222bfc22cf19fddb879c3",
+  "static_source_parent_commit": "020144bb86a3e5020024726139a7961c2b608f07",
+  "status": "deployed-https-verified",
+  "activated_at": "2026-11-12T13:17:35Z",
+  "activation_command": "t-bj072w5n47gt5og",
+  "activation_exit_code": 0,
+  "sql_sha256": "fad789bedc427d69ce7a78e5e4b4ffc17b4d1dff20315d0a5f70a7e47258f38b",
+  "sql_command": "t-bj072w4icmtx62o",
+  "sql_exit_code": 0,
+  "private_broadcast": {
+    "command": "t-bj072w4vl9zx1c0",
+    "database_send_exit_code": 0,
+    "sdk_version": "2.112.0",
+    "anonymous_clients_subscribed": 2,
+    "anonymous_clients_received": 2,
+    "production_profiles_modified": false,
+    "temporary_policy_created": false
+  },
+  "external_http_checks": [
+    {
+      "path": "community-feed.js",
+      "status": 200,
+      "sha256": "de457027078d4c84235d3653965acc3dd55c486ea9f53a75f0f0548dbdae2f00",
+      "expected": "de457027078d4c84235d3653965acc3dd55c486ea9f53a75f0f0548dbdae2f00",
+      "match": true
+    },
+    {
+      "path": "community/main.dart.js",
+      "status": 200,
+      "sha256": "bda1f6c6da57b32e36aa1d1b14baab5d307aaed06d5092107ab3c907992fff81",
+      "expected": "bda1f6c6da57b32e36aa1d1b14baab5d307aaed06d5092107ab3c907992fff81",
+      "match": true
+    },
+    {
+      "path": "miniprogram/main.dart.js",
+      "status": 200,
+      "sha256": "184a4da3bb1fce1eb26a520b6fea3b5139fbed9e5df6f32c9c24b74c67ef2dd8",
+      "expected": "184a4da3bb1fce1eb26a520b6fea3b5139fbed9e5df6f32c9c24b74c67ef2dd8",
+      "match": true
+    }
+  ],
+  "preserved": "Parent index files, Viewer and all resources outside the seven listed changed files are reused from the actual active server release. Static source baseline is separately identified above.",
+  "app": "Names source handed to root. This deployment does not build or install the App."
+}
