@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-13",
+  "release": "20261112-search-suggestion-rows-r4",
+  "website_source_baseline": "e78362446b006e83549fb576a0ca303e1993e563",
+  "scope": [
+    "docs/login/login.mjs",
+    "docs/login/device-login.mjs"
+  ],
+  "changes": "Complete approved device authorization directly through its existing Casdoor OAuth code and GoTrue PKCE callback, preserving original return page.",
+  "published": true,
+  "sha256": {
+    "login.mjs": "b033fe1c50e99549ddbd1779a0b4e71b4c474214bc4b155f645b81a7db8064bc",
+    "device-login.mjs": "c1ff7fa211581c84bd05a2227d279bd4e1571d2342e3525d3e39df9cd3afeea4"
+  },
+  "bridge_sha256": "d95a1c7aabd062a4c2bfce515217519b7656a581f547f9b4ecef223cf8708faf",
+  "official_casdoor_revision": "1658baf628c760b4d04c259b364af1a91462deb1",
+  "official_source_paths": [
+    "web/src/pages/auth/LoginPage.tsx",
+    "web/src/backend/AuthBackend.ts",
+    "controllers/auth.go"
+  ],
+  "web_root_changed": false,
+  "verification": {
+    "status": "passed",
+    "scope": "isolated existing synthetic identities",
+    "production_accounts_used": false,
+    "cases": [
+      {
+        "kind": "email",
+        "same_original_uuid": true,
+        "official_device_completion_code": true,
+        "official_browser_pkce_session": true,
+        "email_present": true,
+        "phone_confirmed": false
+      },
+      {
+        "kind": "phone",
+        "same_original_uuid": true,
+        "official_device_completion_code": true,
+        "official_browser_pkce_session": true,
+        "email_present": false,
+        "phone_confirmed": true
+      }
+    ]
+  },
+  "production_account_changes": false
+}
