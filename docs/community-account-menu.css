@@ -20,3 +20,7 @@
 .community-shell #account-actions [data-logout-retry]{padding:4px 12px;color:#a33;font-size:12px}
 .community-shell #account-menu #open-settings{margin-top:2px;color:#777}
 @media(max-width:600px){.community-shell #account-menu>.account-dropdown{width:260px}.community-shell .account-card-avatar{width:44px;height:44px}}
+
+.community-shell .account-card-identity{display:flex;flex-direction:column;gap:4px;min-width:0}
+.community-shell .account-card-number{display:block;color:#888;font-size:11px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.community-shell .account-card-number[hidden]{display:none}

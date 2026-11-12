@@ -1,8 +1,17 @@
-import {feedUrl,checkModel,currentLocale} from './community-data.mjs?v=account-library-20261106-v44';
+import {feedUrl,formatCount,currentLocale} from './community-data.mjs?v=account-library-20261106-v44';
 
 export async function requestCommunitySearch(client, action, query) {
   const {data,error}=await client.rpc('community_search',{p_action:action,p_query:query.trim()});
   if(error||!data||typeof data!=='object')throw Error('Search unavailable');
+  if(action==='users'){
+    if(!Array.isArray(data.users)||data.users.some(user=>
+      typeof user?.id!=='string'||!/^[0-9a-f-]{36}$/i.test(user.id)||
+      typeof user.display_name!=='string'||
+      (user.avatar_url!==null&&typeof user.avatar_url!=='string')||
+      typeof user.public_account_number!=='string'||
+      !Number.isSafeInteger(user.follower_count)||user.follower_count<0))throw Error('Invalid users');
+    return data.users;
+  }
   if(action==='suggest'){
     if(!Array.isArray(data.suggestions)||data.suggestions.some(value=>typeof value!=='string'))throw Error('Invalid suggestions');
     return data.suggestions;
@@ -21,7 +30,7 @@ export async function hydrateSearchWorks(client,config,ids){
   return ids.filter(id=>byId.has(id)).map(id=>byId.get(id));
 }
 
-export function installCommunitySearch({getClient,getConfig,onOpenWork}){
+export function installCommunitySearch({getClient,getConfig,createCard,attachWorkGrid,onWorkCardsRendered,clearResults,renderUserAvatar,getViewerId}){
   const header=document.querySelector('.community-header');
   if(!header||header.querySelector('[data-community-search]'))return;
   const zh=()=>currentLocale()==='zh';
@@ -78,7 +87,7 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
   }
   function queueSuggestions(){
     dismissSuggestions();
-    if(entry.value.trim())homeTimer=setTimeout(()=>void suggestHome(),160);
+    if(entry.value.trim())homeTimer=setTimeout(()=>void suggestHome(),200);
   }
   entry.addEventListener('input',queueSuggestions);
   entry.addEventListener('compositionstart',()=>{composing=true;});
@@ -98,48 +107,122 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
   document.addEventListener('click',event=>{if(!priorSearch.contains(event.target))dismissSuggestions();});
   document.querySelector('#community-search-clear').addEventListener('click',dismissSuggestions);
   const style=document.createElement('style');
-  style.textContent=`.pw-community-search{box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:24px;border:0;background:#fff;color:#111}.pw-community-search::backdrop{background:#fff}.pw-community-search header{display:flex;align-items:center;gap:12px;max-width:900px;margin:auto}.pw-community-search input{min-width:0;flex:1;font:inherit;border:1px solid #bbb;border-radius:8px;padding:12px;background:#f5f5f5;color:#111}.pw-community-search button{font:inherit;cursor:pointer;background:#fff;border:0;color:#111;padding:12px}.pw-community-search ul{list-style:none;padding:0;max-width:900px;margin:20px auto}.pw-community-search li:not(.pw-suggestion-row) button{display:block;width:100%;text-align:left;border-bottom:1px solid #eee;padding:18px 12px}.pw-community-search [role=status]{max-width:900px;margin:20px auto;color:#666}.pw-community-search .search-retry{border:1px solid #aaa;border-radius:6px}@media(max-width:600px){.pw-community-search{padding:12px}.pw-community-search header{gap:2px}.pw-community-search button{padding:10px}}`;
+  style.textContent=`.pw-community-search{box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:24px;border:0;background:#fff;color:#111}.pw-community-search::backdrop{background:#fff}.pw-community-search header{display:flex;align-items:center;gap:12px;max-width:900px;margin:auto}.pw-community-search input{min-width:0;flex:1;font:inherit;border:1px solid #bbb;border-radius:8px;padding:12px;background:#f5f5f5;color:#111}.pw-community-search header>button{font:inherit;cursor:pointer;background:#fff;border:0;color:#111;padding:12px}.pw-community-search [role=status]{max-width:1600px;margin:20px auto;color:#666}.pw-community-search .search-retry{border:1px solid #aaa;border-radius:6px;background:#fff;padding:8px 12px;cursor:pointer}@media(max-width:600px){.pw-community-search{padding:12px}.pw-community-search header{gap:2px}.pw-community-search header>button{padding:10px}}`;
   document.head.append(style);
   const page=document.createElement('dialog');page.className='pw-community-search';
   page.setAttribute('aria-label',label('搜索作品','Search works'));
   const bar=document.createElement('header'),back=document.createElement('button'),input=document.createElement('input'),clear=document.createElement('button'),submit=document.createElement('button');
   for(const button of [back,clear,submit])button.type='button';
-  back.textContent=label('返回','Back');input.type='search';input.maxLength=128;input.placeholder=label('搜索作品','Search works');input.setAttribute('aria-label',input.placeholder);
+  back.textContent=label('返回','Back');input.type='search';input.maxLength=128;input.placeholder=label('搜索作品或用户','Search works or users');input.setAttribute('aria-label',input.placeholder);
   clear.textContent=label('清除','Clear');submit.textContent=label('搜索','Search');
+  const inputGroup=document.createElement('div');inputGroup.className='pw-search-input-group';
+  const liveSuggestions=document.createElement('ul');liveSuggestions.className='pw-search-suggestions';liveSuggestions.hidden=true;liveSuggestions.setAttribute('role','listbox');
+  inputGroup.append(input,liveSuggestions);
+  const tabs=document.createElement('div');tabs.className='pw-search-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label',label('搜索结果','Search results'));
+  const workTab=document.createElement('button'),userTab=document.createElement('button');
+  workTab.textContent=label('作品','Works');userTab.textContent=label('用户','Users');
+  for(const button of [workTab,userTab]){button.type='button';button.setAttribute('role','tab');}
+  workTab.id='pw-search-work-tab';userTab.id='pw-search-user-tab';tabs.append(workTab,userTab);
   const feedback=document.createElement('p');feedback.setAttribute('role','status');
-  const list=document.createElement('ul');
-  bar.append(back,input,clear,submit);page.append(bar,feedback,list);document.body.append(page);
-  let generation=0,timer,submitted=false;
-  function invalidate(){clearTimeout(timer);generation++;list.replaceChildren();feedback.replaceChildren();}
-  async function run(action){
-    const query=input.value.trim();invalidate();if(!query)return;
-    submitted=action==='search';const revision=generation;
+  const resultsArea=document.createElement('div');resultsArea.className='pw-search-results';
+  const workGrid=document.createElement('div');workGrid.className='community-grid pw-search-work-grid';workGrid.id='pw-search-works';
+  const userList=document.createElement('div');userList.className='pw-search-users';userList.id='pw-search-users';
+  workGrid.setAttribute('role','tabpanel');userList.setAttribute('role','tabpanel');
+  workTab.setAttribute('aria-controls',workGrid.id);userTab.setAttribute('aria-controls',userList.id);
+  workGrid.setAttribute('aria-labelledby',workTab.id);userList.setAttribute('aria-labelledby',userTab.id);
+  resultsArea.append(workGrid,userList);bar.append(back,inputGroup,clear,submit);page.append(bar,tabs,feedback,resultsArea);document.body.append(page);
+  attachWorkGrid(workGrid);
+  let generation=0,timer,activeTab='works';
+  function updateTabs(){
+    workTab.setAttribute('aria-selected',String(activeTab==='works'));
+    userTab.setAttribute('aria-selected',String(activeTab==='users'));
+    workGrid.hidden=activeTab!=='works';userList.hidden=activeTab!=='users';
+  }
+  updateTabs();
+  function invalidate(){
+    clearTimeout(timer);generation++;clearResults(resultsArea);
+    workGrid.replaceChildren();userList.replaceChildren();liveSuggestions.replaceChildren();liveSuggestions.hidden=true;feedback.replaceChildren();
+  }
+  function renderUsers(users,client,revision){
+    const current=()=>revision===generation&&page.open&&activeTab==='users';
+    for(const user of users){
+      const row=document.createElement('div');row.className='pw-search-user-row';
+      const link=document.createElement('a');link.className='following-person';link.href='/community/?profile='+encodeURIComponent(user.id);
+      const avatar=document.createElement('span');avatar.className='following-avatar';avatar.setAttribute('aria-hidden','true');
+      const identity=document.createElement('span');identity.className='pw-search-user-identity';
+      const name=document.createElement('strong');name.textContent=user.display_name;
+      const meta=document.createElement('span');meta.className='pw-search-user-meta';
+      const followers=document.createElement('span');
+      const renderCount=count=>{followers.textContent=label(formatCount(count)+'粉丝',formatCount(count)+' followers');};
+      renderCount(user.follower_count);
+      const number=document.createElement('span');number.textContent=label('窗后城号 '+user.public_account_number,'ID '+user.public_account_number);
+      meta.append(followers,number);identity.append(name,meta);link.append(avatar,identity);row.append(link);userList.append(row);
+      renderUserAvatar(avatar,user);
+      if(getViewerId()===user.id)continue;
+      const follow=document.createElement('button');follow.type='button';follow.className='pw-search-follow';row.append(follow);
+      let profile;
+      async function loadState(){
+        follow.disabled=true;follow.textContent=label('加载中…','Loading…');
+        try{
+          const {data,error}=await client.rpc('get_social_profile',{p_user_id:user.id});
+          if(error||!Array.isArray(data)||!data[0])throw Error('Follow unavailable');
+          if(!current())return;
+          profile=data[0];
+          if(Number.isSafeInteger(profile.followers_count))renderCount(profile.followers_count);
+          follow.textContent=profile.is_following?label('已关注','Following'):label('关注','Follow');
+          follow.setAttribute('aria-pressed',String(!!profile.is_following));follow.onclick=()=>void toggleFollow();
+        }catch{
+          if(!current())return;
+          follow.textContent=label('重试','Retry');follow.onclick=()=>void loadState();
+        }finally{if(current())follow.disabled=false;}
+      }
+      async function toggleFollow(){
+        follow.disabled=true;
+        try{
+          const {data:session,error:sessionError}=await client.auth.getSession();
+          if(sessionError)throw sessionError;
+          if(!session.session){location.assign('/community/?auth=signin');return;}
+          const {data,error}=await client.auth.getUser();
+          if(error)throw error;
+          if(!data.user){location.assign('/community/?auth=signin');return;}
+          if(data.user.id===user.id){follow.hidden=true;return;}
+          const request=profile.is_following
+            ?client.from('follows').delete().eq('follower_id',data.user.id).eq('followee_id',user.id)
+            :client.from('follows').upsert({follower_id:data.user.id,followee_id:user.id},{onConflict:'follower_id,followee_id',ignoreDuplicates:true});
+          const result=await request;if(result.error)throw result.error;
+          await loadState();
+        }catch{if(current()){follow.textContent=label('重试','Retry');follow.onclick=()=>void loadState();}}
+        finally{if(current())follow.disabled=false;}
+      }
+      void loadState();
+    }
+  }
+  async function runResults({showSuggestions=false}={}){
+    const query=input.value.trim();invalidate();updateTabs();if(!query)return;
+    const revision=generation,tab=activeTab;
     feedback.textContent=label('加载中…','Loading…');
     try{
       const client=await getClient();
-      const values=await requestCommunitySearch(client,action,query);
-      const results=action==='search'?await hydrateSearchWorks(client,getConfig(),values):values;
+      const titles=showSuggestions?requestCommunitySearch(client,'suggest',query).catch(()=>[]):Promise.resolve([]);
+      const values=requestCommunitySearch(client,tab==='users'?'users':'search',query);
+      const [suggested,found]=await Promise.all([titles,values]);
+      const results=tab==='works'?await hydrateSearchWorks(client,getConfig(),found):found;
       if(revision!==generation||!page.open)return;
-      feedback.textContent=results.length?'':label('未找到相关作品','No matching works');
-      if(action==='suggest'){
-        renderSuggestionRows(list,results,{
-          onSearch:title=>{input.value=title;void run('search');},
-          onFill:title=>{input.value=title;submitted=false;input.focus();void run('suggest');}
+      feedback.textContent=results.length?'':(tab==='users'?label('未找到相关用户','No matching users'):label('未找到相关作品','No matching works'));
+      if(tab==='works'){
+        workGrid.replaceChildren(...results.map(createCard));onWorkCardsRendered(results);
+      }else renderUsers(results,client,revision);
+      if(showSuggestions&&document.activeElement===input&&suggested.length){
+        renderSuggestionRows(liveSuggestions,suggested,{
+          onSearch:title=>{input.value=title;activeTab='works';void runResults();},
+          onFill:title=>{input.value=title;input.focus();void runResults({showSuggestions:true});}
         });
-      }else{
-        for(const result of results){
-          const item=document.createElement('li'),button=document.createElement('button');button.type='button';
-          button.textContent=result.title;
-          button.addEventListener('click',()=>{
-            try{checkModel(result);onOpenWork(result);}catch{feedback.textContent=label('作品暂不可用','Work unavailable');}
-          });
-          item.append(button);list.append(item);
-        }
+        liveSuggestions.hidden=false;
       }
     }catch{
       if(revision!==generation||!page.open)return;
       feedback.textContent=label('搜索暂不可用','Search unavailable');
-      const retry=document.createElement('button');retry.type='button';retry.className='search-retry';retry.textContent=label('重试','Retry');retry.addEventListener('click',()=>void run(action));feedback.append(retry);
+      const retry=document.createElement('button');retry.type='button';retry.className='search-retry';retry.textContent=label('重试','Retry');retry.addEventListener('click',()=>void runResults());feedback.append(retry);
     }
   }
   function show(){if(!page.open)page.showModal();input.focus();}
@@ -149,18 +232,18 @@ export function installCommunitySearch({getClient,getConfig,onOpenWork}){
     else{const url=new URL(location.href);url.searchParams.delete('search');history.replaceState(history.state,'',url);close();}
   }
   function openHomeSearch(){
-    dismissSuggestions();input.value=entry.value;
-    if(!input.value.trim())return;
+    dismissSuggestions();input.value=entry.value;if(!input.value.trim())return;
     if(!new URL(location.href).searchParams.has('search')){const url=new URL(location.href);url.searchParams.set('search','1');history.pushState({pwCommunitySearch:true},'',url);}
-    show();void run('search');
+    activeTab='works';show();void runResults();
   }
   priorSearch.addEventListener('submit',event=>{event.preventDefault();if(!composing)openHomeSearch();});
-  input.addEventListener('input',()=>{invalidate();submitted=false;if(input.value.trim())timer=setTimeout(()=>void run('suggest'),200);});
-  input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing){event.preventDefault();void run('search');}});
-  clear.addEventListener('click',()=>{input.value='';submitted=false;invalidate();input.focus();});
-  submit.addEventListener('click',()=>void run('search'));
-  back.addEventListener('click',leave);
-  page.addEventListener('cancel',event=>{event.preventDefault();leave();});
-  window.addEventListener('popstate',()=>{if(new URL(location.href).searchParams.has('search')){show();if(input.value.trim())void run(submitted?'search':'suggest');}else close();});
+  input.addEventListener('input',()=>{invalidate();if(input.value.trim())timer=setTimeout(()=>void runResults({showSuggestions:true}),200);});
+  input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing){event.preventDefault();void runResults();}});
+  clear.addEventListener('click',()=>{input.value='';invalidate();input.focus();});
+  submit.addEventListener('click',()=>void runResults());
+  for(const [button,tab] of [[workTab,'works'],[userTab,'users']])button.addEventListener('click',()=>{if(activeTab!==tab){activeTab=tab;updateTabs();void runResults();}});
+  page.addEventListener('click',event=>{if(!inputGroup.contains(event.target))liveSuggestions.hidden=true;});
+  back.addEventListener('click',leave);page.addEventListener('cancel',event=>{event.preventDefault();leave();});
+  window.addEventListener('popstate',()=>{if(new URL(location.href).searchParams.has('search')){show();if(input.value.trim())void runResults();}else close();});
   if(new URL(location.href).searchParams.has('search'))show();
 }

@@ -13,7 +13,8 @@ export async function readAccount(client){
  const social=profile?.[0];
  const count=value=>Number.isSafeInteger(value)&&value>=0?value:null;
  return {id,name:social?.display_name||meta.display_name||meta.full_name||meta.name||'',
-  following_count:count(social?.following_count),followers_count:count(social?.followers_count)};
+  following_count:count(social?.following_count),followers_count:count(social?.followers_count),
+  public_account_number:typeof social?.public_account_number==='string'?social.public_account_number:null};
 }
 export async function avatarDataUrl(value){
  if(value?.version!=='jdenticon-3.3.0-pw-v2'||typeof value.png_base64!=='string'||value.png_base64.length>22000||!(/^[a-f0-9]{64}$/).test(value.png_sha256)||!(/^[a-f0-9]{64}$/).test(value.pixel_sha256))return null;
