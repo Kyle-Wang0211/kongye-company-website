@@ -22,8 +22,6 @@ INDEX = 'public-works-v1'
 PASSWORD = (ROOT / 'engine-password').read_text().strip()
 ENGINE_AUTH = 'Basic ' + base64.b64encode(('admin:' + PASSWORD).encode()).decode()
 TLS = ssl.create_default_context(cafile=str(ROOT / 'engine-root-ca.pem'))
-# The upstream demo certificate has a node DNS name. Its CA is pinned locally.
-TLS.check_hostname = False
 READY = threading.Event()
 
 
