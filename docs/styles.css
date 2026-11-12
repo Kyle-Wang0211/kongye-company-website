@@ -128,6 +128,7 @@ html .community-grid .community-picture.is-loading:after{content:none;animation:
 
 .pw-community-search [hidden]{display:none!important}
 .pw-search-input-group{position:relative;display:flex;flex:1;min-width:0}
+.pw-community-search input:focus-visible,.pw-community-search button:focus-visible,.pw-community-search a:focus-visible{outline:2px solid #777;outline-offset:2px}
 .pw-community-search .pw-search-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:4;list-style:none;margin:0;padding:6px;background:#fff;border:1px solid #e4e4e4;border-radius:10px;box-shadow:0 8px 26px #0001;max-height:50vh;overflow:auto}
 .pw-search-tabs{display:flex;align-items:center;gap:36px;max-width:1600px;margin:24px auto 0}
 .pw-search-tabs>button{position:relative;padding:10px 0 16px;min-width:44px;border:0;background:transparent;color:#888;font:inherit;font-weight:400;cursor:pointer}
