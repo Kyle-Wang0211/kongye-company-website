@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../community/community_search_service.dart';
 import '../../community/feed_models.dart';
 import '../../l10n/app_localizations.dart';
+import 'search_suggestion_list.dart';
 
 class CommunitySearchPage extends StatefulWidget {
   const CommunitySearchPage({
@@ -104,6 +105,15 @@ class _CommunitySearchPageState extends State<CommunitySearchPage> {
     }
   }
 
+  void _fillSuggestion(String suggestion) {
+    _controller.value = TextEditingValue(
+      text: suggestion,
+      selection: TextSelection.collapsed(offset: suggestion.length),
+    );
+    _changed(suggestion);
+    _focus.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchLabel = _zh ? '搜索' : 'Search';
@@ -169,22 +179,22 @@ class _CommunitySearchPageState extends State<CommunitySearchPage> {
     if (_submitted && _works.isEmpty) {
       return Center(child: Text(_zh ? '未找到相关作品' : 'No matching works'));
     }
+    if (!_submitted) {
+      return SearchSuggestionList(
+        suggestions: _suggestions,
+        onSearch: _search,
+        onFill: _fillSuggestion,
+        fillTooltip: _zh ? '填入搜索框' : 'Use this search term',
+      );
+    }
     return ListView.builder(
-      itemCount: _submitted ? _works.length : _suggestions.length,
+      itemCount: _works.length,
       itemBuilder: (context, index) {
-        if (_submitted) {
-          final work = _works[index];
-          return ListTile(
-            title: Text(work.title),
-            trailing: const Icon(Icons.chevron_right, color: Colors.black),
-            onTap: () => widget.onWorkSelected(work),
-          );
-        }
-        final suggestion = _suggestions[index];
+        final work = _works[index];
         return ListTile(
-          leading: const Icon(Icons.search, color: Colors.grey),
-          title: Text(suggestion),
-          onTap: () => _search(suggestion),
+          title: Text(work.title),
+          trailing: const Icon(Icons.chevron_right, color: Colors.black),
+          onTap: () => widget.onWorkSelected(work),
         );
       },
     );

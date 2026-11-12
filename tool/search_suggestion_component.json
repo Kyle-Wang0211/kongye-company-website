@@ -1,0 +1,9 @@
+{
+  "canonical_component": "App/lib/ui/community/search_suggestion_list.dart",
+  "sha256": "e1b76287b1064b364e81b325744e7d087b2865b0d4bdd08f485777210d3415e1",
+  "copies": [
+    "source/miniprogram-community/lib/ui/community/search_suggestion_list.dart"
+  ],
+  "web_renderer": "docs/community-search.mjs shared by homepage and standalone search",
+  "web_source_revision": "e78362446b006e83549fb576a0ca303e1993e563"
+}

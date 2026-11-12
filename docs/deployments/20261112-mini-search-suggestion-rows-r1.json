@@ -1,0 +1,30 @@
+{
+  "scope": "mini search suggestions only; App and mini share byte-identical Dart widget; web homepage and search share existing renderSuggestionRows",
+  "source_parent": "f1e94cf56c69b23d210222bfc22cf19fddb879c3",
+  "app_source_revision": "e6d9ee55c70eed892049522d677d6fdab06807ce",
+  "website_parent": "20261112-search-suggestion-rows-r4",
+  "website_source_revision": "e78362446b006e83549fb576a0ca303e1993e563",
+  "source_manifest_sha256": "1e53c146663ab59d6c8367f989f34bf6fed39f44b578f388550fadc445e019d7",
+  "community_main_unchanged": "bda1f6c6da57b32e36aa1d1b14baab5d307aaed06d5092107ab3c907992fff81",
+  "files": [
+    {
+      "path": "miniprogram/main.dart.js",
+      "base_sha256": "184a4da3bb1fce1eb26a520b6fea3b5139fbed9e5df6f32c9c24b74c67ef2dd8",
+      "sha256": "599f0b88e3552d1bd1788981204025ba2b12d1510e17648e4586a946b480d000",
+      "bytes": 4815662
+    },
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "base_sha256": "2ed681de98829b06462019128c63e0e1b30039f6f0d13cb6369168bee6339d18",
+      "sha256": "8d3289b234fe97dc682a3054f85be57b8d950c34f3bc470bd3c95c2a1f81e693",
+      "bytes": 13091
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "base_sha256": "3fc111a31ba5dec18bf94f0e5a1497c3a6bb1694669d79ce1712b896b2f134ed",
+      "sha256": "02a0c426399ad879588a3bdc71c5002e00e4875011e55d509be192fce7dc41df",
+      "bytes": 1165
+    }
+  ],
+  "status": "candidate-built"
+}
