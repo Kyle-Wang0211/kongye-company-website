@@ -120,5 +120,8 @@ html .community-grid .community-picture.is-loading:after{content:none;animation:
 
 .community-search-suggestions{position:absolute;top:calc(100% + 7px);left:0;right:0;list-style:none;margin:0;padding:6px;background:#fff;border:1px solid #e4e4e4;border-radius:10px;box-shadow:0 8px 26px #0001;max-height:50vh;overflow:auto;z-index:40}
 .community-search-suggestions[hidden]{display:none}
-.community-search-suggestions button{width:100%;border:0;background:transparent;color:#222;text-align:left;font:inherit;padding:10px 12px;border-radius:6px;cursor:pointer}
-.community-search-suggestions button:hover,.community-search-suggestions button:focus-visible{background:#f3f3f3;outline:0}
+#community-search-suggestions .pw-suggestion-row,.pw-community-search .pw-suggestion-row{display:flex;align-items:center;gap:4px;min-height:44px;border-radius:6px;background:#fff}
+#community-search-suggestions .pw-suggestion-row:hover,.pw-community-search .pw-suggestion-row:hover{background:#f3f3f3}
+#community-search-suggestions .pw-suggestion-text,.pw-community-search .pw-suggestion-text{display:block;flex:1;min-width:0;width:auto;text-align:left;border:0;background:transparent;color:#222;font:inherit;padding:11px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+#community-search-suggestions .pw-suggestion-fill,.pw-community-search .pw-suggestion-fill{display:block;flex:0 0 44px;width:44px;min-height:44px;margin-left:auto;padding:6px;border:0;background:transparent;color:#777;font:24px/1 var(--sans);text-align:center;cursor:pointer}
+#community-search-suggestions .pw-suggestion-row button:focus-visible,.pw-community-search .pw-suggestion-row button:focus-visible{outline:2px solid #777;outline-offset:-2px;border-radius:6px}

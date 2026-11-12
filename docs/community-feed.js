@@ -1,4 +1,4 @@
-import {installCommunitySearch} from './community-search.mjs?v=search-home-inline-20261112-v3';
+import {installCommunitySearch} from './community-search.mjs?v=search-suggestion-rows-20261112-v4';
 import {attachCommunityMasonry} from './community-masonry.mjs?v=natural-covers-20261110-v2';
 import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
