@@ -1,0 +1,38 @@
+{
+  "status": "published",
+  "invocation": "t-bj072wljoz2iiv4",
+  "exit_code": 0,
+  "completed_at": "2026-11-13T00:15:48+08:00",
+  "parent": "20261112-search-suggestion-rows-r4",
+  "release": "20261112-mini-search-suggestion-rows-r1",
+  "source_commit": "5c5a97ab476145bd28740204b9caaae0ff49e2dc",
+  "http_readback": [
+    {
+      "path": "miniprogram/main.dart.js",
+      "http": 200,
+      "sha256": "599f0b88e3552d1bd1788981204025ba2b12d1510e17648e4586a946b480d000"
+    },
+    {
+      "path": "miniprogram/flutter_bootstrap.js",
+      "http": 200,
+      "sha256": "8d3289b234fe97dc682a3054f85be57b8d950c34f3bc470bd3c95c2a1f81e693"
+    },
+    {
+      "path": "miniprogram/shared-source-build.json",
+      "http": 200,
+      "sha256": "02a0c426399ad879588a3bdc71c5002e00e4875011e55d509be192fce7dc41df"
+    }
+  ],
+  "login_hashes_preserved": true,
+  "old_release_3asset_hashes_preserved": true,
+  "community_main_unchanged": "bda1f6c6da57b32e36aa1d1b14baab5d307aaed06d5092107ab3c907992fff81",
+  "server_receipt": "/data/www/kongye-web/deployment-records/20261112-mini-search-suggestion-rows-r1/result.json",
+  "ui_readback": {
+    "entry": "https://kongye.space/miniprogram/?feed=1&release=5c5a97ab4761",
+    "query": "s",
+    "suggestion_count": 5,
+    "arrow_fills": "市场街头烧烤摊",
+    "text_search_result": "市场街头烧烤摊",
+    "display_issue": "U+2196 rendered as colored emoji in Chrome; reported to canonical App owner"
+  }
+}
