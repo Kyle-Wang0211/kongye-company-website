@@ -1,0 +1,43 @@
+{
+  "status": "published",
+  "scope": [
+    "web homepage activity windows"
+  ],
+  "source_commit": "16e1a5e7ca8502e90b22bec3560b0ca0a80847f8",
+  "remote_release": "/data/www/kongye-web/releases/20261114-activity-window-copy-r1",
+  "remote_receipt": "/data/www/kongye-web/deployment-records/20261114-activity-window-copy-r1/result.json",
+  "cloud_assistant_invoke": "t-bj0730a0p53j5z4",
+  "window_width_fraction": 0.8,
+  "aspect_ratio": "4:3",
+  "files": [
+    {
+      "path": "community-screens.css",
+      "base_sha256": "cd391435e1018b037d5e7fdfc6a7635e1aac3af39b4376d0c7e985db29c7ae9d",
+      "sha256": "0716ee604e371dc745b6c89387a490a514b34c5997ed02c573f53e2c1a05b972",
+      "bytes": 3459
+    },
+    {
+      "path": "community-screens.mjs",
+      "base_sha256": "adabf6df1b7c9277a236bf22b5f1266e2905c81f4219917b51fda2f190f4263a",
+      "sha256": "e859550d7404805c221a5c8ba02d7cf2396b3053828b8c9a7db0ec9e784e8562",
+      "bytes": 8974
+    },
+    {
+      "path": "index.html",
+      "base_sha256": "444924397635db430ba7917b68f534552706a6783437b452224cf8c7bf8bb027",
+      "sha256": "6a8860ae942c104e6a092b00f4014eb9bd7349e028d283526a2f2825aec9148a",
+      "bytes": 10110
+    }
+  ],
+  "verification": {
+    "syntax": "passed",
+    "cloud_exit_code": 0,
+    "live_width_fraction": 0.7999934805285118,
+    "live_aspect_ratio": 1.3333514433699156
+  },
+  "layout": {
+    "title_summary": "centered in upper window",
+    "entry": "black background white text, existing activity detail link",
+    "summary_source": "existing activity detail.summary"
+  }
+}
