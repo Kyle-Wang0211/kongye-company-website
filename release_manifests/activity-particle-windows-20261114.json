@@ -1,0 +1,68 @@
+{
+  "status": "published",
+  "scope": [
+    "web homepage activity hero"
+  ],
+  "baseline_commit": "cc99676c2c232cbeea9051611a40ca8d68f75cb6",
+  "source_commit": "06fe75a",
+  "remote_release": "/data/www/kongye-web/releases/20261114-activity-particle-windows-r1",
+  "remote_receipt": "/data/www/kongye-web/deployment-records/20261114-activity-particle-windows-r1/result.json",
+  "cloud_assistant_invoke": "t-bj07306h1v361vk",
+  "scene_content": "Procedural particle placeholders for ceramic, resort and courtyard",
+  "files": [
+    {
+      "path": "community-particle-scenes.mjs",
+      "base_sha256": null,
+      "sha256": "3dfe6c3db254998a2feb3ebd6d8897ba1a3145f4ce18de901952765007012d10",
+      "bytes": 10682
+    },
+    {
+      "path": "community-screens.css",
+      "base_sha256": "646f51236c2d4dd7b79865fd049c3b8d1a395ada3abf727d786ef99cf18ce190",
+      "sha256": "e2371ac02287652425a3817d80c4f961c4c23be8a2b252628f728006eefd9425",
+      "bytes": 2946
+    },
+    {
+      "path": "community-screens.mjs",
+      "base_sha256": "c00178cf1c66d8b55a47a21b221633598787973e53530a4be2e6f36303e487f9",
+      "sha256": "c45e149eb047d3fcd9ac649f9f548b819edee63da6ce6621595df0315ab26586",
+      "bytes": 8442
+    },
+    {
+      "path": "index.html",
+      "base_sha256": "3785a54aecbfaecb4794f6be91e402c4000347d41f414e10fb6b30a5e5792367",
+      "sha256": "f29587ed71e595dd1730be7ffc6c6769bd4fcbc464c6f71a0be8b4c3327b232f",
+      "bytes": 10102
+    },
+    {
+      "path": "vendor/gsap/SOURCE.json",
+      "base_sha256": null,
+      "sha256": "98fb2a6f6fdfb6b49fb5682514e7bbea444205173871524f918fe5c006a59aac",
+      "bytes": 293
+    },
+    {
+      "path": "vendor/gsap/gsap-core.js",
+      "base_sha256": null,
+      "sha256": "731756fb6a7cae2fa6878ac15a3030a4c2721c1c1b3f1c909431066eb4deef55",
+      "bytes": 172615
+    },
+    {
+      "path": "vendor/three-activity/MeshSurfaceSampler.js",
+      "base_sha256": null,
+      "sha256": "6d48fc8a3926ad63fe7dee4a9c8c338efb4a75222bfd83f2b63912bef39bfbe1",
+      "bytes": 9355
+    },
+    {
+      "path": "vendor/three-activity/SOURCE.json",
+      "base_sha256": null,
+      "sha256": "bfb98f55ef231bc99d860700ac1e026e791cef1c7a0abcf871a5cef29557c4e4",
+      "bytes": 679
+    }
+  ],
+  "verification": {
+    "syntax": "passed",
+    "scoped_review": "fixed visible-page activity refresh regression",
+    "public_asset_hashes": "four application files match",
+    "live_browser": "particle windows visible; ceramic window enters existing detail page"
+  }
+}
