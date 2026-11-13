@@ -44,9 +44,9 @@ function remember(index) {
 function render() {
   if (!renderer || !rows.length) return;
   const count = panes.length;
-  const pitch = width / 3;
-  const paneWidth = pitch * 0.91;
-  const gap = pitch - paneWidth;
+  const paneWidth = panes[0][0].getBoundingClientRect().width;
+  const pitch = paneWidth + width * 0.04;
+  const centeredLeft = (width - paneWidth) / 2;
   const cycle = count * pitch;
   let nearest = 0;
   let nearestDistance = Infinity;
@@ -58,7 +58,7 @@ function render() {
   renderer.setViewport(0, 0, width, height);
   renderer.setScissorTest(true);
   panes.forEach((copies, index) => {
-    const raw = (index + 1) * pitch + gap / 2 - phase.value * pitch;
+    const raw = index * pitch + centeredLeft - phase.value * pitch;
     const base = THREE.MathUtils.euclideanModulo(raw + pitch, cycle) - pitch;
     copies.forEach((pane, copy) => {
       const left = base + copy * cycle;
