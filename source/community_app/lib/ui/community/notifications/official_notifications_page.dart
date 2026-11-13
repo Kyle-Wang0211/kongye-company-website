@@ -9,7 +9,7 @@ import 'moderation_ui_support.dart';
 
 class _OfficialNotice {
   _OfficialNotice(Map<String, dynamic> row)
-    : id = row['id'] as String,
+    : id = row['id'].toString(),
       payload = Map<String, dynamic>.from(row['payload'] as Map),
       createdAt = DateTime.parse(row['created_at'] as String),
       readAt = DateTime.tryParse(row['read_at'] as String? ?? '');
@@ -295,7 +295,11 @@ class _OfficialNotificationsPageState extends State<OfficialNotificationsPage>
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: const Color(0xfff5f5f5),
     appBar: AppBar(
+      backgroundColor: const Color(0xfff5f5f5),
+      foregroundColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
       title: Text(_en ? 'Official notifications' : '官方通知'),
       actions: [
         IconButton(
@@ -336,37 +340,95 @@ class _OfficialNotificationsPageState extends State<OfficialNotificationsPage>
           color: Colors.black,
           onRefresh: _reload,
           child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: rows.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
             itemBuilder: (_, index) {
               final notice = rows[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                leading: Icon(
-                  notice.readAt == null
-                      ? Icons.mark_email_unread_outlined
-                      : Icons.drafts_outlined,
-                  color: Colors.grey,
-                ),
-                title: Text(
-                  notice.title(_en),
-                  style: TextStyle(
-                    fontWeight: notice.readAt == null
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+              final reason = notice.reason(_en);
+              final caseId = notice.payload['case_id'];
+              final hasCase =
+                  notice.subtype.startsWith('comment_') &&
+                  caseId is String &&
+                  caseId.isNotEmpty;
+              final action = hasCase
+                  ? (_en ? 'View review details' : '查看处理详情')
+                  : notice.readAt == null
+                  ? (_en ? 'Mark as read' : '标为已读')
+                  : (_en ? 'Read' : '已读');
+              return Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _open(notice),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          notice.title(_en),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _noticeTime(notice.createdAt),
+                          style: const TextStyle(
+                            color: Color(0xff999999),
+                            fontSize: 12,
+                            height: 1.5,
+                          ),
+                        ),
+                        if (reason.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            reason,
+                            style: const TextStyle(
+                              color: Color(0xff555555),
+                              fontSize: 15,
+                              height: 1.65,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        const Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          color: Color(0xffeeeeee),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  action,
+                                  style: const TextStyle(
+                                    color: Color(0xff555555),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              if (hasCase)
+                                const Icon(
+                                  Icons.chevron_right,
+                                  size: 20,
+                                  color: Color(0xff999999),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                subtitle: Text(
-                  [
-                    notice.reason(_en),
-                    _noticeTime(notice.createdAt),
-                  ].where((text) => text.isNotEmpty).join('\n'),
-                ),
-                onTap: () => _open(notice),
               );
             },
           ),

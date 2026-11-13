@@ -45,6 +45,6 @@ _flutter.loader.load({
     canvasKitBaseUrl: new URL('canvaskit/', document.baseURI).href
   },
   serviceWorkerSettings: {
-    serviceWorkerVersion: "193127000" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */
+    serviceWorkerVersion: "4036653813" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */
   }
 });
