@@ -1,0 +1,33 @@
+{
+  "status": "published",
+  "scope": [
+    "web homepage activity hover pause and horizontal trackpad control"
+  ],
+  "baseline_commit": "4f843b2",
+  "source_commit": "180a9f3151daa4717dc5b18755714c1a6d32ec5b",
+  "remote_release": "/data/www/kongye-web/releases/20261114-activity-window-gestures-r1",
+  "remote_receipt": "/data/www/kongye-web/deployment-records/20261114-activity-window-gestures-r1/result.json",
+  "cloud_assistant_invoke": "t-bj0730ebafbwwlc",
+  "files": [
+    {
+      "path": "community-screens.mjs",
+      "base_sha256": "e859550d7404805c221a5c8ba02d7cf2396b3053828b8c9a7db0ec9e784e8562",
+      "sha256": "bcbd588302f568f67f29d1adb2bccd50fdf6e3f51c79f2e19d7c4b71f2ff4046",
+      "bytes": 9939
+    },
+    {
+      "path": "index.html",
+      "base_sha256": "6e4fcf7684ebcbfe769c827ff283cfb999bcd61fe02b3e07f2e20d7f00c9b2de",
+      "sha256": "92272040c127572c42b186fd5bb617d7b1a0538055ab36d6862363a7383309f0",
+      "bytes": 10115
+    }
+  ],
+  "verification": {
+    "syntax": "passed",
+    "cloud_exit_code": 0,
+    "hover": "position unchanged across successive visible DOM observations",
+    "horizontal_wheel": "40px and 120px input moved windows 40px and 120px",
+    "pointer_leave": "automatic movement resumed"
+  },
+  "input_scope": "desktop pointer hover and horizontal wheel events from a trackpad"
+}
