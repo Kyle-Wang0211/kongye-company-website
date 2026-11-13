@@ -141,10 +141,19 @@ function build(next) {
       link.className = 'community-feature-screen community-screen-event';
       link.href = activityPageUrl(row.slug);
       link.setAttribute('aria-label', row.content.title);
+      const copyBlock = document.createElement('span');
+      copyBlock.className = 'community-screen-copy';
       const title = document.createElement('span');
       title.className = 'community-screen-title';
       title.textContent = row.content.title;
-      link.append(title);
+      const summary = document.createElement('span');
+      summary.className = 'community-screen-summary';
+      summary.textContent = row.content.detail.summary || '';
+      copyBlock.append(title, summary);
+      const entry = document.createElement('span');
+      entry.className = 'community-screen-entry';
+      entry.textContent = '查看活动';
+      link.append(copyBlock, entry);
       stage.append(link);
       copies.push(link);
     }
