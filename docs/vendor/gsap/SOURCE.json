@@ -1,0 +1,9 @@
+{
+  "package": "gsap",
+  "version": "3.15.1",
+  "source": "https://registry.npmjs.org/gsap/-/gsap-3.15.1.tgz",
+  "file": "package/gsap-core.js",
+  "license": "https://gsap.com/standard-license",
+  "sha256": "731756fb6a7cae2fa6878ac15a3030a4c2721c1c1b3f1c909431066eb4deef55",
+  "changes": []
+}

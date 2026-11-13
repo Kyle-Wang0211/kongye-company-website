@@ -1,0 +1,14 @@
+{
+  "source": "https://raw.githubusercontent.com/mrdoob/three.js/r186/examples/jsm/math/MeshSurfaceSampler.js",
+  "revision": "r186",
+  "retrieved": "2026-11-13",
+  "upstream_sha256": "a70ab7a8f28b96cd51f09b7c4d5987167bdc23b91b2a26134766a180751aee43",
+  "vendored_sha256": "6d48fc8a3926ad63fe7dee4a9c8c338efb4a75222bfd83f2b63912bef39bfbe1",
+  "license": "MIT",
+  "license_source": "https://raw.githubusercontent.com/mrdoob/three.js/r186/LICENSE",
+  "changes": [
+    "Prepended upstream MIT license text.",
+    "Replaced bare three import with existing relative three.module.js path."
+  ],
+  "runtime": "Existing docs/viewer/vendor/three/build/three.module.js, version 0.186.1"
+}
