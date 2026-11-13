@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://api.kongye.space" crossorigin>
   <link rel="canonical" href="https://kongye.space/">
   <link rel="stylesheet" href="styles.css?v=discovery-20261110-v2">
-  <link rel="stylesheet" href="community-shell.css?v=natural-masonry-20261110-v1">
+  <link rel="stylesheet" href="community-shell.css?v=icon-sidebar-20261113-v1">
   <link rel="stylesheet" href="community-screens.css?v=cover16x9-20261110">
   <link rel="stylesheet" href="community-account-menu.css?v=account-library-20261106-v44">
   <script src="community-screens.mjs?v=cover16x9-20261110-r2" type="module"></script>
@@ -22,17 +22,16 @@
 <body class="community-shell">
   <a class="skip" href="#main" data-i18n="siteSkip">跳至正文</a>
   <aside class="community-sidebar" aria-label="社区导航" data-i18n-aria="navCommunity">
-    <a class="brand" href="./" data-i18n-aria="siteHome" aria-label="窗后城首页"><img class="brand-icon" src="assets/app-icon.png" alt="" width="38" height="38"><span data-i18n="siteBrand">窗后城</span></a>
+    <a class="brand" href="./" data-i18n-aria="siteHome" aria-label="窗后城首页"><img class="brand-icon" src="assets/app-icon.png" alt="" width="38" height="38"></a>
     <nav class="sidebar-primary">
-      <a class="sidebar-item is-current" data-i18n-aria="communityTabHot" aria-label="热门" href="./" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3c1 5-3 5-2 9 1-1 3-2 4-4 2 2 4 5 4 7a7 7 0 0 1-14 0c0-3 2-6 4-8 0 3 1 4 2 5"/></svg><span data-i18n="communityTabHot">热门</span></a>
-      <button id="following-link" data-i18n-aria="navFollowing" aria-label="关注" class="sidebar-item" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2a6 6 0 0 1 10-4m2-1 3 3 4-6"/></svg><span data-i18n="navFollowing">关注</span></button>
-      <a id="my-profile-link" data-i18n-aria="navMyProfile" aria-label="我的" class="sidebar-item" href="community/?auth=signin"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z"/></svg><span data-i18n="navMyProfile">我的</span></a>
-      <a id="sidebar-messages-link" data-i18n-aria="navMessages" aria-label="消息" class="sidebar-item" href="community/#/messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11a9 9 0 0 1-9 9H3v-9a9 9 0 0 1 18 0Z"/></svg><span data-i18n="navMessages">消息</span></a>
+      <a class="sidebar-item is-current" data-i18n-aria="communityTabHot" aria-label="热门" href="./" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3c1 5-3 5-2 9 1-1 3-2 4-4 2 2 4 5 4 7a7 7 0 0 1-14 0c0-3 2-6 4-8 0 3 1 4 2 5"/></svg></a>
+      <button id="following-link" data-i18n-aria="navFollowing" aria-label="关注" class="sidebar-item" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2a6 6 0 0 1 10-4m2-1 3 3 4-6"/></svg></button>
+      <a id="my-profile-link" data-i18n-aria="navMyProfile" aria-label="我的" class="sidebar-item" href="community/?auth=signin"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z"/></svg></a>
+      <a id="sidebar-messages-link" data-i18n-aria="navMessages" aria-label="消息" class="sidebar-item" href="community/#/messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11a9 9 0 0 1-9 9H3v-9a9 9 0 0 1 18 0Z"/></svg></a>
     </nav>
     <div class="sidebar-footer">
-      <button id="open-sidebar-settings" data-i18n-aria="siteSettings" aria-label="设置" class="sidebar-item sidebar-settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7Z"/><circle cx="12" cy="12" r="3"/></svg><span data-i18n="siteSettings">设置</span></button>
-      <p data-i18n="siteCopyright">© 2026 北京空也科技有限公司</p>
-      <a class="sidebar-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2026067702号-1</a>
+      <button id="open-sidebar-settings" data-i18n-aria="siteSettings" aria-label="设置" class="sidebar-item sidebar-settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <a class="sidebar-item sidebar-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" aria-label="京ICP备2026067702号-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6"/></svg></a>
     </div>
   </aside>
   <header class="site-header community-header wrap">
