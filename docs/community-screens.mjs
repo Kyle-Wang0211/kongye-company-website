@@ -22,6 +22,7 @@ let selected = -1;
 let loading = false;
 let visible = true;
 let pageActive = true;
+let hovered = false;
 let activeId = null;
 let pointerStart = null;
 let suppressClickUntil = 0;
@@ -86,7 +87,7 @@ function render() {
 }
 
 function updatePlayback() {
-  const playing = visible && pageActive && !document.hidden && !reducedMotion.matches && !pointerStart;
+  const playing = visible && pageActive && !document.hidden && !reducedMotion.matches && !pointerStart && !hovered;
   if (playing) timeline?.play();
   else timeline?.pause();
 }
@@ -209,6 +210,31 @@ switcher.addEventListener('keydown', (event) => {
   select(index);
   switcher.children[selected].focus();
 });
+stage.addEventListener('pointerenter', (event) => {
+  if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
+  hovered = true;
+  updatePlayback();
+});
+stage.addEventListener('pointerleave', (event) => {
+  if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
+  hovered = false;
+  updatePlayback();
+});
+stage.addEventListener('wheel', (event) => {
+  if (!timeline || !panes.length || event.ctrlKey || event.deltaX === 0 ||
+      Math.abs(event.deltaX) < Math.abs(event.deltaY)) return;
+  event.preventDefault();
+  timeline.pause();
+  const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? width : 1;
+  const pitch = panes[0][0].getBoundingClientRect().width + width * 0.04;
+  const target = THREE.MathUtils.euclideanModulo(
+    phase.value + event.deltaX * unit / pitch,
+    panes.length,
+  );
+  timeline.time(target * 5);
+  phase.value = target;
+  render();
+}, { passive: false });
 stage.addEventListener('pointerdown', (event) => {
   if (!event.isPrimary || event.button !== 0) return;
   pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
