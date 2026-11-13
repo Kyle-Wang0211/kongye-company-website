@@ -3,6 +3,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
+import 'community_cover_processor.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -159,7 +162,9 @@ class _SupabaseWebPublicationPorts implements WebPublicationPorts {
           token,
           bytes,
           FileOptions(
-            contentType: path.endsWith('.ply')
+            contentType: bucket == 'publication-cover-staging'
+                ? 'image/jpeg'
+                : path.endsWith('.ply')
                 ? 'application/octet-stream'
                 : 'model/gltf-binary',
             upsert: false,
@@ -309,6 +314,7 @@ class WebPublicationService {
     String description = '',
     required String idempotencyKey,
     Map<String, dynamic>? selectionBox,
+    Uint8List? coverJpeg,
     String? expectedSourceSha256,
     Map<String, dynamic>? initialView,
     required FutureOr<void> Function(String submissionId) onSubmissionCreated,
@@ -355,6 +361,31 @@ class WebPublicationService {
       if (expectedSourceSha256 != null && hash != expectedSourceSha256) {
         throw const WebPublicationException('source_changed');
       }
+      Uint8List? preparedCover;
+      Map<String, dynamic>? userCover;
+      if (coverJpeg != null) {
+        final coverBytes = await compute(prepareCommunityCover, coverJpeg);
+        preparedCover = coverBytes;
+        final codec = await ui.instantiateImageCodec(coverBytes);
+        try {
+          final image = (await codec.getNextFrame()).image;
+          try {
+            userCover = {
+              'sha256': sha256.convert(coverBytes).toString(),
+              'byte_length': coverBytes.lengthInBytes,
+              'width': image.width,
+              'height': image.height,
+              'content_type': 'image/jpeg',
+            };
+          } finally {
+            image.dispose();
+          }
+        } finally {
+          codec.dispose();
+        }
+      }
+      if (format == 'glb' && coverJpeg == null)
+        throw const WebPublicationException('missing_user_cover');
       final frozenView = initialView == null
           ? null
           : validatePublicationInitialView(
@@ -373,6 +404,7 @@ class WebPublicationService {
         'idempotency_key': idempotencyKey,
         'selection_box': ?selectionBox,
         'initial_view': ?frozenView,
+        'user_cover': ?userCover,
       });
       _signedIn(uid);
       final current = _status(initiated);
@@ -418,6 +450,39 @@ class WebPublicationService {
           submissionId: submissionId,
         );
       }
+      final coverUpload = initiated['cover_upload'];
+      if (preparedCover != null) {
+        if (_ports is! WebPublicationPorts ||
+            coverUpload is! Map ||
+            coverUpload['bucket'] != 'publication-cover-staging' ||
+            coverUpload['path'] != '$uid/$submissionId/cover.jpg' ||
+            coverUpload['token'] is! String ||
+            (coverUpload['token'] as String).isEmpty ||
+            coverUpload['signed_url'] is! String ||
+            coverUpload['sha256'] != userCover!['sha256'] ||
+            coverUpload['byte_length'] != preparedCover.lengthInBytes) {
+          throw WebPublicationException(
+            'invalid_cover_upload_contract',
+            submissionId: submissionId,
+          );
+        }
+        final coverUri = Uri.tryParse(coverUpload['signed_url'] as String);
+        if (coverUri == null ||
+            coverUri.scheme != 'https' ||
+            coverUri.origin != api.origin ||
+            coverUri.userInfo.isNotEmpty ||
+            coverUri.hasFragment ||
+            coverUri.path !=
+                '/storage/v1/object/upload/sign/publication-cover-staging/${coverUpload['path']}' ||
+            coverUri.queryParametersAll.length != 1 ||
+            coverUri.queryParametersAll['token']?.length != 1 ||
+            coverUri.queryParameters['token'] != coverUpload['token']) {
+          throw WebPublicationException(
+            'invalid_cover_upload_contract',
+            submissionId: submissionId,
+          );
+        }
+      }
       onProgress?.call('uploading', 0);
       final transfer = _ports.upload(
         path: upload['path'] as String,
@@ -446,6 +511,22 @@ class WebPublicationService {
         rethrow;
       }
       _signedIn(uid);
+      if (preparedCover != null) {
+        onProgress?.call('uploading_cover', 0.95);
+        try {
+          await (_ports as WebPublicationPorts)
+              .upload(
+                path: (coverUpload as Map)['path'] as String,
+                token: coverUpload['token'] as String,
+                bytes: preparedCover,
+                bucket: 'publication-cover-staging',
+              )
+              .timeout(requestTimeout);
+        } on StorageException catch (e) {
+          if (e.statusCode != '409') rethrow;
+        }
+        _signedIn(uid);
+      }
       onProgress?.call('sealing', 1);
       final sealed = _status(
         await _call({

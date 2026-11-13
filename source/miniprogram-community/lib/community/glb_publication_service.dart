@@ -3,6 +3,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
+import 'community_cover_processor.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -51,11 +54,21 @@ abstract class GlbPublicationPorts {
     required String path,
     required String token,
     required File file,
+    String bucket = 'publication-staging',
   });
   Future<File> verifySource(String recordId, String glbPath);
 }
 
-class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
+abstract interface class GlbPublicationCoverUploader {
+  Future<void> uploadCover({
+    required String path,
+    required String token,
+    required Uint8List bytes,
+  });
+}
+
+class _SupabaseGlbPublicationPorts
+    implements GlbPublicationPorts, GlbPublicationCoverUploader {
   final SupabaseClient client;
   @override
   final Uri apiOrigin;
@@ -78,15 +91,33 @@ class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
     required String path,
     required String token,
     required File file,
+    String bucket = 'publication-staging',
   }) async {
     await client.storage
-        .from('publication-staging')
+        .from(bucket)
         .uploadToSignedUrl(
           path,
           token,
           file,
           const FileOptions(contentType: 'model/gltf-binary', upsert: false),
           0, // Ambiguous requests are resumed through the same submission, never retried blindly.
+        );
+  }
+
+  @override
+  Future<void> uploadCover({
+    required String path,
+    required String token,
+    required Uint8List bytes,
+  }) async {
+    await client.storage
+        .from('publication-cover-staging')
+        .uploadBinaryToSignedUrl(
+          path,
+          token,
+          bytes,
+          const FileOptions(contentType: 'image/jpeg', upsert: false),
+          0,
         );
   }
 
@@ -233,6 +264,9 @@ class GlbPublicationService {
     required String glbPath,
     required String title,
     String description = '',
+    Map<String, dynamic>? selectionBox,
+    Uint8List? coverJpeg,
+    Map<String, dynamic>? initialView,
     required String idempotencyKey,
     required FutureOr<void> Function(String submissionId) onSubmissionCreated,
     void Function(String phase, double fraction)? onProgress,
@@ -261,6 +295,29 @@ class GlbPublicationService {
           await FileSystemEntity.type(source.path, followLinks: false) !=
               FileSystemEntityType.file) {
         throw const GlbPublicationException('invalid_glb_source');
+      }
+      Uint8List? preparedCover;
+      Map<String, dynamic>? userCover;
+      if (coverJpeg != null) {
+        final coverBytes = await compute(prepareCommunityCover, coverJpeg);
+        preparedCover = coverBytes;
+        final codec = await ui.instantiateImageCodec(coverBytes);
+        try {
+          final image = (await codec.getNextFrame()).image;
+          try {
+            userCover = {
+              'sha256': sha256.convert(coverBytes).toString(),
+              'byte_length': coverBytes.lengthInBytes,
+              'width': image.width,
+              'height': image.height,
+              'content_type': 'image/jpeg',
+            };
+          } finally {
+            image.dispose();
+          }
+        } finally {
+          codec.dispose();
+        }
       }
       final dir = await Directory.systemTemp.createTemp('pw-glb-publication-');
       snapshot = File('${dir.path}/source.glb');
@@ -295,6 +352,9 @@ class GlbPublicationService {
         'byte_length': size,
         'source_sha256': hash,
         'idempotency_key': idempotencyKey,
+        'selection_box': ?selectionBox,
+        'user_cover': ?userCover,
+        'initial_view': ?initialView,
       });
       final current = _status(initiated);
       submissionId = current.submissionId;
@@ -303,6 +363,10 @@ class GlbPublicationService {
       if (current.status != 'uploading') return current;
       final upload = initiated['upload'];
       if (upload is! Map ||
+          upload['bucket'] !=
+              (selectionBox == null
+                  ? 'publication-staging'
+                  : 'publication-selection-staging') ||
           upload['path'] != '$uid/$submissionId/source.glb' ||
           upload['token'] is! String ||
           (upload['token'] as String).isEmpty ||
@@ -323,7 +387,7 @@ class GlbPublicationService {
           uri.userInfo.isNotEmpty ||
           uri.hasFragment ||
           uri.path !=
-              '/storage/v1/object/upload/sign/publication-staging/${upload['path']}' ||
+              '/storage/v1/object/upload/sign/${upload['bucket']}/${upload['path']}' ||
           uri.queryParametersAll.length != 1 ||
           uri.queryParametersAll['token']?.length != 1 ||
           uri.queryParameters['token'] != upload['token']) {
@@ -331,6 +395,39 @@ class GlbPublicationService {
           'invalid_upload_contract',
           submissionId: submissionId,
         );
+      }
+      final coverUpload = initiated['cover_upload'];
+      if (preparedCover != null) {
+        if (_ports is! GlbPublicationCoverUploader ||
+            coverUpload is! Map ||
+            coverUpload['bucket'] != 'publication-cover-staging' ||
+            coverUpload['path'] != '$uid/$submissionId/cover.jpg' ||
+            coverUpload['token'] is! String ||
+            (coverUpload['token'] as String).isEmpty ||
+            coverUpload['signed_url'] is! String ||
+            coverUpload['sha256'] != userCover!['sha256'] ||
+            coverUpload['byte_length'] != preparedCover.lengthInBytes) {
+          throw GlbPublicationException(
+            'invalid_cover_upload_contract',
+            submissionId: submissionId,
+          );
+        }
+        final coverUri = Uri.tryParse(coverUpload['signed_url'] as String);
+        if (coverUri == null ||
+            coverUri.scheme != 'https' ||
+            coverUri.origin != api.origin ||
+            coverUri.userInfo.isNotEmpty ||
+            coverUri.hasFragment ||
+            coverUri.path !=
+                '/storage/v1/object/upload/sign/publication-cover-staging/${coverUpload['path']}' ||
+            coverUri.queryParametersAll.length != 1 ||
+            coverUri.queryParametersAll['token']?.length != 1 ||
+            coverUri.queryParameters['token'] != coverUpload['token']) {
+          throw GlbPublicationException(
+            'invalid_cover_upload_contract',
+            submissionId: submissionId,
+          );
+        }
       }
       onProgress?.call('uploading', 0.2);
       uploadInFlight = true;
@@ -340,6 +437,7 @@ class GlbPublicationService {
         path: upload['path'] as String,
         token: upload['token'] as String,
         file: snapshot,
+        bucket: upload['bucket'] as String,
       );
       // Future.timeout does not cancel an SDK transfer. Clean only our private
       // snapshot after that transfer really settles, even if the caller timed out.
@@ -384,6 +482,21 @@ class GlbPublicationService {
         rethrow;
       }
       _signedIn(uid);
+      if (preparedCover != null) {
+        onProgress?.call('uploading_cover', 0.8);
+        try {
+          await (_ports as GlbPublicationCoverUploader)
+              .uploadCover(
+                path: (coverUpload as Map)['path'] as String,
+                token: coverUpload['token'] as String,
+                bytes: preparedCover,
+              )
+              .timeout(requestTimeout);
+        } on StorageException catch (e) {
+          if (e.statusCode != '409') rethrow;
+        }
+        _signedIn(uid);
+      }
       onProgress?.call('sealing', 0.9);
       final sealed = _status(
         await _call({

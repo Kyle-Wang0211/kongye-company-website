@@ -58,6 +58,11 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   SharedViewerController? _previewController;
   Map<String, dynamic>? _confirmedView;
   Uint8List? _coverPreview;
+  Uint8List? _coverJpeg;
+  bool get _isGlb => _format == 'glb';
+  bool get _hasConfirmedCover => _isGlb
+      ? _coverJpeg != null && !_coverEditing
+      : _confirmedView != null && !_coverEditing;
   int _previewEpoch = 0;
   bool _previewReady = false, _confirming = false, _coverEditing = false;
   final _previewAnchor = GlobalKey();
@@ -135,9 +140,13 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       if (!current()) return;
       final camera = await controller.getCameraFraming();
       if (!current()) return;
-      final image = await controller.capture(type: 'image/png');
+      final mime = _isGlb ? 'image/jpeg' : 'image/png';
+      final image = await controller.capture(
+        type: mime,
+        canonicalCamera: false,
+      );
       if (!current()) return;
-      if (image is! String || !image.startsWith('data:image/png;base64,')) {
+      if (image is! String || !image.startsWith('data:$mime;base64,')) {
         throw const WebPublicationException('cover_preview_unavailable');
       }
       final confirmed = validatePublicationInitialView(
@@ -150,13 +159,12 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         sourceSha256: _sourceHash!,
         selectionBox: _selection,
       );
-      final png = base64Decode(
-        image.substring('data:image/png;base64,'.length),
-      );
+      final png = base64Decode(image.substring('data:$mime;base64,'.length));
       if (!current()) return;
       setState(() {
         _confirmedView = confirmed;
         _coverPreview = png;
+        if (_isGlb) _coverJpeg = png;
         _coverEditing = false;
         _message = '已确认封面和初始视角';
       });
@@ -351,6 +359,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     _bytes = null;
     _resetPreview();
     _selection = null;
+    _coverJpeg = null;
     _status = null;
     _key = null;
     _submission = null;
@@ -442,6 +451,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       _bytes = null;
       _resetPreview();
       _selection = null;
+      _coverJpeg = null;
       _status = null;
       _selected = false;
       _message = null;
@@ -477,7 +487,8 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       }
       final bytes = file.bytes!;
       _format = format;
-      if (_key != null || (_bytes == null && _sourceHash != null)) {
+      if (format != 'glb' &&
+          (_key != null || (_bytes == null && _sourceHash != null))) {
         if (sha256.convert(bytes).toString() != _sourceHash) {
           throw const WebPublicationException('source_changed');
         }
@@ -503,11 +514,31 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       final selection = await Navigator.of(context).push(route);
       _selectionRoute = null;
       if (!_current || selection == null) return;
+      if (_isGlb &&
+          (selection.coverJpeg == null || selection.cameraFraming == null))
+        return;
       setState(() {
         _bytes = bytes;
         _selection = selection.box?.toJson();
+        _coverJpeg = selection.coverJpeg;
         _sourceHash = sha256.convert(bytes).toString();
         _resetPreview();
+        if (_isGlb) {
+          _coverPreview = _coverJpeg;
+          _confirmedView = validatePublicationInitialView(
+            {
+              'schema': 'pw.camera-framing.v1',
+              'source_sha256': _sourceHash,
+              'selection_box': _selection,
+              ...?selection.cameraFraming,
+            },
+            sourceSha256: _sourceHash!,
+            selectionBox: _selection,
+          );
+          _key = null;
+          _submission = null;
+          _status = null;
+        }
         _selected = true;
       });
     } catch (error) {
@@ -530,7 +561,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         !_selected ||
         _busy ||
         _confirming ||
-        (_key == null && (_confirmedView == null || _coverEditing)))
+        (_isGlb ? !_hasConfirmedCover : (_key == null && !_hasConfirmedCover)))
       return;
     if (_title.text.trim().isEmpty ||
         _title.text.runes.length > 100 ||
@@ -555,6 +586,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         idempotencyKey: _key!,
         selectionBox: _selection,
         initialView: _confirmedView,
+        coverJpeg: _isGlb ? _coverJpeg : null,
         expectedSourceSha256: _sourceHash,
         onSubmissionCreated: (id) async {
           if (!_current) return;
@@ -695,12 +727,18 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                   if (_previewController != null) _preview(),
                   TextField(
                     controller: _title,
-                    enabled: !_busy && _key == null,
+                    enabled:
+                        !_busy &&
+                        _key == null &&
+                        (!_isGlb || _hasConfirmedCover),
                     decoration: const InputDecoration(labelText: '标题（1–100 字）'),
                   ),
                   TextField(
                     controller: _description,
-                    enabled: !_busy && _key == null,
+                    enabled:
+                        !_busy &&
+                        _key == null &&
+                        (!_isGlb || _hasConfirmedCover),
                     decoration: const InputDecoration(labelText: '描述（最多 30 字）'),
                   ),
                   const SizedBox(height: 24),
@@ -709,8 +747,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                         !_busy &&
                             _selected &&
                             !_confirming &&
-                            (_key != null ||
-                                (_confirmedView != null && !_coverEditing)) &&
+                            (_isGlb
+                                ? _hasConfirmedCover
+                                : (_key != null || _hasConfirmedCover)) &&
                             (_submission == null ||
                                 _status?.status == 'uploading' ||
                                 _status == null)

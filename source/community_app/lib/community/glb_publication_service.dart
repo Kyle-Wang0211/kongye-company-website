@@ -61,7 +61,16 @@ abstract class GlbPublicationPorts {
   Future<File> verifySource(String recordId, String glbPath);
 }
 
-class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
+abstract interface class GlbPublicationCoverUploader {
+  Future<void> uploadCover({
+    required String path,
+    required String token,
+    required Uint8List bytes,
+  });
+}
+
+class _SupabaseGlbPublicationPorts
+    implements GlbPublicationPorts, GlbPublicationCoverUploader {
   final SupabaseClient client;
   @override
   final Uri apiOrigin;
@@ -97,6 +106,23 @@ class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
   }
 
   @override
+  Future<void> uploadCover({
+    required String path,
+    required String token,
+    required Uint8List bytes,
+  }) async {
+    await client.storage
+        .from('publication-cover-staging')
+        .uploadBinaryToSignedUrl(
+          path,
+          token,
+          bytes,
+          const FileOptions(contentType: 'image/jpeg', upsert: false),
+          0,
+        );
+  }
+
+  @override
   Future<File> verifySource(String recordId, String glbPath) async {
     final requested = File(glbPath);
     if (await FileSystemEntity.type(glbPath, followLinks: false) !=
@@ -124,9 +150,29 @@ class _SupabaseGlbPublicationPorts implements GlbPublicationPorts {
 /// Native source verification stays local; authenticated control requests share
 /// the exact same publication protocol as browser submissions.
 class _GlbPublicationControlPorts
-    implements PublicationControlPorts, PublicationResumableCredentials {
+    implements WebPublicationPorts, PublicationResumableCredentials {
   final GlbPublicationPorts ports;
   _GlbPublicationControlPorts(this.ports);
+  @override
+  Future<void> upload({
+    required String path,
+    required String token,
+    required Uint8List bytes,
+    String bucket = 'publication-staging',
+    void Function(int sent, int total)? onBytesSent,
+  }) async {
+    if (bucket != 'publication-cover-staging' ||
+        ports is! GlbPublicationCoverUploader) {
+      throw const WebPublicationException('invalid_cover_upload_contract');
+    }
+    await (ports as GlbPublicationCoverUploader).uploadCover(
+      path: path,
+      token: token,
+      bytes: bytes,
+    );
+    onBytesSent?.call(bytes.length, bytes.length);
+  }
+
   @override
   String? get userId => ports.userId;
   @override
@@ -227,6 +273,9 @@ class GlbPublicationService {
     required String glbPath,
     required String title,
     String description = '',
+    Map<String, dynamic>? selectionBox,
+    Uint8List? coverJpeg,
+    Map<String, dynamic>? initialView,
     required String idempotencyKey,
     required FutureOr<void> Function(String submissionId) onSubmissionCreated,
     void Function(String phase, double fraction)? onProgress,
@@ -294,6 +343,9 @@ class GlbPublicationService {
           title: title,
           description: description,
           idempotencyKey: idempotencyKey,
+          selectionBox: selectionBox,
+          coverJpeg: coverJpeg,
+          initialView: initialView,
           onSubmissionCreated: (id) async {
             submissionId = id;
             await onSubmissionCreated(id);
@@ -308,6 +360,9 @@ class GlbPublicationService {
         title: title,
         description: description,
         idempotencyKey: idempotencyKey,
+        selectionBox: selectionBox,
+        coverJpeg: coverJpeg,
+        initialView: initialView,
         onSubmissionCreated: (id) async {
           submissionId = id;
           try {

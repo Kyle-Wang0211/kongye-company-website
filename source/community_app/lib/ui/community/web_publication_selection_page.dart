@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -14,8 +15,14 @@ import '../official_capture/web_publication_camera_controls.dart'
 
 /// null route result is cancellation; box == null explicitly retains all GLB.
 class WebPublicationSelectionResult {
-  const WebPublicationSelectionResult({this.box});
+  const WebPublicationSelectionResult({
+    this.box,
+    this.coverJpeg,
+    this.cameraFraming,
+  });
   final SelectionBox? box;
+  final Uint8List? coverJpeg;
+  final Map<String, dynamic>? cameraFraming;
 }
 
 /// Publication-only draft. Never reads or writes the capture selection archive.
@@ -38,6 +45,7 @@ class _WebPublicationSelectionPageState
   SelectionBox? _box, _initial;
   String? _error;
   bool _busy = false, _keepAll = false, _showAdjustment = false;
+  bool _choosingCover = false;
   bool get _supportedModel => true;
 
   double _span = 1;
@@ -185,21 +193,65 @@ class _WebPublicationSelectionPageState
 
   Future<void> _finish({bool cancel = false}) async {
     if (_busy) return;
+    if (!cancel && (_error != null || _box == null || _viewer == null)) return;
+    setState(() => _busy = true);
     try {
       await _queue;
-      await _viewer?.setSelectionPreview(null);
       await _viewer?.endSelectionEditing();
-      if (!mounted) return;
       if (cancel) {
-        Navigator.of(context).pop();
-      } else {
-        if (_error != null || _box == null) return;
-        Navigator.of(
-          context,
-        ).pop(WebPublicationSelectionResult(box: _keepAll ? null : _box));
+        if (mounted) Navigator.of(context).pop();
+        return;
       }
+      await _viewer!.setSelectionPreview(
+        _keepAll ? null : _box!.toJson(),
+        decorations: false,
+      );
+      await _viewer!.configure(autoRotate: false);
+      _cameraPoll?.cancel();
+      if (mounted) setState(() => _choosingCover = true);
     } catch (e) {
       _fail(e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _takeCover() async {
+    if (_busy || !_choosingCover || _viewer == null) return;
+    setState(() => _busy = true);
+    try {
+      await _viewer!.configure(interactive: false);
+      final camera = await _viewer!.getCameraFraming();
+      final capture = await _viewer!.capture(
+        type: 'image/jpeg',
+        quality: 0.85,
+        canonicalCamera: false,
+      );
+      const prefix = 'data:image/jpeg;base64,';
+      if (capture is! String || !capture.startsWith(prefix)) {
+        throw StateError('无法拍摄作品封面');
+      }
+      final jpeg = base64Decode(capture.substring(prefix.length));
+      if (jpeg.isEmpty) throw StateError('作品封面为空');
+      if (!mounted) return;
+      Navigator.of(context).pop(
+        WebPublicationSelectionResult(
+          box: _keepAll ? null : _box,
+          coverJpeg: jpeg,
+          cameraFraming: camera,
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('封面拍摄未完成，请重试')));
+      }
+    } finally {
+      try {
+        await _viewer?.configure(interactive: true);
+      } catch (_) {}
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -423,8 +475,8 @@ class _WebPublicationSelectionPageState
                   onReady: _ready,
                   onError: _fail,
                 ),
-              if (_box != null) _handles(viewport),
-              if (_box != null)
+              if (_box != null && !_choosingCover) _handles(viewport),
+              if (_box != null && !_choosingCover)
                 SelectionToolsLayer(
                   box: _box!,
                   onBoxChanged: _change,
@@ -436,14 +488,14 @@ class _WebPublicationSelectionPageState
                   onCancel: () => _finish(cancel: true),
                   onResetBoxSize: () => _change(_initial!),
                 ),
-              if (_box != null && _showAdjustment)
+              if (_box != null && !_choosingCover && _showAdjustment)
                 Positioned(
                   left: 12,
                   right: 100,
                   bottom: 180,
                   child: _adjustment(),
                 ),
-              if (_box != null)
+              if (_box != null && !_choosingCover)
                 Positioned(
                   left: 12,
                   bottom: 150,
@@ -463,6 +515,45 @@ class _WebPublicationSelectionPageState
                           );
                         },
                         child: Text(_keepAll ? '恢复选区' : '保留全部'),
+                      ),
+                    ],
+                  ),
+                ),
+              if (_choosingCover)
+                SafeArea(
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: IconButton(
+                          onPressed: _busy ? null : () => _finish(cancel: true),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
+                          tooltip: '取消',
+                        ),
+                      ),
+                      const Spacer(),
+                      const Text(
+                        '旋转、缩放作品，选择封面角度',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: FilledButton.icon(
+                            onPressed: _busy ? null : _takeCover,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                            ),
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('拍摄封面并继续'),
+                          ),
+                        ),
                       ),
                     ],
                   ),

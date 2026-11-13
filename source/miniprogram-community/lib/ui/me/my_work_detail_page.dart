@@ -21,6 +21,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:crypto/crypto.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pw_shared_viewer/pw_shared_viewer.dart';
 
@@ -33,6 +34,7 @@ import '../../community/publish_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../me/scan_record_store.dart';
 import '../community/aether_cpp_card_demo.dart';
+import '../community/web_publication_selection_page.dart';
 import '../design_system.dart';
 import '../final_mesh_thumbnail.dart';
 import '../shared/product_model_view.dart';
@@ -406,14 +408,22 @@ class _MyWorkDetailPageState extends State<MyWorkDetailPage> {
     if (!hasPw38FinalRecordProof(renderedRecord)) return;
     unawaited(() async {
       try {
-        final proof = await verifyPw38FinalRecordArtifact(_store, renderedRecord);
-        final artifactIdentity = '${proof.publishedGlb}:${renderedRecord.finalGlbSha256}';
+        final proof = await verifyPw38FinalRecordArtifact(
+          _store,
+          renderedRecord,
+        );
+        final artifactIdentity =
+            '${proof.publishedGlb}:${renderedRecord.finalGlbSha256}';
         if (_retirementCoverRequestedFor == artifactIdentity) return;
         bool current() {
           final record = _store.byId(renderedRecord.id);
-          return mounted && _store.isActive && _modelUrl == renderedUrl &&
-              record != null && pw38FinalRecordProofMatches(record, proof);
+          return mounted &&
+              _store.isActive &&
+              _modelUrl == renderedUrl &&
+              record != null &&
+              pw38FinalRecordProofMatches(record, proof);
         }
+
         if (!current()) return;
         _retirementCoverRequestedFor = artifactIdentity;
         final capture = renderedRecord.captureDir;
@@ -510,16 +520,6 @@ class _MyWorkDetailPageState extends State<MyWorkDetailPage> {
 
   Future<void> _startPublish(ScanRecord r) async {
     if (_publishing || r.cloudWorkId != null) return;
-    final form =
-        r.publicationIdempotencyKey != null && r.publicationTitle != null
-        ? _PublishFormResult(r.publicationTitle!, r.publicationDescription)
-        : await showModalBottomSheet<_PublishFormResult>(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => _PublishForm(defaultTitle: r.name),
-          );
-    if (form == null || !mounted || !_samePublicationOwner(r)) return;
     setState(() {
       _publishing = true;
       _publishFraction = 0;
@@ -539,9 +539,29 @@ class _MyWorkDetailPageState extends State<MyWorkDetailPage> {
         }
         glbPath = artifact.glbPath;
       }
-      if (!_samePublicationOwner(r)) return;
+      if (!mounted || !_samePublicationOwner(r)) return;
+      setState(() => _publishing = false);
+      final bytes = await File(glbPath).readAsBytes();
+      if (!mounted || !_samePublicationOwner(r)) return;
+      final selection = await Navigator.of(context)
+          .push<WebPublicationSelectionResult>(
+            MaterialPageRoute(
+              builder: (_) => WebPublicationSelectionPage(bytes: bytes),
+            ),
+          );
+      if (selection?.coverJpeg == null || !mounted || !_samePublicationOwner(r))
+        return;
+      final form = await showModalBottomSheet<_PublishFormResult>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) =>
+            _PublishForm(defaultTitle: r.publicationTitle ?? r.name),
+      );
+      if (form == null || !mounted || !_samePublicationOwner(r)) return;
+      setState(() => _publishing = true);
       var current = _store.byId(r.id)!;
-      final requestKey = current.publicationIdempotencyKey ?? const Uuid().v4();
+      final requestKey = const Uuid().v4();
       await _store.addOrUpdate(
         current.copyWith(
           publicationIdempotencyKey: requestKey,
@@ -553,6 +573,14 @@ class _MyWorkDetailPageState extends State<MyWorkDetailPage> {
       final result = await GlbPublicationService().submit(
         recordId: r.id,
         glbPath: glbPath,
+        selectionBox: selection!.box?.toJson(),
+        coverJpeg: selection.coverJpeg,
+        initialView: {
+          'schema': 'pw.camera-framing.v1',
+          'source_sha256': sha256.convert(bytes).toString(),
+          'selection_box': selection.box?.toJson(),
+          ...?selection.cameraFraming,
+        },
         title: form.title,
         description: form.description ?? '',
         idempotencyKey: requestKey,
