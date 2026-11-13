@@ -1,0 +1,32 @@
+{
+  "status": "published",
+  "scope": [
+    "web homepage activity window aspect ratio"
+  ],
+  "baseline_commit": "8e22b54",
+  "source_commit": "cbb2e9090b7a34d2e46eb114c693c7a8ba2c4458",
+  "remote_release": "/data/www/kongye-web/releases/20261114-activity-windows-16x9-r1",
+  "remote_receipt": "/data/www/kongye-web/deployment-records/20261114-activity-windows-16x9-r1/result.json",
+  "cloud_assistant_invoke": "t-bj0730bskccxkhs",
+  "window_width_fraction": 0.8,
+  "aspect_ratio": "16:9",
+  "files": [
+    {
+      "path": "community-screens.css",
+      "base_sha256": "0716ee604e371dc745b6c89387a490a514b34c5997ed02c573f53e2c1a05b972",
+      "sha256": "f0b7b0956e76f8df33b28c8d1eb8efd1ecf9d7da744257c9733c9d2c5cc5da51",
+      "bytes": 3461
+    },
+    {
+      "path": "index.html",
+      "base_sha256": "6a8860ae942c104e6a092b00f4014eb9bd7349e028d283526a2f2825aec9148a",
+      "sha256": "6e4fcf7684ebcbfe769c827ff283cfb999bcd61fe02b3e07f2e20d7f00c9b2de",
+      "bytes": 10111
+    }
+  ],
+  "verification": {
+    "cloud_exit_code": 0,
+    "live_width_fraction": 0.7999933956395602,
+    "live_aspect_ratio": 1.7777802720698317
+  }
+}
