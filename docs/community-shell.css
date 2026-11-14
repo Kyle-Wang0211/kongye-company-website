@@ -28,10 +28,30 @@
 .community-shell .header-action:hover{color:#161616}.community-shell .community-header #account-nav{margin-left:0;flex:none}.community-shell .community-account-name{font-size:14px;max-width:130px}
 .community-shell .community-screen-overflow{overflow-x:clip}.community-shell #account-summary{gap:8px}
 .community-shell .community-header~main .community-section{padding-top:18px}
-#following-dialog{width:min(460px,calc(100vw - 32px));max-height:80svh;padding:0;border:1px solid #e5e5e5;border-radius:10px;background:#fff;color:#161616;overflow:auto}
-#following-dialog::backdrop{background:#0005}#following-status{margin:16px 24px;font-size:13px;color:#737373}#following-status:empty{display:none}
-#following-list{padding:8px 16px}.following-person{display:flex;align-items:center;gap:12px;padding:12px 8px;text-decoration:none;font-size:14px;border-radius:6px}.following-person:hover{background:#f6f6f6}.following-avatar{display:block;width:32px;height:32px;flex:none;border-radius:50%;background:#eee;overflow:hidden}.following-avatar img{display:block;width:100%;height:100%;object-fit:cover}
-#following-more{display:block;margin:12px auto 20px;padding:7px 20px;background:#f4f4f4;border:0;border-radius:5px;cursor:pointer}#following-more[hidden]{display:none}
+/* The following route uses the homepage shell and the existing work cards. */
+#main > [hidden]{display:none!important}
+.community-shell .community-header{justify-content:center}
+.community-sidebar #account-nav{min-width:0;width:100%}
+.community-sidebar #account-summary{padding:8px 0;border-radius:8px}
+.community-sidebar #account-summary:hover{background:#f3f3f3}
+.community-sidebar #account-summary .community-account-name{display:none}
+.community-shell .community-sidebar #account-menu>.account-dropdown{position:fixed;left:calc(var(--sidebar-width) + 8px);right:auto;top:auto;bottom:128px;max-height:calc(100dvh - 32px);overflow:auto}
+.community-shell .following-page{padding-block:28px 48px}
+.following-page h1{margin:0 0 28px;font:600 28px/1.4 var(--sans);letter-spacing:0}
+.following-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:36px;align-items:start}
+.following-page h2{margin:0 0 20px;font:500 16px/1.5 var(--sans);letter-spacing:0}
+.following-people{position:sticky;top:108px;max-height:calc(100dvh - 132px);overflow-y:auto;padding-right:16px;border-right:1px solid #eee}
+#following-status,#following-feed-status{margin:12px 0;font-size:14px;color:#777}
+#following-status:empty,#following-feed-status:empty{display:none}
+#following-list{display:grid;gap:4px}
+.following-person{display:flex;align-items:center;gap:12px;padding:12px 8px;color:#222;text-decoration:none;font-size:14px;border-radius:8px}
+.following-person:hover{background:#f5f5f5}
+.following-person>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.following-avatar{display:block;width:32px;height:32px;flex:none;border-radius:50%;background:#eee;overflow:hidden}
+.following-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+#following-more,#following-feed-more{display:block;margin:20px auto;padding:8px 20px;color:#333;background:#f3f3f3;border:0;border-radius:6px;cursor:pointer}
+#following-more[hidden],#following-feed-more[hidden]{display:none}
+#following-more:disabled,#following-feed-more:disabled{opacity:.6;cursor:wait}
 /* Shared cover proportions, upstream shortest-column placement. */
 .community-shell .community-grid{--community-columns:2;--community-gutter:22px}
 .community-shell .community-grid.is-masonry{display:block;position:relative}
@@ -63,3 +83,8 @@
 .settings-help-content details{border-bottom:1px solid #eee;padding:14px 0}
 .settings-help-content summary{cursor:pointer;color:#222;font-weight:500}
 .settings-help-content details p{margin:10px 0 0}.settings-help-contact{margin:20px 0 0}.settings-help-contact a{color:#333;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+
+/* Following cards keep the same cover, metadata, and loading components. */
+.community-shell .following-works .community-grid{--community-columns:3;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:1179px){.community-shell .following-works .community-grid{--community-columns:2;grid-template-columns:repeat(2,minmax(0,1fr))}.following-layout{grid-template-columns:190px minmax(0,1fr);gap:24px}}
+@media(max-width:800px){.following-layout{grid-template-columns:minmax(0,1fr);gap:24px}.following-people{position:static;max-height:240px;border-right:0;border-bottom:1px solid #eee;padding:0 0 16px}.following-page h1{font-size:24px;margin-bottom:20px}}

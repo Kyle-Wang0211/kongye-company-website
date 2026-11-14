@@ -1,3 +1,4 @@
+import {installFollowingPage} from './community-following.mjs?v=sidebar-following-page-20261114-v1';
 import {installCommunitySearch} from './community-search.mjs?v=search-results-users-20261113-v1';
 import {attachCommunityMasonry} from './community-masonry.mjs?v=natural-covers-20261110-v2';
 import {accountClientReady,getAccountClient} from './community-account.mjs?v=search-results-users-20261113-v1';
@@ -6,7 +7,7 @@ import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-202
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
 attachCommunityMasonry(grid);
-let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,authorReadRevision=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map(),searchCards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,authorReadRevision=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map(),searchCards=new Map(),followingCards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 let viewerId = null, viewerGeneration = 0, authRevision = 0;
 let accountBound = false, accountConnecting;
 let publicOrder = [], ownPublicWorks = [], ownRequest;
@@ -326,19 +327,19 @@ function cardFor(work,collection=cards){
  row.append(avatar,author,like);card.append(open,row);
  collection.set(work.id,{card,work,author,avatar,like});syncAuthorNameRefresh();return card;
 }
-function clearSearchResults(container){
- for(const entry of searchCards.values()){
+function clearCardResults(container,collection){
+ for(const entry of collection.values()){
   const nodes=authorNodes.get(entry.work.user_id);
   if(nodes){for(const node of nodes)if(node.author===entry.author)nodes.delete(node);if(!nodes.size)authorNodes.delete(entry.work.user_id);}
  }
  for(const avatar of container.querySelectorAll('.community-avatar,.following-avatar')){
   avatarObservers.get(avatar)?.disconnect();avatarObservers.delete(avatar);avatarTokens.delete(avatar);
  }
- searchCards.clear();syncAuthorNameRefresh();
+ collection.clear();syncAuthorNameRefresh();
 }
-function loadingShells(){
+function loadingShells(container=grid,count=12){
  const shells=[];
- for(let i=0;i<12;i++){
+ for(let i=0;i<count;i++){
   const shell=document.createElement('article');shell.className='community-skeleton';shell.setAttribute('aria-hidden','true');
   const picture=document.createElement('div');picture.className='community-picture is-loading';
   const information=document.createElement('div');information.className='skeleton-information';
@@ -348,7 +349,7 @@ function loadingShells(){
   const author=document.createElement('div');author.className='skeleton-author';
   const like=document.createElement('div');like.className='skeleton-like';
   row.append(avatar,author,like);information.append(title,row);shell.append(picture,information);
-  grid.append(shell);shells.push(shell);
+  container.append(shell);shells.push(shell);
  }
  return shells;
 }
@@ -360,8 +361,14 @@ async function load(){
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
  installCommunitySearch({
   getClient:getAccountClient,getConfig:()=>config,createCard:work=>cardFor(work,searchCards),
-  attachWorkGrid:attachCommunityMasonry,clearResults:clearSearchResults,
+  attachWorkGrid:attachCommunityMasonry,clearResults:container=>clearCardResults(container,searchCards),
   renderUserAvatar:(avatar,user)=>renderAvatar(avatar,user.id,user),getViewerId:()=>viewerId,
+  onWorkCardsRendered:rows=>{for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));syncAuthorNameRefresh();}
+ });
+ installFollowingPage({
+  getConfig:()=>config,createCard:work=>cardFor(work,followingCards),
+  attachWorkGrid:attachCommunityMasonry,clearResults:container=>clearCardResults(container,followingCards),
+  createLoadingCards:()=>loadingShells(document.querySelector('#following-grid'),6),
   onWorkCardsRendered:rows=>{for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));syncAuthorNameRefresh();}
  });
  const rows=await readFeed(cursor,filters);if(revision!==filterRevision)return;lastFeedRead=Date.now();
@@ -433,7 +440,7 @@ function stopAuthorNameRefresh(){
  authorNameChannels.clear();
 }
 function invalidateWorkAuthor(workId){
- if(document.visibilityState==='hidden'||![cards.get(workId),searchCards.get(workId)].some(entry=>entry?.card.isConnected))return;
+ if(document.visibilityState==='hidden'||![cards.get(workId),searchCards.get(workId),followingCards.get(workId)].some(entry=>entry?.card.isConnected))return;
  // Keep covers, work models and card ordering while revalidating names only.
  revalidateAuthorNames();
 }
@@ -444,7 +451,7 @@ function syncAuthorNameRefresh(){
  authorNameConnecting=getAccountClient().then(client=>{
   if(epoch!==authorNameEpoch||authorNamesSuspended||document.visibilityState==='hidden')return;
   authorNameClient=client;
-  const workIds=new Set([...cards,...searchCards].filter(([,entry])=>entry.card.isConnected).map(([id])=>id));
+  const workIds=new Set([...cards,...searchCards,...followingCards].filter(([,entry])=>entry.card.isConnected).map(([id])=>id));
   for(const [id,channel] of authorNameChannels){
    if(!workIds.has(id)){authorNameChannels.delete(id);void client.removeChannel(channel);}
   }
