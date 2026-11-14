@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -208,10 +209,16 @@ class _CommunityCommentInboxPageState extends State<CommunityCommentInboxPage>
         backgroundColor: AetherColors.bgCanvas,
         foregroundColor: AetherColors.textPrimary,
         actions: [
-          IconButton(
-            tooltip: AppL10n.of(context).moderationRefreshNotices,
-            onPressed: _loading ? null : _load,
-            icon: const Icon(Icons.refresh),
+          ShadTooltip(
+            builder: (_) => Text(AppL10n.of(context).moderationRefreshNotices),
+            child: Semantics(
+              label: AppL10n.of(context).moderationRefreshNotices,
+              child: ShadIconButton.ghost(
+                enabled: !(_loading),
+                onPressed: _loading ? null : _load,
+                icon: const Icon(Icons.refresh),
+              ),
+            ),
           ),
         ],
       ),

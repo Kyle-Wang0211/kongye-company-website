@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../l10n/app_localizations.dart';
 import '../../community/social_profile_models.dart';
+import '../design_system.dart';
 
 /// Only the signed-in owner's report fields belong in this view model.
 /// The loader must enforce ownership before returning records.
@@ -169,10 +171,10 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
                           ),
                           const SizedBox(height: 12),
                           if (widget.onAppeal != null)
-                            OutlinedButton.icon(
+                            ShadButton.outline(
                               onPressed: () => _appeal(report),
-                              icon: const Icon(Icons.edit_note),
-                              label: Text(l.reportAppealAction),
+                              leading: const Icon(Icons.edit_note),
+                              child: Text(l.reportAppealAction),
                             )
                           else
                             Text(l.reportAppealUnavailable),
@@ -208,7 +210,7 @@ class _WebReportHistoryPageState extends State<WebReportHistoryPage> {
             ],
             if (retry) ...[
               const SizedBox(height: 16),
-              OutlinedButton(
+              ShadButton.outline(
                 onPressed: () => setState(_load),
                 child: Text(AppL10n.of(context).communityRetry),
               ),
@@ -326,32 +328,17 @@ class _AppealDialogState extends State<_AppealDialog> {
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
-    child: AlertDialog(
+    child: ShadDialog.alert(
       title: Text(AppL10n.of(context).reportAppealAction),
-      content: SizedBox(
-        width: 440,
-        child: TextField(
-          controller: _controller,
-          autofocus: true,
-          enabled: !_busy,
-          minLines: 3,
-          maxLines: 6,
-          maxLength: 2000,
-          decoration: InputDecoration(
-            labelText: AppL10n.of(context).reportAppealExplanation,
-            helperText: AppL10n.of(context).reportAppealPrivacy,
-            helperMaxLines: 2,
-            errorText: _error,
-          ),
-        ),
-      ),
       actions: [
-        TextButton(
+        ShadButton.ghost(
           onPressed: _busy ? null : () => Navigator.of(context).pop(),
+          enabled: (_busy ? null : () => Navigator.of(context).pop()) != null,
           child: Text(AppL10n.of(context).commonCancel),
         ),
-        FilledButton(
+        ShadButton(
           onPressed: _busy ? null : _submit,
+          enabled: (_busy ? null : _submit) != null,
           child: Text(
             _busy
                 ? AppL10n.of(context).reportAppealSubmitting
@@ -359,6 +346,36 @@ class _AppealDialogState extends State<_AppealDialog> {
           ),
         ),
       ],
+      closeIcon: const SizedBox.shrink(),
+      child: SizedBox(
+        width: 440,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(AppL10n.of(context).reportAppealExplanation),
+            const SizedBox(height: 8),
+            ShadInput(
+              controller: _controller,
+              autofocus: true,
+              enabled: !_busy,
+              minLines: 3,
+              maxLines: 6,
+              maxLength: 2000,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              AppL10n.of(context).reportAppealPrivacy,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AetherColors.textSecondary,
+              ),
+            ),
+            if (_error != null)
+              Text(_error!, style: const TextStyle(color: AetherColors.danger)),
+          ],
+        ),
+      ),
     ),
   );
 }

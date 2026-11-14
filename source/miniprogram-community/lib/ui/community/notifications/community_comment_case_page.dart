@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -201,10 +202,16 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
         backgroundColor: AetherColors.bgCanvas,
         foregroundColor: AetherColors.textPrimary,
         actions: [
-          IconButton(
-            tooltip: AppL10n.of(context).moderationRefreshCase,
-            onPressed: _loading || _submitting ? null : _load,
-            icon: const Icon(Icons.refresh),
+          ShadTooltip(
+            builder: (_) => Text(AppL10n.of(context).moderationRefreshCase),
+            child: Semantics(
+              label: AppL10n.of(context).moderationRefreshCase,
+              child: ShadIconButton.ghost(
+                enabled: !(_loading || _submitting),
+                onPressed: _loading || _submitting ? null : _load,
+                icon: const Icon(Icons.refresh),
+              ),
+            ),
           ),
         ],
       ),
@@ -304,41 +311,40 @@ class _CommunityCommentCasePageState extends State<CommunityCommentCasePage>
                         style: AetherTextStyles.bodySm,
                       ),
                       const SizedBox(height: AetherSpacing.md),
-                      TextField(
-                        key: const Key('appeal-statement'),
-                        controller: _statement,
-                        enabled: !_submitting,
-                        minLines: 4,
-                        maxLines: 8,
-                        maxLength: null,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: InputDecoration(
-                          labelText: AppL10n.of(
-                            context,
-                          ).moderationAppealStatement,
-                          hintText: AppL10n.of(
-                            context,
-                          ).moderationAppealStatementHint,
-                          counterText: '${_statement.text.length}/1000',
-                          errorText: _statement.text.length > 1000
-                              ? AppL10n.of(
-                                  context,
-                                ).moderationAppealStatementTooLong
-                              : null,
-                          alignLabelWithHint: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AetherRadii.sm),
+                      ShadInputDecorator(
+                        label: Text(
+                          AppL10n.of(context).moderationAppealStatement,
+                        ),
+                        description: Text('${_statement.text.length}/1000'),
+                        error: _statement.text.length > 1000
+                            ? Text(
+                                AppL10n.of(context)
+                                    .moderationAppealStatementTooLong,
+                              )
+                            : null,
+                        decoration: ShadDecoration(
+                          hasError: _statement.text.length > 1000,
+                        ),
+                        child: ShadInput(
+                          key: const Key('appeal-statement'),
+                          controller: _statement,
+                          enabled: !_submitting,
+                          minLines: 4,
+                          maxLines: 8,
+                          maxLength: null,
+                          textCapitalization: TextCapitalization.sentences,
+                          placeholder: Text(
+                            AppL10n.of(context).moderationAppealStatementHint,
                           ),
                         ),
                       ),
                       const SizedBox(height: AetherSpacing.lg),
-                      FilledButton(
+                      ShadButton(
+                        enabled: !_submitting && _validStatement,
                         key: const Key('appeal-submit'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AetherColors.primary,
-                          foregroundColor: AetherColors.bgCanvas,
-                          minimumSize: const Size.fromHeight(48),
-                        ),
+                        backgroundColor: AetherColors.primary,
+                        foregroundColor: AetherColors.bgCanvas,
+                        height: 48,
                         onPressed: !_submitting && _validStatement
                             ? _submit
                             : null,

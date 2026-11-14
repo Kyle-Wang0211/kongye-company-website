@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../auth/auth_error.dart';
 import '../../auth/auth_models.dart';
 import '../../auth/current_user.dart';
@@ -203,9 +204,12 @@ class _LoginCodeViewState extends State<LoginCodeView>
                           onTap: _verify,
                         ),
                         const SizedBox(height: AetherSpacing.lg),
-                        TextButton(
+                        ShadButton.ghost(
                           key: const ValueKey('login-code-resend'),
                           onPressed: _working || _cooldown > 0 ? null : _send,
+                          enabled:
+                              (_working || _cooldown > 0 ? null : _send) !=
+                              null,
                           child: Text(
                             _cooldown > 0
                                 ? l.otpResendCooldown(_cooldown)

@@ -13,6 +13,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show visibleForTesting, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -357,7 +358,10 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
   Future<void> _syncCommentMarkers() async {
     final markers = <SharedSurfaceMarker>[];
     final draft = _commentAnchor;
-    if (_commentsOpen && _commentsEnabled && _surfaceAssetSha256 != null && draft != null) {
+    if (_commentsOpen &&
+        _commentsEnabled &&
+        _surfaceAssetSha256 != null &&
+        draft != null) {
       markers.add(
         SharedSurfaceMarker(
           id: _draftSurfaceMarkerId,
@@ -678,23 +682,24 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     final l = AppL10n.of(context);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (_) => ShadDialog.alert(
         backgroundColor: AetherColors.bgCanvas,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
-        ),
         title: Text(l.workDeleteDialogTitle, style: AetherTextStyles.h2),
-        content: Text(l.workDeleteDialogBody, style: AetherTextStyles.body),
+        description: Text(l.workDeleteDialogBody, style: AetherTextStyles.body),
         actions: [
           if (widget.service.currentUserId == null && widget.onSignIn != null)
-            TextButton(onPressed: widget.onSignIn, child: Text(l.authSignIn)),
-          TextButton(
+            ShadButton.ghost(
+              enabled: widget.onSignIn != null,
+              onPressed: widget.onSignIn,
+              child: Text(l.authSignIn),
+            ),
+          ShadButton.ghost(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AetherColors.danger),
+            foregroundColor: AetherColors.danger,
             child: Text(
               l.workDeleteConfirm,
               style: const TextStyle(fontWeight: FontWeight.w700),
@@ -707,17 +712,15 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     try {
       await widget.service.deleteMyWork(widget.work.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.workDeleteDone)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.workDeleteDone)));
       // The work no longer exists; leave the page. The feed refetches on
       // its next load, and pull-to-refresh is right there.
       Navigator.of(context).maybePop();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.workDeleteFailed)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.workDeleteFailed)));
     }
   }
 
@@ -729,21 +732,18 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     final l = AppL10n.of(context);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (_) => ShadDialog.alert(
         backgroundColor: AetherColors.bgCanvas,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
-        ),
         title: Text(l.blockDialogTitle, style: AetherTextStyles.h2),
-        content: Text(l.blockDialogBody, style: AetherTextStyles.body),
+        description: Text(l.blockDialogBody, style: AetherTextStyles.body),
         actions: [
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AetherColors.danger),
+            foregroundColor: AetherColors.danger,
             child: Text(
               l.blockConfirm,
               style: const TextStyle(fontWeight: FontWeight.w700),
@@ -756,18 +756,16 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
     try {
       await widget.service.blockUser(widget.work.userId);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.blockDone)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.blockDone)));
       // Leave the page: its author is now blocked, so keeping their work
       // on screen would contradict the action just taken. The feed
       // re-filters on its next load.
       Navigator.of(context).maybePop();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.blockFailed)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.blockFailed)));
     }
   }
 
@@ -1321,7 +1319,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        leading: IconButton(
+        leading: ShadIconButton.ghost(
           icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
           onPressed: _leaveWork,
         ),
@@ -1337,10 +1335,15 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           // The menu contents flip by ownership: reporting or blocking
           // yourself is meaningless, and deleting someone else's work
           // isn't yours to do.
-          IconButton(
-            icon: const Icon(Icons.more_horiz_rounded, color: Colors.white),
-            tooltip: AppL10n.of(context).workMoreActions,
-            onPressed: _showMoreActions,
+          ShadTooltip(
+            builder: (_) => Text(AppL10n.of(context).workMoreActions),
+            child: Semantics(
+              label: AppL10n.of(context).workMoreActions,
+              child: ShadIconButton.ghost(
+                icon: const Icon(Icons.more_horiz_rounded, color: Colors.white),
+                onPressed: _showMoreActions,
+              ),
+            ),
           ),
         ],
         title: Text(
@@ -1483,19 +1486,17 @@ class WorkDetailMetadata extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 if (onComments != null) ...[
-                  TextButton.icon(
+                  ShadButton.ghost(
                     key: const ValueKey('work-detail-comments'),
                     onPressed: onComments,
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white70,
-                      minimumSize: const Size(44, 44),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    icon: const Icon(
+                    foregroundColor: Colors.white70,
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    leading: const Icon(
                       Icons.chat_bubble_outline_rounded,
                       size: 18,
                     ),
-                    label: Text(
+                    child: Text(
                       '$commentsCount',
                       semanticsLabel:
                           '${AppL10n.of(context).commentAll} $commentsCount',
@@ -1663,7 +1664,7 @@ class _EmptyState extends StatelessWidget {
           ),
           if (onRetry != null) ...[
             const SizedBox(height: AetherSpacing.md),
-            TextButton(
+            ShadButton.ghost(
               onPressed: onRetry,
               child: Text(AppL10n.of(context).communityRetry),
             ),

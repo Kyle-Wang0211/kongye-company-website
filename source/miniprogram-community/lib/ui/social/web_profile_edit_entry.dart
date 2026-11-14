@@ -1,9 +1,11 @@
 import 'community_capabilities.dart';
 import '../community/profile_presentation_stub.dart'
     if (dart.library.js_interop) '../community/profile_presentation_web.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../auth/current_user.dart';
@@ -257,7 +259,7 @@ class _WebProfileEditEntryState extends State<WebProfileEditEntry> {
               children: [
                 Text(message ?? '暂时无法读取个人资料。', style: AetherTextStyles.body),
                 if (_current && widget.backendReady)
-                  TextButton(
+                  ShadButton.ghost(
                     onPressed: () => unawaited(_refresh()),
                     child: const Text('重新读取'),
                   ),

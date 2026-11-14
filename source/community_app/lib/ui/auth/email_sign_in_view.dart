@@ -12,6 +12,7 @@
 // the file would churn git history more than it's worth right now.
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../auth/auth_error.dart';
 import '../../auth/auth_models.dart';
@@ -88,26 +89,25 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (_) => AlertDialog(
+      builder: (_) => ShadDialog.alert(
         backgroundColor: AetherColors.bgCanvas,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
-        ),
         title: Text(
           AppL10n.of(context).authErrorDialogTitle,
           style: AetherTextStyles.h2,
         ),
-        content: Text(message, style: AetherTextStyles.body),
         actions: [
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(foregroundColor: AetherColors.primary),
+            foregroundColor: AetherColors.primary,
             child: Text(
               AppL10n.of(context).commonOk,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ],
+        closeIcon: const SizedBox.shrink(),
+        radius: BorderRadius.circular(AetherRadii.lg),
+        child: Text(message, style: AetherTextStyles.body),
       ),
     );
   }

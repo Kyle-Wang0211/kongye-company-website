@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 //     centering doesn't drift when leading / trailing widths change.
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../i18n/locale_notifier.dart';
 import '../../l10n/app_localizations.dart';
@@ -87,9 +88,10 @@ class AuthTopBarBack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).maybePop(),
+    return ShadButton.ghost(
+      onPressed: () => Navigator.of(context).maybePop(),
+      padding: EdgeInsets.zero,
+      height: 0,
       child: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Icon(
@@ -113,9 +115,11 @@ class CompactLanguageToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifier = LocaleScope.of(context);
     final isZh = notifier.isChinese;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => notifier.set(isZh ? const Locale('en') : const Locale('zh')),
+    return ShadButton.ghost(
+      onPressed: () =>
+          notifier.set(isZh ? const Locale('en') : const Locale('zh')),
+      padding: EdgeInsets.zero,
+      height: 0,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AetherSpacing.sm,
@@ -273,7 +277,7 @@ class LabeledField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        TextField(
+        ShadInput(
           controller: controller,
           enabled: enabled,
           focusNode: focusNode,
@@ -291,31 +295,8 @@ class LabeledField extends StatelessWidget {
             fontWeight: FontWeight.w500,
             color: AetherColors.textPrimary,
           ),
-          decoration: InputDecoration(
-            prefixIcon: leading,
-            suffixIcon: trailing,
-            prefixIconConstraints: const BoxConstraints(
-              minWidth: 0,
-              minHeight: 0,
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 10),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AetherColors.border, width: 1),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: AetherColors.textPrimary,
-                width: 1.5,
-              ),
-            ),
-            disabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AetherColors.border, width: 1),
-            ),
-            border: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AetherColors.border, width: 1),
-            ),
-          ),
+          leading: leading,
+          trailing: trailing,
         ),
       ],
     );
@@ -346,9 +327,13 @@ class MinimalCta extends StatelessWidget {
     final color = enabled
         ? AetherColors.textPrimary
         : AetherColors.textTertiary;
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      behavior: HitTestBehavior.opaque,
+    return ShadButton.ghost(
+      onPressed: enabled ? onTap : null,
+      padding: EdgeInsets.zero,
+      enabled: enabled,
+      height: 36,
+      width: double.infinity,
+      expands: true,
       child: SizedBox(
         height: 36,
         child: Center(
@@ -413,9 +398,13 @@ class MinimalLink extends StatelessWidget {
         : AetherColors.textTertiary;
     final fontSize = emphasis == MinimalLinkEmphasis.medium ? 12.0 : 11.0;
     final letterSpacing = emphasis == MinimalLinkEmphasis.medium ? 2.5 : 2.0;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+    return ShadButton.ghost(
+      onPressed: onTap,
+      padding: EdgeInsets.zero,
+      enabled: onTap != null,
+      height: 28,
+      width: double.infinity,
+      expands: true,
       child: SizedBox(
         height: 28,
         child: Center(

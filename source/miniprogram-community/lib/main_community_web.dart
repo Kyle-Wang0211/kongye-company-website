@@ -1,8 +1,13 @@
 import 'ui/community/community_activities_page.dart';
+
 // Community-only browser entry. Existing community/auth/viewer widgets are reused.
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart'
+    show GlobalShadLocalizations, ShadAppBuilder;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/vault_page.dart';
@@ -160,23 +165,7 @@ Future<void> _initialize(
   }
 }
 
-ThemeData communityWebTheme() => ThemeData(
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: AetherColors.primary,
-    dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-    primary: AetherColors.primary,
-    secondary: AetherColors.primarySoft,
-    error: AetherColors.danger,
-  ),
-  textSelectionTheme: const TextSelectionThemeData(
-    cursorColor: AetherColors.primary,
-    selectionColor: Color(0x33111111),
-    selectionHandleColor: AetherColors.primary,
-  ),
-  scaffoldBackgroundColor: AetherColors.bg,
-  canvasColor: AetherColors.bg,
-  useMaterial3: true,
-);
+ThemeData communityWebTheme() => aetherTheme();
 
 class CommunityWebApp extends StatefulWidget {
   const CommunityWebApp({
@@ -278,131 +267,144 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
     notifier: locale,
     child: AnimatedBuilder(
       animation: Listenable.merge([locale, user]),
-      builder: (context, _) => MaterialApp(
-        key: _navigationKey(),
-        navigatorKey: _communityNavigator,
-        navigatorObservers: [_routes, _sidebarRoutes],
-        title: '窗后城',
-        debugShowCheckedModeBanner: false,
-        theme: communityWebTheme(),
-        locale: locale.locale,
-        localizationsDelegates: AppL10n.localizationsDelegates,
-        supportedLocales: AppL10n.supportedLocales,
-        builder: (context, child) => AuthScope(
-          currentUser: user,
-          child: AnimatedBuilder(
-            animation: _sidebarRoutes,
+      builder: (context, _) => AetherUiScope(
+        child: MaterialApp(
+          key: _navigationKey(),
+          navigatorKey: _communityNavigator,
+          navigatorObservers: [_routes, _sidebarRoutes],
+          title: '窗后城',
+          debugShowCheckedModeBanner: false,
+          theme: communityWebTheme(),
+          locale: locale.locale,
+          localizationsDelegates: const [
+            ...AppL10n.localizationsDelegates,
+            GlobalShadLocalizations.delegate,
+          ],
+          supportedLocales: AppL10n.supportedLocales,
+          builder: (context, child) => ShadAppBuilder(
             child: child,
-            builder: (context, navigator) => CommunityNavigationFrame(
-              controller: _navigationController,
-              navigatorKey: _communityNavigator,
-              onUpload: () =>
-                  _communityNavigator.currentState?.pushNamed<void>('/publish'),
-              visible: communitySidebarVisible(
-                _entryUri,
-                _sidebarRoutes.currentRoute,
+            builder: (context, child) => AuthScope(
+              currentUser: user,
+              child: AnimatedBuilder(
+                animation: _sidebarRoutes,
+                child: child,
+                builder: (context, navigator) => CommunityNavigationFrame(
+                  controller: _navigationController,
+                  navigatorKey: _communityNavigator,
+                  onUpload: () => _communityNavigator.currentState
+                      ?.pushNamed<void>('/publish'),
+                  visible: communitySidebarVisible(
+                    _entryUri,
+                    _sidebarRoutes.currentRoute,
+                  ),
+                  selectedDestination: communitySidebarDestination(
+                    _entryUri,
+                    _sidebarRoutes.currentRoute,
+                    ownerId: user.signedInUser?.id.rawValue,
+                  ),
+                  onHome: () {
+                    _communityNavigator.currentState?.popUntil(
+                      (route) => route.isFirst,
+                    );
+                  },
+                  onFollowing: () =>
+                      unawaited(_exitDocument(openCommunityFollowing)),
+                  onMyProfile: _openMyProfile,
+                  onActivities: () {
+                    if (_sidebarRoutes.currentRoute != '/activities') {
+                      _communityNavigator.currentState?.push<void>(
+                        MaterialPageRoute(
+                          settings: const RouteSettings(name: '/activities'),
+                          builder: (_) => CommunityActivitiesPage(
+                            onOpen: (_, activity) =>
+                                openCommunityActivityDestination(
+                                  activity.destination.replace(
+                                    queryParameters: {
+                                      ...activity.destination.queryParameters,
+                                      'mini': '1',
+                                    },
+                                  ),
+                                ),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  onMessages: _openMessages,
+                  onSettings: () =>
+                      unawaited(_exitDocument(openCommunitySettings)),
+                  onOpenFiling: () =>
+                      unawaited(_exitDocument(openCommunityFiling)),
+                  child: navigator!,
+                ),
               ),
-              selectedDestination: communitySidebarDestination(
-                _entryUri,
-                _sidebarRoutes.currentRoute,
-                ownerId: user.signedInUser?.id.rawValue,
-              ),
-              onHome: () {
-                _communityNavigator.currentState?.popUntil(
-                  (route) => route.isFirst,
-                );
-              },
-              onFollowing: () =>
-                  unawaited(_exitDocument(openCommunityFollowing)),
-              onMyProfile: _openMyProfile,
-              onActivities: () {
-                if (_sidebarRoutes.currentRoute != '/activities') {
-                  _communityNavigator.currentState?.push<void>(
-                    MaterialPageRoute(
-                      settings: const RouteSettings(name: '/activities'),
-                      builder: (_) => CommunityActivitiesPage(
-                        onOpen: (_, activity) =>
-                            openCommunityActivityDestination(
-                              activity.destination.replace(
-                                queryParameters: {
-                                  ...activity.destination.queryParameters,
-                                  'mini': '1',
-                                },
-                              ),
-                            ),
-                      ),
-                    ),
-                  );
-                }
-              },
-              onMessages: _openMessages,
-              onSettings: () => unawaited(_exitDocument(openCommunitySettings)),
-              onOpenFiling: () => unawaited(_exitDocument(openCommunityFiling)),
-              child: navigator!,
             ),
           ),
-        ),
-        onGenerateRoute: (settings) =>
-            communityFavoritesRoute(settings, user) ??
-            communityMessagingRoute(settings, user) ??
-            communityAccountRoute(settings, user),
-        home: AnimatedBuilder(
-          animation: user,
-          builder: (context, _) {
-            final state = user.state;
-            final query = (widget.entryUri ?? Uri.base).queryParameters;
-            final mobileFeed = query['feed'] == '1';
-            if (!mobileFeed &&
-                !query.containsKey('profile') &&
-                !query.containsKey('work') &&
-                query['publish'] != '1' &&
-                !query.containsKey('auth')) {
-              return _WebsiteHomeEntry(routes: _routes, onExit: widget.onExit);
-            }
-            // Public profiles use the existing mobile page for guests and
-            // members, once the shared backend initialization has completed.
-            if ((state is CurrentUserSignedIn ||
-                    state is CurrentUserSignedOut) &&
-                query.containsKey('profile')) {
-              return PublicProfileEntry(user: user);
-            }
-            return switch (state) {
-              CurrentUserSignedIn() =>
-                query.containsKey('work')
-                    ? PublicWorkEntry(user: user)
-                    : query['publish'] == '1'
-                    ? const _WebPublicationEntry()
-                    : mobileFeed
-                    ? _mobileCommunityFeed()
-                    : _WebsiteHomeEntry(
-                        routes: _routes,
-                        onExit: widget.onExit,
-                        completeAuthentication: query.containsKey('auth'),
-                      ),
-              CurrentUserSignedOut() =>
-                query.containsKey('work')
-                    ? PublicWorkEntry(user: user)
-                    : mobileFeed &&
-                          !query.containsKey('auth') &&
-                          query['publish'] != '1'
-                    ? _mobileCommunityFeed()
-                    : AuthRootView(
-                        currentUser: user,
-                        initialSignUp: query['auth'] == 'signup',
-                      ),
-              CurrentUserServiceUnavailable(:final reason) =>
-                CommunityServiceUnavailableView(
-                  currentUser: user,
-                  reason: reason,
-                ),
-              _ =>
-                query.containsKey('work')
-                    ? PublicWorkOpening()
-                    : const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      ),
-            };
-          },
+          onGenerateRoute: (settings) =>
+              communityFavoritesRoute(settings, user) ??
+              communityMessagingRoute(settings, user) ??
+              communityAccountRoute(settings, user),
+          home: AnimatedBuilder(
+            animation: user,
+            builder: (context, _) {
+              final state = user.state;
+              final query = (widget.entryUri ?? Uri.base).queryParameters;
+              final mobileFeed = query['feed'] == '1';
+              if (!mobileFeed &&
+                  !query.containsKey('profile') &&
+                  !query.containsKey('work') &&
+                  query['publish'] != '1' &&
+                  !query.containsKey('auth')) {
+                return _WebsiteHomeEntry(
+                  routes: _routes,
+                  onExit: widget.onExit,
+                );
+              }
+              // Public profiles use the existing mobile page for guests and
+              // members, once the shared backend initialization has completed.
+              if ((state is CurrentUserSignedIn ||
+                      state is CurrentUserSignedOut) &&
+                  query.containsKey('profile')) {
+                return PublicProfileEntry(user: user);
+              }
+              return switch (state) {
+                CurrentUserSignedIn() =>
+                  query.containsKey('work')
+                      ? PublicWorkEntry(user: user)
+                      : query['publish'] == '1'
+                      ? const _WebPublicationEntry()
+                      : mobileFeed
+                      ? _mobileCommunityFeed()
+                      : _WebsiteHomeEntry(
+                          routes: _routes,
+                          onExit: widget.onExit,
+                          completeAuthentication: query.containsKey('auth'),
+                        ),
+                CurrentUserSignedOut() =>
+                  query.containsKey('work')
+                      ? PublicWorkEntry(user: user)
+                      : mobileFeed &&
+                            !query.containsKey('auth') &&
+                            query['publish'] != '1'
+                      ? _mobileCommunityFeed()
+                      : AuthRootView(
+                          currentUser: user,
+                          initialSignUp: query['auth'] == 'signup',
+                        ),
+                CurrentUserServiceUnavailable(:final reason) =>
+                  CommunityServiceUnavailableView(
+                    currentUser: user,
+                    reason: reason,
+                  ),
+                _ =>
+                  query.containsKey('work')
+                      ? PublicWorkOpening()
+                      : const Scaffold(
+                          body: Center(child: CircularProgressIndicator()),
+                        ),
+              };
+            },
+          ),
         ),
       ),
     ),

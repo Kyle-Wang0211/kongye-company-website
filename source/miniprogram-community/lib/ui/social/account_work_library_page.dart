@@ -1,5 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
 import '../../community/account_work_library_repository.dart';
 import '../design_system.dart';
 
@@ -147,10 +150,16 @@ class _AccountWorkLibraryPageState extends State<AccountWorkLibraryPage> {
         _likes ? _text('我的喜欢', 'Liked works') : _text('观看历史', 'Watch history'),
       ),
       actions: [
-        IconButton(
-          tooltip: _text('刷新', 'Refresh'),
-          onPressed: _loading ? null : _reset,
-          icon: const Icon(Icons.refresh_rounded),
+        Tooltip(
+          message: _text('刷新', 'Refresh'),
+          child: ShadButton.ghost(
+            onPressed: _loading ? null : _reset,
+            child: const Icon(Icons.refresh_rounded),
+            enabled: !_loading,
+            width: 48,
+            height: 48,
+            padding: const EdgeInsets.all(12),
+          ),
         ),
       ],
     ),
@@ -196,7 +205,7 @@ class _AccountWorkLibraryPageState extends State<AccountWorkLibraryPage> {
                               style: AetherTextStyles.body,
                             ),
                             const SizedBox(height: 12),
-                            TextButton(
+                            ShadButton.ghost(
                               onPressed: _load,
                               child: Text(_text('重试', 'Retry')),
                             ),

@@ -1,5 +1,7 @@
 import 'generated_account_avatar.dart';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../community/community_service.dart';
@@ -240,17 +242,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final l = AppL10n.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => ShadDialog.alert(
         title: Text(l.profileBlockTitle),
-        content: Text(l.profileBlockBody),
+        description: Text(l.profileBlockBody),
         actions: [
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(l.commonCancel),
           ),
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AetherColors.danger),
+            foregroundColor: AetherColors.danger,
             child: Text(l.profileBlockConfirm),
           ),
         ],
@@ -263,9 +265,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       Navigator.of(context).maybePop();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.profileBlockFailed)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.profileBlockFailed)));
     }
   }
 
@@ -279,10 +280,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: null,
-        leading: IconButton(
-          tooltip: l.profileBack,
-          onPressed: widget.onExit ?? () => Navigator.of(context).maybePop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
+        leading: ShadTooltip(
+          builder: (_) => Text(l.profileBack),
+          child: Semantics(
+            label: l.profileBack,
+            child: ShadIconButton.ghost(
+              onPressed:
+                  widget.onExit ?? () => Navigator.of(context).maybePop(),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
+            ),
+          ),
         ),
         actions: [
           if (!_isMine)
@@ -342,7 +349,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           children: [
             Text(l.profileLoadFailed),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: _load, child: Text(l.communityRetry)),
+            ShadButton.outline(onPressed: _load, child: Text(l.communityRetry)),
           ],
         ),
       );
@@ -360,11 +367,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ),
       ),
       if (_isMine && widget.onEditNickname != null)
-        IconButton(
-          key: const ValueKey('profile-edit-nickname'),
-          tooltip: _label('修改昵称', 'Edit nickname'),
-          onPressed: widget.onEditNickname,
-          icon: const Icon(Icons.edit_outlined, size: 20),
+        ShadTooltip(
+          builder: (_) => Text(_label('修改昵称', 'Edit nickname')),
+          child: Semantics(
+            label: _label('修改昵称', 'Edit nickname'),
+            child: ShadIconButton.ghost(
+              key: const ValueKey('profile-edit-nickname'),
+              enabled: widget.onEditNickname != null,
+              onPressed: widget.onEditNickname,
+              icon: const Icon(Icons.edit_outlined, size: 20),
+            ),
+          ),
         ),
     ],
   );
@@ -467,7 +480,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           spacing: 12,
                           runSpacing: 8,
                           children: [
-                            FilledButton(
+                            ShadButton(
+                              enabled: !_relationshipInFlight,
                               key: const Key('profile-follow-button'),
                               onPressed: _relationshipInFlight
                                   ? null
@@ -479,16 +493,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               ),
                             ),
                             if (widget.onMessage != null)
-                              OutlinedButton.icon(
+                              ShadButton.outline(
                                 key: const ValueKey(
                                   'profile-message-peer-button',
                                 ),
                                 onPressed: _messageProfile,
-                                icon: const Icon(
+                                leading: const Icon(
                                   Icons.chat_bubble_outline,
                                   size: 18,
                                 ),
-                                label: Text(_label('私信', 'Message')),
+                                child: Text(_label('私信', 'Message')),
                               ),
                           ],
                         ),
@@ -518,18 +532,21 @@ class _UserProfilePageState extends State<UserProfilePage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  TextButton(
+                  ShadButton.ghost(
                     key: const ValueKey('profile-works-tab'),
                     onPressed: () => setState(() => _selectedTab = 'works'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 20,
-                        horizontal: 4,
-                      ),
-                      shape: const RoundedRectangleBorder(),
-                      side: _selectedTab == 'works'
-                          ? const BorderSide()
-                          : BorderSide.none,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 4,
+                    ),
+                    decoration: ShadDecoration(
+                      border: _selectedTab == 'works'
+                          ? ShadBorder.all(
+                              color: AetherColors.textPrimary,
+                              width: 1,
+                              radius: BorderRadius.zero,
+                            )
+                          : ShadBorder.none,
                     ),
                     child: Text(
                       '${l.socialWorks} ${profile.publicWorksCount}',
@@ -553,22 +570,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         (widget.libraryTabs.containsKey(tab.$1) ||
                             tab.$3 != null)) ...[
                       const SizedBox(width: 28),
-                      TextButton.icon(
+                      ShadButton.ghost(
                         key: ValueKey('profile-${tab.$1}-button'),
                         onPressed: () => _selectLibrary(tab.$1, tab.$3),
-                        style: TextButton.styleFrom(
-                          shape: const RoundedRectangleBorder(),
-                          side: _selectedTab == tab.$1
-                              ? const BorderSide()
-                              : BorderSide.none,
+                        decoration: ShadDecoration(
+                          border: _selectedTab == tab.$1
+                              ? ShadBorder.all(
+                                  color: AetherColors.textPrimary,
+                                  width: 1,
+                                  radius: BorderRadius.zero,
+                                )
+                              : ShadBorder.none,
                         ),
-                        icon: const Icon(Icons.lock_outline, size: 16),
-                        label: Text(tab.$2),
+                        leading: const Icon(Icons.lock_outline, size: 16),
+                        child: Text(tab.$2),
                       ),
                     ],
                   if (_isMine && widget.onOpenMessages != null) ...[
                     const SizedBox(width: 28),
-                    TextButton(
+                    ShadButton.ghost(
                       key: const ValueKey('profile-messages-button'),
                       onPressed: widget.onOpenMessages,
                       child: Text(_label('私信', 'Messages')),

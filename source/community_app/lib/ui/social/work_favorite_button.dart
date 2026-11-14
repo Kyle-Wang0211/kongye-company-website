@@ -1,5 +1,7 @@
 import 'community_capabilities.dart';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pocketworld_flutter/auth/auth_scope.dart';
 import 'package:pocketworld_flutter/community/web_social_api.dart';
@@ -218,18 +220,24 @@ class _WorkFavoriteButtonState extends State<WorkFavoriteButton> {
     }
     return Semantics(
       toggled: _saved == true,
-      child: IconButton(
-        key: const ValueKey('work-detail-favorite'),
-        tooltip: label,
-        color: Colors.white70,
-        onPressed: _busy ? null : _press,
-        icon: _busy
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Icon(_saved == true ? Icons.bookmark : Icons.bookmark_border),
+      child: Tooltip(
+        message: label,
+        child: ShadButton.ghost(
+          key: const ValueKey('work-detail-favorite'),
+          foregroundColor: Colors.white70,
+          onPressed: _busy ? null : _press,
+          child: _busy
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(_saved == true ? Icons.bookmark : Icons.bookmark_border),
+          enabled: !_busy,
+          width: 48,
+          height: 48,
+          padding: const EdgeInsets.all(12),
+        ),
       ),
     );
   }

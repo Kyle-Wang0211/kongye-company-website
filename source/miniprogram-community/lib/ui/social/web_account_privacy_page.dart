@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../design_system.dart';
 import '../legal/legal_doc_page.dart';
@@ -122,19 +123,20 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
       context: context,
       builder: (context) => Theme(
         data: _theme(context),
-        child: AlertDialog(
+        child: ShadDialog.alert(
           title: Text(_text('解除屏蔽？', 'Unblock user?')),
-          content: Text(user.displayName),
           actions: [
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(context, false),
               child: Text(_text('取消', 'Cancel')),
             ),
-            FilledButton(
+            ShadButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(_text('确认解除屏蔽', 'Confirm unblock')),
             ),
           ],
+          closeIcon: const SizedBox.shrink(),
+          child: Text(user.displayName),
         ),
       ),
     );
@@ -183,9 +185,27 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
       builder: (context) => Theme(
         data: _theme(context),
         child: StatefulBuilder(
-          builder: (context, updateDialog) => AlertDialog(
+          builder: (context, updateDialog) => ShadDialog.alert(
             title: Text(_text('申请注销账号', 'Request account deletion')),
-            content: SizedBox(
+            actions: [
+              ShadButton.ghost(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(_text('取消', 'Cancel')),
+              ),
+              ShadButton(
+                onPressed: acknowledged
+                    ? () => Navigator.pop(context, true)
+                    : null,
+                enabled:
+                    (acknowledged
+                        ? () => Navigator.pop(context, true)
+                        : null) !=
+                    null,
+                child: Text(_text('提交申请', 'Submit request')),
+              ),
+            ],
+            closeIcon: const SizedBox.shrink(),
+            child: SizedBox(
               width: 400,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -197,13 +217,11 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
+                  ShadCheckbox(
                     value: acknowledged,
                     onChanged: (value) =>
-                        updateDialog(() => acknowledged = value ?? false),
-                    title: Text(
+                        updateDialog(() => acknowledged = value),
+                    label: Text(
                       _text(
                         '我确认申请注销当前账号',
                         'I confirm this request for my current account',
@@ -213,18 +231,6 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
                 ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(_text('取消', 'Cancel')),
-              ),
-              FilledButton(
-                onPressed: acknowledged
-                    ? () => Navigator.pop(context, true)
-                    : null,
-                child: Text(_text('提交申请', 'Submit request')),
-              ),
-            ],
           ),
         ),
       ),
@@ -341,7 +347,7 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
                         ),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: TextButton(
+                          child: ShadButton.ghost(
                             onPressed: _loadBlocked,
                             child: Text(_text('重试', 'Retry')),
                           ),
@@ -367,13 +373,19 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    OutlinedButton(
+                                    ShadButton.outline(
                                       key: ValueKey('unblock-${user.id}'),
                                       onPressed:
                                           widget.onUnblock == null ||
                                               _unblocking.contains(user.id)
                                           ? null
                                           : () => _unblock(user),
+                                      enabled:
+                                          (widget.onUnblock == null ||
+                                                  _unblocking.contains(user.id)
+                                              ? null
+                                              : () => _unblock(user)) !=
+                                          null,
                                       child: Text(
                                         _unblocking.contains(user.id)
                                             ? _text('处理中…', 'Working…')
@@ -428,10 +440,15 @@ class _WebAccountPrivacyPageState extends State<WebAccountPrivacyPage> {
                       else
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: OutlinedButton(
+                          child: ShadButton.outline(
                             onPressed: _deleting || _confirmingDeletion
                                 ? null
                                 : _requestDeletion,
+                            enabled:
+                                (_deleting || _confirmingDeletion
+                                    ? null
+                                    : _requestDeletion) !=
+                                null,
                             child: Text(
                               _deleting
                                   ? _text('正在提交…', 'Submitting…')

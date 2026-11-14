@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../design_system.dart';
@@ -133,19 +134,20 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
       context: context,
       builder: (context) => Theme(
         data: _theme(context),
-        child: AlertDialog(
+        child: ShadDialog.alert(
           title: const Text('放弃未保存的修改？'),
-          content: const Text('离开后，本次未保存的昵称和简介将丢失。'),
           actions: [
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(context, false),
               child: const Text('继续编辑'),
             ),
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('放弃修改'),
             ),
           ],
+          closeIcon: const SizedBox.shrink(),
+          child: const Text('离开后，本次未保存的昵称和简介将丢失。'),
         ),
       ),
     );
@@ -201,40 +203,6 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
     }
   }
 
-  InputDecoration _fieldDecoration(
-    String label,
-    TextEditingController controller,
-    int maxLength, {
-    String? hintText,
-  }) {
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    );
-    return InputDecoration(
-      labelText: label,
-      floatingLabelBehavior: FloatingLabelBehavior.always,
-      hintText: hintText,
-      filled: true,
-      fillColor: AetherColors.bgElevated,
-      contentPadding: const EdgeInsets.all(16),
-      border: border,
-      enabledBorder: border,
-      disabledBorder: border,
-      focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: AetherColors.primary),
-      ),
-      errorBorder: border.copyWith(
-        borderSide: const BorderSide(color: AetherColors.danger),
-      ),
-      focusedErrorBorder: border.copyWith(
-        borderSide: const BorderSide(color: AetherColors.danger),
-      ),
-      helperText: '最多 $maxLength 个字符',
-      counterText: '${controller.text.characters.length}/$maxLength',
-    );
-  }
-
   ThemeData _theme(BuildContext context) {
     final theme = Theme.of(context);
     final colors = ColorScheme.fromSeed(
@@ -264,10 +232,16 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
           appBar: AppBar(
             backgroundColor: AetherColors.bgCanvas,
             foregroundColor: AetherColors.textPrimary,
-            leading: IconButton(
-              tooltip: '返回',
-              onPressed: _saving ? null : _exit,
-              icon: const Icon(Icons.arrow_back),
+            leading: Tooltip(
+              message: '返回',
+              child: ShadButton.ghost(
+                onPressed: _saving ? null : _exit,
+                enabled: (_saving ? null : _exit) != null,
+                width: 40,
+                height: 40,
+                padding: EdgeInsets.zero,
+                child: const Icon(Icons.arrow_back),
+              ),
             ),
             title: const Text('编辑个人资料'),
           ),
@@ -322,23 +296,32 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
                           key: const Key('approved-bio'),
                         ),
                         const SizedBox(height: AetherSpacing.xl),
-                        TextFormField(
+                        ShadInputFormField(
                           key: const Key('profile-name'),
                           controller: _name,
                           enabled: !_saving,
                           maxLength: 20,
                           maxLengthEnforcement:
                               MaxLengthEnforcement.truncateAfterCompositionEnds,
-                          decoration: _fieldDecoration('昵称', _name, 20),
                           textInputAction: TextInputAction.next,
-                          validator: (value) => (value?.trim().isEmpty ?? true)
+                          validator: (String? value) =>
+                              (value?.trim().isEmpty ?? true)
                               ? '请输入昵称'
                               : value!.trim().characters.length > 20
                               ? '昵称最多 20 个字符'
                               : null,
+                          label: Text('昵称'),
+                          description: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('最多 20 个字符'),
+                              Text('${_name.text.characters.length}/20'),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(16),
                         ),
                         const SizedBox(height: AetherSpacing.lg),
-                        TextFormField(
+                        ShadInputFormField(
                           key: const Key('profile-bio'),
                           controller: _bio,
                           enabled: !_saving,
@@ -347,16 +330,20 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
                           maxLength: 160,
                           maxLengthEnforcement:
                               MaxLengthEnforcement.truncateAfterCompositionEnds,
-                          decoration: _fieldDecoration(
-                            '个人简介',
-                            _bio,
-                            160,
-                            hintText: '介绍一下你自己',
-                          ),
-                          validator: (value) =>
+                          validator: (String? value) =>
                               (value?.characters.length ?? 0) > 160
                               ? '个人简介最多 160 个字符'
                               : null,
+                          label: Text('个人简介'),
+                          placeholder: const Text('介绍一下你自己'),
+                          description: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('最多 160 个字符'),
+                              Text('${_bio.text.characters.length}/160'),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(16),
                         ),
                         const SizedBox(height: AetherSpacing.lg),
                         if (_result != null)
@@ -379,8 +366,10 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
                             }),
                           ),
                         if (widget.onRefresh != null)
-                          TextButton(
+                          ShadButton.ghost(
                             onPressed: _saving ? null : widget.onRefresh,
+                            enabled:
+                                (_saving ? null : widget.onRefresh) != null,
                             child: const Text('刷新审核状态'),
                           ),
                         if (widget.statusError != null)
@@ -399,11 +388,16 @@ class _WebProfileEditPageState extends State<WebProfileEditPage> {
                             ),
                           ),
                         const SizedBox(height: AetherSpacing.lg),
-                        FilledButton(
+                        ShadButton(
                           onPressed:
                               _saving || widget.submissionBlocked || !_dirty
                               ? null
                               : _save,
+                          enabled:
+                              (_saving || widget.submissionBlocked || !_dirty
+                                  ? null
+                                  : _save) !=
+                              null,
                           child: _saving
                               ? const SizedBox(
                                   width: 20,

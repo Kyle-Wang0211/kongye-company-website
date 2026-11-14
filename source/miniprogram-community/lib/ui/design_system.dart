@@ -17,6 +17,7 @@
 // so leaving them in place through the redesign costs nothing.
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 // ─── Color tokens ───────────────────────────────────────────────────
 //
@@ -62,6 +63,116 @@ class AetherColors {
   static const Color inspPartial = Color(0xFF6B6B6B); // 灰 — 部分可改
   static const Color inspLocked = Color(0xFF9B9B9B); // 浅灰 — iOS 系统锁
   static const Color inspBackend = Color(0xFF3A3A3A); // 深灰 — 需后端接入
+}
+
+/// Shared Material colors for the app and community website.
+ThemeData aetherTheme({Color backgroundColor = AetherColors.bg}) => ThemeData(
+  colorScheme: const ColorScheme(
+    brightness: Brightness.light,
+    primary: AetherColors.primary,
+    onPrimary: AetherColors.bgCanvas,
+    primaryContainer: AetherColors.bgElevated,
+    onPrimaryContainer: AetherColors.textPrimary,
+    primaryFixed: AetherColors.border,
+    primaryFixedDim: AetherColors.borderStrong,
+    onPrimaryFixed: AetherColors.textPrimary,
+    onPrimaryFixedVariant: AetherColors.primarySoft,
+    secondary: AetherColors.primarySoft,
+    onSecondary: AetherColors.bgCanvas,
+    secondaryContainer: AetherColors.bgElevated,
+    onSecondaryContainer: AetherColors.textPrimary,
+    secondaryFixed: AetherColors.border,
+    secondaryFixedDim: AetherColors.borderStrong,
+    onSecondaryFixed: AetherColors.textPrimary,
+    onSecondaryFixedVariant: AetherColors.primarySoft,
+    tertiary: AetherColors.textSecondary,
+    onTertiary: AetherColors.bgCanvas,
+    tertiaryContainer: AetherColors.bgElevated,
+    onTertiaryContainer: AetherColors.textPrimary,
+    tertiaryFixed: AetherColors.border,
+    tertiaryFixedDim: AetherColors.borderStrong,
+    onTertiaryFixed: AetherColors.textPrimary,
+    onTertiaryFixedVariant: AetherColors.primarySoft,
+    error: AetherColors.danger,
+    onError: AetherColors.bgCanvas,
+    errorContainer: AetherColors.bgElevated,
+    onErrorContainer: AetherColors.danger,
+    surface: AetherColors.bgCanvas,
+    onSurface: AetherColors.textPrimary,
+    surfaceDim: AetherColors.border,
+    surfaceBright: AetherColors.bgCanvas,
+    surfaceContainerLowest: AetherColors.bgCanvas,
+    surfaceContainerLow: AetherColors.bg,
+    surfaceContainer: AetherColors.bgElevated,
+    surfaceContainerHigh: AetherColors.bgElevated,
+    surfaceContainerHighest: AetherColors.border,
+    onSurfaceVariant: AetherColors.textSecondary,
+    outline: AetherColors.textTertiary,
+    outlineVariant: AetherColors.border,
+    shadow: Colors.black,
+    scrim: Colors.black,
+    inverseSurface: AetherColors.primarySoft,
+    onInverseSurface: AetherColors.bg,
+    inversePrimary: AetherColors.border,
+    surfaceTint: AetherColors.primary,
+  ),
+  textSelectionTheme: const TextSelectionThemeData(
+    cursorColor: AetherColors.primary,
+    selectionColor: Color(0x33111111),
+    selectionHandleColor: AetherColors.primary,
+  ),
+  scaffoldBackgroundColor: backgroundColor,
+  canvasColor: backgroundColor,
+  useMaterial3: true,
+);
+
+ShadThemeData aetherShadTheme({Color backgroundColor = AetherColors.bg}) =>
+    ShadThemeData(
+      brightness: Brightness.light,
+      colorScheme: ShadColorScheme(
+        background: backgroundColor,
+        foreground: AetherColors.textPrimary,
+        card: AetherColors.bgCanvas,
+        cardForeground: AetherColors.textPrimary,
+        popover: AetherColors.bgCanvas,
+        popoverForeground: AetherColors.textPrimary,
+        primary: AetherColors.primary,
+        primaryForeground: AetherColors.bgCanvas,
+        secondary: AetherColors.bgElevated,
+        secondaryForeground: AetherColors.textPrimary,
+        muted: AetherColors.bgElevated,
+        mutedForeground: AetherColors.textSecondary,
+        accent: AetherColors.bgElevated,
+        accentForeground: AetherColors.textPrimary,
+        destructive: AetherColors.danger,
+        destructiveForeground: AetherColors.bgCanvas,
+        border: AetherColors.border,
+        input: AetherColors.border,
+        ring: AetherColors.primary,
+        selection: const Color(0x33111111),
+      ),
+      textTheme: ShadTextTheme(
+        family: aetherTheme().textTheme.bodyMedium?.fontFamily,
+      ),
+    );
+
+/// Adds shadcn components around the existing platform-owned Material app.
+class AetherUiScope extends StatelessWidget {
+  const AetherUiScope({
+    super.key,
+    required this.child,
+    this.backgroundColor = AetherColors.bg,
+  });
+
+  final Widget child;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) => ShadApp.custom(
+    theme: aetherShadTheme(backgroundColor: backgroundColor),
+    themeMode: ThemeMode.light,
+    appBuilder: (_) => child,
+  );
 }
 
 class AetherSpacing {
@@ -496,32 +607,19 @@ class AetherPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return LayoutBuilder(
+      builder: (context, constraints) => ShadButton(
+        onPressed: onTap,
+        enabled: onTap != null,
+        width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
         height: 56,
-        decoration: BoxDecoration(
-          color: AetherColors.primary,
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
+        decoration: ShadDecoration(
+          border: ShadBorder(radius: BorderRadius.circular(AetherRadii.lg)),
         ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, color: Colors.white, size: 18),
-              const SizedBox(width: AetherSpacing.sm),
-            ],
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+        leading: icon == null ? null : Icon(icon, size: 18),
+        gap: AetherSpacing.sm,
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        child: Text(label),
       ),
     );
   }
@@ -536,24 +634,18 @@ class AetherSecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return LayoutBuilder(
+      builder: (context, constraints) => ShadButton.outline(
+        onPressed: onTap,
+        enabled: onTap != null,
+        backgroundColor: AetherColors.bgCanvas,
+        width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
         height: 48,
-        decoration: BoxDecoration(
-          color: AetherColors.bgCanvas,
-          borderRadius: BorderRadius.circular(AetherRadii.md),
-          border: Border.all(color: AetherColors.border),
+        decoration: ShadDecoration(
+          border: ShadBorder(radius: BorderRadius.circular(AetherRadii.md)),
         ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: AetherColors.textPrimary,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        child: Text(label),
       ),
     );
   }

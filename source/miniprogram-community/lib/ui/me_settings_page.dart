@@ -6,6 +6,7 @@
 // which loads from public.notification_settings and public.profiles.
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../auth/auth_models.dart';
 import '../auth/auth_scope.dart';
@@ -251,32 +252,28 @@ class _SettingsSection extends StatelessWidget {
       context: context,
       builder: (ctx) {
         final current = notifier.isChinese ? _LangChoice.zh : _LangChoice.en;
-        return AlertDialog(
+        return ShadDialog.alert(
           backgroundColor: AetherColors.bgCanvas,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AetherRadii.lg),
-          ),
           title: Text(l.languageDialogTitle, style: AetherTextStyles.h2),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final choice in _LangChoice.values)
-                RadioListTile<_LangChoice>(
-                  title: Text(_choiceLabel(choice, l)),
-                  value: choice,
-                  groupValue: current,
-                  onChanged: (v) => Navigator.of(ctx).pop(v),
-                  activeColor: AetherColors.primary,
-                  contentPadding: EdgeInsets.zero,
-                ),
-            ],
-          ),
           actions: [
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.of(ctx).pop(),
               child: Text(l.commonCancel),
             ),
           ],
+          closeIcon: const SizedBox.shrink(),
+          radius: BorderRadius.circular(AetherRadii.lg),
+          child: ShadRadioGroup<_LangChoice>(
+            initialValue: current,
+            onChanged: (value) => Navigator.of(ctx).pop(value),
+            items: [
+              for (final choice in _LangChoice.values)
+                ShadRadio<_LangChoice>(
+                  value: choice,
+                  label: Text(_choiceLabel(choice, l)),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -339,29 +336,34 @@ class _SettingsSection extends StatelessWidget {
     final controller = TextEditingController(text: current);
     final next = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => ShadDialog.alert(
         backgroundColor: AetherColors.bgCanvas,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
-        ),
         title: Text(l.meHandleDialogTitle, style: AetherTextStyles.h2),
-        content: Column(
+        actions: [
+          ShadButton.ghost(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l.commonCancel),
+          ),
+          ShadButton.ghost(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: Text(l.meActionSave),
+          ),
+        ],
+        closeIcon: const SizedBox.shrink(),
+        radius: BorderRadius.circular(AetherRadii.lg),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
+            ShadInput(
               controller: controller,
               autofocus: true,
               maxLength: 32,
               autocorrect: false,
               enableSuggestions: false,
               textCapitalization: TextCapitalization.none,
-              decoration: InputDecoration(
-                hintText: l.meHandleDialogHint,
-                border: const OutlineInputBorder(),
-                counterText: '',
-              ),
               onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
+              placeholder: Text(l.meHandleDialogHint),
             ),
             const SizedBox(height: AetherSpacing.sm),
             Text(
@@ -373,16 +375,6 @@ class _SettingsSection extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: Text(l.meActionSave),
-          ),
-        ],
       ),
     );
     if (next == null || next.isEmpty || next == current) return;
@@ -421,37 +413,32 @@ class _SettingsSection extends StatelessWidget {
     final controller = TextEditingController(text: currentName);
     final newName = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => ShadDialog.alert(
         backgroundColor: AetherColors.bgCanvas,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
-        ),
         title: Text(l.meDisplayNameDialogTitle, style: AetherTextStyles.h2),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          // 20 = 服务端 DISPLAY_NAME_MAX_GRAPHEMES。⚠️ 口径不同:这里数的是
-          // UTF-16 code unit,服务端数的是**字素簇**。一个 ZWJ emoji 在这里
-          // 算 8、在服务端算 1 ⇒ 客户端更严。这是有意的保守方向:客户端拦下
-          // 的一定会被服务端接受,反过来则会出现"输得下却被拒"。
-          maxLength: 20,
-          decoration: InputDecoration(
-            hintText: l.meDisplayNameDialogHint,
-            border: const OutlineInputBorder(),
-            counterText: '',
-          ),
-          onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
-        ),
         actions: [
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(l.commonCancel),
           ),
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
             child: Text(l.meActionSave),
           ),
         ],
+        closeIcon: const SizedBox.shrink(),
+        radius: BorderRadius.circular(AetherRadii.lg),
+        child: ShadInput(
+          controller: controller,
+          autofocus: true,
+          // 20 = 服务端 DISPLAY_NAME_MAX_GRAPHEMES。⚠️ 口径不同: 这里数的是
+          // UTF-16 code unit,服务端数的是**字素簇**。一个 ZWJ emoji 在这里
+          // 算 8、在服务端算 1 ⇒ 客户端更严。这是有意的保守方向:客户端拦下
+          // 的一定会被服务端接受,反过来则会出现"输得下却被拒"。
+          maxLength: 20,
+          onSubmitted: (v) => Navigator.of(ctx).pop(v.trim()),
+          placeholder: Text(l.meDisplayNameDialogHint),
+        ),
       ),
     );
     if (newName == null || newName.isEmpty || newName == currentName) return;
@@ -559,42 +546,39 @@ class _DeleteAccountButtonState extends State<_DeleteAccountButton> {
   @override
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
-    return GestureDetector(
-      onTap: _busy
+    return ShadButton.destructive(
+      onPressed: _busy
           ? null
           : () async {
               final currentUser = AuthScope.read(context);
               final confirmed = await showDialog<bool>(
                 context: context,
-                builder: (_) => AlertDialog(
+                builder: (_) => ShadDialog.alert(
                   backgroundColor: AetherColors.bgCanvas,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AetherRadii.lg),
-                  ),
                   title: Text(
                     l.meDeleteAccountDialogTitle,
                     style: AetherTextStyles.h2,
                   ),
-                  content: Text(
-                    l.meDeleteAccountDialogBody,
-                    style: AetherTextStyles.body,
-                  ),
                   actions: [
-                    TextButton(
+                    ShadButton.ghost(
                       onPressed: () => Navigator.of(context).pop(false),
                       child: Text(l.commonCancel),
                     ),
-                    TextButton(
+                    ShadButton.ghost(
                       onPressed: () => Navigator.of(context).pop(true),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AetherColors.danger,
-                      ),
+                      foregroundColor: AetherColors.danger,
                       child: Text(
                         l.meDeleteAccountConfirm,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
+                  closeIcon: const SizedBox.shrink(),
+                  radius: BorderRadius.circular(AetherRadii.lg),
+                  child: Text(
+                    l.meDeleteAccountDialogBody,
+                    style: AetherTextStyles.body,
+                  ),
                 ),
               );
               if (confirmed != true) return;
@@ -622,6 +606,11 @@ class _DeleteAccountButtonState extends State<_DeleteAccountButton> {
                 rootNavigator: true,
               ).popUntil((route) => route.isFirst);
             },
+      padding: EdgeInsets.zero,
+      height: 52,
+      width: double.infinity,
+      expands: true,
+      enabled: !_busy,
       child: Container(
         height: 52,
         decoration: BoxDecoration(
@@ -659,34 +648,31 @@ class _SignOutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
-    return GestureDetector(
-      onTap: () async {
+    return ShadButton.outline(
+      onPressed: () async {
         final currentUser = AuthScope.read(context);
         final confirmed = await showDialog<bool>(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (_) => ShadDialog.alert(
             backgroundColor: AetherColors.bgCanvas,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AetherRadii.lg),
-            ),
             title: Text(l.meSignOut, style: AetherTextStyles.h2),
-            content: const SizedBox.shrink(),
             actions: [
-              TextButton(
+              ShadButton.ghost(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(l.commonCancel),
               ),
-              TextButton(
+              ShadButton.ghost(
                 onPressed: () => Navigator.of(context).pop(true),
-                style: TextButton.styleFrom(
-                  foregroundColor: AetherColors.danger,
-                ),
+                foregroundColor: AetherColors.danger,
                 child: Text(
                   l.commonOk,
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
+            closeIcon: const SizedBox.shrink(),
+            radius: BorderRadius.circular(AetherRadii.lg),
+            child: const SizedBox.shrink(),
           ),
         );
         if (confirmed == true) {
@@ -724,6 +710,10 @@ class _SignOutButton extends StatelessWidget {
           ).popUntil((route) => route.isFirst);
         }
       },
+      padding: EdgeInsets.zero,
+      height: 52,
+      width: double.infinity,
+      expands: true,
       child: Container(
         height: 52,
         decoration: BoxDecoration(

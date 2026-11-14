@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 /// Repository-provided status. [stage] preserves the backend's stage identity.
 class WebPublicationSummary {
@@ -148,21 +149,22 @@ class _WebPublicationStatusPageState extends State<WebPublicationStatusPage> {
             dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
           ),
         ),
-        child: AlertDialog(
+        child: ShadDialog.alert(
           title: Text(restore ? '恢复发布？' : '撤回发布？'),
-          content: Text(
-            restore ? '恢复后，作品会按服务端审核结果重新提供。' : '撤回后，作品将停止公开提供。审核与争议材料按平台规则保留。',
-          ),
           actions: [
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('取消'),
             ),
-            FilledButton(
+            ShadButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(restore ? '确认恢复' : '确认撤回'),
             ),
           ],
+          closeIcon: const SizedBox.shrink(),
+          child: Text(
+            restore ? '恢复后，作品会按服务端审核结果重新提供。' : '撤回后，作品将停止公开提供。审核与争议材料按平台规则保留。',
+          ),
         ),
       ),
     );
@@ -216,10 +218,17 @@ class _WebPublicationStatusPageState extends State<WebPublicationStatusPage> {
           backgroundColor: const Color(0xFFFAFAFA),
           foregroundColor: const Color(0xFF242424),
           actions: [
-            IconButton(
-              tooltip: '刷新状态',
-              onPressed: _loading || _retryingId != null ? null : _load,
-              icon: const Icon(Icons.refresh),
+            Tooltip(
+              message: '刷新状态',
+              child: ShadButton.ghost(
+                onPressed: _loading || _retryingId != null ? null : _load,
+                enabled:
+                    (_loading || _retryingId != null ? null : _load) != null,
+                width: 40,
+                height: 40,
+                padding: EdgeInsets.zero,
+                child: const Icon(Icons.refresh),
+              ),
             ),
           ],
         ),
@@ -290,10 +299,10 @@ class _WebPublicationStatusPageState extends State<WebPublicationStatusPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 16, top: 8),
-                      child: TextButton.icon(
+                      child: ShadButton.ghost(
                         onPressed: () => setState(() => _selectedId = null),
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('返回发布列表'),
+                        leading: const Icon(Icons.arrow_back),
+                        child: const Text('返回发布列表'),
                       ),
                     ),
                     _detail(selected),
@@ -320,7 +329,7 @@ class _WebPublicationStatusPageState extends State<WebPublicationStatusPage> {
             Text(body, textAlign: TextAlign.center),
             if (retry) ...[
               const SizedBox(height: 16),
-              OutlinedButton(onPressed: _load, child: const Text('重新加载')),
+              ShadButton.outline(onPressed: _load, child: const Text('重新加载')),
             ],
           ],
         ),
@@ -376,33 +385,45 @@ class _WebPublicationStatusPageState extends State<WebPublicationStatusPage> {
           ],
           const SizedBox(height: 24),
           if (stage == 'published')
-            FilledButton.icon(
+            ShadButton(
               onPressed: () => widget.onOpen(item.id),
-              icon: const Icon(Icons.open_in_new),
-              label: const Text('在社区查看'),
+              leading: const Icon(Icons.open_in_new),
+              child: const Text('在社区查看'),
             ),
           if (retryable && widget.onRetry != null)
-            OutlinedButton.icon(
+            ShadButton.outline(
               onPressed: _retryingId == null ? () => _retry(item) : null,
-              icon: const Icon(Icons.refresh),
-              label: Text(_retryingId == item.id ? '正在提交重试…' : '重试处理'),
+              enabled:
+                  (_retryingId == null ? () => _retry(item) : null) != null,
+              leading: const Icon(Icons.refresh),
+              child: Text(_retryingId == item.id ? '正在提交重试…' : '重试处理'),
             ),
           if (retryable && widget.onRetry == null)
             const Text('暂时无法重试，请稍后刷新状态。'),
           if (item.canWithdraw && widget.onWithdraw != null)
-            OutlinedButton(
+            ShadButton.outline(
               key: ValueKey('withdraw-${item.id}'),
               onPressed: _retryingId == null && _retryError == null
                   ? () => _changeVisibility(item, restore: false)
                   : null,
+              enabled:
+                  (_retryingId == null && _retryError == null
+                      ? () => _changeVisibility(item, restore: false)
+                      : null) !=
+                  null,
               child: Text(_retryingId == item.id ? '正在处理…' : '撤回发布'),
             ),
           if (item.canRestore && widget.onRestore != null)
-            OutlinedButton(
+            ShadButton.outline(
               key: ValueKey('restore-${item.id}'),
               onPressed: _retryingId == null && _retryError == null
                   ? () => _changeVisibility(item, restore: true)
                   : null,
+              enabled:
+                  (_retryingId == null && _retryError == null
+                      ? () => _changeVisibility(item, restore: true)
+                      : null) !=
+                  null,
               child: Text(_retryingId == item.id ? '正在处理…' : '恢复发布'),
             ),
         ],

@@ -1,5 +1,7 @@
 import 'generated_account_avatar.dart';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../community/social_profile_models.dart';
 import '../../community/social_profile_repository.dart';
@@ -118,7 +120,7 @@ class _FollowingListPageState extends State<FollowingListPage> {
           children: [
             Text(l.socialFollowingLoadFailed),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: _load, child: Text(l.communityRetry)),
+            ShadButton.outline(onPressed: _load, child: Text(l.communityRetry)),
           ],
         ),
       );
@@ -154,20 +156,20 @@ class _FollowingListPageState extends State<FollowingListPage> {
                 ? null
                 : Text('@${profile.handle}', style: AetherTextStyles.bodySm),
             trailing: profile.isFollowing
-                ? OutlinedButton(
+                ? ShadButton.outline(
+                    enabled: !(_inFlight.contains(profile.id)),
                     onPressed: _inFlight.contains(profile.id)
                         ? null
                         : () => _toggle(profile),
                     child: Text(l.socialFollowing),
                   )
-                : FilledButton(
+                : ShadButton(
+                    enabled: !(_inFlight.contains(profile.id)),
                     onPressed: _inFlight.contains(profile.id)
                         ? null
                         : () => _toggle(profile),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AetherColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
+                    backgroundColor: AetherColors.primary,
+                    foregroundColor: Colors.white,
                     child: Text(l.socialFollow),
                   ),
           );

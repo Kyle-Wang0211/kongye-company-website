@@ -7,6 +7,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../design_system.dart';
@@ -71,7 +72,7 @@ class AuthField extends StatelessWidget {
     final isPasswordLike = isSecure;
     final isEmailLike = keyboard == AuthFieldKeyboard.email;
     final shouldDisableInputAssistance = isPasswordLike || isEmailLike;
-    final field = TextField(
+    final field = ShadInput(
       controller: controller,
       enabled: enabled,
       obscureText: isSecure,
@@ -84,34 +85,10 @@ class AuthField extends StatelessWidget {
       autofillHints: autofillHints,
       textCapitalization: TextCapitalization.none,
       style: const TextStyle(fontSize: 15, color: AetherColors.textPrimary),
-      decoration: InputDecoration(
-        prefixIcon: leading,
-        prefixIconConstraints: leading == null
-            ? null
-            : const BoxConstraints(minWidth: 0, minHeight: 48),
-
-        hintStyle: const TextStyle(
-          color: AetherColors.textTertiary,
-          fontSize: 15,
-        ),
-        filled: true,
-        fillColor: AetherColors.bgCanvas,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.md),
-          borderSide: const BorderSide(color: AetherColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.md),
-          borderSide: const BorderSide(color: AetherColors.primary, width: 1.4),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.md),
-          borderSide: const BorderSide(color: AetherColors.border),
-        ),
+      leading: leading,
+      placeholderStyle: const TextStyle(
+        color: AetherColors.textTertiary,
+        fontSize: 15,
       ),
     );
     final labeled = Column(
@@ -152,8 +129,12 @@ class AuthPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effective = isEnabled && !isWorking;
-    return GestureDetector(
-      onTap: effective ? onTap : null,
+    return ShadButton(
+      onPressed: effective ? onTap : null,
+      enabled: effective,
+      height: 52,
+      width: double.infinity,
+      padding: EdgeInsets.zero,
       child: Container(
         height: 52,
         decoration: BoxDecoration(

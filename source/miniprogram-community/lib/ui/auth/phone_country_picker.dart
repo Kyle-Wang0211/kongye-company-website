@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../auth/phone_country_catalog.dart';
 import '../../l10n/app_localizations.dart';
@@ -42,7 +43,7 @@ class _CountrySearchPageState extends State<_CountrySearchPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(l.phoneCountrySearchHint, softWrap: true),
-              TextField(
+              ShadInput(
                 key: const ValueKey('phone-country-search'),
                 onChanged: (value) => setState(() => _query = value),
               ),
@@ -104,14 +105,13 @@ class PhoneCountryPrefix extends StatelessWidget {
             child: Tooltip(
               message: countryLabel,
               excludeFromSemantics: true,
-              child: TextButton(
+              child: ShadButton.ghost(
                 key: const ValueKey('phone-country-selector'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AetherColors.textPrimary,
-                  minimumSize: const Size(0, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                ),
                 onPressed: enabled ? onTap : null,
+                foregroundColor: AetherColors.textPrimary,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                enabled: (enabled ? onTap : null) != null,
                 child: Semantics(
                   label: countryLabel,
                   excludeSemantics: true,

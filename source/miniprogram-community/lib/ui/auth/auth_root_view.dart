@@ -17,6 +17,7 @@
 // reset-password pages share the same look-and-feel.
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../../auth/auth_error.dart';
@@ -120,26 +121,25 @@ class _AuthRootViewState extends State<AuthRootView> {
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (_) => AlertDialog(
+      builder: (_) => ShadDialog.alert(
         backgroundColor: AetherColors.bgCanvas,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AetherRadii.lg),
-        ),
         title: Text(
           AppL10n.of(context).authErrorDialogTitle,
           style: AetherTextStyles.h2,
         ),
-        content: Text(message, style: AetherTextStyles.body),
         actions: [
-          TextButton(
+          ShadButton.ghost(
             onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(foregroundColor: AetherColors.primary),
+            foregroundColor: AetherColors.primary,
             child: Text(
               AppL10n.of(context).commonOk,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ],
+        closeIcon: const SizedBox.shrink(),
+        radius: BorderRadius.circular(AetherRadii.lg),
+        child: Text(message, style: AetherTextStyles.body),
       ),
     );
   }
@@ -181,7 +181,7 @@ class _AuthRootViewState extends State<AuthRootView> {
     return Expanded(
       child: Semantics(
         selected: selected,
-        child: TextButton(
+        child: ShadButton.ghost(
           key: ValueKey('auth-method-${method.name}'),
           onPressed: working
               ? null
@@ -190,13 +190,22 @@ class _AuthRootViewState extends State<AuthRootView> {
                   _codeLogin = false;
                   _policyAccepted = false;
                 }),
-          style: TextButton.styleFrom(
-            foregroundColor: selected
-                ? AetherColors.textPrimary
-                : AetherColors.textTertiary,
-            minimumSize: const Size(0, 48),
-            shape: const RoundedRectangleBorder(),
+          foregroundColor: selected
+              ? AetherColors.textPrimary
+              : AetherColors.textTertiary,
+          height: 48,
+          decoration: const ShadDecoration(
+            border: ShadBorder(radius: BorderRadius.zero),
           ),
+          enabled:
+              (working
+                  ? null
+                  : () => setState(() {
+                      _method = method;
+                      _codeLogin = false;
+                      _policyAccepted = false;
+                    })) !=
+              null,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
@@ -352,31 +361,41 @@ class _AuthRootViewState extends State<AuthRootView> {
                           Row(
                             children: [
                               Expanded(
-                                child: TextButton(
+                                child: ShadButton.ghost(
                                   key: const ValueKey('auth-use-password'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: !_codeLogin
-                                        ? AetherColors.textPrimary
-                                        : AetherColors.textTertiary,
-                                  ),
                                   onPressed: working
                                       ? null
                                       : () =>
                                             setState(() => _codeLogin = false),
+                                  foregroundColor: !_codeLogin
+                                      ? AetherColors.textPrimary
+                                      : AetherColors.textTertiary,
+                                  enabled:
+                                      (working
+                                          ? null
+                                          : () => setState(
+                                              () => _codeLogin = false,
+                                            )) !=
+                                      null,
                                   child: Text(l.authPasswordLogin),
                                 ),
                               ),
                               Expanded(
-                                child: TextButton(
+                                child: ShadButton.ghost(
                                   key: const ValueKey('auth-use-code'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: _codeLogin
-                                        ? AetherColors.textPrimary
-                                        : AetherColors.textTertiary,
-                                  ),
                                   onPressed: working
                                       ? null
                                       : () => setState(() => _codeLogin = true),
+                                  foregroundColor: _codeLogin
+                                      ? AetherColors.textPrimary
+                                      : AetherColors.textTertiary,
+                                  enabled:
+                                      (working
+                                          ? null
+                                          : () => setState(
+                                              () => _codeLogin = true,
+                                            )) !=
+                                      null,
                                   child: Text(l.authCodeLogin),
                                 ),
                               ),
@@ -390,22 +409,35 @@ class _AuthRootViewState extends State<AuthRootView> {
                             enabled: !working,
                             isSecure: true,
                             obscureText: !_passwordVisible,
-                            trailing: IconButton(
-                              tooltip: _passwordVisible
+                            trailing: Tooltip(
+                              message: _passwordVisible
                                   ? l.authHidePassword
                                   : l.authShowPassword,
-                              onPressed: working
-                                  ? null
-                                  : () => setState(
-                                      () =>
-                                          _passwordVisible = !_passwordVisible,
-                                    ),
-                              icon: Icon(
-                                _passwordVisible
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                size: 20,
-                                color: AetherColors.textTertiary,
+                              child: ShadButton.ghost(
+                                onPressed: working
+                                    ? null
+                                    : () => setState(
+                                        () => _passwordVisible =
+                                            !_passwordVisible,
+                                      ),
+                                enabled:
+                                    (working
+                                        ? null
+                                        : () => setState(
+                                            () => _passwordVisible =
+                                                !_passwordVisible,
+                                          )) !=
+                                    null,
+                                width: 40,
+                                height: 40,
+                                padding: EdgeInsets.zero,
+                                child: Icon(
+                                  _passwordVisible
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 20,
+                                  color: AetherColors.textTertiary,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.done,
@@ -418,14 +450,13 @@ class _AuthRootViewState extends State<AuthRootView> {
                           const SizedBox(height: 4),
                           Align(
                             alignment: Alignment.centerRight,
-                            child: TextButton(
+                            child: ShadButton.ghost(
                               key: const ValueKey('auth-forgot-password'),
                               onPressed: working ? null : _pushReset,
-                              style: TextButton.styleFrom(
-                                foregroundColor: AetherColors.textTertiary,
-                                minimumSize: const Size(0, 44),
-                                padding: EdgeInsets.zero,
-                              ),
+                              foregroundColor: AetherColors.textTertiary,
+                              height: 44,
+                              padding: EdgeInsets.zero,
+                              enabled: (working ? null : _pushReset) != null,
                               child: Text(
                                 l.authForgotPassword
                                     .replaceAll('?', '')

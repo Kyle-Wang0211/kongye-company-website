@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class WebReportReviewItem {
   const WebReportReviewItem({
@@ -100,9 +101,20 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
         context: context,
         builder: (context) => Theme(
           data: _theme(context),
-          child: AlertDialog(
+          child: ShadDialog.alert(
             title: const Text('确认处理举报'),
-            content: TextFormField(
+            actions: [
+              ShadButton.ghost(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              ShadButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('确认提交'),
+              ),
+            ],
+            closeIcon: const SizedBox.shrink(),
+            child: ShadInputFormField(
               initialValue: feedback,
               onChanged: (value) {
                 feedback = value.trim();
@@ -111,18 +123,8 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
               maxLength: 1000,
               minLines: 2,
               maxLines: 5,
-              decoration: const InputDecoration(labelText: '给举报人的处理说明'),
+              label: Text('给举报人的处理说明'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('确认提交'),
-              ),
-            ],
           ),
         ),
       );
@@ -170,19 +172,20 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
       context: context,
       builder: (context) => Theme(
         data: _theme(context),
-        child: AlertDialog(
+        child: ShadDialog.alert(
           title: const Text('恢复关联作品？'),
-          content: const Text('服务端将检查当前审核、作品版本和处理权限。原举报记录会保留。'),
           actions: [
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(context, false),
               child: const Text('取消'),
             ),
-            FilledButton(
+            ShadButton(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('确认恢复'),
             ),
           ],
+          closeIcon: const SizedBox.shrink(),
+          child: const Text('服务端将检查当前审核、作品版本和处理权限。原举报记录会保留。'),
         ),
       ),
     );
@@ -232,10 +235,16 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
       appBar: AppBar(
         title: const Text('人工举报处理'),
         actions: [
-          IconButton(
-            tooltip: '刷新队列',
-            onPressed: _busy == null ? () => setState(_load) : null,
-            icon: const Icon(Icons.refresh),
+          Tooltip(
+            message: '刷新队列',
+            child: ShadButton.ghost(
+              onPressed: _busy == null ? () => setState(_load) : null,
+              enabled: (_busy == null ? () => setState(_load) : null) != null,
+              width: 40,
+              height: 40,
+              padding: EdgeInsets.zero,
+              child: const Icon(Icons.refresh),
+            ),
           ),
         ],
       ),
@@ -251,7 +260,7 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('无法访问举报队列，请确认处理权限。'),
-                  TextButton(
+                  ShadButton.ghost(
                     onPressed: () => setState(_load),
                     child: const Text('重试'),
                   ),
@@ -284,7 +293,7 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
                         SelectableText('对象 ${item.targetId}'),
                         if (item.sourceWorkId != null &&
                             widget.onOpenWork != null)
-                          TextButton(
+                          ShadButton.ghost(
                             onPressed: () =>
                                 widget.onOpenWork!(item.sourceWorkId!),
                             child: const Text('查看关联作品'),
@@ -295,20 +304,30 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
                           children: [
                             if (item.claimedBy == null &&
                                 ['pending', 'needs_info'].contains(item.status))
-                              OutlinedButton(
+                              ShadButton.outline(
                                 onPressed: _busy == null && !_unconfirmed
                                     ? () => _act(item, null)
                                     : null,
+                                enabled:
+                                    (_busy == null && !_unconfirmed
+                                        ? () => _act(item, null)
+                                        : null) !=
+                                    null,
                                 child: const Text('领取处理'),
                               ),
                             if (queue.role == 'lead' &&
                                 item.status == 'actioned' &&
                                 item.sourceWorkId != null &&
                                 widget.onRestoreWork != null)
-                              OutlinedButton(
+                              ShadButton.outline(
                                 onPressed: _busy == null && !_unconfirmed
                                     ? () => _restore(item)
                                     : null,
+                                enabled:
+                                    (_busy == null && !_unconfirmed
+                                        ? () => _restore(item)
+                                        : null) !=
+                                    null,
                                 child: const Text('恢复关联作品'),
                               ),
                             if (item.claimedBy == queue.userId &&
@@ -317,23 +336,38 @@ class _WebReportReviewPageState extends State<WebReportReviewPage> {
                                   'in_review',
                                   'needs_info',
                                 ].contains(item.status)) ...[
-                              OutlinedButton(
+                              ShadButton.outline(
                                 onPressed: _busy == null && !_unconfirmed
                                     ? () => _act(item, 'needs_info')
                                     : null,
+                                enabled:
+                                    (_busy == null && !_unconfirmed
+                                        ? () => _act(item, 'needs_info')
+                                        : null) !=
+                                    null,
                                 child: const Text('要求补充说明'),
                               ),
-                              OutlinedButton(
+                              ShadButton.outline(
                                 onPressed: _busy == null && !_unconfirmed
                                     ? () => _act(item, 'dismissed')
                                     : null,
+                                enabled:
+                                    (_busy == null && !_unconfirmed
+                                        ? () => _act(item, 'dismissed')
+                                        : null) !=
+                                    null,
                                 child: const Text('不予采纳'),
                               ),
                               if (queue.role == 'lead')
-                                FilledButton(
+                                ShadButton(
                                   onPressed: _busy == null && !_unconfirmed
                                       ? () => _act(item, 'actioned')
                                       : null,
+                                  enabled:
+                                      (_busy == null && !_unconfirmed
+                                          ? () => _act(item, 'actioned')
+                                          : null) !=
+                                      null,
                                   child: const Text('确认采取措施'),
                                 ),
                             ],

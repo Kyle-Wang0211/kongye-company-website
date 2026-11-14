@@ -5,6 +5,7 @@
 //   2) enter 6-digit code → sign in / sign up
 //
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../../auth/auth_models.dart';
@@ -435,8 +436,8 @@ class _PhoneSignInViewState extends State<PhoneSignInView>
           enabled: !working,
           onChanged: (value) => setState(() => _policyAccepted = value),
         ),
-        GestureDetector(
-          onTap: working
+        ShadButton.ghost(
+          onPressed: working
               ? null
               : () {
                   if (_blocked) return;
@@ -444,6 +445,17 @@ class _PhoneSignInViewState extends State<PhoneSignInView>
                     _resetConsent();
                   });
                 },
+          padding: EdgeInsets.zero,
+          enabled:
+              (working
+                  ? null
+                  : () {
+                      if (_blocked) return;
+                      setState(() {
+                        _resetConsent();
+                      });
+                    }) !=
+              null,
           child: Text(
             l.authPhoneChangeNumber,
             style: const TextStyle(

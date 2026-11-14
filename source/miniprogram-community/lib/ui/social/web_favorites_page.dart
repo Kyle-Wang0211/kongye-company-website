@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../design_system.dart';
 
@@ -169,10 +170,16 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
           foregroundColor: AetherColors.primary,
           title: Text(_text('我的收藏', 'Favorites')),
           actions: [
-            IconButton(
-              tooltip: _text('刷新收藏', 'Refresh favorites'),
-              onPressed: _loading || _pending.isNotEmpty ? null : _load,
-              icon: const Icon(Icons.refresh_rounded),
+            Tooltip(
+              message: _text('刷新收藏', 'Refresh favorites'),
+              child: ShadButton.ghost(
+                onPressed: _loading || _pending.isNotEmpty ? null : _load,
+                child: const Icon(Icons.refresh_rounded),
+                enabled: !(_loading || _pending.isNotEmpty),
+                width: 48,
+                height: 48,
+                padding: const EdgeInsets.all(12),
+              ),
             ),
             const SizedBox(width: AetherSpacing.sm),
           ],
@@ -251,10 +258,10 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
                               '请稍后重试，您的收藏不会因此改变。',
                               'Please try again. Your saved works are unchanged.',
                             ),
-                            action: FilledButton.icon(
+                            action: ShadButton(
                               onPressed: _load,
-                              icon: const Icon(Icons.refresh_rounded),
-                              label: Text(_text('重试', 'Retry')),
+                              leading: const Icon(Icons.refresh_rounded),
+                              child: Text(_text('重试', 'Retry')),
                             ),
                           )
                         else if (_items.isEmpty)
@@ -430,10 +437,10 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
             padding: const EdgeInsets.all(8),
             child: Align(
               alignment: Alignment.centerRight,
-              child: TextButton.icon(
+              child: ShadButton.ghost(
                 key: ValueKey('remove-favorite-${item.id}'),
                 onPressed: pending ? null : () => _remove(item),
-                icon: pending
+                leading: pending
                     ? const SizedBox(
                         width: 18,
                         height: 18,
@@ -443,11 +450,12 @@ class _WebFavoritesPageState extends State<WebFavoritesPage> {
                         ),
                       )
                     : const Icon(Icons.bookmark_remove_outlined, size: 20),
-                label: Text(
+                child: Text(
                   pending
                       ? _text('正在移除…', 'Removing…')
                       : _text('取消收藏', 'Remove favorite'),
                 ),
+                enabled: !pending,
               ),
             ),
           ),

@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -58,11 +59,6 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
   SharedViewerController? _previewController;
   Map<String, dynamic>? _confirmedView;
   Uint8List? _coverPreview;
-  Uint8List? _coverJpeg;
-  bool get _isGlb => _format == 'glb';
-  bool get _hasConfirmedCover => _isGlb
-      ? _coverJpeg != null && !_coverEditing
-      : _confirmedView != null && !_coverEditing;
   int _previewEpoch = 0;
   bool _previewReady = false, _confirming = false, _coverEditing = false;
   final _previewAnchor = GlobalKey();
@@ -140,13 +136,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       if (!current()) return;
       final camera = await controller.getCameraFraming();
       if (!current()) return;
-      final mime = _isGlb ? 'image/jpeg' : 'image/png';
-      final image = await controller.capture(
-        type: mime,
-        canonicalCamera: false,
-      );
+      final image = await controller.capture(type: 'image/png');
       if (!current()) return;
-      if (image is! String || !image.startsWith('data:$mime;base64,')) {
+      if (image is! String || !image.startsWith('data:image/png;base64,')) {
         throw const WebPublicationException('cover_preview_unavailable');
       }
       final confirmed = validatePublicationInitialView(
@@ -159,12 +151,13 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         sourceSha256: _sourceHash!,
         selectionBox: _selection,
       );
-      final png = base64Decode(image.substring('data:$mime;base64,'.length));
+      final png = base64Decode(
+        image.substring('data:image/png;base64,'.length),
+      );
       if (!current()) return;
       setState(() {
         _confirmedView = confirmed;
         _coverPreview = png;
-        if (_isGlb) _coverJpeg = png;
         _coverEditing = false;
         _message = '已确认封面和初始视角';
       });
@@ -276,13 +269,15 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         const Text('拖动旋转、缩放或平移模型，再确认当前画面。'),
         if (_coverEditing)
           const Text('封面待重新确认', key: ValueKey('publication-cover-pending')),
-        OutlinedButton(
+        ShadButton.outline(
+          enabled: _previewReady && !_busy && !_confirming && _key == null,
           onPressed: _previewReady && !_busy && !_confirming && _key == null
               ? _confirmView
               : null,
           child: Text(_confirming ? '正在确认画面…' : '确认当前画面为封面和初始视角'),
         ),
-        TextButton(
+        ShadButton.ghost(
+          enabled: _previewReady && !_busy && !_confirming && _key == null,
           onPressed: _previewReady && !_busy && !_confirming && _key == null
               ? () async {
                   try {
@@ -299,7 +294,9 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
             key: const ValueKey('publication-confirmed-cover'),
             errorBuilder: (_, _, _) => const Text('已保存当前视角'),
           ),
-          OutlinedButton(
+          ShadButton.outline(
+            enabled:
+                !_busy && !_confirming && (_key == null || _canReturnToEditing),
             key: const ValueKey('publication-change-cover'),
             onPressed:
                 !_busy && !_confirming && (_key == null || _canReturnToEditing)
@@ -359,7 +356,6 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
     _bytes = null;
     _resetPreview();
     _selection = null;
-    _coverJpeg = null;
     _status = null;
     _key = null;
     _submission = null;
@@ -451,7 +447,6 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       _bytes = null;
       _resetPreview();
       _selection = null;
-      _coverJpeg = null;
       _status = null;
       _selected = false;
       _message = null;
@@ -487,8 +482,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       }
       final bytes = file.bytes!;
       _format = format;
-      if (format != 'glb' &&
-          (_key != null || (_bytes == null && _sourceHash != null))) {
+      if (_key != null || (_bytes == null && _sourceHash != null)) {
         if (sha256.convert(bytes).toString() != _sourceHash) {
           throw const WebPublicationException('source_changed');
         }
@@ -514,31 +508,11 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
       final selection = await Navigator.of(context).push(route);
       _selectionRoute = null;
       if (!_current || selection == null) return;
-      if (_isGlb &&
-          (selection.coverJpeg == null || selection.cameraFraming == null))
-        return;
       setState(() {
         _bytes = bytes;
         _selection = selection.box?.toJson();
-        _coverJpeg = selection.coverJpeg;
         _sourceHash = sha256.convert(bytes).toString();
         _resetPreview();
-        if (_isGlb) {
-          _coverPreview = _coverJpeg;
-          _confirmedView = validatePublicationInitialView(
-            {
-              'schema': 'pw.camera-framing.v1',
-              'source_sha256': _sourceHash,
-              'selection_box': _selection,
-              ...?selection.cameraFraming,
-            },
-            sourceSha256: _sourceHash!,
-            selectionBox: _selection,
-          );
-          _key = null;
-          _submission = null;
-          _status = null;
-        }
         _selected = true;
       });
     } catch (error) {
@@ -561,7 +535,7 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         !_selected ||
         _busy ||
         _confirming ||
-        (_isGlb ? !_hasConfirmedCover : (_key == null && !_hasConfirmedCover)))
+        (_key == null && (_confirmedView == null || _coverEditing)))
       return;
     if (_title.text.trim().isEmpty ||
         _title.text.runes.length > 100 ||
@@ -586,7 +560,6 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
         idempotencyKey: _key!,
         selectionBox: _selection,
         initialView: _confirmedView,
-        coverJpeg: _isGlb ? _coverJpeg : null,
         expectedSourceSha256: _sourceHash,
         onSubmissionCreated: (id) async {
           if (!_current) return;
@@ -710,46 +683,52 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
               child: ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
-                  OutlinedButton.icon(
+                  ShadButton.outline(
+                    enabled:
+                        !(_busy ||
+                            (_submission != null &&
+                                _status?.status != 'uploading')),
                     onPressed:
                         _busy ||
                             (_submission != null &&
                                 _status?.status != 'uploading')
                         ? null
                         : _pick,
-                    icon: const Icon(Icons.upload_file),
-                    label: Text(
+                    leading: const Icon(Icons.upload_file),
+                    child: Text(
                       _selected ? '重新选择 GLB / PLY / 调整选区' : '选择 GLB / PLY',
                     ),
                   ),
                   if (_selected)
                     Text(_selection == null ? '保留整个模型' : '已确认模型选区'),
                   if (_previewController != null) _preview(),
-                  TextField(
+                  ShadInput(
                     controller: _title,
-                    enabled:
-                        !_busy &&
-                        _key == null &&
-                        (!_isGlb || _hasConfirmedCover),
-                    decoration: const InputDecoration(labelText: '标题（1–100 字）'),
+                    enabled: !_busy && _key == null,
+                    top: const Text('标题（1–100 字）'),
                   ),
-                  TextField(
+                  ShadInput(
                     controller: _description,
-                    enabled:
-                        !_busy &&
-                        _key == null &&
-                        (!_isGlb || _hasConfirmedCover),
-                    decoration: const InputDecoration(labelText: '描述（最多 30 字）'),
+                    enabled: !_busy && _key == null,
+                    top: const Text('描述（最多 30 字）'),
                   ),
                   const SizedBox(height: 24),
-                  FilledButton(
+                  ShadButton(
+                    enabled:
+                        !_busy &&
+                        _selected &&
+                        !_confirming &&
+                        (_key != null ||
+                            (_confirmedView != null && !_coverEditing)) &&
+                        (_submission == null ||
+                            _status?.status == 'uploading' ||
+                            _status == null),
                     onPressed:
                         !_busy &&
                             _selected &&
                             !_confirming &&
-                            (_isGlb
-                                ? _hasConfirmedCover
-                                : (_key != null || _hasConfirmedCover)) &&
+                            (_key != null ||
+                                (_confirmedView != null && !_coverEditing)) &&
                             (_submission == null ||
                                 _status?.status == 'uploading' ||
                                 _status == null)
@@ -762,23 +741,26 @@ class _WebPublicationPageState extends State<WebPublicationPage> {
                   if (_status != null)
                     Text(_statusText, key: const Key('publication-status')),
                   if (_submission != null)
-                    TextButton(
+                    ShadButton.ghost(
+                      enabled: !(_busy),
                       onPressed: _busy ? null : _checkStatus,
                       child: const Text('刷新状态'),
                     ),
                   if (_submission != null && _status?.isTerminal != true)
-                    TextButton(
+                    ShadButton.ghost(
+                      enabled: _current && !_busy,
                       onPressed: _current && !_busy ? _cancelSubmission : null,
                       child: const Text('取消本次提交'),
                     ),
                   if (_canReturnToEditing)
-                    OutlinedButton(
+                    ShadButton.outline(
+                      enabled: !(_busy || _confirming),
                       key: const ValueKey('publication-return-editing'),
                       onPressed: _busy || _confirming ? null : _returnToEditing,
                       child: const Text('返回编辑 / 更换封面'),
                     ),
                   if (_status?.isTerminal == true)
-                    TextButton(
+                    ShadButton.ghost(
                       onPressed: _newDraft,
                       child: const Text('发布另一个作品'),
                     ),

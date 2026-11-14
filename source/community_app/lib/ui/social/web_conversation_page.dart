@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../design_system.dart';
 
@@ -257,15 +258,15 @@ class _WebConversationPageState extends State<WebConversationPage>
         context: context,
         builder: (context) => Theme(
           data: _theme(context),
-          child: AlertDialog(
+          child: ShadDialog.alert(
             title: const Text('确认重试发送？'),
-            content: const Text('上次发送结果未确认，消息可能已经送达。建议先刷新核对，重试可能产生重复消息。'),
+            description: const Text('上次发送结果未确认，消息可能已经送达。建议先刷新核对，重试可能产生重复消息。'),
             actions: [
-              TextButton(
+              ShadButton.ghost(
                 onPressed: () => Navigator.pop(context, false),
                 child: const Text('取消'),
               ),
-              FilledButton(
+              ShadButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: const Text('确认重试'),
               ),
@@ -318,14 +319,14 @@ class _WebConversationPageState extends State<WebConversationPage>
     if (message.isMine) {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => ShadDialog.alert(
           title: const Text('撤回这条消息？'),
           actions: [
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(context, false),
               child: const Text('取消'),
             ),
-            TextButton(
+            ShadButton.ghost(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('撤回'),
             ),
@@ -409,10 +410,16 @@ class _WebConversationPageState extends State<WebConversationPage>
           foregroundColor: AetherColors.textPrimary,
           title: Text(widget.peerName, overflow: TextOverflow.ellipsis),
           actions: [
-            IconButton(
-              tooltip: '刷新消息',
-              onPressed: _loading || _sending ? null : _load,
-              icon: const Icon(Icons.refresh),
+            Tooltip(
+              message: '刷新消息',
+              child: ShadButton.ghost(
+                onPressed: _loading || _sending ? null : _load,
+                child: const Icon(Icons.refresh),
+                enabled: !(_loading || _sending),
+                width: 48,
+                height: 48,
+                padding: const EdgeInsets.all(12),
+              ),
             ),
             if (widget.onBlockPeer != null)
               PopupMenuButton<bool>(
@@ -478,29 +485,36 @@ class _WebConversationPageState extends State<WebConversationPage>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: TextField(
-                            key: const ValueKey('conversation-draft'),
-                            controller: _draft,
-                            focusNode: _focus,
-                            readOnly: _sending,
-                            minLines: 1,
-                            maxLines: 5,
-                            maxLength: 600,
-                            textInputAction: TextInputAction.newline,
-                            decoration: InputDecoration(
-                              labelText: '消息',
-                              hintText: '写下您的消息',
-                              border: OutlineInputBorder(),
-                              counterText: '',
-                              errorText: _draft.text.trim().length > 600
-                                  ? '消息过长，请缩短后发送。'
+                          child: Semantics(
+                            label: '消息',
+                            child: ShadInput(
+                              key: const ValueKey('conversation-draft'),
+                              controller: _draft,
+                              focusNode: _focus,
+                              readOnly: _sending,
+                              minLines: 1,
+                              maxLines: 5,
+                              maxLength: 600,
+                              textInputAction: TextInputAction.newline,
+                              top: const Text('消息'),
+                              placeholder: const Text('写下您的消息'),
+                              decoration: ShadDecoration(
+                                hasError: _draft.text.trim().length > 600,
+                              ),
+                              bottom: _draft.text.trim().length > 600
+                                  ? const Text(
+                                      '消息过长，请缩短后发送。',
+                                      style: TextStyle(
+                                        color: AetherColors.danger,
+                                      ),
+                                    )
                                   : null,
+                              onChanged: (_) => setState(() {}),
                             ),
-                            onChanged: (_) => setState(() {}),
                           ),
                         ),
                         const SizedBox(width: 12),
-                        FilledButton(
+                        ShadButton(
                           onPressed:
                               _sending ||
                                   _confirmingRetry ||
@@ -517,6 +531,13 @@ class _WebConversationPageState extends State<WebConversationPage>
                                 ? '重试'
                                 : '发送',
                           ),
+                          enabled:
+                              !(_sending ||
+                                  _confirmingRetry ||
+                                  _loading ||
+                                  _loadFailed ||
+                                  _draft.text.trim().isEmpty ||
+                                  _draft.text.trim().length > 600),
                         ),
                       ],
                     ),
@@ -549,7 +570,7 @@ class _WebConversationPageState extends State<WebConversationPage>
               const SizedBox(height: 8),
               const Text('请稍后重试，草稿仍保留。'),
               const SizedBox(height: 12),
-              OutlinedButton(onPressed: _load, child: const Text('重新加载')),
+              ShadButton.outline(onPressed: _load, child: const Text('重新加载')),
             ],
           ),
         ),
@@ -625,7 +646,7 @@ class _WebConversationPageState extends State<WebConversationPage>
                 ),
                 if (message.isMine &&
                     message.status == WebChatMessageStatus.retryable)
-                  TextButton(
+                  ShadButton.ghost(
                     onPressed:
                         _sending || _loading || _draft.text.trim().isNotEmpty
                         ? null
@@ -634,16 +655,21 @@ class _WebConversationPageState extends State<WebConversationPage>
                             _send();
                           },
                     child: const Text('重试发送'),
+                    enabled:
+                        !(_sending ||
+                            _loading ||
+                            _draft.text.trim().isNotEmpty),
                   ),
                 if (message.status == WebChatMessageStatus.sent &&
                     (message.isMine
                         ? widget.onWithdraw != null
                         : widget.onReport != null))
-                  TextButton(
+                  ShadButton.ghost(
                     onPressed: _actionBusy
                         ? null
                         : () => _messageAction(message),
                     child: Text(message.isMine ? '撤回' : '举报'),
+                    enabled: !_actionBusy,
                   ),
               ],
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../legal/legal_doc_links_row.dart';
@@ -20,11 +21,15 @@ class AuthPolicyConsent extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Checkbox(
-        key: const ValueKey('auth-policy-consent'),
-        value: value,
-        semanticLabel: AppL10n.of(context).authPolicyConsentLabel,
-        onChanged: enabled ? (value) => onChanged(value == true) : null,
+      Semantics(
+        label: AppL10n.of(context).authPolicyConsentLabel,
+        child: ShadCheckbox(
+          key: const ValueKey('auth-policy-consent'),
+          value: value,
+          onChanged: enabled ? (value) => onChanged(value == true) : null,
+          enabled: enabled,
+          checkboxPadding: const EdgeInsets.all(12),
+        ),
       ),
       Expanded(
         child: Padding(

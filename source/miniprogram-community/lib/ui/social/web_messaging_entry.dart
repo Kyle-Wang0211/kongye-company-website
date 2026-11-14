@@ -1,5 +1,7 @@
 import 'community_capabilities.dart';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../auth/current_user.dart';
@@ -206,7 +208,7 @@ class _WebMessagingEntryState extends State<WebMessagingEntry> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text('无法开始对话，请稍后重试。'),
-                    OutlinedButton(
+                    ShadButton.outline(
                       onPressed: () => setState(() {
                         _initialConversation = repository!.openPeer(
                           widget.peerId!,

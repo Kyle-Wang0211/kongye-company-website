@@ -2,8 +2,53 @@
   "font_cache_identity": [
     {
       "original": "fonts/MaterialIcons-Regular.otf",
-      "asset": "fonts/MaterialIcons-Regular.039269cb73033622.otf",
-      "sha256": "039269cb730336228eedfb6ee64d8a5df140271657af6077b8aeb837e43aaf42"
+      "asset": "fonts/MaterialIcons-Regular.adcafe0385fdc12b.otf",
+      "sha256": "adcafe0385fdc12b82f54664d097f3aaf72d2bc1bbc1826871d5962bbfb289ac"
+    },
+    {
+      "original": "packages/shadcn_ui/fonts/Geist%5Bwght%5D.ttf",
+      "asset": "packages/shadcn_ui/fonts/Geist%5Bwght%5D.ab491eb63bca7372.ttf",
+      "sha256": "ab491eb63bca7372be9fa9e7cd511b2fe9d4a602ba59c1e978638ea49cf77461"
+    },
+    {
+      "original": "packages/shadcn_ui/fonts/GeistMono%5Bwght%5D.ttf",
+      "asset": "packages/shadcn_ui/fonts/GeistMono%5Bwght%5D.678ff43c7d3a9b3e.ttf",
+      "sha256": "678ff43c7d3a9b3e971399ea53b3043f98ba51be5a76f4dd6cda61e59a96df05"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/lucide.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/lucide.1c7368504190bc51.ttf",
+      "sha256": "1c7368504190bc51323e76be81620a21b8fd602701bcbe92ad932cc1f898f57c"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w100.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w100.da2712a5bbd45e70.ttf",
+      "sha256": "da2712a5bbd45e70b6833dc693e11ef01ca49f0e8cd55fb01fda21ac1a7d37bf"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w200.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w200.4bd63b986a7ed9c6.ttf",
+      "sha256": "4bd63b986a7ed9c6ee5facfcb9707c0d20c5a53d12f817ed8cd3cad4b77bfebf"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w300.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w300.528e445c720493fd.ttf",
+      "sha256": "528e445c720493fd22490eefe7aa2693250828530aee990dd8be7eda33881745"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w400.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w400.edd52cc6fa23e71a.ttf",
+      "sha256": "edd52cc6fa23e71ab1e68a87c808ca45a0914013bd7e6244682cc78d7e2debf6"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w500.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w500.4494ab9f98185102.ttf",
+      "sha256": "4494ab9f98185102ad7e227dd3b431578e6806f2a6c99830d6003abfcd45f3f6"
+    },
+    {
+      "original": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w600.ttf",
+      "asset": "packages/lucide_icons_flutter/assets/build_font/LucideVariable-w600.9b527d1680308a07.ttf",
+      "sha256": "9b527d1680308a07ce971eb7db76f9801ab1571dd74bc0da596f1f7c64665f6b"
     },
     {
       "original": "packages/cupertino_icons/assets/CupertinoIcons.ttf",
@@ -19,8 +64,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
-  "main_js_sha256": "1ece6730d5558a0a57858aeaf626e281ffee0c636504845ffe2fe802aac56edc",
+  "main_js_sha256": "bfbd3f6c150d45d8bf65e085ce670754fea3cb589c5041dbb6dc070bede0902b",
   "status": "built-local-not-deployed",
-  "source_revision": "5a7e44aff640801f8bb5b8c6067b47efdf75d025",
-  "source_manifest_sha256": "df494f25111b96370aab96a1e1de58d249b5bb0874a99868145e9d4e6edf3749"
+  "source_revision": "0f9ca6a6fe73881b1a8aed2c88e0d54508cb78e1",
+  "source_manifest_sha256": "92c32c820b221b54179e9e106ddbc5ec0135567fa4c840b8347638f229aa2d8a"
 }

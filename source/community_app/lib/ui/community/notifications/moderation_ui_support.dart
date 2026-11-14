@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -85,7 +86,7 @@ class ModerationMessage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           if (retry != null)
-            TextButton(
+            ShadButton.ghost(
               onPressed: retry,
               child: Text(AppL10n.of(context).authRetry),
             ),

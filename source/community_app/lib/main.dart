@@ -24,6 +24,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shadcn_ui/shadcn_ui.dart'
+    show GlobalShadLocalizations, ShadAppBuilder;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'auth/auth_scope.dart';
@@ -499,44 +501,46 @@ class _PocketWorldAppState extends State<PocketWorldApp> {
       child: AnimatedBuilder(
         animation: Listenable.merge([localeNotifier, currentUser]),
         builder: (context, _) {
-          return MaterialApp(
-            key: _navigationIdentity.keyFor(currentUser),
-            title: 'PocketWorld',
-            debugShowCheckedModeBanner: false,
-            scaffoldMessengerKey: rootScaffoldMessengerKey,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: AetherColors.primary,
-                brightness: Brightness.light,
+          return AetherUiScope(
+            backgroundColor: _aetherColdStartBackground,
+            child: MaterialApp(
+              key: _navigationIdentity.keyFor(currentUser),
+              title: 'PocketWorld',
+              debugShowCheckedModeBanner: false,
+              scaffoldMessengerKey: rootScaffoldMessengerKey,
+              theme: aetherTheme(backgroundColor: _aetherColdStartBackground),
+              locale: localeNotifier.locale,
+              localizationsDelegates: const [
+                ...AppL10n.localizationsDelegates,
+                GlobalShadLocalizations.delegate,
+              ],
+              supportedLocales: AppL10n.supportedLocales,
+              home: const _AuthGate(),
+              onGenerateRoute: (settings) =>
+                  communityFavoritesRoute(settings, currentUser) ??
+                  communityMessagingRoute(settings, currentUser) ??
+                  communityAccountRoute(settings, currentUser),
+              // AuthScope wraps the *route content* via builder rather than
+              // sitting inside `home`. Why: `home` is only the FIRST route on
+              // the Navigator. When MePage does `Navigator.push(MaterialPageRoute(
+              // builder: (_) => MeSettingsPage()))`, the pushed route lives
+              // as a sibling of the home route inside the Navigator's overlay
+              // — its BuildContext does NOT walk up through `home`'s subtree,
+              // so `context.getInheritedWidgetOfExactType<AuthScope>()` from
+              // MeSettingsPage's button used to come back null and the
+              // `notifier!` assertion in AuthScope.read crashed the sign-out
+              // gesture (see crash 2026-04-30 in the log:
+              // `AuthScope.read … _SignOutButton.build`). The `builder`
+              // callback is invoked for every route MaterialApp shows, so
+              // wrapping `child` here makes AuthScope available to home AND
+              // every pushed route uniformly.
+              builder: (context, child) => ShadAppBuilder(
+                backgroundColor: _aetherColdStartBackground,
+                builder: (context, shadChild) =>
+                    AuthScope(currentUser: currentUser, child: shadChild!),
+                child: child,
               ),
-              scaffoldBackgroundColor: _aetherColdStartBackground,
-              canvasColor: _aetherColdStartBackground,
-              useMaterial3: true,
             ),
-            locale: localeNotifier.locale,
-            localizationsDelegates: AppL10n.localizationsDelegates,
-            supportedLocales: AppL10n.supportedLocales,
-            home: const _AuthGate(),
-            onGenerateRoute: (settings) =>
-                communityFavoritesRoute(settings, currentUser) ??
-                communityMessagingRoute(settings, currentUser) ??
-                communityAccountRoute(settings, currentUser),
-            // AuthScope wraps the *route content* via builder rather than
-            // sitting inside `home`. Why: `home` is only the FIRST route on
-            // the Navigator. When MePage does `Navigator.push(MaterialPageRoute(
-            // builder: (_) => MeSettingsPage()))`, the pushed route lives
-            // as a sibling of the home route inside the Navigator's overlay
-            // — its BuildContext does NOT walk up through `home`'s subtree,
-            // so `context.getInheritedWidgetOfExactType<AuthScope>()` from
-            // MeSettingsPage's button used to come back null and the
-            // `notifier!` assertion in AuthScope.read crashed the sign-out
-            // gesture (see crash 2026-04-30 in the log:
-            // `AuthScope.read … _SignOutButton.build`). The `builder`
-            // callback is invoked for every route MaterialApp shows, so
-            // wrapping `child` here makes AuthScope available to home AND
-            // every pushed route uniformly.
-            builder: (context, child) =>
-                AuthScope(currentUser: currentUser, child: child!),
           );
         },
       ),

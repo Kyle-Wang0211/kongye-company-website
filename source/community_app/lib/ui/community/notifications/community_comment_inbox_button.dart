@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -105,49 +106,54 @@ class _CommunityCommentInboxButtonState
   }
 
   @override
-  Widget build(BuildContext context) => IconButton(
-    tooltip: AppL10n.of(context).moderationInbox,
-    onPressed: widget.onPressed,
-    icon: Semantics(
-      label: _failed
-          ? AppL10n.of(context).moderationInboxLoadFailedLabel
-          : _unread == true
-          ? AppL10n.of(context).moderationInboxUnreadLabel
-          : _unread == false
-          ? AppL10n.of(context).moderationInboxReadLabel
-          : AppL10n.of(context).moderationInboxNotLoadedLabel,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          const Icon(
-            Icons.notifications_none_outlined,
-            color: AetherColors.primary,
-          ),
-          if (_unread == true)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                key: const Key('comment-inbox-unread'),
-                width: 7,
-                height: 7,
-                decoration: const BoxDecoration(
-                  color: AetherColors.primary,
-                  shape: BoxShape.circle,
+  Widget build(BuildContext context) => ShadTooltip(
+    builder: (_) => Text(AppL10n.of(context).moderationInbox),
+    child: Semantics(
+      label: AppL10n.of(context).moderationInbox,
+      child: ShadIconButton.ghost(
+        onPressed: widget.onPressed,
+        icon: Semantics(
+          label: _failed
+              ? AppL10n.of(context).moderationInboxLoadFailedLabel
+              : _unread == true
+              ? AppL10n.of(context).moderationInboxUnreadLabel
+              : _unread == false
+              ? AppL10n.of(context).moderationInboxReadLabel
+              : AppL10n.of(context).moderationInboxNotLoadedLabel,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const Icon(
+                Icons.notifications_none_outlined,
+                color: AetherColors.primary,
+              ),
+              if (_unread == true)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    key: const Key('comment-inbox-unread'),
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: AetherColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          if (_failed)
-            const Positioned(
-              right: -3,
-              top: -3,
-              child: Icon(
-                Icons.error_outline,
-                size: 11,
-                color: AetherColors.textSecondary,
-              ),
-            ),
-        ],
+              if (_failed)
+                const Positioned(
+                  right: -3,
+                  top: -3,
+                  child: Icon(
+                    Icons.error_outline,
+                    size: 11,
+                    color: AetherColors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     ),
   );

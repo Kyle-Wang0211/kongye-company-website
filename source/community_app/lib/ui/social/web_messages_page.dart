@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../design_system.dart';
 
@@ -94,19 +95,19 @@ class _WebMessagesPageState extends State<WebMessagesPage> {
                             style: AetherTextStyles.displayLarge,
                           ),
                         ),
-                        IconButton(
-                          tooltip: _text('刷新私信', 'Refresh messages'),
-                          onPressed: _request == null || loading
-                              ? null
-                              : _reload,
-                          color: AetherColors.primary,
-                          disabledColor: AetherColors.textTertiary,
-                          style: IconButton.styleFrom(
-                            hoverColor: AetherColors.bgElevated,
-                            focusColor: AetherColors.bgElevated,
-                            highlightColor: AetherColors.border,
+                        Tooltip(
+                          message: _text('刷新私信', 'Refresh messages'),
+                          child: ShadButton.ghost(
+                            onPressed: _request == null || loading
+                                ? null
+                                : _reload,
+                            foregroundColor: AetherColors.primary,
+                            child: const Icon(Icons.refresh_rounded),
+                            enabled: !(_request == null || loading),
+                            width: 48,
+                            height: 48,
+                            padding: const EdgeInsets.all(12),
                           ),
-                          icon: const Icon(Icons.refresh_rounded),
                         ),
                       ],
                     ),
@@ -202,15 +203,10 @@ class _WebMessagesPageState extends State<WebMessagesPage> {
           ),
           if (retry) ...[
             const SizedBox(height: AetherSpacing.lg),
-            OutlinedButton.icon(
+            ShadButton.outline(
               onPressed: _reload,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AetherColors.primary,
-                overlayColor: AetherColors.border,
-                side: const BorderSide(color: AetherColors.borderStrong),
-              ),
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(_text('重试', 'Retry')),
+              leading: const Icon(Icons.refresh_rounded),
+              child: Text(_text('重试', 'Retry')),
             ),
           ],
         ],

@@ -1,7 +1,11 @@
 // Community-only browser entry. Existing community/auth/viewer widgets are reused.
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart'
+    show GlobalShadLocalizations, ShadAppBuilder;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'auth/auth_scope.dart';
 import 'ui/community/public_work_entry.dart';
 import 'ui/community/public_work_opening.dart';
@@ -159,23 +163,7 @@ Future<void> _initialize(
   }
 }
 
-ThemeData communityWebTheme() => ThemeData(
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: AetherColors.primary,
-    dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-    primary: AetherColors.primary,
-    secondary: AetherColors.primarySoft,
-    error: AetherColors.danger,
-  ),
-  textSelectionTheme: const TextSelectionThemeData(
-    cursorColor: AetherColors.primary,
-    selectionColor: Color(0x33111111),
-    selectionHandleColor: AetherColors.primary,
-  ),
-  scaffoldBackgroundColor: AetherColors.bg,
-  canvasColor: AetherColors.bg,
-  useMaterial3: true,
-);
+ThemeData communityWebTheme() => aetherTheme();
 
 class CommunityWebApp extends StatefulWidget {
   const CommunityWebApp({
@@ -275,102 +263,115 @@ class _CommunityWebAppState extends State<CommunityWebApp> {
     notifier: locale,
     child: AnimatedBuilder(
       animation: Listenable.merge([locale, user]),
-      builder: (context, _) => MaterialApp(
-        key: _navigationKey(),
-        navigatorKey: _communityNavigator,
-        navigatorObservers: [_routes, _sidebarRoutes],
-        title: 'PocketWorld',
-        debugShowCheckedModeBanner: false,
-        theme: communityWebTheme(),
-        locale: locale.locale,
-        localizationsDelegates: AppL10n.localizationsDelegates,
-        supportedLocales: AppL10n.supportedLocales,
-        builder: (context, child) => AuthScope(
-          currentUser: user,
-          child: AnimatedBuilder(
-            animation: _sidebarRoutes,
+      builder: (context, _) => AetherUiScope(
+        child: MaterialApp(
+          key: _navigationKey(),
+          navigatorKey: _communityNavigator,
+          navigatorObservers: [_routes, _sidebarRoutes],
+          title: 'PocketWorld',
+          debugShowCheckedModeBanner: false,
+          theme: communityWebTheme(),
+          locale: locale.locale,
+          localizationsDelegates: const [
+            ...AppL10n.localizationsDelegates,
+            GlobalShadLocalizations.delegate,
+          ],
+          supportedLocales: AppL10n.supportedLocales,
+          builder: (context, child) => ShadAppBuilder(
             child: child,
-            builder: (context, navigator) => CommunityNavigationFrame(
-              controller: _navigationController,
-              visible: communitySidebarVisible(
-                _entryUri,
-                _sidebarRoutes.currentRoute,
+            builder: (context, child) => AuthScope(
+              currentUser: user,
+              child: AnimatedBuilder(
+                animation: _sidebarRoutes,
+                child: child,
+                builder: (context, navigator) => CommunityNavigationFrame(
+                  controller: _navigationController,
+                  visible: communitySidebarVisible(
+                    _entryUri,
+                    _sidebarRoutes.currentRoute,
+                  ),
+                  selectedDestination: communitySidebarDestination(
+                    _entryUri,
+                    _sidebarRoutes.currentRoute,
+                    ownerId: user.signedInUser?.id.rawValue,
+                  ),
+                  onHome: () => unawaited(_exitDocument(exitPublicWork)),
+                  onFollowing: () =>
+                      unawaited(_exitDocument(openCommunityFollowing)),
+                  onMyProfile: _openMyProfile,
+                  onMessages: _openMessages,
+                  onSettings: () =>
+                      unawaited(_exitDocument(openCommunitySettings)),
+                  onOpenFiling: () =>
+                      unawaited(_exitDocument(openCommunityFiling)),
+                  child: navigator!,
+                ),
               ),
-              selectedDestination: communitySidebarDestination(
-                _entryUri,
-                _sidebarRoutes.currentRoute,
-                ownerId: user.signedInUser?.id.rawValue,
-              ),
-              onHome: () => unawaited(_exitDocument(exitPublicWork)),
-              onFollowing: () =>
-                  unawaited(_exitDocument(openCommunityFollowing)),
-              onMyProfile: _openMyProfile,
-              onMessages: _openMessages,
-              onSettings: () => unawaited(_exitDocument(openCommunitySettings)),
-              onOpenFiling: () => unawaited(_exitDocument(openCommunityFiling)),
-              child: navigator!,
             ),
           ),
-        ),
-        onGenerateRoute: (settings) =>
-            communityFavoritesRoute(settings, user) ??
-            communityMessagingRoute(settings, user) ??
-            communityAccountRoute(settings, user),
-        home: AnimatedBuilder(
-          animation: Listenable.merge([user, _supabaseClientReady]),
-          builder: (context, _) {
-            final state = user.state;
-            final query = Uri.base.queryParameters;
-            if (!query.containsKey('profile') &&
-                !query.containsKey('work') &&
-                query['publish'] != '1' &&
-                !query.containsKey('auth')) {
-              return _WebsiteHomeEntry(routes: _routes, onExit: widget.onExit);
-            }
-            if (_supabaseClientReady.value &&
-                query.containsKey('work') &&
-                !query.containsKey('profile')) {
-              return PublicWorkEntry(user: user);
-            }
-            // Public profiles use the existing mobile page for guests and
-            // members, once the shared backend initialization has completed.
-            if ((state is CurrentUserSignedIn ||
-                    state is CurrentUserSignedOut) &&
-                Uri.base.queryParameters.containsKey('profile')) {
-              return PublicProfileEntry(user: user);
-            }
-            return switch (state) {
-              CurrentUserSignedIn() =>
-                Uri.base.queryParameters.containsKey('work')
-                    ? PublicWorkEntry(user: user)
-                    : Uri.base.queryParameters['publish'] == '1'
-                    ? const _WebPublicationEntry()
-                    : _WebsiteHomeEntry(
-                        routes: _routes,
-                        onExit: widget.onExit,
-                        completeAuthentication: query.containsKey('auth'),
-                      ),
-              CurrentUserSignedOut() =>
-                Uri.base.queryParameters.containsKey('work')
-                    ? PublicWorkEntry(user: user)
-                    : AuthRootView(
-                        currentUser: user,
-                        initialSignUp:
-                            Uri.base.queryParameters['auth'] == 'signup',
-                      ),
-              CurrentUserServiceUnavailable(:final reason) =>
-                CommunityServiceUnavailableView(
-                  currentUser: user,
-                  reason: reason,
-                ),
-              _ =>
-                Uri.base.queryParameters.containsKey('work')
-                    ? PublicWorkOpening()
-                    : const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      ),
-            };
-          },
+          onGenerateRoute: (settings) =>
+              communityFavoritesRoute(settings, user) ??
+              communityMessagingRoute(settings, user) ??
+              communityAccountRoute(settings, user),
+          home: AnimatedBuilder(
+            animation: Listenable.merge([user, _supabaseClientReady]),
+            builder: (context, _) {
+              final state = user.state;
+              final query = Uri.base.queryParameters;
+              if (!query.containsKey('profile') &&
+                  !query.containsKey('work') &&
+                  query['publish'] != '1' &&
+                  !query.containsKey('auth')) {
+                return _WebsiteHomeEntry(
+                  routes: _routes,
+                  onExit: widget.onExit,
+                );
+              }
+              if (_supabaseClientReady.value &&
+                  query.containsKey('work') &&
+                  !query.containsKey('profile')) {
+                return PublicWorkEntry(user: user);
+              }
+              // Public profiles use the existing mobile page for guests and
+              // members, once the shared backend initialization has completed.
+              if ((state is CurrentUserSignedIn ||
+                      state is CurrentUserSignedOut) &&
+                  Uri.base.queryParameters.containsKey('profile')) {
+                return PublicProfileEntry(user: user);
+              }
+              return switch (state) {
+                CurrentUserSignedIn() =>
+                  Uri.base.queryParameters.containsKey('work')
+                      ? PublicWorkEntry(user: user)
+                      : Uri.base.queryParameters['publish'] == '1'
+                      ? const _WebPublicationEntry()
+                      : _WebsiteHomeEntry(
+                          routes: _routes,
+                          onExit: widget.onExit,
+                          completeAuthentication: query.containsKey('auth'),
+                        ),
+                CurrentUserSignedOut() =>
+                  Uri.base.queryParameters.containsKey('work')
+                      ? PublicWorkEntry(user: user)
+                      : AuthRootView(
+                          currentUser: user,
+                          initialSignUp:
+                              Uri.base.queryParameters['auth'] == 'signup',
+                        ),
+                CurrentUserServiceUnavailable(:final reason) =>
+                  CommunityServiceUnavailableView(
+                    currentUser: user,
+                    reason: reason,
+                  ),
+                _ =>
+                  Uri.base.queryParameters.containsKey('work')
+                      ? PublicWorkOpening()
+                      : const Scaffold(
+                          body: Center(child: CircularProgressIndicator()),
+                        ),
+              };
+            },
+          ),
         ),
       ),
     ),

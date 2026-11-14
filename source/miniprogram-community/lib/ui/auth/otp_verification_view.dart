@@ -22,6 +22,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../../auth/current_user.dart';
@@ -214,12 +215,15 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
       appBar: AppBar(
         backgroundColor: AetherColors.bg,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
+        leading: ShadButton.ghost(
+          onPressed: () => Navigator.of(context).maybePop(),
+          width: 40,
+          height: 40,
+          padding: EdgeInsets.zero,
+          child: const Icon(
             Icons.chevron_left_rounded,
             color: AetherColors.textPrimary,
           ),
-          onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
       body: SafeArea(
@@ -281,13 +285,21 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                     ),
                   const SizedBox(height: AetherSpacing.lg),
                   Center(
-                    child: GestureDetector(
-                      onTap:
+                    child: ShadButton.ghost(
+                      onPressed:
                           (_resendCooldownSec > 0 ||
                               working ||
                               !_hasPolicyConsent)
                           ? null
                           : _resend,
+                      padding: EdgeInsets.zero,
+                      enabled:
+                          ((_resendCooldownSec > 0 ||
+                                  working ||
+                                  !_hasPolicyConsent)
+                              ? null
+                              : _resend) !=
+                          null,
                       child: Text(
                         _resendCooldownSec > 0
                             ? l.otpResendCooldown(_resendCooldownSec)
@@ -314,10 +326,16 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                   ),
                   const SizedBox(height: AetherSpacing.xl),
                   Center(
-                    child: GestureDetector(
-                      onTap: working
+                    child: ShadButton.ghost(
+                      onPressed: working
                           ? null
                           : () => Navigator.of(context).maybePop(),
+                      padding: EdgeInsets.zero,
+                      enabled:
+                          (working
+                              ? null
+                              : () => Navigator.of(context).maybePop()) !=
+                          null,
                       child: Text(
                         l.otpUseAnotherEmail,
                         style: const TextStyle(
