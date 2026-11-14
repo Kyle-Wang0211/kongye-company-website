@@ -146010,7 +146010,7 @@ o=A.aV(o).gaE()==="zh"?"\u66f4\u591a\u8bbe\u7f6e":"More settings"
 p.push(A.bym(c,!0,B.a3f,new A.biQ(d),B.aPH,B.f,new A.biR(d),B.fi,c,o,t.N))}q=A.ek(c,A.ch(p,B.a3,B.i,B.p,0,c),B.C,c,c,B.Vs,c,c,c,c,q,c,c,c)
 p=a0?20:36
 o=A.c8(c,d.at==="works"?A.bJ(B.D,c,c,B.au,1):B.eh,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c)
-o=A.b([A.c3(A.C(a.ga3C()+" "+b.y,c,c,c,c,c,B.bh,c,c,c),o,!0,c,c,c,B.aP6,c,new A.biS(d),B.a0E,c)],n)
+o=A.b([A.c3(A.C(a.ga3C()+" "+b.y,c,c,c,c,c,B.bh,c,c,c),o,!0,c,c,0,B.aP6,c,new A.biS(d),B.a0E,c)],n)
 m=d.c
 m.toString
 m=A.aV(m).gaE()==="zh"?"\u559c\u6b22":"Likes"

@@ -142735,7 +142735,7 @@ o=A.b2(o).gaJ()==="zh"?"\u66f4\u591a\u8bbe\u7f6e":"More settings"
 p.push(A.btY(c,!0,B.a2e,new A.bfW(d),B.aO_,B.f,new A.bfX(d),B.f5,c,o,t.N))}q=A.f0(c,A.cz(p,B.a4,B.l,B.q,0,c),B.F,c,c,B.UZ,c,c,c,c,q,c,c,c)
 p=a0?20:36
 o=A.c7(c,d.at==="works"?A.bD(B.C,c,c,B.at,1):B.ec,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c)
-o=A.c([A.c2(A.G(a.ga3_()+" "+b.x,c,c,c,c,c,B.bm,c,c,c),o,!0,c,c,c,B.aNn,c,new A.bfY(d),B.a0_,c)],m)
+o=A.c([A.c2(A.G(a.ga3_()+" "+b.x,c,c,c,c,c,B.bm,c,c,c),o,!0,c,c,0,B.aNn,c,new A.bfY(d),B.a0_,c)],m)
 n=d.c
 n.toString
 n=A.b2(n).gaJ()==="zh"?"\u559c\u6b22":"Likes"

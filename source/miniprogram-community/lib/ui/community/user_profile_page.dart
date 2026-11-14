@@ -541,6 +541,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 children: [
                   ShadButton.ghost(
                     key: const ValueKey('profile-works-tab'),
+                    height: 0,
                     onPressed: () => setState(() => _selectedTab = 'works'),
                     padding: const EdgeInsets.symmetric(
                       vertical: 20,

@@ -64,8 +64,8 @@
     "PW_COMMUNITY_PROFILES_ENABLED": "true"
   },
   "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
-  "main_js_sha256": "bfbd3f6c150d45d8bf65e085ce670754fea3cb589c5041dbb6dc070bede0902b",
+  "main_js_sha256": "3fa73b095f8fcd6956bb3e84102f6c8a5b38aebbf0ec58b68df0984a18ecd22f",
   "status": "built-local-not-deployed",
-  "source_revision": "0f9ca6a6fe73881b1a8aed2c88e0d54508cb78e1",
-  "source_manifest_sha256": "92c32c820b221b54179e9e106ddbc5ec0135567fa4c840b8347638f229aa2d8a"
+  "source_revision": "1aa2321dd0a06d4020a94722279ce76df55af586",
+  "source_manifest_sha256": "1efd2f301f481b41bb72f9835d1d2c7aa97448a5620e7ee7f464224d88c6ac90"
 }
