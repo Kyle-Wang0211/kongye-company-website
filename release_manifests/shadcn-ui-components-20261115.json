@@ -1,471 +1,31 @@
 {
   "scope": "UI components and monochrome theme only",
-  "base_source": "5a7e44aff640801f8bb5b8c6067b47efdf75d025",
+  "base_source": "d820d4fd91b795ae0490a116b8688b10d8f293e2",
   "files": [
     {
       "path": "community/flutter_bootstrap.js",
-      "sha256": "58657170e4522c9401cf00b1a6de59a36adfbb314af10c4025ce935f2ac22c49",
-      "size": 13178
-    },
-    {
-      "path": "community/main.dart.js_79.part.js",
-      "sha256": "e816498395ded7261566297d64098195699cad833857ebfbb16027e49cfb1960",
-      "size": 1673
-    },
-    {
-      "path": "community/main.dart.js_69.part.js",
-      "sha256": "b025b03dab0dcd15b9027b65e20a4c6dc4da0fb487878bc80f3f0f52ca9a6204",
-      "size": 1797
-    },
-    {
-      "path": "community/main.dart.js_111.part.js",
-      "sha256": "e81eb3ae24a3b76623f3c5ebb0e07ba606ad678f3278e50d575fdf045890ea50",
-      "size": 1438
-    },
-    {
-      "path": "community/main.dart.js_24.part.js",
-      "sha256": "015d9ee77e05238278b388cc95fb7fa37a0fb47ba11132bbaef600c20ae8ccaa",
-      "size": 1420
-    },
-    {
-      "path": "community/main.dart.js_46.part.js",
-      "sha256": "805db53941334d32987b6881bc43c3c237b90ab9ff20085ee5c4115afd052ea8",
-      "size": 1438
-    },
-    {
-      "path": "community/main.dart.js_56.part.js",
-      "sha256": "c2340164abb334d25e39ee36dcb0e96e9af260415b77809760f51ec19c0459bf",
-      "size": 1799
-    },
-    {
-      "path": "community/main.dart.js_7.part.js",
-      "sha256": "84176f314abfed07762fda56ce512ef40e1b3282e8672775a0f958d6a8304ed7",
-      "size": 1742
-    },
-    {
-      "path": "community/main.dart.js_60.part.js",
-      "sha256": "25ba838357be1408b692d45c44755f637af9a707de50cba376ecb9c39bc96e2f",
-      "size": 1409
-    },
-    {
-      "path": "community/main.dart.js_70.part.js",
-      "sha256": "bbd6e1ac9cea24007309b7ada5b2f7e218102fa346ff5a52b49b21f6ff96495e",
-      "size": 1835
-    },
-    {
-      "path": "community/main.dart.js_84.part.js",
-      "sha256": "a2b6ad849fd6662129bb67819f8ee62d2a39c69e14cf5798139e203a6f180b57",
-      "size": 1915
-    },
-    {
-      "path": "community/main.dart.js_94.part.js",
-      "sha256": "b75168311a973492f07e285534683324e61fe282acb75cb69ffa28f381501b9e",
-      "size": 1765
-    },
-    {
-      "path": "community/.last_build_id",
-      "sha256": "7242010825a071bd9b4fc2c49e340b1e35adce74469cd01ca7199f40f24b8cbb",
-      "size": 32
-    },
-    {
-      "path": "community/main.dart.js_108.part.js",
-      "sha256": "9eec315dbe742bc09f256cf0b581f36d123131c328ae78ce34b6de7f12f2afbf",
-      "size": 1821
-    },
-    {
-      "path": "community/main.dart.js_71.part.js",
-      "sha256": "788857b1f449e8db87a0cbaa6d6b544d1b5c82b87382e24adef9e74c392c425f",
-      "size": 1516
-    },
-    {
-      "path": "community/main.dart.js_6.part.js",
-      "sha256": "d83048f76767691b2e93fc2b22f4097dd935d8caad7378cacce259cb3ace3445",
-      "size": 1646
-    },
-    {
-      "path": "community/main.dart.js_13.part.js",
-      "sha256": "e4543f1ab56a60b2d5aaa9a5c1fb1cc7cd02cfe9beeb4a831b6aa0c60455808a",
-      "size": 1786
-    },
-    {
-      "path": "community/main.dart.js_109.part.js",
-      "sha256": "4392189a2cfa36a8bd138f98cc5649235e40f3088232e8fc0f94cf144d632f55",
-      "size": 1750
-    },
-    {
-      "path": "community/main.dart.js_95.part.js",
-      "sha256": "2029e7e70f1d7a092899135a2dce6a16fe543c755f4f34a5f919bcda72458bdd",
-      "size": 1464
-    },
-    {
-      "path": "community/main.dart.js_85.part.js",
-      "sha256": "5ecfcb05457da4b4259315582c58ee83f776df980d774fce67aea681e23b6c1b",
-      "size": 1424
-    },
-    {
-      "path": "community/main.dart.js_78.part.js",
-      "sha256": "37656dd15d1767f37a0059414a477a72f548b56431c004f28854a576bfdc5045",
-      "size": 1757
-    },
-    {
-      "path": "community/main.dart.js_110.part.js",
-      "sha256": "6506a6fe7818f5b08aa293c5cfb81827a6484aa545f8f18f09a2a574b7b54240",
-      "size": 1420
-    },
-    {
-      "path": "community/main.dart.js_100.part.js",
-      "sha256": "7ac87dddbbc155fdd7c9bea33fc102d5a37c827079f7b23eaece2181bfec4568",
-      "size": 1412
-    },
-    {
-      "path": "community/main.dart.js_25.part.js",
-      "sha256": "6e685f156187773c1ecda19fa38c4152b9f3d7245a637a49b0fff0d6f37d8d5f",
-      "size": 1425
-    },
-    {
-      "path": "community/main.dart.js_57.part.js",
-      "sha256": "1a3501269b45a1d2477e0a381511d5af554eb643d33a92e8379503808e84e6e9",
-      "size": 1403
-    },
-    {
-      "path": "community/main.dart.js_47.part.js",
-      "sha256": "847ec17145a6113976ebc3ae28150235b8ee87c9ffdb08fa668ef878fbbfd025",
-      "size": 1447
-    },
-    {
-      "path": "community/main.dart.js_11.part.js",
-      "sha256": "9f3dcb98c96ed13185bcc5f4258b143356107ab1b3ed3fe8d7f39fa2a1a102a9",
-      "size": 1822
-    },
-    {
-      "path": "community/main.dart.js_63.part.js",
-      "sha256": "a7c2fc6aad15e1c808039dbd48a6d5c391d662d5d45b91a59c787f95ccc05e32",
-      "size": 1520
-    },
-    {
-      "path": "community/main.dart.js_73.part.js",
-      "sha256": "20600684584cb74af12ac9ea90ec8e5f7bbd5c11a49d28b2bbb67d2fa5c040c3",
-      "size": 1719
+      "sha256": "8122d1678e460642ce467e1e867fef93d17af0e7b0d805c9b026d1e5338b918b",
+      "size": 13459
     },
     {
       "path": "community/main.dart.js",
-      "sha256": "bfbd3f6c150d45d8bf65e085ce670754fea3cb589c5041dbb6dc070bede0902b",
+      "sha256": "3fa73b095f8fcd6956bb3e84102f6c8a5b38aebbf0ec58b68df0984a18ecd22f",
       "size": 4989187
     },
     {
-      "path": "community/main.dart.js_87.part.js",
-      "sha256": "2ed1d7cc5081428c0daeaf23f54d43239c99d4e07770e5b19dded799fbfecbcc",
-      "size": 1704
-    },
-    {
-      "path": "community/main.dart.js_97.part.js",
-      "sha256": "25d496cc93d0f5a4aa71fe1f65d1a05065b0bcb46b703be690062eeaab4ca3ec",
-      "size": 1419
-    },
-    {
-      "path": "community/main.dart.js_18.part.js",
-      "sha256": "1734d1dbc480168e4d4c3f5cf9da240571faf9c3a723352f59aeff9aae89db5f",
-      "size": 1799
-    },
-    {
-      "path": "community/main.dart.js_55.part.js",
-      "sha256": "a1230b451f65c8e60bfcd260fce76b9531665f052e72bc897ab0683aa0f6c00a",
-      "size": 1465
-    },
-    {
-      "path": "community/main.dart.js_37.part.js",
-      "sha256": "bd29c9b32d6f09805173fcaf3a5ec87c3c8cad10cef75f0f0339fb9aa5b6f495",
-      "size": 1420
-    },
-    {
-      "path": "community/main.dart.js_102.part.js",
-      "sha256": "2dc8a0baade6382cd86bd03749e0e36eb904398077b8d0096483a2d77a8ddfc3",
-      "size": 1919
-    },
-    {
-      "path": "community/main.dart.js_112.part.js",
-      "sha256": "0fea0553f7062e65236ad0d9f65fff6284d3717cabe254606c590ed0d3a64c8f",
-      "size": 1459
-    },
-    {
-      "path": "community/main.dart.js_19.part.js",
-      "sha256": "df15f6c6b6b4d1a93c6e7c61aef2c40f2f7f101b3ac84057bd98d59487d896ae",
-      "size": 1849
-    },
-    {
-      "path": "community/main.dart.js_54.part.js",
-      "sha256": "b2d6c687490e1d63b6c233822c900059b3cba7ab4473368cfa31a84cf96aa07c",
-      "size": 1419
-    },
-    {
-      "path": "community/main.dart.js_44.part.js",
-      "sha256": "52a8055a97ab95f648dc42519dc6044876e7af5631bf0fbe747f7340fb47846b",
-      "size": 1413
-    },
-    {
-      "path": "community/main.dart.js_36.part.js",
-      "sha256": "d874ea5dcb21dbe0c0265afe9c0d3471a17eb23684a0c342fc00992d85a6d4c7",
-      "size": 1881
-    },
-    {
-      "path": "community/main.dart.js_113.part.js",
-      "sha256": "d62b23beee5fe62c73988baebefbdd65a51316073241a22369c1330f325656d8",
-      "size": 1426
-    },
-    {
-      "path": "community/main.dart.js_103.part.js",
-      "sha256": "7fcd2a5e3ab2d128c2eebb79b08e94474b4be79ea8d3780753d50aa1ce0a231b",
-      "size": 1854
-    },
-    {
-      "path": "community/main.dart.js_72.part.js",
-      "sha256": "c1c483cd3af1f60af9953b80a9e4c78c829b4b65f0323b1c13328190ca5001c9",
-      "size": 1745
-    },
-    {
-      "path": "community/main.dart.js_5.part.js",
-      "sha256": "0c4f38c58a8763d625b580116f7540eba39230d9e0cf62d9005d558df714faf4",
-      "size": 1622
-    },
-    {
-      "path": "community/main.dart.js_96.part.js",
-      "sha256": "af5dbfe6a4f83aeb7dfba76d92b095690125c14b27226376b3f1656144afe5db",
-      "size": 1419
-    },
-    {
-      "path": "community/main.dart.js_86.part.js",
-      "sha256": "bfcc9628762cd385e1234bd4d536ec26e2d483b917f585bd1b4880df29361cc3",
-      "size": 1407
-    },
-    {
-      "path": "community/main.dart.js_93.part.js",
-      "sha256": "b37f378db703dfa31604118e9888172b18749e01c034af51845cab3f24407961",
-      "size": 1793
-    },
-    {
-      "path": "community/main.dart.js_48.part.js",
-      "sha256": "32c44873233a01f70676a0f8dcd1905609a98c9dd3eb116b1e0ea60ef44a1347",
-      "size": 1419
-    },
-    {
-      "path": "community/main.dart.js_77.part.js",
-      "sha256": "f354ff28daff46e108bf047e1481aed6ee0933b460f7c97584dc40693a19d351",
-      "size": 1991
-    },
-    {
-      "path": "community/main.dart.js_41.part.js",
-      "sha256": "90339ede35b27e2c8477fb901fce83811843a47045210001ee79d733d691820c",
-      "size": 1412
-    },
-    {
-      "path": "community/main.dart.js_51.part.js",
-      "sha256": "99e9b82800aab5e6f92061c4d49d17166a0b6240e190ed9c03c212955751f9b5",
-      "size": 1625
-    },
-    {
-      "path": "community/main.dart.js_106.part.js",
-      "sha256": "fc7b8e8322c7285dd380400b0599b3fa83b229bd032c4e3f4a73454fe996dc46",
-      "size": 1439
-    },
-    {
-      "path": "community/main.dart.js_33.part.js",
-      "sha256": "1c744130de800053cbaa03ce903a277f1f6c5c875ca93bf9607787cb49bc627a",
-      "size": 1438
-    },
-    {
-      "path": "community/main.dart.js_9.part.js",
-      "sha256": "971c31f4a0009432d7efb99d70f229019bf7ce4f869ae5df3c601aaa66a6968f",
-      "size": 1464
-    },
-    {
       "path": "community/shared-source-build.json",
-      "sha256": "f491d7e04c9e2284997c8ca68ef3cf9f0ba9959a9c9e6ed7fee7831d4db654d2",
+      "sha256": "1c1a7671ec4e37ba521acf0e8adef5d72d0afbad46a2055ba278457e12568a24",
       "size": 3649
     },
     {
-      "path": "community/main.dart.js_50.part.js",
-      "sha256": "63f0b2ea5d20bf678d37874a3f03abc88afe7b698ea0e327599d986bb4897b88",
-      "size": 1762
-    },
-    {
-      "path": "community/main.dart.js_107.part.js",
-      "sha256": "4d2a0edcadcedad72356b478c3e69ea34756c017ad5965a8cf45aa20876f9a09",
-      "size": 1709
-    },
-    {
-      "path": "community/main.dart.js_92.part.js",
-      "sha256": "9b4417a79c1a63012a1ec071b245cf4d8933bf56f58f77bd321810111a89703c",
-      "size": 1438
-    },
-    {
-      "path": "community/main.dart.js_82.part.js",
-      "sha256": "b6651e4d73c3345a20f71b8136ddb608fa7ded63d533b3c10503e5563c607ec0",
-      "size": 1407
-    },
-    {
-      "path": "community/main.dart.js_49.part.js",
-      "sha256": "cb88d149ec6d5d90b402b5fb8cd27376f9594345ec3db8af8397f8eeb6fbd0e7",
-      "size": 1427
-    },
-    {
-      "path": "community/main.dart.js_59.part.js",
-      "sha256": "cab14ff234c1e86cfa4cb92c0eeed3d2a7123eed74d00b0ac58a23baafe5e659",
-      "size": 1436
-    },
-    {
-      "path": "community/main.dart.js_76.part.js",
-      "sha256": "b172d3d795b29d544163dd1b355a9d1f582d6a7399daf014fa3998bac19dc634",
-      "size": 1755
-    },
-    {
-      "path": "community/main.dart.js_66.part.js",
-      "sha256": "c0534e13a5ca18d7ec2b6ed57d27fced729c76f97a4d16a8f847bd312618e20a",
-      "size": 1733
-    },
-    {
-      "path": "community/main.dart.js_1.part.js",
-      "sha256": "0f511bbf30b72d4ceacbb2f5adb94d1d123df2817ea5321fc0703f00b02b7719",
-      "size": 1398
-    },
-    {
-      "path": "community/main.dart.js_20.part.js",
-      "sha256": "a6d5c2169c195a1e465092e45624bb88777c322d9fc8eb0a1a12b4c8ddff0917",
-      "size": 1416
-    },
-    {
-      "path": "community/main.dart.js_30.part.js",
-      "sha256": "11dfa9fb428043369d20503b3fb6d72c2fa18ac5ed8430b7d3631af02cf04854",
-      "size": 1418
-    },
-    {
-      "path": "community/main.dart.js_105.part.js",
-      "sha256": "57dcf42531131c94635189cc6433f20e3ca14feb2ee974566b798eeb378ab46d",
-      "size": 1416
-    },
-    {
-      "path": "community/main.dart.js_99.part.js",
-      "sha256": "fd143ef7f29eb5428246a5cf38b01eded98c61235d06c30dbc2c521f42523ea8",
-      "size": 1416
-    },
-    {
-      "path": "community/main.dart.js_89.part.js",
-      "sha256": "44632a88eb73c436840d6ac549f77c38bdcb7df1925a90cadcbff52737c20fb5",
-      "size": 1416
-    },
-    {
-      "path": "community/main.dart.js_42.part.js",
-      "sha256": "7ca4c1a5f0f42f50b0d6116490f4bcc48418c9c30cb0983d1d222f6fa268569d",
-      "size": 1678
-    },
-    {
-      "path": "community/main.dart.js_52.part.js",
-      "sha256": "ef819b5f43187ab78e42a881135ae7f6134c95df8bc0f86d411029d3fad48ef7",
-      "size": 1712
-    },
-    {
-      "path": "community/main.dart.js_39.part.js",
-      "sha256": "02cdf1ae7a74375821e9f20987ce508365a8b6a9affb374f51bae33f190202a9",
-      "size": 1417
-    },
-    {
-      "path": "community/main.dart.js_29.part.js",
-      "sha256": "ca46463de0ba5a690ea245b448d6f42bbc4a970a42c0ee7d72aa636855c47cf4",
-      "size": 1416
-    },
-    {
-      "path": "community/main.dart.js_80.part.js",
-      "sha256": "815491b1168c41fa973b670a9b9ad13ae8ee9540eafd9487e6c9aec4de122b5e",
-      "size": 1400
-    },
-    {
-      "path": "community/main.dart.js_90.part.js",
-      "sha256": "429e990e8dbeafb71f1114f68364fc32fb3d5df1b446c7dc8379a29b64a19835",
-      "size": 1744
-    },
-    {
-      "path": "community/main.dart.js_74.part.js",
-      "sha256": "aa9c33782432501ea79a04878cbb5808355d436b68149db4a1eff893c294999f",
-      "size": 1464
-    },
-    {
-      "path": "community/main.dart.js_91.part.js",
-      "sha256": "aaa3efb8c5bf421720baff35baab9a77a44ca613e54e830ea87c0eba658b6156",
-      "size": 1424
-    },
-    {
-      "path": "community/main.dart.js_81.part.js",
-      "sha256": "67e1db0e54071227a9cb66266230a3c2981acb84c1dcc67df8c23720e8041f87",
-      "size": 1833
-    },
-    {
-      "path": "community/main.dart.js_75.part.js",
-      "sha256": "8337fa4ef4132bd8ca52e697fece0df64ebceaf1ca156aece7ff6d604b1788cc",
-      "size": 1446
-    },
-    {
-      "path": "community/main.dart.js_65.part.js",
-      "sha256": "dc7ff8326ef5266a50bf8291c11106fc007f303d74529eac0d63633799e174a3",
-      "size": 1787
-    },
-    {
-      "path": "community/main.dart.js_88.part.js",
-      "sha256": "b2c07e1e56773782969b4f8cb992dc210ff1d4f31b938361be030ab7703f7103",
-      "size": 1664
-    },
-    {
-      "path": "community/main.dart.js_98.part.js",
-      "sha256": "b7c92b7d4be4c0e98b576e20185c30a18e4cf6044770d16e075d86fc8035a6df",
-      "size": 1406
-    },
-    {
-      "path": "community/main.dart.js_104.part.js",
-      "sha256": "d33011b858d7a8428e9dbb3027fa7f1c2f59b993b6b85d4095f9c188281c6d5f",
-      "size": 1749
-    },
-    {
-      "path": "community/main.dart.js_43.part.js",
-      "sha256": "93c384860ae253c572e7ce431337f7712b81ef4decfb38bed5fc81a5cac161af",
-      "size": 1436
-    },
-    {
-      "path": "community/assets/NOTICES",
-      "sha256": "ba6dfea23ce864eebc7a3b7c20a0a2bc36cb88d3800282db493b3e51706d1512",
-      "size": 1484682
-    },
-    {
-      "path": "community/assets/FontManifest.json",
-      "sha256": "8dc732b5113b80b0e0292627b2f3ec3c507ab3299fbb6697acb1ce554832acc6",
-      "size": 1694
-    },
-    {
-      "path": "community/assets/AssetManifest.bin.json",
-      "sha256": "5f0642042b552265c73cddb5dabc59d6bbb7821abbca2230814da734a3b691ce",
-      "size": 74514
-    },
-    {
-      "path": "community/assets/AssetManifest.bin",
-      "sha256": "930b6817babdba0e93816dd4515330b12aa0ab0e446d34ffebf898566d9bd768",
-      "size": 55882
-    },
-    {
-      "path": "community/assets/fonts/MaterialIcons-Regular.otf",
+      "path": "community/assets/fonts/MaterialIcons-Regular.adcafe0385fdc12b.otf",
       "sha256": "adcafe0385fdc12b82f54664d097f3aaf72d2bc1bbc1826871d5962bbfb289ac",
       "size": 15644
-    },
-    {
-      "path": "community/assets/packages/shadcn_ui/fonts/Geist%5Bwght%5D.ttf",
-      "sha256": "ab491eb63bca7372be9fa9e7cd511b2fe9d4a602ba59c1e978638ea49cf77461",
-      "size": 168932
     },
     {
       "path": "community/assets/packages/shadcn_ui/fonts/Geist%5Bwght%5D.ab491eb63bca7372.ttf",
       "sha256": "ab491eb63bca7372be9fa9e7cd511b2fe9d4a602ba59c1e978638ea49cf77461",
       "size": 168932
-    },
-    {
-      "path": "community/assets/packages/shadcn_ui/fonts/GeistMono%5Bwght%5D.ttf",
-      "sha256": "678ff43c7d3a9b3e971399ea53b3043f98ba51be5a76f4dd6cda61e59a96df05",
-      "size": 171072
     },
     {
       "path": "community/assets/packages/shadcn_ui/fonts/GeistMono%5Bwght%5D.678ff43c7d3a9b3e.ttf",
@@ -478,29 +38,9 @@
       "size": 2968
     },
     {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/lucide.ttf",
-      "sha256": "1c7368504190bc51323e76be81620a21b8fd602701bcbe92ad932cc1f898f57c",
-      "size": 2968
-    },
-    {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w500.ttf",
-      "sha256": "4494ab9f98185102ad7e227dd3b431578e6806f2a6c99830d6003abfcd45f3f6",
-      "size": 479020
-    },
-    {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w100.ttf",
-      "sha256": "da2712a5bbd45e70b6833dc693e11ef01ca49f0e8cd55fb01fda21ac1a7d37bf",
-      "size": 458652
-    },
-    {
       "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w100.da2712a5bbd45e70.ttf",
       "sha256": "da2712a5bbd45e70b6833dc693e11ef01ca49f0e8cd55fb01fda21ac1a7d37bf",
       "size": 458652
-    },
-    {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w300.ttf",
-      "sha256": "528e445c720493fd22490eefe7aa2693250828530aee990dd8be7eda33881745",
-      "size": 505904
     },
     {
       "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w400.edd52cc6fa23e71a.ttf",
@@ -518,21 +58,6 @@
       "size": 505904
     },
     {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w400.ttf",
-      "sha256": "edd52cc6fa23e71ab1e68a87c808ca45a0914013bd7e6244682cc78d7e2debf6",
-      "size": 479712
-    },
-    {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w600.ttf",
-      "sha256": "9b527d1680308a07ce971eb7db76f9801ab1571dd74bc0da596f1f7c64665f6b",
-      "size": 518328
-    },
-    {
-      "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w200.ttf",
-      "sha256": "4bd63b986a7ed9c6ee5facfcb9707c0d20c5a53d12f817ed8cd3cad4b77bfebf",
-      "size": 501364
-    },
-    {
       "path": "community/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w500.4494ab9f98185102.ttf",
       "sha256": "4494ab9f98185102ad7e227dd3b431578e6806f2a6c99830d6003abfcd45f3f6",
       "size": 479020
@@ -543,469 +68,34 @@
       "size": 501364
     },
     {
+      "path": "community/assets/packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+      "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d",
+      "size": 1472
+    },
+    {
       "path": "miniprogram/flutter_bootstrap.js",
-      "sha256": "00a60c492409a9f7d2639f8c104547b8f91c05ff523c31fd01b83b1d94e894cc",
+      "sha256": "1721a8b16b2d653c165008442e905de0406bf8816cd7719bb9deae7933044173",
       "size": 13090
     },
     {
-      "path": "miniprogram/main.dart.js_79.part.js",
-      "sha256": "71b83fb387b9478d121e7678a1d6855a2200c3935394e85341db009a51938fb1",
-      "size": 1673
-    },
-    {
-      "path": "miniprogram/main.dart.js_69.part.js",
-      "sha256": "81c22678864508c7b80b2915b37f5e3b0733fcaca8ba261d0fb407c426e1e532",
-      "size": 1797
-    },
-    {
-      "path": "miniprogram/main.dart.js_111.part.js",
-      "sha256": "9d52a6b74e2cddf15179045b58452ac84bf9680c3226313ad3c3d04fe3c8bf3a",
-      "size": 1438
-    },
-    {
-      "path": "miniprogram/main.dart.js_24.part.js",
-      "sha256": "2321280d367c31d33661378d0ae4524c57d87ea370ce8936704c29ac39fc1a6e",
-      "size": 1420
-    },
-    {
-      "path": "miniprogram/main.dart.js_46.part.js",
-      "sha256": "ebc99d62d1dc58f9decf17a712b019a390a87915aa53c76c5ff2efb01ad773b8",
-      "size": 1438
-    },
-    {
-      "path": "miniprogram/main.dart.js_56.part.js",
-      "sha256": "66b2f6ddac58da545909b09ec554c75927f0f9d40c90e5294b4437c41204d6ac",
-      "size": 1799
-    },
-    {
-      "path": "miniprogram/main.dart.js_7.part.js",
-      "sha256": "6192847de2fb93a717adb3ee525546afba928a007fe9d6a2eda9eb168c6d9908",
-      "size": 1742
-    },
-    {
-      "path": "miniprogram/main.dart.js_60.part.js",
-      "sha256": "77d25e8a9c6d14763cbe5ce3634433128e3436e55d1dae2ff1f92eadbd3129a9",
-      "size": 1409
-    },
-    {
-      "path": "miniprogram/main.dart.js_70.part.js",
-      "sha256": "ad7185506571fcbdfe442a543c15afa0255d4bf4de5c4943d2df6fdc73d1e060",
-      "size": 1835
-    },
-    {
-      "path": "miniprogram/main.dart.js_84.part.js",
-      "sha256": "976defc79ce3d5e287b24f385fde6be3f6467bea6e6da84cb95d1a2e98a5b278",
-      "size": 1915
-    },
-    {
-      "path": "miniprogram/main.dart.js_94.part.js",
-      "sha256": "e836905c796320de57f0195e4feaf0466b2c0cc2126ec8809ace491ad58e6d77",
-      "size": 1765
-    },
-    {
-      "path": "miniprogram/.last_build_id",
-      "sha256": "d718ab39e533af4591d8f06d52d5d4b1205c91f44b4e547d2add49f3c2c3257b",
-      "size": 32
-    },
-    {
-      "path": "miniprogram/main.dart.js_108.part.js",
-      "sha256": "9cb432ef1819f580a6da13a4ab38faf917e95d689c99512822082f07233b2f21",
-      "size": 1821
-    },
-    {
-      "path": "miniprogram/main.dart.js_71.part.js",
-      "sha256": "cdde0db8dbaed60b85767240e592299003b580e886d7f10d22e4a8509485bc2f",
-      "size": 1516
-    },
-    {
-      "path": "miniprogram/main.dart.js_6.part.js",
-      "sha256": "1de19eec768bceaf7abc687826f66bd9f537bbf2a69ec80a7fd79c6ceeec0c43",
-      "size": 1646
-    },
-    {
-      "path": "miniprogram/main.dart.js_13.part.js",
-      "sha256": "5717362b360794ce2ac989640834fd4052db66aced174d957939ed8ae9c87d47",
-      "size": 1786
-    },
-    {
-      "path": "miniprogram/main.dart.js_109.part.js",
-      "sha256": "7f330aee8d5d983be2aa8eaafc13df0b4781f30f9d4fd6ec2f0eb3ac283736a1",
-      "size": 1750
-    },
-    {
-      "path": "miniprogram/main.dart.js_95.part.js",
-      "sha256": "6aa593ff2a99f5ab443425f0eebc2e372f46416b13f448246c67fcb43c9f92d8",
-      "size": 1464
-    },
-    {
-      "path": "miniprogram/main.dart.js_85.part.js",
-      "sha256": "c0c2b69be9ee7a98eb2139fd7c71f42b9b27f1b162e76106fec5de634dce5ada",
-      "size": 1424
-    },
-    {
-      "path": "miniprogram/main.dart.js_78.part.js",
-      "sha256": "11a9433e7c34c84bcc4de17451d27b91913708371cbec1e4937c467bfc87573e",
-      "size": 1757
-    },
-    {
-      "path": "miniprogram/main.dart.js_110.part.js",
-      "sha256": "1ef61338d66f0376d05b8a22ca9c4c279a4dce87ccfc0351343f22395ea77dc2",
-      "size": 1420
-    },
-    {
-      "path": "miniprogram/main.dart.js_100.part.js",
-      "sha256": "5e1e39c8f5a0c4457cde1148cc22e39cf683d019330cc57bb14ce1e5f95d9fff",
-      "size": 1412
-    },
-    {
-      "path": "miniprogram/main.dart.js_25.part.js",
-      "sha256": "3b2563972e16b77d971842750d7a3bd5610a9f473a315f738fb171a7258545a1",
-      "size": 1425
-    },
-    {
-      "path": "miniprogram/main.dart.js_57.part.js",
-      "sha256": "490eb76a755eef3d12352377b9462a1715da81350731469c86987a47d55656da",
-      "size": 1403
-    },
-    {
-      "path": "miniprogram/main.dart.js_47.part.js",
-      "sha256": "5a396471cfaf6349946e16159a590e183c5fd0498bbf13a311d2b7fa12ccce0b",
-      "size": 1447
-    },
-    {
-      "path": "miniprogram/main.dart.js_11.part.js",
-      "sha256": "6802a760f0a9538257421b51302b664555b0eeb8ad1b3bef708fca26286ea38e",
-      "size": 1822
-    },
-    {
-      "path": "miniprogram/main.dart.js_63.part.js",
-      "sha256": "0c48b98539efc63173a272766d8159b99b4f3eedaec83d401701982257d6b32c",
-      "size": 1520
-    },
-    {
-      "path": "miniprogram/main.dart.js_73.part.js",
-      "sha256": "63583499b5b120f572d5360cbfe5190c32a8f3f5f8f0cc6b02b49350cf7353e5",
-      "size": 1719
-    },
-    {
       "path": "miniprogram/main.dart.js",
-      "sha256": "3cc3389b2d205e6036426d29152e61831ef6c99b29b3ca6a812e21bd11db30d8",
+      "sha256": "233b643041064193cfd31882b6b6353a3b961119bc669c90aee50ce8b78758b9",
       "size": 5092227
     },
     {
-      "path": "miniprogram/main.dart.js_87.part.js",
-      "sha256": "24bb83c2d9dbf5d35e31b158e9bed07f8e2ba11215b44ec120018a82c517c198",
-      "size": 1704
-    },
-    {
-      "path": "miniprogram/main.dart.js_97.part.js",
-      "sha256": "e105bbf247e1b1b7977026e22bfdec1806b2b097dc4a016e5a2c82bd507b44da",
-      "size": 1419
-    },
-    {
-      "path": "miniprogram/main.dart.js_18.part.js",
-      "sha256": "a1e5267bf0641bcaacf179b20d1264ff85c58b558e6ea372d5dc3222bc32fe08",
-      "size": 1799
-    },
-    {
-      "path": "miniprogram/main.dart.js_55.part.js",
-      "sha256": "dbdbea8af582ca3ddb4f1f0b6568a89745ce6398c922b65a965fc694e2fa988c",
-      "size": 1465
-    },
-    {
-      "path": "miniprogram/main.dart.js_37.part.js",
-      "sha256": "1f60b185685d7317672f8e07a5a3c4a702b68668d25deddd7b1aeb3b9af607d4",
-      "size": 1420
-    },
-    {
-      "path": "miniprogram/main.dart.js_102.part.js",
-      "sha256": "31b0345dfe9102c935906d78e3857ff5958d4bbf56f869152bd904bccf24e5fb",
-      "size": 1919
-    },
-    {
-      "path": "miniprogram/main.dart.js_112.part.js",
-      "sha256": "0cd47bcb3a286c87259f92b644a85724ccd86e9395166438abd449b6f1bf19a6",
-      "size": 1459
-    },
-    {
-      "path": "miniprogram/main.dart.js_19.part.js",
-      "sha256": "c22a3ef25f80f460a789869c374e4c0a427dd8b00ccb57d1c809d0c38bf569e7",
-      "size": 1849
-    },
-    {
-      "path": "miniprogram/main.dart.js_54.part.js",
-      "sha256": "52d93bf909e6d477a70f061a6ccf050cba12d9c940e65baac63304de8870bbc6",
-      "size": 1419
-    },
-    {
-      "path": "miniprogram/main.dart.js_44.part.js",
-      "sha256": "3908bca4a923e1d3f8b9733ce9d653da82bd567034ad520cae331d51eedd1de5",
-      "size": 1413
-    },
-    {
-      "path": "miniprogram/main.dart.js_36.part.js",
-      "sha256": "59bef21905d93d7e5d10d6b672512f7b31698df2e15aa36bb22305d068a075f3",
-      "size": 1881
-    },
-    {
-      "path": "miniprogram/main.dart.js_113.part.js",
-      "sha256": "28f574d49e0602c52563a79cdc61c3766a4040d6bcf41515b15a1b8a4d3574e2",
-      "size": 1426
-    },
-    {
-      "path": "miniprogram/main.dart.js_103.part.js",
-      "sha256": "7ddf127a18a06010a3245ea740ad808a9833f3209d1895ce62ab68e620d644ac",
-      "size": 1854
-    },
-    {
-      "path": "miniprogram/main.dart.js_72.part.js",
-      "sha256": "02083cd7da9a27430efccec0a03bc6d0dde3f6b6f7af52dd9a0d0eb4337bc9b0",
-      "size": 1745
-    },
-    {
-      "path": "miniprogram/main.dart.js_5.part.js",
-      "sha256": "002a1efb791eb2501a4a4cf8650ab9c580bc87eb073cfddedbf9a73c4dd4d6ff",
-      "size": 1622
-    },
-    {
-      "path": "miniprogram/main.dart.js_96.part.js",
-      "sha256": "ae3ea697882badb7cdeb1a0f89f47512c395d0d7e21d058661d8feb7e343cd38",
-      "size": 1419
-    },
-    {
-      "path": "miniprogram/main.dart.js_86.part.js",
-      "sha256": "97c22874353efec352aa2da45e02cf34a4220cf2416b7d4ec3c922be4587ef4d",
-      "size": 1407
-    },
-    {
-      "path": "miniprogram/main.dart.js_93.part.js",
-      "sha256": "74fb840a5a06e052182551f66678a78a6845433f10f8d27ab624dc7aaf5ff45c",
-      "size": 1793
-    },
-    {
-      "path": "miniprogram/main.dart.js_48.part.js",
-      "sha256": "1ec67bf39ed13228fcdeb399ff528422f7e6e81269c8f5f93235d45ff4c131b0",
-      "size": 1419
-    },
-    {
-      "path": "miniprogram/main.dart.js_77.part.js",
-      "sha256": "e6b882235e6a41e5118a37e1fd249b5a803a6a317578dd671abaaf337c5f4faf",
-      "size": 1991
-    },
-    {
-      "path": "miniprogram/main.dart.js_41.part.js",
-      "sha256": "b4f9d5fc0d809f07aebb1f886bd9a6b26d49ad863e68dcf851466016f1983193",
-      "size": 1412
-    },
-    {
-      "path": "miniprogram/main.dart.js_51.part.js",
-      "sha256": "fb4778318ccbf91cd6e1daf74715d63c66336bfc1b7893744a7dd53293b4544e",
-      "size": 1625
-    },
-    {
-      "path": "miniprogram/main.dart.js_106.part.js",
-      "sha256": "f3e28cf8d1eb6ab04a6258a076be6733f4ef3d93465f12a8367969abc6b4cd5b",
-      "size": 1439
-    },
-    {
-      "path": "miniprogram/main.dart.js_33.part.js",
-      "sha256": "49b0b2b1050245d13971c56e548dd12bbcf480a3881319017b760fa95d35cf95",
-      "size": 1438
-    },
-    {
-      "path": "miniprogram/main.dart.js_9.part.js",
-      "sha256": "0ff177dd7cf4e00638e9bcb8d397e6484e733502b1a81b6c4b059ee9b9654924",
-      "size": 1464
-    },
-    {
       "path": "miniprogram/shared-source-build.json",
-      "sha256": "f13797b8068dd28d1da989b0b37b5051cef8069739dff392a146ae9e922cba06",
+      "sha256": "6ca3bd27ea778a6b00612908934bdf545cd1035272e1d8f3b2ec9adcc0a49a2a",
       "size": 3681
     },
     {
-      "path": "miniprogram/main.dart.js_50.part.js",
-      "sha256": "4c74b73ba3da8ee214152d36fcb389332be4337ff8320c68a0bbf9812f6d0f07",
-      "size": 1762
-    },
-    {
-      "path": "miniprogram/main.dart.js_107.part.js",
-      "sha256": "a7894786c79b6be9db37068e71fc1ceeed9b9f8b920e347f48af1ff7e05f2743",
-      "size": 1709
-    },
-    {
-      "path": "miniprogram/main.dart.js_92.part.js",
-      "sha256": "b4d0018f3636424b1df0081c8d140c28d3d4a5ce1ad4f9a4ed88ae4b56bed6f9",
-      "size": 1438
-    },
-    {
-      "path": "miniprogram/main.dart.js_82.part.js",
-      "sha256": "9c5008265b240702dc4014f47973670bd193f59b008d04a931bc9389595382b8",
-      "size": 1407
-    },
-    {
-      "path": "miniprogram/main.dart.js_49.part.js",
-      "sha256": "6b2eeb321a47fc265a816e837138c3e6cfb7125513f84360841ad3a18524f670",
-      "size": 1427
-    },
-    {
-      "path": "miniprogram/main.dart.js_59.part.js",
-      "sha256": "249b920e4d10fc86b724bb15895d9477673ab05b7d59d66a4840afed005a60f0",
-      "size": 1436
-    },
-    {
-      "path": "miniprogram/main.dart.js_76.part.js",
-      "sha256": "91bce64a1097d3805df3d08fc44c3ea55f230e0ca2ea3d4e646651c3a7802a06",
-      "size": 1755
-    },
-    {
-      "path": "miniprogram/main.dart.js_66.part.js",
-      "sha256": "6e0650c80f2914cb0a8b88fc2d2a30849f089231209740b828c6c95d456b1a2a",
-      "size": 1733
-    },
-    {
-      "path": "miniprogram/main.dart.js_1.part.js",
-      "sha256": "af336656f3707467a64f843e72ec5d6ccd8b5d37c04e59afaa2a936e60f50674",
-      "size": 1398
-    },
-    {
-      "path": "miniprogram/main.dart.js_20.part.js",
-      "sha256": "6909e0011bdb669e1ebcf7e498fe98928138a8b3274020d448cb3d40881739be",
-      "size": 1416
-    },
-    {
-      "path": "miniprogram/main.dart.js_30.part.js",
-      "sha256": "1260975615bff77c87ce38066e9386ac6596a0b70a366957874d4c1c7566cbc0",
-      "size": 1418
-    },
-    {
-      "path": "miniprogram/main.dart.js_105.part.js",
-      "sha256": "a6cca5d1beb89660965f360934b2cb21487896eddab793f4822b728f1da1e8bc",
-      "size": 1416
-    },
-    {
-      "path": "miniprogram/main.dart.js_99.part.js",
-      "sha256": "78d08d06e0e9b33f014972c7493555d814f7db00fadfebfc203d482fb7387461",
-      "size": 1416
-    },
-    {
-      "path": "miniprogram/main.dart.js_89.part.js",
-      "sha256": "16b4380f1cddf98dc808eaa2befefb724542bbec35d6305371702df5bc7ba12b",
-      "size": 1416
-    },
-    {
-      "path": "miniprogram/main.dart.js_42.part.js",
-      "sha256": "a068ef430ac8170bebec64d98983f99ebc4931becdb64f58bca7f058abf3d42a",
-      "size": 1678
-    },
-    {
-      "path": "miniprogram/main.dart.js_52.part.js",
-      "sha256": "47e02020b0e6832fe2d3528bfcf4e4c37df824d36c8601626183541ad31ad998",
-      "size": 1712
-    },
-    {
-      "path": "miniprogram/main.dart.js_39.part.js",
-      "sha256": "1ecf6cb5df20cf536b05f9e45629cd0ffcf812489ce014ac6b249ecdc66af9c0",
-      "size": 1417
-    },
-    {
-      "path": "miniprogram/main.dart.js_29.part.js",
-      "sha256": "d0fbd084df8ed9f7ea75cfb8794a6cd7aa72d9fc04f3c1b9724533f0ef5d497f",
-      "size": 1416
-    },
-    {
-      "path": "miniprogram/main.dart.js_80.part.js",
-      "sha256": "b8015f75d42bd5f493d98e870a5aaa039390d76c03bfbb97d4bfa7b0b570e783",
-      "size": 1400
-    },
-    {
-      "path": "miniprogram/main.dart.js_90.part.js",
-      "sha256": "f0d985d7e0e4897d9f41d5fbf6ae2301ca9b7a2356ab5fe7d026387609aa499a",
-      "size": 1744
-    },
-    {
-      "path": "miniprogram/main.dart.js_74.part.js",
-      "sha256": "a8911056c2735ebb9e7e4b95022696ffdbb79dd7dc71da70062567b27e0bd911",
-      "size": 1464
-    },
-    {
-      "path": "miniprogram/main.dart.js_91.part.js",
-      "sha256": "9715f768ac1adef93a0798c0f89efa60e0fc081fc992a07a80d3243c2c62e575",
-      "size": 1424
-    },
-    {
-      "path": "miniprogram/main.dart.js_81.part.js",
-      "sha256": "94335becf1c2943dc6437c80b60501459cbbe1e381c865df232ae3eaca9dfb08",
-      "size": 1833
-    },
-    {
-      "path": "miniprogram/main.dart.js_75.part.js",
-      "sha256": "fa0ad6d2de0b29cd6e88897573d23170d5533343d32bf39c8be76b68dd6d55b4",
-      "size": 1446
-    },
-    {
-      "path": "miniprogram/main.dart.js_65.part.js",
-      "sha256": "470e382a2e673759d8db90de38b1142922e88f9c763e43c27c7d9e7b75c393a6",
-      "size": 1787
-    },
-    {
-      "path": "miniprogram/main.dart.js_88.part.js",
-      "sha256": "4be8530d654b6289f871d1a99b1cb344a14eb4f3a4906c848f30769e919625a0",
-      "size": 1664
-    },
-    {
-      "path": "miniprogram/main.dart.js_98.part.js",
-      "sha256": "5b1b1af4ddfe2257b0a2398d125479ba54869b96a644c81b086c5d166a08b145",
-      "size": 1406
-    },
-    {
-      "path": "miniprogram/main.dart.js_104.part.js",
-      "sha256": "d239cfa108487ee5acb28628a6706471c91c13dec418238d51a89078db3f65cd",
-      "size": 1749
-    },
-    {
-      "path": "miniprogram/main.dart.js_43.part.js",
-      "sha256": "1e675f9d94bbe74e34bdcd28b9714b5921546b370787c2330bf6c18b767e1628",
-      "size": 1436
-    },
-    {
-      "path": "miniprogram/assets/NOTICES",
-      "sha256": "ba6dfea23ce864eebc7a3b7c20a0a2bc36cb88d3800282db493b3e51706d1512",
-      "size": 1484682
-    },
-    {
-      "path": "miniprogram/assets/FontManifest.json",
-      "sha256": "f52bec1cd6f8664dbfdd7f930b891416e1894e72214c6f554455b7102c9eb2f9",
-      "size": 1694
-    },
-    {
-      "path": "miniprogram/assets/AssetManifest.bin.json",
-      "sha256": "54fc9b2e47f6fa46d33e707524a7e1de5e1b609503f5ce819ed13053d6bc06a6",
-      "size": 72046
-    },
-    {
-      "path": "miniprogram/assets/AssetManifest.bin",
-      "sha256": "d4874f5854806f991af248e8e4467c0ef1ca22ca4035304bd06286bac4db6937",
-      "size": 54032
-    },
-    {
-      "path": "miniprogram/assets/fonts/MaterialIcons-Regular.otf",
+      "path": "miniprogram/assets/fonts/MaterialIcons-Regular.3ab6b67e5484a9f5.otf",
       "sha256": "3ab6b67e5484a9f518f39ca05eca6523dae4169d65e4298bd158abbdbfcc9057",
       "size": 17800
-    },
-    {
-      "path": "miniprogram/assets/packages/shadcn_ui/fonts/Geist%5Bwght%5D.ttf",
-      "sha256": "ab491eb63bca7372be9fa9e7cd511b2fe9d4a602ba59c1e978638ea49cf77461",
-      "size": 168932
     },
     {
       "path": "miniprogram/assets/packages/shadcn_ui/fonts/Geist%5Bwght%5D.ab491eb63bca7372.ttf",
       "sha256": "ab491eb63bca7372be9fa9e7cd511b2fe9d4a602ba59c1e978638ea49cf77461",
       "size": 168932
-    },
-    {
-      "path": "miniprogram/assets/packages/shadcn_ui/fonts/GeistMono%5Bwght%5D.ttf",
-      "sha256": "678ff43c7d3a9b3e971399ea53b3043f98ba51be5a76f4dd6cda61e59a96df05",
-      "size": 171072
     },
     {
       "path": "miniprogram/assets/packages/shadcn_ui/fonts/GeistMono%5Bwght%5D.678ff43c7d3a9b3e.ttf",
@@ -1018,29 +108,9 @@
       "size": 2968
     },
     {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/lucide.ttf",
-      "sha256": "1c7368504190bc51323e76be81620a21b8fd602701bcbe92ad932cc1f898f57c",
-      "size": 2968
-    },
-    {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w500.ttf",
-      "sha256": "4494ab9f98185102ad7e227dd3b431578e6806f2a6c99830d6003abfcd45f3f6",
-      "size": 479020
-    },
-    {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w100.ttf",
-      "sha256": "da2712a5bbd45e70b6833dc693e11ef01ca49f0e8cd55fb01fda21ac1a7d37bf",
-      "size": 458652
-    },
-    {
       "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w100.da2712a5bbd45e70.ttf",
       "sha256": "da2712a5bbd45e70b6833dc693e11ef01ca49f0e8cd55fb01fda21ac1a7d37bf",
       "size": 458652
-    },
-    {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w300.ttf",
-      "sha256": "528e445c720493fd22490eefe7aa2693250828530aee990dd8be7eda33881745",
-      "size": 505904
     },
     {
       "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w400.edd52cc6fa23e71a.ttf",
@@ -1058,21 +128,6 @@
       "size": 505904
     },
     {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w400.ttf",
-      "sha256": "edd52cc6fa23e71ab1e68a87c808ca45a0914013bd7e6244682cc78d7e2debf6",
-      "size": 479712
-    },
-    {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w600.ttf",
-      "sha256": "9b527d1680308a07ce971eb7db76f9801ab1571dd74bc0da596f1f7c64665f6b",
-      "size": 518328
-    },
-    {
-      "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w200.ttf",
-      "sha256": "4bd63b986a7ed9c6ee5facfcb9707c0d20c5a53d12f817ed8cd3cad4b77bfebf",
-      "size": 501364
-    },
-    {
       "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w500.4494ab9f98185102.ttf",
       "sha256": "4494ab9f98185102ad7e227dd3b431578e6806f2a6c99830d6003abfcd45f3f6",
       "size": 479020
@@ -1081,12 +136,21 @@
       "path": "miniprogram/assets/packages/lucide_icons_flutter/assets/build_font/LucideVariable-w200.4bd63b986a7ed9c6.ttf",
       "sha256": "4bd63b986a7ed9c6ee5facfcb9707c0d20c5a53d12f817ed8cd3cad4b77bfebf",
       "size": 501364
+    },
+    {
+      "path": "miniprogram/assets/packages/cupertino_icons/assets/CupertinoIcons.3d90c370aa4cf00d.ttf",
+      "sha256": "3d90c370aa4cf00dc57ee2b902f6652147c0f81e03e483df584a9c08b1687c9d",
+      "size": 1472
     }
   ],
+  "status": "published",
+  "base_main_js": {
+    "community": "bfbd3f6c150d45d8bf65e085ce670754fea3cb589c5041dbb6dc070bede0902b",
+    "miniprogram": "3cc3389b2d205e6036426d29152e61831ef6c99b29b3ca6a812e21bd11db30d8"
+  },
   "community": {
-    "source_commit": "0f9ca6a6fe73881b1a8aed2c88e0d54508cb78e1",
-    "source_ui_files": 36,
-    "artifact_delta_files": 108,
+    "source_commit": "1aa2321dd0a06d4020a94722279ce76df55af586",
+    "artifact_delta_files": 14,
     "build": {
       "font_cache_identity": [
         {
@@ -1153,16 +217,15 @@
         "PW_COMMUNITY_PROFILES_ENABLED": "true"
       },
       "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
-      "main_js_sha256": "bfbd3f6c150d45d8bf65e085ce670754fea3cb589c5041dbb6dc070bede0902b",
+      "main_js_sha256": "3fa73b095f8fcd6956bb3e84102f6c8a5b38aebbf0ec58b68df0984a18ecd22f",
       "status": "built-local-not-deployed",
-      "source_revision": "0f9ca6a6fe73881b1a8aed2c88e0d54508cb78e1",
-      "source_manifest_sha256": "92c32c820b221b54179e9e106ddbc5ec0135567fa4c840b8347638f229aa2d8a"
+      "source_revision": "1aa2321dd0a06d4020a94722279ce76df55af586",
+      "source_manifest_sha256": "1efd2f301f481b41bb72f9835d1d2c7aa97448a5620e7ee7f464224d88c6ac90"
     }
   },
   "miniprogram": {
-    "source_commit": "d8f590a1a25f9d7d723ee9f9151c66e88b470453",
-    "source_ui_files": 36,
-    "artifact_delta_files": 108,
+    "source_commit": "46b1c3df54f85ed0f1190bd27364b706398fa19c",
+    "artifact_delta_files": 14,
     "build": {
       "font_cache_identity": [
         {
@@ -1230,11 +293,23 @@
         "PW_COMMUNITY_PROFILES_ENABLED": "true"
       },
       "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
-      "main_js_sha256": "3cc3389b2d205e6036426d29152e61831ef6c99b29b3ca6a812e21bd11db30d8",
+      "main_js_sha256": "233b643041064193cfd31882b6b6353a3b961119bc669c90aee50ce8b78758b9",
       "status": "built-local-not-deployed",
-      "source_revision": "d8f590a1a25f9d7d723ee9f9151c66e88b470453",
-      "source_manifest_sha256": "f1036b82eeb064704682fc562afd0bce2c25f178fdb646d9acb43cc4f52a7dc4"
+      "source_revision": "46b1c3df54f85ed0f1190bd27364b706398fa19c",
+      "source_manifest_sha256": "7244323de92b9da5caa8f9e6a7a6110bfd6cfb233c9c54fcb01720a4e410c088"
     }
   },
-  "status": "prepared-not-published"
+  "source_commit": "76492185bbcfb2cfc4706be142385864837cd4b0",
+  "cloud_invoke": "t-bj07349xvlyzf9c",
+  "remote_release": "/data/www/kongye-web/releases/20261115-shadcn-ui-components-r2",
+  "verified_live_receipts": {
+    "community": {
+      "main_js_sha256": "3fa73b095f8fcd6956bb3e84102f6c8a5b38aebbf0ec58b68df0984a18ecd22f",
+      "source_revision": "1aa2321dd0a06d4020a94722279ce76df55af586"
+    },
+    "miniprogram": {
+      "main_js_sha256": "233b643041064193cfd31882b6b6353a3b961119bc669c90aee50ce8b78758b9",
+      "source_revision": "46b1c3df54f85ed0f1190bd27364b706398fa19c"
+    }
+  }
 }
