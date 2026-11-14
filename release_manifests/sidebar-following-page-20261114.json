@@ -1,0 +1,48 @@
+{
+  "source_commit": "8b222339cafbcbcbdacaeadac6b5c73a1ed68141",
+  "scope": [
+    "web homepage sidebar navigation",
+    "web following page with followed users and latest works"
+  ],
+  "files": [
+    {
+      "path": "index.html",
+      "base_sha256": "92272040c127572c42b186fd5bb617d7b1a0538055ab36d6862363a7383309f0",
+      "sha256": "9a73723b8e5f671aee410b8e8ab5017d36ac36ec9211c2f6953c47eef94bab4e"
+    },
+    {
+      "path": "community-shell.css",
+      "base_sha256": "272f2084c1b53583be09a340b85d202a77c5d933df58b65e5f2a02b7006c3cc3",
+      "sha256": "780a4f007f33443cbad0f54ddbb689dc8bf06d1b48204aa0711a3d5b6cfb8fc1"
+    },
+    {
+      "path": "community-feed.js",
+      "base_sha256": "1afb4e13d86de87b0e1cfb44acc9947bf6a089f6a5b6a7899153f64e23c4a824",
+      "sha256": "e78845054960d706ca78a743a5e12f19dee6475ac4fbe2e69ae315da21547289"
+    },
+    {
+      "path": "community-following.mjs",
+      "base_sha256": "6c7a894835f80d434e77dccf2cd3e52d62693449be44bce5eb0ac329d3cfebfb",
+      "sha256": "f3a99e0e72e1561ae6938e9f135780b600a7865cec380d23b5e01c4611108a55"
+    }
+  ],
+  "status": "published",
+  "baseline_commit": "0654bf0",
+  "baseline_remote_release": "/data/www/kongye-web/releases/20261114-activity-window-gestures-r1",
+  "remote_release": "/data/www/kongye-web/releases/20261114-sidebar-following-page-r1",
+  "remote_receipt": "/data/www/kongye-web/deployment-records/20261114-sidebar-following-page-r1/result.json",
+  "cloud_assistant_invoke": "t-bj0733jgs782v40",
+  "verification": {
+    "syntax": "passed",
+    "cloud_exit_code": 0,
+    "normal_sidebar_navigation": "passed",
+    "header_navigation_links": 0,
+    "following_open_dialogs": 0,
+    "visible_followed_users": 1,
+    "visible_followed_works": 9
+  },
+  "deployment_notes": [
+    "Corrected a command string escaping error before any website change",
+    "Transferred the exact source payload through Cloud Assistant after the server GitHub connection was reset"
+  ]
+}
