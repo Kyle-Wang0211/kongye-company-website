@@ -1,12 +1,12 @@
-import {installCommunitySearch} from './community-search.mjs?v=rds-pg-trgm-20261112-v1';
+import {installCommunitySearch} from './community-search.mjs?v=search-results-users-20261113-v1';
 import {attachCommunityMasonry} from './community-masonry.mjs?v=natural-covers-20261110-v2';
-import {accountClientReady,getAccountClient} from './community-account.mjs?v=account-restore-20261109-v2';
+import {accountClientReady,getAccountClient} from './community-account.mjs?v=search-results-users-20261113-v1';
 import {feedUrl,workUrl,authorUrl,assetUrl,publicationCoverAspect,checkModel,formatCount,publishedLabel,modelUrl,translatedError,t,currentLocale,localizeElement,initSiteLocale,localeReady,localeEvent} from './community-data.mjs?v=account-library-20261106-v44';
 import {legacyWorkIds,workCovers} from './community-work-links.mjs?v=rds-web-20261104-7931926b3d74';
 import {createPublicAvatarReader} from './community-public-avatar.mjs?v=rds-web-20261104-7931926b3d74';
 const grid=document.querySelector('#community-grid'),status=document.querySelector('#feed-status'),more=document.querySelector('#feed-more');
 attachCommunityMasonry(grid);
-let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,authorReadRevision=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
+let config,cursor,paging,busy=false,shareResolved=false,pageFailed=false,authorEpoch=0,authorReadRevision=0,refreshPending=false,refreshTimer,refreshFailed=false,lastFeedRead=0;const cards=new Map(),searchCards=new Map();const seen=new Set(),authors=new Map(),authorRequests=new Map(),authorNodes=new Map(),authorFailures=new Set();
 let viewerId = null, viewerGeneration = 0, authRevision = 0;
 let accountBound = false, accountConnecting;
 let publicOrder = [], ownPublicWorks = [], ownRequest;
@@ -88,10 +88,6 @@ function changeDiscoveryFilters(category = activeCategory) {
   renderDiscoveryControls();
   drainRefresh();
 }
-searchForm.addEventListener('submit', event => {
-  event.preventDefault();
-  changeDiscoveryFilters();
-});
 searchInput.addEventListener('input', () => { clearSearch.hidden = searchInput.value.length === 0; });
 clearSearch.addEventListener('click', () => {
   searchInput.value = '';
@@ -291,7 +287,7 @@ async function readAuthors(rows){
   syncAuthorNameRefresh();
  }
 }
-function cardFor(work){
+function cardFor(work,collection=cards){
  const card=document.createElement('article');card.className='community-card';
  const open=document.createElement('button');open.type='button';open.className='community-open';localizeElement(open,'siteViewWork',{title:work.title||t('siteUntitled')},'aria-label');
  const picture=document.createElement('div');picture.className='community-picture';
@@ -328,7 +324,17 @@ function cardFor(work){
  const heart=document.createElement('span');heart.className='community-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♡';like.append(heart);
  const count=document.createElement('span');count.textContent=formatCount(Number.isSafeInteger(work.likes_count)&&work.likes_count>0?work.likes_count:0);like.append(count);
  row.append(avatar,author,like);card.append(open,row);
- cards.set(work.id,{card,work,author,avatar,like});syncAuthorNameRefresh();return card;
+ collection.set(work.id,{card,work,author,avatar,like});syncAuthorNameRefresh();return card;
+}
+function clearSearchResults(container){
+ for(const entry of searchCards.values()){
+  const nodes=authorNodes.get(entry.work.user_id);
+  if(nodes){for(const node of nodes)if(node.author===entry.author)nodes.delete(node);if(!nodes.size)authorNodes.delete(entry.work.user_id);}
+ }
+ for(const avatar of container.querySelectorAll('.community-avatar,.following-avatar')){
+  avatarObservers.get(avatar)?.disconnect();avatarObservers.delete(avatar);avatarTokens.delete(avatar);
+ }
+ searchCards.clear();syncAuthorNameRefresh();
 }
 function loadingShells(){
  const shells=[];
@@ -352,7 +358,12 @@ async function load(){
  try{
  config??=await fetch('community-config.json',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error();return r.json();});
  if(config.origin!=='https://api.kongye.space')throw translatedError('siteConfigUnavailable');
- installCommunitySearch({getClient:getAccountClient,getConfig:()=>config,onOpenWork:openWork});
+ installCommunitySearch({
+  getClient:getAccountClient,getConfig:()=>config,createCard:work=>cardFor(work,searchCards),
+  attachWorkGrid:attachCommunityMasonry,clearResults:clearSearchResults,
+  renderUserAvatar:(avatar,user)=>renderAvatar(avatar,user.id,user),getViewerId:()=>viewerId,
+  onWorkCardsRendered:rows=>{for(let i=0;i<rows.length;i+=12)void readAuthors(rows.slice(i,i+12));syncAuthorNameRefresh();}
+ });
  const rows=await readFeed(cursor,filters);if(revision!==filterRevision)return;lastFeedRead=Date.now();
  for(const shell of shells)shell.remove();
  for(const work of rows){if(!publicOrder.includes(work.id))publicOrder.push(work.id);if(seen.has(work.id))continue;const card=cardFor(work);seen.add(work.id);grid.append(card);}
@@ -422,8 +433,7 @@ function stopAuthorNameRefresh(){
  authorNameChannels.clear();
 }
 function invalidateWorkAuthor(workId){
- const entry=cards.get(workId);
- if(!entry||!entry.card.isConnected||document.visibilityState==='hidden')return;
+ if(document.visibilityState==='hidden'||![cards.get(workId),searchCards.get(workId)].some(entry=>entry?.card.isConnected))return;
  // Keep covers, work models and card ordering while revalidating names only.
  revalidateAuthorNames();
 }
@@ -434,7 +444,7 @@ function syncAuthorNameRefresh(){
  authorNameConnecting=getAccountClient().then(client=>{
   if(epoch!==authorNameEpoch||authorNamesSuspended||document.visibilityState==='hidden')return;
   authorNameClient=client;
-  const workIds=new Set([...cards].filter(([,entry])=>entry.card.isConnected).map(([id])=>id));
+  const workIds=new Set([...cards,...searchCards].filter(([,entry])=>entry.card.isConnected).map(([id])=>id));
   for(const [id,channel] of authorNameChannels){
    if(!workIds.has(id)){authorNameChannels.delete(id);void client.removeChannel(channel);}
   }

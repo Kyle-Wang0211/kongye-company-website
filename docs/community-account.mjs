@@ -1,5 +1,5 @@
-import {localizeElement,localeReady} from './site-l10n.mjs?v=account-library-20261106-v44';
-import {avatarDataUrl,readAccount} from './community-account-data.mjs?v=account-restore-20261109-v2';
+import {localizeElement,localeReady,currentLocale,localeEvent} from './site-l10n.mjs?v=account-library-20261106-v44';
+import {avatarDataUrl,readAccount} from './community-account-data.mjs?v=search-results-users-20261113-v1';
 const nav=document.querySelector('#account-nav'),summary=document.querySelector('#account-summary'),actions=document.querySelector('#account-actions');
 const lifetime=86400000,storageKey='pw-current-account-presentation-rds-v1';
 let publishLink,signingOut=false;
@@ -7,7 +7,7 @@ let client,revision=0,displayedId=null,pending,scheduled=false,rerun=false,start
 const cache=new Map();
 const accountMenu=document.querySelector('#account-menu');
 const libraryLifetime=60000;
-let closeTimer,menuGeneration=0,menuName,menuAvatar,followingCount,followersCount;
+let closeTimer,menuGeneration=0,menuName,menuNumber,menuAvatar,followingCount,followersCount;
 let countNodes={},libraryCache,libraryPending;
 function countText(value){return Number.isSafeInteger(value)&&value>=0?String(value):'—';}
 function renderLibraryCounts(row){
@@ -119,7 +119,10 @@ function render(account,src){
   summary.replaceChildren();actions.replaceChildren();
   const profileLink=document.createElement('a');profileLink.href='community/?profile='+encodeURIComponent(account.id);profileLink.className='account-profile-card';
   menuAvatar=document.createElement('span');menuAvatar.className='account-card-avatar account-avatar-pending';menuAvatar.setAttribute('aria-hidden','true');
-  menuName=document.createElement('span');menuName.className='account-card-name';profileLink.append(menuAvatar,menuName);actions.append(profileLink);
+  const identity=document.createElement('span');identity.className='account-card-identity';
+  menuName=document.createElement('span');menuName.className='account-card-name';
+  menuNumber=document.createElement('small');menuNumber.className='account-card-number';menuNumber.hidden=true;
+  identity.append(menuName,menuNumber);profileLink.append(menuAvatar,identity);actions.append(profileLink);
   const stats=document.createElement('div');stats.className='account-social-counts';
   for(const [kind,key] of [['following','socialFollowing'],['followers','socialFollowers']]){
    const stat=document.createElement('span');stat.className='account-social-stat';
@@ -140,6 +143,10 @@ function render(account,src){
  const name=summary.querySelector('.community-account-name');
  for(const node of [name,menuName]){
   if(account.name){delete node.dataset.i18n;node.textContent=account.name;}else localizeElement(node,'siteAccount');
+ }
+ if(menuNumber){
+  menuNumber.dataset.number=account.public_account_number||'';menuNumber.hidden=!account.public_account_number;
+  menuNumber.textContent=(currentLocale()==='zh'?'窗后城号 ':'ID ')+(account.public_account_number||'');
  }
  followingCount.textContent=countText(account.following_count);followersCount.textContent=countText(account.followers_count);
  if(src){
@@ -246,3 +253,5 @@ function start(){
 export function getAccountClient(){return client?Promise.resolve(client):start();}
 export const accountClientReady=start();
 void accountClientReady.catch(retry);
+
+window.addEventListener(localeEvent,()=>{if(menuNumber?.dataset.number)menuNumber.textContent=(currentLocale()==='zh'?'窗后城号 ':'ID ')+menuNumber.dataset.number;});
