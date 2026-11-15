@@ -1,0 +1,9 @@
+name: pw_shared_auth
+description: Shared PocketWorld authentication UI parts with host authentication adapters.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
