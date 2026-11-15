@@ -10,6 +10,8 @@ import '../../community/social_profile_models.dart';
 import '../../community/social_profile_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
+import '../../util/qr_scan_launch_stub.dart'
+    if (dart.library.js_interop) '../../util/qr_scan_launch_web.dart';
 import 'profile_work_grid.dart';
 import 'user_report_page.dart';
 
@@ -265,8 +267,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       Navigator.of(context).maybePop();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l.profileBlockFailed)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.profileBlockFailed)));
     }
   }
 
@@ -517,6 +520,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     ],
                   ),
                 ),
+                if (_isMine && qrScanAvailable)
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_scanner),
+                    color: AetherColors.textPrimary,
+                    tooltip: _label('扫一扫', 'Scan QR code'),
+                    onPressed: openQrScanner,
+                  ),
                 if (_isMine && widget.accountActions.isNotEmpty)
                   PopupMenuButton<String>(
                     key: const ValueKey('profile-account-menu'),
