@@ -813,7 +813,6 @@ class SupabaseAuthServiceImpl
 class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
   _SupabasePhonePasswordRecovery(this._client, this._mapAuthApi);
 
-  static const _proofLifetime = Duration(minutes: 10);
   final SupabaseClient _client;
   final AuthErrorKind Function(AuthApiException) _mapAuthApi;
   Future<void> _tail = Future<void>.value();
@@ -822,7 +821,6 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
   String? _requestedPhone;
   String? _verifiedUserId;
   String? _verifiedPhone;
-  Stopwatch? _proofAge;
   bool _completed = false;
 
   String _canonicalPhone(String value) {
@@ -841,8 +839,6 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
   void _invalidateProof() {
     _verifiedUserId = null;
     _verifiedPhone = null;
-    _proofAge?.stop();
-    _proofAge = null;
   }
 
   Future<void> _run(Future<void> Function() operation) {
@@ -908,16 +904,12 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
         }
         _verifiedUserId = user.id;
         _verifiedPhone = canonical;
-        _proofAge = Stopwatch()..start();
       });
 
   @override
   Future<void> setPassword(String password) => _run(() async {
     final session = _client.auth.currentSession;
-    final age = _proofAge;
     if (_verifiedUserId == null ||
-        age == null ||
-        age.elapsed >= _proofLifetime ||
         session == null ||
         session.isExpired ||
         session.user.id != _verifiedUserId ||
@@ -962,7 +954,6 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
 class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
   _SupabaseEmailPasswordRecovery(this._client, this._mapAuthApi);
 
-  static const _proofLifetime = Duration(minutes: 10);
   final SupabaseClient _client;
   final AuthErrorKind Function(AuthApiException) _mapAuthApi;
   Future<void> _tail = Future<void>.value();
@@ -971,7 +962,6 @@ class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
   String? _requestedEmail;
   String? _verifiedUserId;
   String? _verifiedEmail;
-  Stopwatch? _proofAge;
   bool _completed = false;
 
   String _canonicalEmail(String value) {
@@ -990,8 +980,6 @@ class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
   void _invalidateProof() {
     _verifiedUserId = null;
     _verifiedEmail = null;
-    _proofAge?.stop();
-    _proofAge = null;
   }
 
   Future<void> _run(Future<void> Function() operation) {
@@ -1056,16 +1044,12 @@ class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
         }
         _verifiedUserId = user.id;
         _verifiedEmail = canonical;
-        _proofAge = Stopwatch()..start();
       });
 
   @override
   Future<void> setPassword(String password) => _run(() async {
     final session = _client.auth.currentSession;
-    final age = _proofAge;
     if (_verifiedUserId == null ||
-        age == null ||
-        age.elapsed >= _proofLifetime ||
         session == null ||
         session.isExpired ||
         session.user.id != _verifiedUserId ||
