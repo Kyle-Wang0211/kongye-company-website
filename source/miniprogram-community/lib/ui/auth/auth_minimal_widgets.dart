@@ -266,14 +266,11 @@ class LabeledField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
+          label,
           softWrap: true,
           maxLines: null,
-          style: TextStyle(
+          style: ShadTheme.of(context).textTheme.small.copyWith(
             fontSize: labelFontSize,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 2.5,
-            color: AetherColors.textTertiary,
           ),
         ),
         const SizedBox(height: 4),
@@ -290,11 +287,7 @@ class LabeledField extends StatelessWidget {
           autocorrect: !disableInputAssist,
           enableSuggestions: !disableInputAssist,
           textCapitalization: TextCapitalization.none,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: AetherColors.textPrimary,
-          ),
+
           leading: leading,
           trailing: trailing,
         ),
@@ -324,48 +317,22 @@ class MinimalCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = enabled
-        ? AetherColors.textPrimary
-        : AetherColors.textTertiary;
-    return ShadButton.ghost(
+    return ShadButton(
       onPressed: enabled ? onTap : null,
-      padding: EdgeInsets.zero,
       enabled: enabled,
-      height: 36,
       width: double.infinity,
       expands: true,
-      child: SizedBox(
-        height: 36,
-        child: Center(
-          child: working
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AetherColors.textPrimary,
-                    ),
-                  ),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 3,
-                        color: color,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Icon(Icons.arrow_forward_rounded, size: 18, color: color),
-                  ],
-                ),
-        ),
-      ),
+      trailing: working ? null : const Icon(Icons.arrow_forward_rounded, size: 18),
+      child: working
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AetherColors.bgCanvas),
+              ),
+            )
+          : Text(title),
     );
   }
 }
@@ -396,30 +363,14 @@ class MinimalLink extends StatelessWidget {
     final color = emphasis == MinimalLinkEmphasis.medium
         ? AetherColors.textSecondary
         : AetherColors.textTertiary;
-    final fontSize = emphasis == MinimalLinkEmphasis.medium ? 12.0 : 11.0;
-    final letterSpacing = emphasis == MinimalLinkEmphasis.medium ? 2.5 : 2.0;
     return ShadButton.ghost(
       onPressed: onTap,
-      padding: EdgeInsets.zero,
       enabled: onTap != null,
-      height: 28,
       width: double.infinity,
       expands: true,
-      child: SizedBox(
-        height: 28,
-        child: Center(
-          child: Text(
-            title.toUpperCase().replaceAll('?', '').replaceAll('？', ''),
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w700,
-              letterSpacing: letterSpacing,
-              color: onTap == null
-                  ? AetherColors.textTertiary.withValues(alpha: 0.6)
-                  : color,
-            ),
-          ),
-        ),
+      child: Text(
+        title.replaceAll('?', '').replaceAll('？', ''),
+        style: TextStyle(color: onTap == null ? null : color),
       ),
     );
   }

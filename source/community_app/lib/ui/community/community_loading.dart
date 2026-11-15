@@ -28,8 +28,7 @@ double communityAuthorRowHeight(BuildContext context) =>
 
 double communityTitleHeight(BuildContext context) =>
     MediaQuery.textScalerOf(context).scale(kCommunityTitleTextStyle.fontSize!) *
-    kCommunityTitleTextStyle.height! *
-    2;
+    kCommunityTitleTextStyle.height!;
 
 double communityInformationHeight(BuildContext context) =>
     12 + communityTitleHeight(context) + 4 + communityAuthorRowHeight(context);

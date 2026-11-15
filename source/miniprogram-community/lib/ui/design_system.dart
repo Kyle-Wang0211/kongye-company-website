@@ -590,9 +590,7 @@ class _DashedBorderPainter extends CustomPainter {
 
 // ─── Shared small components ────────────────────────────────────────
 
-/// Black pill button (primary action). Figma phase can restyle but
-/// component contract stays: icon (optional) + label, full-width
-/// friendly, 56pt tall.
+/// Shared shadcn primary action with an optional icon and full-width support.
 class AetherPrimaryButton extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -612,20 +610,14 @@ class AetherPrimaryButton extends StatelessWidget {
         onPressed: onTap,
         enabled: onTap != null,
         width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
-        height: 56,
-        decoration: ShadDecoration(
-          border: ShadBorder(radius: BorderRadius.circular(AetherRadii.lg)),
-        ),
         leading: icon == null ? null : Icon(icon, size: 18),
-        gap: AetherSpacing.sm,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         child: Text(label),
       ),
     );
   }
 }
 
-/// Outlined secondary button, same height rhythm as primary.
+/// Shared shadcn outlined secondary action.
 class AetherSecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
@@ -638,13 +630,7 @@ class AetherSecondaryButton extends StatelessWidget {
       builder: (context, constraints) => ShadButton.outline(
         onPressed: onTap,
         enabled: onTap != null,
-        backgroundColor: AetherColors.bgCanvas,
         width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
-        height: 48,
-        decoration: ShadDecoration(
-          border: ShadBorder(radius: BorderRadius.circular(AetherRadii.md)),
-        ),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         child: Text(label),
       ),
     );

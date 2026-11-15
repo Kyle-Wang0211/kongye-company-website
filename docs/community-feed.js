@@ -344,7 +344,7 @@ function loadingShells(container=grid,count=12){
   const picture=document.createElement('div');picture.className='community-picture is-loading';
   const information=document.createElement('div');information.className='skeleton-information';
   const title=document.createElement('div');title.className='skeleton-title';
-  for(let line=0;line<2;line++){const bar=document.createElement('div');bar.className='skeleton-title-line';title.append(bar);}
+  for(let line=0;line<1;line++){const bar=document.createElement('div');bar.className='skeleton-title-line';title.append(bar);}
   const row=document.createElement('div');row.className='skeleton-author-row';
   const avatar=document.createElement('div');avatar.className='skeleton-avatar';
   const author=document.createElement('div');author.className='skeleton-author';

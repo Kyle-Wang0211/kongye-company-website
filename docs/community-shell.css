@@ -55,7 +55,7 @@
 /* Shared cover proportions, upstream shortest-column placement. */
 .community-shell .community-grid{--community-columns:2;--community-gutter:22px}
 .community-shell .community-grid.is-masonry{display:block;position:relative}
-.community-shell .community-grid>.community-card{--community-card-info-height:73.8px}
+.community-shell .community-grid>.community-card{--community-card-info-height:56.9px}
 .community-grid.is-masonry>.community-card,.community-grid.is-masonry>.community-skeleton{width:calc((100% - (var(--community-columns) - 1) * var(--community-gutter)) / var(--community-columns));margin-bottom:var(--community-gutter)}
 @media(max-width:600px){.community-shell .community-grid{--community-gutter:16px}}
 @media(min-width:1450px){.community-shell .community-grid{--community-columns:5;grid-template-columns:repeat(5,minmax(0,1fr))}}

@@ -78,7 +78,7 @@ html.community-light #work-dialog iframe{background:#000}
 /* Shared community card metadata and matching loading geometry. */
 .community-card,.community-skeleton{
   --community-card-radius:4px;
-  --community-card-info-height:73.8px;
+  --community-card-info-height:56.9px;
   --community-card-info-padding:6px 8px;
   --community-card-info-background:#f7f7f7;
   --community-card-author-gap:0;
@@ -93,7 +93,7 @@ html.community-light #work-dialog iframe{background:#000}
   overflow:hidden;
   border-radius:var(--community-card-radius);
 }
-.community-open>.community-card-title{position:static;margin:0;height:43.8px;padding:6px 8px 4px;color:var(--white);background:var(--community-card-info-background);text-align:left;font-size:var(--community-card-title-size);font-weight:600;line-height:var(--community-card-title-line-height);text-shadow:none}
+.community-open>.community-card-title{position:static;margin:0;height:auto;min-height:0;padding:6px 8px 4px;color:var(--white);background:var(--community-card-info-background);text-align:left;font-size:var(--community-card-title-size);font-weight:600;line-height:var(--community-card-title-line-height);text-shadow:none}
 .community-author-row{box-sizing:border-box;height:30px;margin:0;padding:0 8px 6px;gap:var(--community-card-author-gap);background:var(--community-card-info-background)}
 .community-avatar{width:var(--community-card-avatar-size);height:var(--community-card-avatar-size);margin-right:4px}
 .community-like{flex:none;font-size:11px;font-weight:600;margin-left:2px;padding:var(--community-card-like-padding);gap:3px}
@@ -106,7 +106,7 @@ html.community-light #work-dialog iframe{background:#000}
 .community-skeleton .community-picture.is-loading{border:0;border-radius:0}
 .community-skeleton .skeleton-information{height:var(--community-card-info-height);padding:var(--community-card-info-padding);background:var(--community-card-info-background)}
 .community-skeleton .skeleton-title:after{content:none}
-.community-skeleton .skeleton-title{display:flex;flex-direction:column;justify-content:space-around;height:33.8px;margin:0 0 4px;width:100%;background:transparent;animation:none}
+.community-skeleton .skeleton-title{display:flex;flex-direction:column;justify-content:space-around;height:16.9px;margin:0 0 4px;width:100%;background:transparent;animation:none}
 .community-skeleton .skeleton-title-line{height:13px;width:100%;border-radius:var(--community-skeleton-radius)}
 .community-skeleton .skeleton-title-line:last-child{width:65%}
 .community-skeleton .skeleton-author-row{display:flex;align-items:center;gap:0;height:24px}

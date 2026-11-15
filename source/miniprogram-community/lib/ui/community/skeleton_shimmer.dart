@@ -168,7 +168,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
   }
 }
 
-/// Matches the cover, two-line title, author and like row.
+/// Matches the cover, title, author and like row.
 class SkeletonWorkCard extends StatelessWidget {
   final bool animate;
 
@@ -220,25 +220,13 @@ class SkeletonWorkCard extends StatelessWidget {
                 children: [
                   SizedBox(
                     height: communityTitleHeight(context),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: SkeletonBox(animate: animate, height: 13),
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: FractionallySizedBox(
-                              widthFactor: 0.65,
-                              child: SkeletonBox(animate: animate, height: 13),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SkeletonBox(
+                        animate: animate,
+                        width: double.infinity,
+                        height: 13,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),

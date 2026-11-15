@@ -366,10 +366,7 @@ class _WorkCardState extends State<WorkCard> {
                   ),
                   KeyedSubtree(
                     key: ValueKey('work-info-${_work.id}'),
-                    child: SizedBox(
-                      height: communityInformationHeight(context),
-                      child: _cardInformation(),
-                    ),
+                    child: _cardInformation(),
                   ),
                 ],
               ),
@@ -387,15 +384,12 @@ class _WorkCardState extends State<WorkCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: communityTitleHeight(context),
-            child: Text(
-              _work.title,
-              key: ValueKey('work-cover-title-${_work.id}'),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: kCommunityTitleTextStyle,
-            ),
+          Text(
+            _work.title,
+            key: ValueKey('work-cover-title-${_work.id}'),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: kCommunityTitleTextStyle,
           ),
           const SizedBox(height: 4),
           SizedBox(

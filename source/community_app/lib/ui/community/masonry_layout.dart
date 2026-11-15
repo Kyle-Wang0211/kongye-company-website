@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
-import 'community_loading.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../design_system.dart';
 import 'masonry_policy.dart';
 
-/// Aligned community rows; name retained for existing callers.
+/// Community cards flow by their rendered cover and metadata height.
 class CommunityMasonry extends StatelessWidget {
   const CommunityMasonry({
     super.key,
@@ -24,9 +24,6 @@ class CommunityMasonry extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final columns = constraints.maxWidth >= 900 ? 4 : 2;
-      final width =
-          (constraints.maxWidth - kCommunitySideInset * 2 - (columns - 1) * 4) /
-          columns;
       return CustomScrollView(
         scrollCacheExtent: const ScrollCacheExtent.pixels(2000),
         physics: const AlwaysScrollableScrollPhysics(
@@ -50,19 +47,12 @@ class CommunityMasonry extends StatelessWidget {
               kCommunitySideInset,
               footer == null ? 140 : 12,
             ),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: 6,
-                crossAxisSpacing: 4,
-                mainAxisExtent:
-                    width / kCommunityLoadingCoverAspectRatio +
-                    communityInformationHeight(context),
-              ),
-              delegate: SliverChildBuilderDelegate(
-                itemBuilder,
-                childCount: itemCount,
-              ),
+            sliver: SliverMasonryGrid.count(
+              crossAxisCount: columns,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 4,
+              itemBuilder: itemBuilder,
+              childCount: itemCount,
             ),
           ),
           if (footer != null)

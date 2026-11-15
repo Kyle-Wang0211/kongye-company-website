@@ -84,12 +84,7 @@ class AuthField extends StatelessWidget {
       enableSuggestions: !shouldDisableInputAssistance,
       autofillHints: autofillHints,
       textCapitalization: TextCapitalization.none,
-      style: const TextStyle(fontSize: 15, color: AetherColors.textPrimary),
       leading: leading,
-      placeholderStyle: const TextStyle(
-        color: AetherColors.textTertiary,
-        fontSize: 15,
-      ),
     );
     final labeled = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -132,34 +127,18 @@ class AuthPrimaryButton extends StatelessWidget {
     return ShadButton(
       onPressed: effective ? onTap : null,
       enabled: effective,
-      height: 52,
       width: double.infinity,
-      padding: EdgeInsets.zero,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          color: effective ? AetherColors.primary : AetherColors.textTertiary,
-          borderRadius: BorderRadius.circular(AetherRadii.md),
-        ),
-        alignment: Alignment.center,
-        child: isWorking
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+      expands: true,
+      child: isWorking
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
-      ),
+            )
+          : Text(title),
     );
   }
 }
