@@ -61,11 +61,19 @@
   "capabilities": {
     "PW_COMMUNITY_FAVORITES_ENABLED": "true",
     "PW_COMMUNITY_MESSAGING_READY": "true",
-    "PW_COMMUNITY_PROFILES_ENABLED": "true"
+    "PW_COMMUNITY_PROFILES_ENABLED": "true",
+    "PW_NATIVE_EMAIL_SMTP_READY": "true"
   },
   "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
-  "main_js_sha256": "3fa73b095f8fcd6956bb3e84102f6c8a5b38aebbf0ec58b68df0984a18ecd22f",
+  "main_js_sha256": "f920ba87fbf02213a3f194b1fbb343c8b41f95a4c0fa5bcd91ff3c1196a0abb8",
   "status": "built-local-not-deployed",
-  "source_revision": "7c8a0230bef7a1a4e3baacb92df00bca33cc3220",
-  "source_manifest_sha256": "195220f8164001d23741d708f44e72deb2ed506e89f635fb906104740b20935d"
+  "source_revision": "ca494dc1eecb47f50ca640207f4870744efb68ac",
+  "source_manifest_sha256": "02c01ce791e0695ac05cc3896f4a125d13b4816f9a93c07c43734f190231a37b",
+  "product_source_commit": "24351cd99573dcb49a635a1206481be61599633a",
+  "shared_auth": {
+    "path": "source/shared_auth",
+    "sha256": "9766c46a082fab6579c6fc7491fceefd3e5a1adc308bf65b82721fb2d5b4fa37",
+    "ui_parts": 11,
+    "web_qr": true
+  }
 }

@@ -2,8 +2,8 @@
   "font_cache_identity": [
     {
       "original": "fonts/MaterialIcons-Regular.otf",
-      "asset": "fonts/MaterialIcons-Regular.3ab6b67e5484a9f5.otf",
-      "sha256": "3ab6b67e5484a9f518f39ca05eca6523dae4169d65e4298bd158abbdbfcc9057"
+      "asset": "fonts/MaterialIcons-Regular.97bc5382d5c17da9.otf",
+      "sha256": "97bc5382d5c17da9e4da21949ddbbc961f795e4a37a850d75da48e4abe7d54bc"
     },
     {
       "original": "packages/shadcn_ui/fonts/Geist%5Bwght%5D.ttf",
@@ -62,11 +62,19 @@
   "capabilities": {
     "PW_COMMUNITY_FAVORITES_ENABLED": "true",
     "PW_COMMUNITY_MESSAGING_READY": "true",
-    "PW_COMMUNITY_PROFILES_ENABLED": "true"
+    "PW_COMMUNITY_PROFILES_ENABLED": "true",
+    "PW_NATIVE_EMAIL_SMTP_READY": "true"
   },
   "viewer_bundle_sha256": "3a7c909e6d31801bd16790b137c5472cadb89ab74a5e5454403e6bdb6fd9276f",
-  "main_js_sha256": "7199382413967ad80596ba03623f83bf4f655ea487d74c67c33d6397fad6aaf6",
+  "main_js_sha256": "4faeb756f72024c6e6cffc81f958b7b41163833d7333039c8fffa9ea244f3b06",
   "status": "built-local-not-deployed",
-  "source_revision": "530d8e407af786b36c744abfb397a247e0238a3a",
-  "source_manifest_sha256": "4685d4bba4530a7ba2f92e4fe00d815dbe980c5ff07e298bd3ef2309c4865adb"
+  "source_revision": "f610ab69cc02a1c25c4893a2d1bf9d6bee680849",
+  "source_manifest_sha256": "7b2a231b810b4cd2027f10ece525ef476170b0eaf1878e03a4ec14e929b3ae9b",
+  "product_source_commit": "24351cd99573dcb49a635a1206481be61599633a",
+  "shared_auth": {
+    "path": "source/shared_auth",
+    "sha256": "9766c46a082fab6579c6fc7491fceefd3e5a1adc308bf65b82721fb2d5b4fa37",
+    "ui_parts": 11,
+    "web_qr": false
+  }
 }
