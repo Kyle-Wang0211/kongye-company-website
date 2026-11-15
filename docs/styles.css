@@ -124,3 +124,43 @@ html[data-motion="paused"] .community-skeleton *{animation-play-state:paused}
 html .community-grid .community-picture.is-loading{background:#ccc;border-color:#ccc;animation:miniprogram-skeleton-pulse 1.8s linear infinite alternate}
 html .community-grid .community-picture.is-loading:after{content:none;animation:none}
 @media(prefers-reduced-motion:reduce){html .community-grid .community-picture.is-loading{animation:none}}
+
+/* Homepage search, with the existing banner, feed and account layout retained. */
+.community-shell .community-search{position:relative;display:flex;align-items:center;flex:1 1 520px;width:min(600px,100%);max-width:600px;min-width:160px;height:44px;margin-right:auto;margin-left:auto;border:1px solid #e5e5e5;border-radius:10px;background:#f5f5f5;color:#222}
+.community-search:focus-within{border-color:#777;background:#fff}
+.community-search input{width:0;min-width:0;flex:1;border:0;background:transparent;color:#222;font:inherit;outline:0;padding:10px 16px}
+.community-search input::-webkit-search-cancel-button{display:none}
+.community-search>button{height:100%;border:0;background:transparent;color:#444;cursor:pointer;flex:none;padding:0 12px}
+.community-search>button[hidden]{display:none}
+.community-search #community-search-submit{display:flex;align-items:center;gap:7px;border-left:1px solid #ddd;padding:0 18px;font-weight:500}
+.community-search #community-search-submit svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
+@media(max-width:600px){.community-shell .community-search{min-width:100px;height:40px}.community-search input{padding-inline:10px;font-size:13px}.community-search #community-search-submit{padding-inline:10px;gap:4px;font-size:12px}.community-search #community-search-submit svg{display:none}}
+
+.community-search-suggestions{position:absolute;top:calc(100% + 7px);left:0;right:0;list-style:none;margin:0;padding:6px;background:#fff;border:1px solid #e4e4e4;border-radius:10px;box-shadow:0 8px 26px #0001;max-height:50vh;overflow:auto;z-index:40}
+.community-search-suggestions[hidden]{display:none}
+#community-search-suggestions .pw-suggestion-row,.pw-community-search .pw-suggestion-row{display:flex;align-items:center;gap:4px;min-height:44px;border-radius:6px;background:#fff}
+#community-search-suggestions .pw-suggestion-row:hover,.pw-community-search .pw-suggestion-row:hover{background:#f3f3f3}
+#community-search-suggestions .pw-suggestion-text,.pw-community-search .pw-suggestion-text{display:block;flex:1;min-width:0;width:auto;text-align:left;border:0;background:transparent;color:#222;font:inherit;padding:11px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+#community-search-suggestions .pw-suggestion-fill,.pw-community-search .pw-suggestion-fill{display:block;flex:0 0 44px;width:44px;min-height:44px;margin-left:auto;padding:6px;border:0;background:transparent;color:#777;font:24px/1 var(--sans);text-align:center;cursor:pointer}
+#community-search-suggestions .pw-suggestion-row button:focus-visible,.pw-community-search .pw-suggestion-row button:focus-visible{outline:2px solid #777;outline-offset:-2px;border-radius:6px}
+
+.pw-community-search [hidden]{display:none!important}
+.pw-search-input-group{position:relative;display:flex;flex:1;min-width:0}
+.pw-community-search input:focus-visible,.pw-community-search button:focus-visible,.pw-community-search a:focus-visible{outline:2px solid #777;outline-offset:2px}
+.pw-community-search .pw-search-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:4;list-style:none;margin:0;padding:6px;background:#fff;border:1px solid #e4e4e4;border-radius:10px;box-shadow:0 8px 26px #0001;max-height:50vh;overflow:auto}
+.pw-search-tabs{display:flex;align-items:center;gap:36px;max-width:1600px;margin:24px auto 0}
+.pw-search-tabs>button{position:relative;padding:10px 0 16px;min-width:44px;border:0;background:transparent;color:#888;font:inherit;font-weight:400;cursor:pointer}
+.pw-search-tabs>button[aria-selected="true"]{color:#000;font-weight:700}
+.pw-search-tabs>button[aria-selected="true"]::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:36px;height:4px;border-radius:2px;background:#000}
+.pw-search-results{max-width:1600px;margin:20px auto}
+.pw-search-work-grid{width:100%;margin:0}
+.pw-search-users{max-width:900px;margin:0 auto}
+.pw-search-user-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid #eee}
+.pw-search-user-row .following-person{flex:1;min-width:0;margin:0;padding:8px}
+.pw-search-user-row .following-avatar{position:relative;width:44px;height:44px}
+.pw-search-user-identity{display:flex;flex-direction:column;min-width:0;gap:4px}
+.pw-search-user-identity>strong{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pw-search-user-meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:#888}
+.pw-search-follow{flex:none;min-width:84px;padding:8px 16px;border:1px solid #333;border-radius:6px;background:#111;color:#fff;font:inherit;cursor:pointer}
+.pw-search-follow[aria-pressed="true"]{background:#f3f3f3;color:#666;border-color:#ddd}
+.pw-search-follow:disabled{color:#888;border-color:#ddd;background:#f5f5f5;cursor:default}
