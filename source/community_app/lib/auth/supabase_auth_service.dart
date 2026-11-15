@@ -876,7 +876,6 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
   Future<void> sendCode(String phone) => _run(() async {
     final canonical = _canonicalPhone(phone);
     _invalidateProof();
-    _requestedPhone = null;
     await _client.auth.signOut(scope: SignOutScope.local);
     await _client.auth.signInWithOtp(phone: canonical, shouldCreateUser: false);
     _requestedPhone = canonical;
@@ -1026,7 +1025,6 @@ class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
   Future<void> sendCode(String email) => _run(() async {
     final canonical = _canonicalEmail(email);
     _invalidateProof();
-    _requestedEmail = null;
     await _client.auth.signOut(scope: SignOutScope.local);
     await _client.auth.resetPasswordForEmail(canonical);
     _requestedEmail = canonical;
