@@ -34,6 +34,7 @@ import 'auth_policy_consent.dart';
 import 'email_sign_in_view.dart';
 import 'phone_country_picker.dart';
 import 'reset_password_view.dart';
+import 'phone_reset_password_view.dart';
 import 'login_code_view.dart';
 
 enum _LoginMethod { phone, email }
@@ -276,7 +277,13 @@ class _AuthRootViewState extends State<AuthRootView> {
     // intentionally disables swipe-back for.
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ResetPasswordView(currentUser: widget.currentUser),
+        builder: (_) => _isPhone
+            ? PhoneResetPasswordView(
+                currentUser: widget.currentUser,
+                initialPhone: _phone.text,
+                initialCountry: _country,
+              )
+            : ResetPasswordView(currentUser: widget.currentUser),
       ),
     );
   }

@@ -1,7 +1,23 @@
 // Dart port of Core/Auth/AuthService.swift — provider-agnostic protocol.
 // Concrete implementations: firebase_auth_service.dart / mock_auth_service.dart.
 
+import '../config/backend_deployment.dart';
 import 'auth_models.dart';
+
+/// An isolated, short-lived phone identity proof for changing a password.
+abstract interface class PhonePasswordRecovery {
+  Future<void> sendCode(String phone);
+  Future<void> verifyCode({required String phone, required String code});
+  Future<void> setPassword(String password);
+  Future<void> close();
+}
+
+/// Optional capability, independent of the app's active authentication session.
+abstract interface class PhonePasswordRecoveryProvider {
+  PhonePasswordRecovery createPhonePasswordRecovery(
+    BackendDeployment deployment,
+  );
+}
 
 abstract class AuthService {
   /// Currently signed-in user, or null if signed out.
