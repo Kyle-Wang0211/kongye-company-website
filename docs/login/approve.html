@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>确认网页登录 · 窗后城</title>
+  <link rel="stylesheet" href="login.css">
+  <script src="/vendor/supabase/supabase-2.112.0.js" defer></script>
+  <script type="module" src="approve.mjs"></script>
+</head>
+<body>
+  <header><a href="/miniprogram/?feed=1">窗后城</a></header>
+  <main>
+    <h1>确认网页登录</h1>
+    <p class="muted">请确认这是你正在使用的电脑。</p>
+    <p id="account" aria-live="polite"></p>
+    <p id="confirmation-code" class="muted"></p>
+    <p id="link-notice" class="muted small" hidden>首次确认将关联本账号的扫码身份，供后续扫码登录使用。</p>
+    <button id="approve" type="button" class="primary" disabled>确认登录</button>
+    <a id="sign-in" class="secondary" hidden>先登录账号</a>
+    <a id="cancel" class="secondary" href="/miniprogram/?feed=1">取消</a>
+    <p id="status" role="status" aria-live="polite">正在读取登录请求…</p>
+  </main>
+</body>
+</html>

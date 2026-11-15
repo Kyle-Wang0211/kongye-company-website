@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>窗后城 · 登录</title><link rel="stylesheet" href="login.css"><script src="/vendor/supabase/supabase-2.112.0.js" defer></script><script src="vendor/qrcode-generator-1.4.4.js" defer></script><script type="module" src="login.mjs"></script></head>
+<body><header><a href="/" data-i18n="brand">窗后城</a><button id="language" type="button">EN</button></header><main>
+<h1 data-i18n="title">登录</h1><p class="muted" data-i18n="intro">登录后点赞、评论与分享你的空间。</p>
+<nav aria-label="登录方式"><button type="button" class="selected" data-method="password" data-i18n="passwordTab">密码登录</button><button type="button" data-method="code" data-i18n="codeTab">验证码登录</button><button type="button" data-method="qr" data-i18n="qrTab">扫码登录</button></nav>
+<div class="columns"><section id="credentials"><form id="login-form">
+<label for="account" data-i18n="account">邮箱或手机号</label><input id="account" name="username" autocomplete="username" required maxlength="254" placeholder="name@example.com / +86 138…">
+<div id="password-fields"><label for="password" data-i18n="password">密码</label><input id="password" name="password" type="password" autocomplete="current-password"></div>
+<div id="code-fields" hidden><label for="code" data-i18n="code">验证码</label><div class="code-row"><input id="code" name="one-time-code" inputmode="numeric" autocomplete="one-time-code" maxlength="12"><button type="button" id="send-code" data-i18n="sendCode">获取验证码</button></div></div>
+<button type="submit" id="submit" class="primary" data-i18n="signIn">登录</button></form>
+<a class="secondary" href="/community/?auth=signup" data-i18n="signup">注册账号</a><a class="secondary" href="/community/?auth=signin&amp;legacy_auth=1" data-i18n="other">其他登录与找回密码</a></section>
+<section id="qr-panel"><h2 data-i18n="qrTitle">扫码登录</h2><p class="muted" data-i18n="qrHint">使用窗后城 App，或微信小程序「我的」中的扫一扫。</p><div id="qr-stage"><button type="button" id="load-qr" data-i18n="showQr">显示登录二维码</button></div><button type="button" id="refresh-qr" hidden data-i18n="refreshQr">刷新二维码</button><p class="muted small" data-i18n="qrConfirm">请在手机上确认登录。首次使用需由本人关联扫码身份。</p></section></div>
+<p id="status" role="status" aria-live="polite"></p><p class="muted small"><a href="/privacy.html" data-i18n="privacy">隐私政策</a> · <a href="/terms.html" data-i18n="terms">用户协议</a></p></main></body></html>
