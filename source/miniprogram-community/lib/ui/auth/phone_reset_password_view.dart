@@ -138,7 +138,7 @@ class _PhoneResetPasswordViewState extends State<PhoneResetPasswordView>
 
   bool get _validCode => RegExp(r'^[0-9]{6}$').hasMatch(_code.text);
   bool get _validPassword =>
-      _password.text.length >= 8 && _password.text == _confirmation.text;
+      _password.text.length >= 6 && _password.text == _confirmation.text;
 
   void _startCooldown() {
     _timer?.cancel();

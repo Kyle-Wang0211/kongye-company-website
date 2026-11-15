@@ -574,7 +574,7 @@ abstract class AppL10n {
   /// No description provided for @authPasswordHintMin.
   ///
   /// In en, this message translates to:
-  /// **'Set password (min 8 chars)'**
+  /// **'Set password (min 6 chars)'**
   String get authPasswordHintMin;
 
   /// No description provided for @authForgotPassword.
@@ -652,7 +652,7 @@ abstract class AppL10n {
   /// No description provided for @resetNewPasswordHint.
   ///
   /// In en, this message translates to:
-  /// **'New password (min 8 chars)'**
+  /// **'New password (min 6 chars)'**
   String get resetNewPasswordHint;
 
   /// No description provided for @resetConfirm.
@@ -6778,7 +6778,7 @@ abstract class AppL10n {
   /// No description provided for @resetPasswordTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Use at least 8 characters for your new password.'**
+  /// **'Use at least 6 characters for your new password.'**
   String get resetPasswordTooShort;
 
   /// No description provided for @resetPasswordMismatch.

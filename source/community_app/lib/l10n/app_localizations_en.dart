@@ -275,7 +275,7 @@ class AppL10nEn extends AppL10n {
   String get authPasswordHint => 'Password';
 
   @override
-  String get authPasswordHintMin => 'Set password (min 8 chars)';
+  String get authPasswordHintMin => 'Set password (min 6 chars)';
 
   @override
   String get authForgotPassword => 'Forgot password?';
@@ -321,7 +321,7 @@ class AppL10nEn extends AppL10n {
   String get resetSendCode => 'Send code';
 
   @override
-  String get resetNewPasswordHint => 'New password (min 8 chars)';
+  String get resetNewPasswordHint => 'New password (min 6 chars)';
 
   @override
   String get resetConfirm => 'Reset password';
@@ -3791,7 +3791,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get resetPasswordTooShort =>
-      'Use at least 8 characters for your new password.';
+      'Use at least 6 characters for your new password.';
 
   @override
   String get resetPasswordMismatch => 'The passwords do not match.';

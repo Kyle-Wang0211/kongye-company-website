@@ -8,7 +8,8 @@ external JSString get _userAgent;
 external void _navigate(JSAny options);
 
 bool get qrScanAvailable =>
-    _environment?.toDart == 'miniprogram' ||
-    _userAgent.toDart.toLowerCase().contains('miniprogram');
+    Uri.base.queryParameters['qr_scan'] == '1' &&
+    (_environment?.toDart == 'miniprogram' ||
+        _userAgent.toDart.toLowerCase().contains('miniprogram'));
 
 void openQrScanner() => _navigate({'url': '/pages/qr-scan/index'}.jsify()!);

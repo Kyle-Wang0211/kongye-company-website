@@ -266,7 +266,7 @@ class AppL10nZh extends AppL10n {
   String get authPasswordHint => '密码';
 
   @override
-  String get authPasswordHintMin => '设置密码（至少 8 位）';
+  String get authPasswordHintMin => '设置密码（至少 6 位）';
 
   @override
   String get authForgotPassword => '忘记密码？';
@@ -311,7 +311,7 @@ class AppL10nZh extends AppL10n {
   String get resetSendCode => '发送验证码';
 
   @override
-  String get resetNewPasswordHint => '新密码（至少 8 位）';
+  String get resetNewPasswordHint => '新密码（至少 6 位）';
 
   @override
   String get resetConfirm => '重置密码';
@@ -3623,7 +3623,7 @@ class AppL10nZh extends AppL10n {
   String get resetConfirmPasswordHint => '再次输入新密码';
 
   @override
-  String get resetPasswordTooShort => '新密码至少需要 8 位';
+  String get resetPasswordTooShort => '新密码至少需要 6 位';
 
   @override
   String get resetPasswordMismatch => '两次输入的密码不一致';

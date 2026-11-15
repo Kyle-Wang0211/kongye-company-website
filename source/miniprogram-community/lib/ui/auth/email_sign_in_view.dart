@@ -118,7 +118,7 @@ class _EmailSignUpPageState extends State<EmailSignUpPage> {
       _policyAccepted &&
       _displayName.text.trim().isNotEmpty &&
       _normalizedEmail.isNotEmpty &&
-      _password.text.length >= 8 &&
+      _password.text.length >= 6 &&
       _password.text == _confirmPassword.text;
 
   Future<void> _submit() async {

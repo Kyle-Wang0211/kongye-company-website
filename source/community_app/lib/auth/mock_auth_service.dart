@@ -42,7 +42,7 @@ class MockAuthServiceImpl implements AuthService {
       SignUpRequestEmail(:final password) ||
       SignUpRequestPhone(:final password) => password,
     };
-    if (password.length < 8) {
+    if (password.length < 6) {
       throw const AuthException(AuthErrorKind.weakPassword);
     }
     final AuthenticatedUser user;
@@ -82,7 +82,7 @@ class MockAuthServiceImpl implements AuthService {
     required String password,
     String? displayName,
   }) async {
-    if (password.length < 8) {
+    if (password.length < 6) {
       throw const AuthException(AuthErrorKind.weakPassword);
     }
     return startPhoneVerification(phoneNumber);

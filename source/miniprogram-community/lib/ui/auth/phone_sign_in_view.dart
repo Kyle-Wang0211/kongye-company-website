@@ -191,7 +191,7 @@ class _PhoneSignInViewState extends State<PhoneSignInView>
   // sends disabled until international SMS delivery is explicitly verified.
   bool get _signupCredentialsValid =>
       _displayName.text.trim().isNotEmpty &&
-      _password.text.length >= 8 &&
+      _password.text.length >= 6 &&
       _password.text == _confirmPassword.text;
 
   bool get _canStart =>

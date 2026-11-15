@@ -242,7 +242,7 @@ class SupabaseAuthServiceImpl
           password: final pw,
           displayName: final name,
         ):
-          if (pw.length < 8) {
+          if (pw.length < 6) {
             throw const AuthException(AuthErrorKind.weakPassword);
           }
           // Strict-confirmation flow. The signup-start Edge Function
@@ -271,7 +271,7 @@ class SupabaseAuthServiceImpl
           password: final password,
           displayName: final name,
         ):
-          if (password.length < 8) {
+          if (password.length < 6) {
             throw const AuthException(AuthErrorKind.weakPassword);
           }
           // startPhoneSignup supplied the password before sending this SMS.
@@ -340,7 +340,7 @@ class SupabaseAuthServiceImpl
     required String password,
     String? displayName,
   }) async {
-    if (password.length < 8) {
+    if (password.length < 6) {
       throw const AuthException(AuthErrorKind.weakPassword);
     }
     try {
@@ -994,7 +994,7 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
       await _client.auth.signOut(scope: SignOutScope.local);
       throw const AuthException(AuthErrorKind.invalidVerificationCode);
     }
-    if (password.length < 8) {
+    if (password.length < 6) {
       throw const AuthException(AuthErrorKind.weakPassword);
     }
     await _client.auth.updateUser(UserAttributes(password: password));
@@ -1134,7 +1134,7 @@ class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
       await _client.auth.signOut(scope: SignOutScope.local);
       throw const AuthException(AuthErrorKind.invalidVerificationCode);
     }
-    if (password.length < 8) {
+    if (password.length < 6) {
       throw const AuthException(AuthErrorKind.weakPassword);
     }
     await _client.auth.updateUser(UserAttributes(password: password));

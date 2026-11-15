@@ -57,7 +57,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
 
   static const int _resendCooldownSeconds = 60;
   static const int _otpLength = 6;
-  static const int _minPasswordLength = 8;
+  static const int _minPasswordLength = 6;
 
   @override
   void initState() {
