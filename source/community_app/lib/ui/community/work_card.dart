@@ -360,35 +360,6 @@ class _WorkCardState extends State<WorkCard> {
                                     color: Colors.white54,
                                   ),
                                 ),
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            child: DecoratedBox(
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [Colors.transparent, Colors.black87],
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
-                                child: Text(
-                                  _work.title,
-                                  key: ValueKey('work-cover-title-${_work.id}'),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    height: 1.3,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -416,6 +387,17 @@ class _WorkCardState extends State<WorkCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(
+            height: communityTitleHeight(context),
+            child: Text(
+              _work.title,
+              key: ValueKey('work-cover-title-${_work.id}'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: kCommunityTitleTextStyle,
+            ),
+          ),
+          const SizedBox(height: 4),
           SizedBox(
             height: communityAuthorRowHeight(context),
             child: Row(
@@ -460,18 +442,6 @@ class _WorkCardState extends State<WorkCard> {
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _work.publishedAt == null
-                ? ''
-                : '${_work.publishedAt!.year}-${_work.publishedAt!.month.toString().padLeft(2, '0')}-${_work.publishedAt!.day.toString().padLeft(2, '0')}',
-            maxLines: 1,
-            style: const TextStyle(
-              fontSize: 10,
-              height: 1.2,
-              color: AetherColors.textSecondary,
             ),
           ),
         ],

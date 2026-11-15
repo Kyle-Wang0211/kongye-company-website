@@ -66,6 +66,6 @@
   "viewer_bundle_sha256": "38907d7db46d8763ca4be4e38ba2c3b1935788bc6aec8abd5a0903aaf91fe915",
   "main_js_sha256": "3fa73b095f8fcd6956bb3e84102f6c8a5b38aebbf0ec58b68df0984a18ecd22f",
   "status": "built-local-not-deployed",
-  "source_revision": "1aa2321dd0a06d4020a94722279ce76df55af586",
-  "source_manifest_sha256": "1efd2f301f481b41bb72f9835d1d2c7aa97448a5620e7ee7f464224d88c6ac90"
+  "source_revision": "7c8a0230bef7a1a4e3baacb92df00bca33cc3220",
+  "source_manifest_sha256": "195220f8164001d23741d708f44e72deb2ed506e89f635fb906104740b20935d"
 }

@@ -295,7 +295,7 @@ function cardFor(work,collection=cards){
  const coverAspect=publicationCoverAspect(work);
  if(coverAspect!==null)picture.style.aspectRatio=String(coverAspect);
  const label=document.createElement('span');label.className='community-card-title';work.title?label.textContent=work.title:localizeElement(label,'siteUntitled');
- const coverMessage=key=>{const message=document.createElement('span');message.className='community-cover-message';localizeElement(message,key);picture.replaceChildren(message,label);};
+ const coverMessage=key=>{const message=document.createElement('span');message.className='community-cover-message';localizeElement(message,key);picture.replaceChildren(message);};
  if(work.thumbnail_storage_path||workCovers[work.model_storage_path]){
   try{
    const img=document.createElement('img');img.alt=work.title||t('siteWorkImage');if(!work.title)img.dataset.i18nAlt='siteWorkImage';img.className='community-cover-image';if(coverAspect!==null)img.style.objectFit='contain';img.loading=seen.size<4?'eager':'lazy';if(seen.size<2)img.fetchPriority='high';img.decoding='async';
@@ -315,7 +315,7 @@ function cardFor(work,collection=cards){
    img.src=work.thumbnail_storage_path?assetUrl(config.origin,'thumbnails',work.thumbnail_storage_path):new URL(workCovers[work.model_storage_path],location.href).href;
   }catch{picture.classList.remove('is-loading');picture.dataset.mediaState='error';coverMessage('siteCoverUnavailable');}
  }else{picture.dataset.mediaState='empty';coverMessage('siteNoCover');}
- picture.append(label);open.append(picture);open.addEventListener('click',()=>openWork(work));
+ open.append(picture,label);open.addEventListener('click',()=>openWork(work));
  const row=document.createElement('div');row.className='community-author-row';
  const avatar=document.createElement('span');avatar.className='community-avatar';avatar.setAttribute('aria-hidden','true');
  const author=document.createElement('span');author.className='community-author';author.style.cssText='position:relative;overflow:hidden;min-width:0;min-height:1em';
@@ -344,11 +344,13 @@ function loadingShells(container=grid,count=12){
   const picture=document.createElement('div');picture.className='community-picture is-loading';
   const information=document.createElement('div');information.className='skeleton-information';
   const title=document.createElement('div');title.className='skeleton-title';
+  for(let line=0;line<2;line++){const bar=document.createElement('div');bar.className='skeleton-title-line';title.append(bar);}
   const row=document.createElement('div');row.className='skeleton-author-row';
   const avatar=document.createElement('div');avatar.className='skeleton-avatar';
   const author=document.createElement('div');author.className='skeleton-author';
   const like=document.createElement('div');like.className='skeleton-like';
-  row.append(avatar,author,like);information.append(title,row);shell.append(picture,information);
+  const count=document.createElement('div');count.className='skeleton-like-count';
+  row.append(avatar,author,like,count);information.append(title,row);shell.append(picture,information);
   container.append(shell);shells.push(shell);
  }
  return shells;

@@ -50,6 +50,8 @@ import 'package:flutter/material.dart';
 
 import '../design_system.dart';
 import 'masonry_policy.dart';
+import 'community_loading.dart'
+    show communityTitleHeight, communityAuthorRowHeight, communityInformationHeight;
 
 /// 闪动一轮的时长。与 splash_overlay 的 pulse 同值,观感一致。
 const Duration kSkeletonPulsePeriod = Duration(milliseconds: 1800);
@@ -153,7 +155,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
   }
 }
 
-/// Matches a cover with title and author placeholders below it.
+/// Matches the cover, two-line title, author and like row.
 class SkeletonWorkCard extends StatelessWidget {
   final bool animate;
 
@@ -192,23 +194,61 @@ class SkeletonWorkCard extends StatelessWidget {
               borderRadius: BorderRadius.zero,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SkeletonBox(animate: animate, height: 17),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    SkeletonBox(animate: animate, width: 16, height: 16),
-                    const SizedBox(width: 4),
-                    Expanded(child: SkeletonBox(animate: animate, height: 13)),
-                    const SizedBox(width: 8),
-                    SkeletonBox(animate: animate, width: 24, height: 24),
-                  ],
-                ),
-              ],
+          SizedBox(
+            height: communityInformationHeight(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: communityTitleHeight(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: SkeletonBox(animate: animate, height: 13),
+                          ),
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.65,
+                              child: SkeletonBox(animate: animate, height: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: communityAuthorRowHeight(context),
+                    child: Row(
+                      children: [
+                        SkeletonBox(
+                          animate: animate,
+                          width: 16,
+                          height: 16,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: SkeletonBox(animate: animate, height: 11),
+                        ),
+                        const SizedBox(width: 6),
+                        SkeletonBox(animate: animate, width: 16, height: 16),
+                        const SizedBox(width: 3),
+                        SkeletonBox(animate: animate, width: 12, height: 11),
+                        const SizedBox(width: 4),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
