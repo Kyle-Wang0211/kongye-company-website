@@ -267,9 +267,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       Navigator.of(context).maybePop();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.profileBlockFailed)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.profileBlockFailed)));
     }
   }
 

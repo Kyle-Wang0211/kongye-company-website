@@ -90,9 +90,11 @@ button.onclick = async () => {
 };
 
 async function initialize() {
-  verification = verificationUrl(new URLSearchParams(location.hash.slice(1)).get('verification'));
+  verification = verificationUrl(
+    new URLSearchParams(location.hash.slice(1)).get('verification') || location.href,
+  );
   element('confirmation-code').textContent = '确认码 ' + verification.pathname.split('/').pop();
-  const returnTo = '/login/approve.html' + location.hash;
+  const returnTo = '/login/approve.html#verification=' + encodeURIComponent(verification.href);
   element('sign-in').href = '/login/?returnTo=' + encodeURIComponent(returnTo);
   const response = await fetch('/community-config.json', {cache: 'no-cache'});
   if (!response.ok) throw new Error('config');
