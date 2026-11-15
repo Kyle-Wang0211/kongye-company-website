@@ -10,6 +10,7 @@ def community_defines():
         "PW_COMMUNITY_FAVORITES_ENABLED",
         "PW_COMMUNITY_MESSAGING_READY",
         "PW_COMMUNITY_PROFILES_ENABLED",
+        "PW_NATIVE_EMAIL_SMTP_READY",
     }
     if set(profile) != expected or any(type(value) is not bool for value in profile.values()):
         raise ValueError("Invalid community capability profile")
