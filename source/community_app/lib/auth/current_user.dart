@@ -59,7 +59,8 @@ class CurrentUser extends ChangeNotifier {
     if (service is! PhonePasswordRecoveryProvider) {
       throw const AuthException(AuthErrorKind.providerUnavailable);
     }
-    return service.createPhonePasswordRecovery(deployment);
+    return (service as PhonePasswordRecoveryProvider)
+        .createPhonePasswordRecovery(deployment);
   }
 
   AuthService _service;
