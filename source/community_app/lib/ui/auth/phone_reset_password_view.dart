@@ -171,6 +171,24 @@ class _PhoneResetPasswordViewState extends State<PhoneResetPasswordView>
       success();
     } on AuthException catch (error) {
       if (!_active) return;
+      if (_step == _Step.password &&
+          (error.kind == AuthErrorKind.notSignedIn ||
+              error.kind == AuthErrorKind.invalidVerificationCode)) {
+        _timer?.cancel();
+        _code.clear();
+        _password.clear();
+        _confirmation.clear();
+        final recovery = _recovery;
+        _recovery = null;
+        if (recovery != null) unawaited(_closeRecovery(recovery));
+        setState(() {
+          _step = _Step.phone;
+          _target = null;
+          _cooldown = 0;
+          _error = AuthErrorKind.notSignedIn;
+        });
+        return;
+      }
       setState(() => _error = error.kind);
       if (_step == _Step.code) {
         _code.clear();

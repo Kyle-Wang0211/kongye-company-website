@@ -34,7 +34,8 @@ class SupabaseAuthServiceImpl
     implements
         AuthService,
         CanonicalProfileReader,
-        PhonePasswordRecoveryProvider {
+        PhonePasswordRecoveryProvider,
+        EmailPasswordRecoveryProvider {
   @override
   PhonePasswordRecovery createPhonePasswordRecovery(
     BackendDeployment deployment,
@@ -42,6 +43,28 @@ class SupabaseAuthServiceImpl
     try {
       deployment.validate();
       return _SupabasePhonePasswordRecovery(
+        SupabaseClient(
+          deployment.supabaseUrl,
+          deployment.anonKey,
+          authOptions: const AuthClientOptions(
+            autoRefreshToken: false,
+            authFlowType: AuthFlowType.implicit,
+          ),
+        ),
+        _mapAuthApi,
+      );
+    } catch (_) {
+      throw const AuthException(AuthErrorKind.providerUnavailable);
+    }
+  }
+
+  @override
+  EmailPasswordRecovery createEmailPasswordRecovery(
+    BackendDeployment deployment,
+  ) {
+    try {
+      deployment.validate();
+      return _SupabaseEmailPasswordRecovery(
         SupabaseClient(
           deployment.supabaseUrl,
           deployment.anonKey,
@@ -994,6 +1017,155 @@ class _SupabasePhonePasswordRecovery implements PhonePasswordRecovery {
   Future<void> _signOutAndDispose() async {
     _invalidateProof();
     _requestedPhone = null;
+    try {
+      // The SDK clears the in-memory session before requesting revocation.
+      await _client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      // Cleanup failure must not report an already-applied password as failed.
+    } finally {
+      try {
+        await _client.dispose();
+      } catch (_) {
+        // The recovery identity has already been invalidated locally.
+      }
+    }
+  }
+
+  @override
+  Future<void> close() => _closeFuture ??= _tail.then((_) => _dispose());
+}
+
+/// This client has no Flutter auth persistence or app-session subscriptions.
+class _SupabaseEmailPasswordRecovery implements EmailPasswordRecovery {
+  _SupabaseEmailPasswordRecovery(this._client, this._mapAuthApi);
+
+  static const _proofLifetime = Duration(minutes: 10);
+  final SupabaseClient _client;
+  final AuthErrorKind Function(AuthApiException) _mapAuthApi;
+  Future<void> _tail = Future<void>.value();
+  Future<void>? _closeFuture;
+  Future<void>? _disposeFuture;
+  String? _requestedEmail;
+  String? _verifiedUserId;
+  String? _verifiedEmail;
+  Stopwatch? _proofAge;
+  bool _completed = false;
+
+  String _canonicalEmail(String value) {
+    final canonical = value.trim().toLowerCase();
+    if (canonical.isEmpty) {
+      throw const AuthException(AuthErrorKind.invalidCredentials);
+    }
+    return canonical;
+  }
+
+  bool _matchesEmail(String? email, String? canonical) =>
+      email != null &&
+      canonical != null &&
+      email.trim().toLowerCase() == canonical;
+
+  void _invalidateProof() {
+    _verifiedUserId = null;
+    _verifiedEmail = null;
+    _proofAge?.stop();
+    _proofAge = null;
+  }
+
+  Future<void> _run(Future<void> Function() operation) {
+    if (_closeFuture != null || _completed) {
+      return Future<void>.error(
+        const AuthException(AuthErrorKind.invalidVerificationCode),
+      );
+    }
+    final result = _tail.then((_) async {
+      if (_completed) {
+        throw const AuthException(AuthErrorKind.invalidVerificationCode);
+      }
+      try {
+        await operation();
+      } on AuthException {
+        rethrow;
+      } on AuthRetryableFetchException {
+        throw const AuthException(AuthErrorKind.network);
+      } on AuthApiException catch (error) {
+        throw AuthException(_mapAuthApi(error));
+      } catch (_) {
+        throw const AuthException(AuthErrorKind.unknown);
+      }
+    });
+    // A failed operation must not poison the queue or race disposal.
+    _tail = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
+
+  @override
+  Future<void> sendCode(String email) => _run(() async {
+    final canonical = _canonicalEmail(email);
+    _invalidateProof();
+    _requestedEmail = null;
+    await _client.auth.signOut(scope: SignOutScope.local);
+    await _client.auth.resetPasswordForEmail(canonical);
+    _requestedEmail = canonical;
+  });
+
+  @override
+  Future<void> verifyCode({required String email, required String code}) =>
+      _run(() async {
+        _invalidateProof();
+        final canonical = _canonicalEmail(email);
+        if (_requestedEmail != canonical || code.trim().isEmpty) {
+          throw const AuthException(AuthErrorKind.invalidVerificationCode);
+        }
+        await _client.auth.signOut(scope: SignOutScope.local);
+        final response = await _client.auth.verifyOTP(
+          email: canonical,
+          token: code.trim(),
+          type: OtpType.recovery,
+        );
+        final user = response.user;
+        final session = response.session;
+        if (user == null ||
+            session == null ||
+            session.isExpired ||
+            session.user.id != user.id ||
+            !_matchesEmail(user.email, canonical)) {
+          await _client.auth.signOut(scope: SignOutScope.local);
+          throw const AuthException(AuthErrorKind.invalidVerificationCode);
+        }
+        _verifiedUserId = user.id;
+        _verifiedEmail = canonical;
+        _proofAge = Stopwatch()..start();
+      });
+
+  @override
+  Future<void> setPassword(String password) => _run(() async {
+    final session = _client.auth.currentSession;
+    final age = _proofAge;
+    if (_verifiedUserId == null ||
+        age == null ||
+        age.elapsed >= _proofLifetime ||
+        session == null ||
+        session.isExpired ||
+        session.user.id != _verifiedUserId ||
+        !_matchesEmail(session.user.email, _verifiedEmail)) {
+      _invalidateProof();
+      await _client.auth.signOut(scope: SignOutScope.local);
+      throw const AuthException(AuthErrorKind.invalidVerificationCode);
+    }
+    if (password.length < 8) {
+      throw const AuthException(AuthErrorKind.weakPassword);
+    }
+    await _client.auth.updateUser(UserAttributes(password: password));
+    _completed = true;
+    _invalidateProof();
+    await _dispose();
+  });
+
+  Future<void> _dispose() => _disposeFuture ??= _signOutAndDispose();
+
+  Future<void> _signOutAndDispose() async {
+    _invalidateProof();
+    _requestedEmail = null;
     try {
       // The SDK clears the in-memory session before requesting revocation.
       await _client.auth.signOut(scope: SignOutScope.local);

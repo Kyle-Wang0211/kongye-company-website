@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../auth/auth_error.dart';
+import '../../auth/auth_service.dart';
 import '../../auth/current_user.dart';
 import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
@@ -38,7 +39,9 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
     with SingleTickerProviderStateMixin {
   _Step _step = _Step.enterEmail;
   String _email = '';
-  String? _resetToken;
+  EmailPasswordRecovery? _recovery;
+  String? _owner;
+  bool _leaving = false;
   bool _requestInFlight = false;
   _ResetError? _error;
 
@@ -59,19 +62,20 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
   @override
   void initState() {
     super.initState();
+    _owner = widget.currentUser.signedInUser?.id.rawValue;
     _shake = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 360),
     );
     _otpFocusNode.addListener(_onExternalChanged);
-    widget.currentUser.addListener(_onExternalChanged);
+    widget.currentUser.addListener(_accountChanged);
   }
 
   @override
   void dispose() {
-    _cooldownTimer?.cancel();
+    _leave();
     _otpFocusNode.removeListener(_onExternalChanged);
-    widget.currentUser.removeListener(_onExternalChanged);
+    widget.currentUser.removeListener(_accountChanged);
     _emailController.dispose();
     _otpController.dispose();
     _otpFocusNode.dispose();
@@ -82,21 +86,78 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
   }
 
   void _onExternalChanged() {
-    if (!mounted) return;
-    setState(() {});
+    if (_active) setState(() {});
+  }
+
+  bool get _active =>
+      mounted &&
+      !_leaving &&
+      !widget.currentUser.isSignedIn &&
+      widget.currentUser.signedInUser?.id.rawValue == _owner;
+
+  void _accountChanged() {
+    if (widget.currentUser.signedInUser?.id.rawValue == _owner) {
+      _onExternalChanged();
+      return;
+    }
+    _leave();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant ResetPasswordView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentUser != widget.currentUser) {
+      oldWidget.currentUser.removeListener(_accountChanged);
+      widget.currentUser.addListener(_accountChanged);
+      _leave();
+    }
+  }
+
+  void _clearSensitive() {
+    _otpController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+  }
+
+  Future<void> _closeRecovery(EmailPasswordRecovery recovery) async {
+    try {
+      await recovery.close();
+    } catch (_) {
+      // Disposal cannot expose provider details or retain the recovery flow.
+    }
+  }
+
+  void _discardRecovery() {
+    _cooldownTimer?.cancel();
+    _clearSensitive();
+    final recovery = _recovery;
+    _recovery = null;
+    if (recovery != null) unawaited(_closeRecovery(recovery));
+  }
+
+  void _leave() {
+    _leaving = true;
+    _discardRecovery();
+    _emailController.clear();
   }
 
   String get _normalizedEmail => _emailController.text.trim().toLowerCase();
 
   bool get _step1CanSubmit => _normalizedEmail.contains('@');
   bool get _working =>
-      _requestInFlight || widget.currentUser.isPerformingAuthAction;
-  bool get _step2CanSubmit => _otpController.text.length == _otpLength;
+      !_active || _requestInFlight || widget.currentUser.isPerformingAuthAction;
+  bool get _step2CanSubmit =>
+      RegExp(r'^[0-9]{6}$').hasMatch(_otpController.text);
   bool get _passwordCanSubmit =>
       _newPasswordController.text.length >= _minPasswordLength &&
       _newPasswordController.text == _confirmPasswordController.text;
 
-  _ResetError _serviceError() => switch (widget.currentUser.lastError?.kind) {
+  _ResetError _serviceError(AuthErrorKind kind) => switch (kind) {
     AuthErrorKind.invalidVerificationCode => _ResetError.invalidCode,
     AuthErrorKind.weakPassword => _ResetError.weakPassword,
     AuthErrorKind.rateLimited => _ResetError.rateLimited,
@@ -133,7 +194,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
     _cooldownTimer?.cancel();
     setState(() => _resendCooldownSec = _resendCooldownSeconds);
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) {
+      if (!_active) {
         t.cancel();
         return;
       }
@@ -147,103 +208,93 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
     });
   }
 
-  Future<void> _sendOtp() async {
-    if (!_step1CanSubmit || _working) return;
-    final email = _normalizedEmail;
+  Future<void> _perform(
+    Future<void> Function(EmailPasswordRecovery) action,
+    VoidCallback success,
+  ) async {
+    if (!_active || _working) return;
     setState(() {
       _requestInFlight = true;
       _error = null;
     });
     try {
-      final ok = await widget.currentUser
-          .sendPasswordReset(email)
-          .timeout(const Duration(seconds: 30));
-      if (!mounted) return;
-      if (ok) {
+      final recovery = _recovery ??= widget.currentUser
+          .createEmailPasswordRecovery();
+      await action(recovery);
+      if (_active) success();
+    } on AuthException catch (error) {
+      if (!_active) return;
+      if (_step == _Step.enterPassword &&
+          (error.kind == AuthErrorKind.notSignedIn ||
+              error.kind == AuthErrorKind.invalidVerificationCode)) {
+        _discardRecovery();
         setState(() {
-          _email = email;
-          _step = _Step.enterOtp;
-        });
-        _startCooldown();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _otpFocusNode.requestFocus();
+          _step = _Step.enterEmail;
+          _email = '';
+          _resendCooldownSec = 0;
+          _error = _ResetError.expired;
         });
       } else {
-        setState(() => _error = _serviceError());
+        setState(() => _error = _serviceError(error.kind));
+        if (_step == _Step.enterOtp) {
+          _otpController.clear();
+          _otpFocusNode.requestFocus();
+          _shake.forward(from: 0);
+        }
       }
     } catch (_) {
-      if (mounted) setState(() => _error = _ResetError.network);
+      if (_active) setState(() => _error = _ResetError.requestFailed);
     } finally {
-      if (mounted) setState(() => _requestInFlight = false);
+      if (_active) setState(() => _requestInFlight = false);
     }
+  }
+
+  Future<void> _sendOtp() async {
+    if (!_step1CanSubmit || _step != _Step.enterEmail) return;
+    final email = _normalizedEmail;
+    await _perform((recovery) => recovery.sendCode(email), () {
+      setState(() {
+        _email = email;
+        _step = _Step.enterOtp;
+      });
+      _startCooldown();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_active) _otpFocusNode.requestFocus();
+      });
+    });
   }
 
   Future<void> _resendOtp() async {
-    if (_resendCooldownSec > 0 || _email.isEmpty || _working) return;
-    setState(() {
-      _requestInFlight = true;
-      _error = null;
+    if (_resendCooldownSec > 0 || _email.isEmpty || _step != _Step.enterOtp)
+      return;
+    await _perform((recovery) => recovery.sendCode(_email), () {
+      _otpController.clear();
+      _startCooldown();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppL10n.of(context).otpResendSent),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     });
-    try {
-      final ok = await widget.currentUser
-          .sendPasswordReset(_email)
-          .timeout(const Duration(seconds: 30));
-      if (!mounted) return;
-      if (ok) {
-        _startCooldown();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppL10n.of(context).otpResendSent),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      } else {
-        setState(() => _error = _serviceError());
-      }
-    } catch (_) {
-      if (mounted) setState(() => _error = _ResetError.network);
-    } finally {
-      if (mounted) setState(() => _requestInFlight = false);
-    }
   }
 
   Future<void> _verifyCode() async {
-    if (!_step2CanSubmit || _working || _step != _Step.enterOtp) return;
-    setState(() {
-      _requestInFlight = true;
-      _error = null;
-    });
-    try {
-      final token = await widget.currentUser
-          .verifyPasswordResetCode(
-            email: _email,
-            token: _otpController.text.trim(),
-          )
-          .timeout(const Duration(seconds: 30));
-      if (!mounted) return;
-      if (token != null && token.isNotEmpty) {
+    if (!_step2CanSubmit || _step != _Step.enterOtp) return;
+    final code = _otpController.text.trim();
+    await _perform(
+      (recovery) => recovery.verifyCode(email: _email, code: code),
+      () {
         _otpFocusNode.unfocus();
         _otpController.clear();
-        setState(() {
-          _resetToken = token;
-          _step = _Step.enterPassword;
-        });
-      } else {
-        _otpController.clear();
-        _otpFocusNode.requestFocus();
-        _shake.forward(from: 0);
-        setState(() => _error = _serviceError());
-      }
-    } catch (_) {
-      if (mounted) setState(() => _error = _ResetError.network);
-    } finally {
-      if (mounted) setState(() => _requestInFlight = false);
-    }
+        setState(() => _step = _Step.enterPassword);
+      },
+    );
   }
 
   Future<void> _confirmReset() async {
-    if (_working || _step != _Step.enterPassword) return;
+    if (!_active || _working || _step != _Step.enterPassword) return;
     if (!_passwordCanSubmit) {
       setState(
         () => _error = _newPasswordController.text.length < _minPasswordLength
@@ -252,61 +303,53 @@ class _ResetPasswordViewState extends State<ResetPasswordView>
       );
       return;
     }
-    final resetToken = _resetToken;
-    if (resetToken == null || resetToken.isEmpty) return;
-    setState(() {
-      _requestInFlight = true;
-      _error = null;
+    final password = _newPasswordController.text;
+    await _perform((recovery) => recovery.setPassword(password), () {
+      _clearSensitive();
+      TextInput.finishAutofillContext();
+      final l = AppL10n.of(context);
+      final message = l.localeName.startsWith('zh')
+          ? '密码已重置，请使用新密码登录。'
+          : 'Password reset. Sign in with your new password.';
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.of(context).pop();
+      messenger.showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
     });
-    try {
-      final ok = await widget.currentUser
-          .completePasswordReset(
-            email: _email,
-            resetToken: resetToken,
-            newPassword: _newPasswordController.text,
-          )
-          .timeout(const Duration(seconds: 30));
-      if (!mounted) return;
-      if (ok) {
-        _resetToken = null;
-        TextInput.finishAutofillContext();
-        Navigator.of(context).popUntil((r) => r.isFirst);
-      } else {
-        setState(() => _error = _serviceError());
-      }
-    } catch (_) {
-      if (mounted) setState(() => _error = _ResetError.network);
-    } finally {
-      if (mounted) setState(() => _requestInFlight = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppL10n.of(context);
     final working = _working;
-    return Scaffold(
-      backgroundColor: AetherColors.bgCanvas,
-      body: SafeArea(
-        child: AutofillGroup(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const AuthTopBar(leading: AuthTopBarBack()),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  child: AuthFormBody(
-                    child: _step == _Step.enterEmail
-                        ? _buildStep1(l, working)
-                        : _step == _Step.enterOtp
-                        ? _buildStep2(l, working)
-                        : _buildPasswordStep(l, working),
+    return PopScope<void>(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) _leave();
+      },
+      child: Scaffold(
+        backgroundColor: AetherColors.bgCanvas,
+        body: SafeArea(
+          child: AutofillGroup(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const AuthTopBar(leading: AuthTopBarBack()),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    child: AuthFormBody(
+                      child: _step == _Step.enterEmail
+                          ? _buildStep1(l, working)
+                          : _step == _Step.enterOtp
+                          ? _buildStep2(l, working)
+                          : _buildPasswordStep(l, working),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

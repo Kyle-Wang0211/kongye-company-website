@@ -64,6 +64,15 @@ class CurrentUser extends ChangeNotifier {
         .createPhonePasswordRecovery(deployment);
   }
 
+  EmailPasswordRecovery createEmailPasswordRecovery() {
+    final service = _service;
+    if (service is! EmailPasswordRecoveryProvider) {
+      throw const AuthException(AuthErrorKind.providerUnavailable);
+    }
+    return (service as EmailPasswordRecoveryProvider)
+        .createEmailPasswordRecovery(deployment);
+  }
+
   AuthService _service;
   final BackendDeployment deployment;
   final Future<void> Function(AuthenticatedUser?)? _onIdentityChanged;

@@ -19,6 +19,20 @@ abstract interface class PhonePasswordRecoveryProvider {
   );
 }
 
+/// An isolated official email recovery session, independent of app sign-in.
+abstract interface class EmailPasswordRecovery {
+  Future<void> sendCode(String email);
+  Future<void> verifyCode({required String email, required String code});
+  Future<void> setPassword(String password);
+  Future<void> close();
+}
+
+abstract interface class EmailPasswordRecoveryProvider {
+  EmailPasswordRecovery createEmailPasswordRecovery(
+    BackendDeployment deployment,
+  );
+}
+
 abstract class AuthService {
   /// Currently signed-in user, or null if signed out.
   Future<AuthenticatedUser?> currentUser();
